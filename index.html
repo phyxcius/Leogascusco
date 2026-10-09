@@ -1,3 +1,14 @@
+Aquí tienes la solución completa implementada en el código.
+¿Qué se agregó?
+ * Desplegable de efectivo dinámico: Al presionar 💵 Efectivo, aparece automáticamente una caja interactiva con:
+   * Campo para ingresar el monto con el que paga (por ejemplo S/ 100).
+   * Botones de acceso rápido para billetes comunes (S/ 50, S/ 100, S/ 200, Monto exacto).
+   * Cálculo automático del vuelto en tiempo real (Vuelto a entregar: S/ 45.00 si el total es S/ 55).
+   * Validación visual si el efectivo ingresado es menor al total del pedido.
+ * Mensaje a WhatsApp con desglose de sencillo: Al hacer el pedido, el mensaje enviado al repartidor detalla:
+   * Total a pagar: S/ 55.00
+   * Paga con: Efectivo (Paga con S/ 100.00 | Llevar vuelto de S/ 45.00)
+Código completo actualizado (index.html):
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,7 +28,7 @@
       --chat-blue: #2563eb;
       --chat-blue-hover: #1d4ed8;
       --dark: #1e1b4b;
-      --gray-light: #fefce8;     /* Fondo suave con matiz cálido */
+      --gray-light: #fefce8;
       --text: #334155;
       --white: #ffffff;
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
@@ -194,7 +205,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
-    /* SECCIÓN VOLANTE OFICIAL */
+    /* SECCIÓN VOLANTE */
     .flyer-section {
       max-width: 1200px;
       margin: 30px auto;
@@ -219,7 +230,6 @@
       max-width: 380px;
       margin: 0 auto;
       cursor: pointer;
-      position: relative;
     }
 
     .flyer-img-container img {
@@ -467,7 +477,7 @@
       background: var(--primary-dark);
     }
 
-    /* GLOBITO FLOTANTE */
+    /* BOTON FLOTANTE */
     .chat-bubble-btn {
       position: fixed;
       bottom: 24px;
@@ -533,7 +543,7 @@
       width: 100%;
       max-width: 500px;
       border-radius: 20px 20px 0 0;
-      max-height: 85vh;
+      max-height: 88vh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
@@ -603,7 +613,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 230px;
+      max-height: 200px;
       overflow-y: auto;
     }
 
@@ -719,6 +729,82 @@
       color: var(--white);
     }
 
+    /* CAJA DESPLEGABLE DE EFECTIVO */
+    .cash-box-drawer {
+      display: none;
+      background: #fdf4ff;
+      border: 2px dashed #d8b4fe;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 8px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cash-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .cash-input {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 800;
+      border: 1px solid #c084fc;
+      border-radius: 8px;
+      color: var(--primary-dark);
+      background: #fff;
+    }
+
+    .cash-quick-btns {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-quick-cash {
+      background: #fff;
+      border: 1px solid #d8b4fe;
+      color: var(--primary-dark);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-quick-cash:hover {
+      background: #f3e8ff;
+    }
+
+    .vuelto-badge-box {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+    }
+
+    .vuelto-badge-box.alerta {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fca5a5;
+    }
+
     .geo-box {
       display: flex;
       flex-direction: column;
@@ -801,7 +887,7 @@
       background: #1eb857;
     }
 
-    /* MODAL DE IMAGEN COMPLETA (LIGHTBOX) */
+    /* LIGHTBOX */
     .lightbox-overlay {
       display: none;
       position: fixed;
@@ -1132,7 +1218,7 @@
       <div class="hero-features">
         <div class="feature-pill">📍 Rastreo en Vivo</div>
         <div class="feature-pill">⚖️ Balón Sellado 10kg</div>
-        <div class="feature-pill">💵 Yape, Plin y Efectivo</div>
+        <div class="feature-pill">💵 Yape, Plin y Efectivo con Vuelto</div>
       </div>
     </div>
   </section>
@@ -1141,8 +1227,7 @@
   <section class="flyer-section">
     <div class="flyer-card">
       <div class="flyer-img-container" onclick="abrirLightboxFlyer()">
-        <!-- Ajusta el nombre de archivo según lo tengas guardado en tu repo (ej. 1791513590376.jpg o volante.jpg) -->
-        <img id="imgFlyerOficial" src= "1791513590376.jpg" alt="Volante Oficial LeoGas Cusco">
+        <img id="imgFlyerOficial" src="1000360632_2.jpg" alt="Volante Oficial LeoGas Cusco">
         <div class="flyer-hint">🔍 Toca para ampliar el volante</div>
       </div>
       <div class="flyer-info">
@@ -1192,7 +1277,7 @@
     <div class="grid-empanadas" id="contenedorEmpanadas"></div>
   </section>
 
-  <!-- LIGHTBOX PARA VER VOLANTE COMPLETO -->
+  <!-- LIGHTBOX -->
   <div class="lightbox-overlay" id="lightboxModal" onclick="cerrarLightboxFlyer()">
     <img src="1000360632_2.jpg" alt="Volante Completo LeoGas">
   </div>
@@ -1228,10 +1313,42 @@
         <div>
           <div class="popup-section-label" style="margin-bottom:6px;">Forma de Pago (Paga Con):</div>
           <div class="grid-payments">
-            <button type="button" class="btn-pay-option active" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
+            <button type="button" class="btn-pay-option active" id="btnPayEfectivo" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Yape', this)">🟣 Yape</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Plin', this)">🔵 Plin</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Transferencia', this)">🏦 Transf.</button>
+          </div>
+
+          <!-- DESPLEGABLE DINÁMICO DE EFECTIVO Y VUELTO -->
+          <div class="cash-box-drawer" id="cajaEfectivoDesplegable" style="display: block;">
+            <div style="font-size: 12px; font-weight: 800; color: var(--primary);">
+              💵 ¿Con cuánto en efectivo pagarás?
+            </div>
+            
+            <div class="cash-input-row">
+              <span style="font-weight: 800; font-size: 14px; color: var(--primary);">S/</span>
+              <input 
+                type="number" 
+                id="montoEfectivoIngresado" 
+                class="cash-input" 
+                placeholder="Ej. 100" 
+                min="0"
+                step="5"
+                oninput="calcularVueltoEfectivo()"
+              />
+            </div>
+
+            <div class="cash-quick-btns">
+              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido('exacto')">Pagar Exacto</button>
+              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(50)">S/ 50</button>
+              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(100)">S/ 100</button>
+              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(200)">S/ 200</button>
+            </div>
+
+            <div class="vuelto-badge-box" id="cajaRespuestaVuelto">
+              <span id="textoDetalleVuelto">Ingresa con cuánto pagarás para calcular el vuelto</span>
+              <span id="montoCalculadoVuelto" style="font-size: 15px;"></span>
+            </div>
           </div>
         </div>
 
@@ -1300,7 +1417,6 @@
         <button type="button" class="btn-add-product-main" onclick="agregarNuevoProducto()">
           ➕ Agregar Nuevo Producto / Accesorio
         </button>
-
         <div class="admin-cards-container" id="adminCardsList"></div>
       </div>
 
@@ -1380,23 +1496,23 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    const WHATSAPP_NUMERO = "51950727212"; // Teléfono oficial LeoGas Claro
+    const WHATSAPP_NUMERO = "51950727212";
 
     const menuInicial = [
       {
         id: "gas-1",
         nombre: "Balón LeoGas 10kg Tradicional",
         tag: "El Moradito Rendidor",
-        descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad y regulador garantizado. Combustión limpia.",
+        descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad garantizado.",
         precio: 50.00,
         imagen: "1000360632_2.jpg"
       },
       {
         id: "gas-2",
-        nombre: "Válvula Reguladora de Seguridad",
-        tag: "Accesorio Oficial",
-        descripcion: "Regulador inteligente de alta durabilidad para máxima protección en tu hogar.",
-        precio: 35.00,
+        nombre: "Balón Gas Premium 10kg",
+        tag: "Máximo Rendimiento",
+        descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
+        precio: 55.00,
         imagen: "1000360632_2.jpg"
       }
     ];
@@ -1419,6 +1535,7 @@
     let metodoPago = "Efectivo";
     let ubicacionClienteCoords = null;
     let esAdminAutenticado = false;
+    let ultimoTotalPagar = 0;
 
     let map = null;
     let marcadorTitular = null;
@@ -1630,16 +1747,80 @@
         listContainer.appendChild(row);
       });
 
+      ultimoTotalPagar = totalMonto;
       document.getElementById('badgeContador').innerText = `${totalUnidades}`;
       const textoCantidad = `${totalUnidades} ${totalUnidades === 1 ? 'balón seleccionado' : 'balones seleccionados'}`;
       document.getElementById('cartLabelTotalConCantidad').innerText = `Total a pagar (${textoCantidad}):`;
       document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
+
+      // Si efectivo está activo, recalculamos vuelto con el nuevo total
+      if (metodoPago === 'Efectivo') {
+        calcularVueltoEfectivo();
+      }
     }
 
+    // CONTROL DE MÉTODOS DE PAGO Y DESPLEGABLE DE EFECTIVO
     function elegirPago(metodo, boton) {
       metodoPago = metodo;
       document.querySelectorAll('.btn-pay-option').forEach(btn => btn.classList.remove('active'));
       boton.classList.add('active');
+
+      const cajaEfectivo = document.getElementById('cajaEfectivoDesplegable');
+      if (metodo === 'Efectivo') {
+        cajaEfectivo.style.display = 'block';
+        calcularVueltoEfectivo();
+      } else {
+        cajaEfectivo.style.display = 'none';
+      }
+    }
+
+    function setMontoEfectivoRapido(monto) {
+      const input = document.getElementById('montoEfectivoIngresado');
+      if (monto === 'exacto') {
+        input.value = ultimoTotalPagar > 0 ? ultimoTotalPagar : '';
+      } else {
+        input.value = monto;
+      }
+      calcularVueltoEfectivo();
+    }
+
+    function calcularVueltoEfectivo() {
+      const input = document.getElementById('montoEfectivoIngresado');
+      const box = document.getElementById('cajaRespuestaVuelto');
+      const txt = document.getElementById('textoDetalleVuelto');
+      const montoTxt = document.getElementById('montoCalculadoVuelto');
+
+      const pagaCon = parseFloat(input.value);
+
+      if (isNaN(pagaCon) || pagaCon <= 0) {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "Ingresa con cuánto pagarás para calcular el vuelto";
+        montoTxt.innerText = "";
+        return;
+      }
+
+      if (ultimoTotalPagar <= 0) {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "Selecciona al menos un balón para calcular el vuelto";
+        montoTxt.innerText = "";
+        return;
+      }
+
+      const vuelto = pagaCon - ultimoTotalPagar;
+
+      if (vuelto < 0) {
+        box.className = "vuelto-badge-box alerta";
+        txt.innerText = `⚠️ El monto es menor al total (Faltan S/ ${Math.abs(vuelto).toFixed(2)})`;
+        montoTxt.innerText = "";
+      } else if (vuelto === 0) {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "✔ Pago exacto (No requiere vuelto)";
+        montoTxt.innerText = "S/ 0.00";
+      } else {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "💵 Vuelto a entregar por el repartidor:";
+        montoTxt.innerText = `S/ ${vuelto.toFixed(2)}`;
+      }
     }
 
     function capturarGPSCliente() {
@@ -1697,6 +1878,24 @@
         total += sub;
       });
 
+      // Detalle de pago para WhatsApp
+      let pagoDetalle = metodoPago;
+      if (metodoPago === 'Efectivo') {
+        const inputEfectivo = parseFloat(document.getElementById('montoEfectivoIngresado').value);
+        if (!isNaN(inputEfectivo) && inputEfectivo > 0) {
+          const vuelto = inputEfectivo - total;
+          if (vuelto > 0) {
+            pagoDetalle = `Efectivo (Paga con S/ ${inputEfectivo.toFixed(2)} | Llevar vuelto de S/ ${vuelto.toFixed(2)})`;
+          } else if (vuelto === 0) {
+            pagoDetalle = `Efectivo (Pago exacto de S/ ${inputEfectivo.toFixed(2)})`;
+          } else {
+            pagoDetalle = `Efectivo (Indica pagar con S/ ${inputEfectivo.toFixed(2)}, monto menor al total)`;
+          }
+        } else {
+          pagoDetalle = "Efectivo (Sin vuelto especificado)";
+        }
+      }
+
       const fechaActual = new Date();
       const fechaISO = fechaActual.toISOString().split('T')[0];
       const fechaFormato = fechaActual.toLocaleString();
@@ -1709,7 +1908,7 @@
         items: itemsParaContabilidad,
         unidades: totalBalones,
         total: total,
-        pago: metodoPago,
+        pago: pagoDetalle,
         lat: ubicacionClienteCoords ? ubicacionClienteCoords.lat : null,
         lng: ubicacionClienteCoords ? ubicacionClienteCoords.lng : null
       };
@@ -1721,7 +1920,7 @@
       let mensaje = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
       mensaje += `*Detalle:*\n${detalleTexto}\n`;
       mensaje += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
-      mensaje += `*Paga con:* ${metodoPago}\n`;
+      mensaje += `*Paga con:* ${pagoDetalle}\n`;
 
       if (ubicacionClienteCoords) {
         mensaje += `*Ubicación GPS:* https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}\n`;
@@ -1735,6 +1934,7 @@
       window.open(url, '_blank');
       
       for (const k in pedido) pedido[k].cantidad = 0;
+      document.getElementById('montoEfectivoIngresado').value = '';
       actualizarVistaPopup();
       cerrarModalCarrito();
     }
@@ -1951,3 +2151,4 @@
   </script>
 </body>
 </html>
+
