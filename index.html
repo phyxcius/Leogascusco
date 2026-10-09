@@ -1,3 +1,15 @@
+Aquí tienes el código completo y listo para copiar en tu archivo `index.html`.
+
+Incluye todas las funciones solicitadas:
+
+1. **Fecha y hora detallada** en cada pedido del reporte contable.
+2. **Botón para Imprimir / Exportar Reporte a PDF** con estilos limpios de impresión.
+3. **Subir imagen desde el celular/dispositivo** y **eliminar imagen** por cada producto en el panel de balones.
+4. **Nueva pestaña en el panel de administración** para cambiar los 3 teléfonos del volante y el número de WhatsApp oficial.
+5. **Campo "¿Por quién preguntamos? (Nombre del cliente)"** en el carrito, enviado directamente en el mensaje de WhatsApp.
+6. **Estado de stock (Disponible / Agotado)** para que el repartidor controle qué productos están a la venta.
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -383,15 +395,20 @@
       flex-direction: column;
       border: 1px solid #f1f5f9;
       transition: transform 0.2s;
+      position: relative;
     }
 
     .card:hover {
       transform: translateY(-4px);
     }
 
+    .card.agotado {
+      opacity: 0.65;
+    }
+
     .card-img-wrapper {
       position: relative;
-      height: 190px;
+      height: 200px;
       background: #e2e8f0;
       overflow: hidden;
     }
@@ -464,6 +481,11 @@
 
     .btn-add:hover {
       background: var(--primary-dark);
+    }
+
+    .btn-add:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
     }
 
     /* BOTÓN FLOTANTE: TEXTO "PEDIDOS" + LEONCITO */
@@ -564,7 +586,7 @@
       width: 100%;
       max-width: 500px;
       border-radius: 20px 20px 0 0;
-      max-height: 88vh;
+      max-height: 90vh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
@@ -634,7 +656,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 200px;
+      max-height: 180px;
       overflow-y: auto;
     }
 
@@ -860,6 +882,29 @@
       font-weight: bold;
     }
 
+    /* CAMPO DE NOMBRE CLIENTE */
+    .client-name-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .client-name-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--dark);
+      background: var(--white);
+    }
+
+    .client-name-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(107, 33, 168, 0.15);
+    }
+
     .cart-modal-footer {
       padding: 14px 20px;
       background: #f8fafc;
@@ -968,6 +1013,26 @@
       background: var(--white);
     }
 
+    .admin-img-preview-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+      background: #fff;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .admin-thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+    }
+
     .admin-card-actions {
       display: flex;
       gap: 8px;
@@ -1036,8 +1101,8 @@
     }
 
     .modal-box.wide {
-      max-width: 650px;
-      max-height: 90vh;
+      max-width: 750px;
+      max-height: 92vh;
       overflow-y: auto;
     }
 
@@ -1120,6 +1185,25 @@
       font-size: 13px;
     }
 
+    .btn-print-report {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .btn-print-report:hover {
+      background: var(--primary-dark);
+    }
+
     .accounting-summary {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -1186,6 +1270,25 @@
       color: #64748b;
     }
 
+    /* ESTILOS DE IMPRESIÓN */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #areaParaImprimir, #areaParaImprimir * {
+        visibility: visible;
+      }
+      #areaParaImprimir {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      .accounting-filter, .dashboard-tabs, .btn-print-report, .btn-close-modal {
+        display: none !important;
+      }
+    }
+
     @media (max-width: 600px) {
       .grid-payments {
         grid-template-columns: repeat(2, 1fr);
@@ -1207,6 +1310,11 @@
       }
       .flyer-card {
         padding: 16px;
+      }
+      .btn-print-report {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
       }
     }
   </style>
@@ -1251,7 +1359,7 @@
   <section class="flyer-section">
     <div class="flyer-card">
       <div class="flyer-img-container" onclick="abrirLightboxFlyer()">
-        <img id="imgFlyerOficial" src="1000360632_2.jpg" alt="Volante Oficial LeoGas Cusco" onerror="this.src='1791513590376.jpg'">
+        <img id="imgFlyerOficial" src="1000360632_2.jpg" alt="Volante Oficial LeoGas Cusco" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
         <div class="flyer-hint">🔍 Toca para ampliar el volante</div>
       </div>
       <div class="flyer-info">
@@ -1263,16 +1371,8 @@
         </p>
 
         <div class="popup-section-label" style="margin-bottom:8px;">Teléfonos de Pedido Inmediato:</div>
-        <div class="flyer-contact-grid">
-          <a href="tel:969773064" class="contact-button">
-            <span>📞</span> 950 727 212
-          </a>
-          <a href="tel:984285500" class="contact-button">
-            <span>📞</span> 984 285 500
-          </a>
-          <a href="tel:084501111" class="contact-button">
-            <span>☎️</span> (084) 501111
-          </a>
+        <div class="flyer-contact-grid" id="contenedorTelefonosFlyer">
+          <!-- Renderizado dinámico desde configuración -->
         </div>
       </div>
     </div>
@@ -1386,6 +1486,17 @@
             <span class="geo-status" id="geoStatus">Envía tus coordenadas para llevar el balón hasta tu casa</span>
           </div>
         </div>
+
+        <!-- TEXT BOX: NOMBRE DEL CLIENTE -->
+        <div class="client-name-box">
+          <label class="popup-section-label" for="nombreClienteInput">¿Por quién preguntamos? (Nombre completo o referencia):</label>
+          <input 
+            type="text" 
+            id="nombreClienteInput" 
+            class="client-name-input" 
+            placeholder="Ej: Sra. Carmen / Familia Quispe"
+          />
+        </div>
       </div>
 
       <div class="cart-modal-footer">
@@ -1436,69 +1547,105 @@
       <div class="dashboard-tabs">
         <button class="tab-btn active" id="tabBtnCatalogo" onclick="cambiarTab('catalogo')">📝 Balones y Precios</button>
         <button class="tab-btn" id="tabBtnContabilidad" onclick="cambiarTab('contabilidad')">📊 Reporte Contable & Ventas</button>
-        <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 GPS en Vivo Repartidor</button>
+        <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos y WhatsApp</button>
+        <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 GPS Repartidor</button>
       </div>
 
       <!-- CATÁLOGO ADMIN -->
       <div id="tabCatalogoContenido">
         <button type="button" class="btn-add-product-main" onclick="agregarNuevoProducto()">
-          ➕ Agregar Nuevo Producto / Accesorio
+          ➕ Agregar Nuevo Balón / Accesorio
         </button>
         <div class="admin-cards-container" id="adminCardsList"></div>
       </div>
 
       <!-- REPORTE CONTABLE -->
       <div id="tabContabilidadContenido" style="display: none;">
-        <div class="accounting-filter">
-          <label style="font-size: 13px; font-weight:bold;">Filtrar por fecha:</label>
-          <input type="date" id="filtroFechaContable" onchange="actualizarReporteContable()">
-          <button style="padding:6px 10px; background:#e2e8f0; border:none; border-radius:6px; font-size:12px; cursor:pointer;" onclick="limpiarFiltroFecha()">Ver todo el historial</button>
-        </div>
-
-        <div class="accounting-summary">
-          <div class="summary-card">
-            <span>TOTAL INGRESOS</span>
-            <h4 id="resumenMontoTotal">S/ 0.00</h4>
+        <div id="areaParaImprimir">
+          <div class="accounting-filter">
+            <label style="font-size: 13px; font-weight:bold;">Filtrar fecha:</label>
+            <input type="date" id="filtroFechaContable" onchange="actualizarReporteContable()">
+            <button style="padding:6px 10px; background:#e2e8f0; border:none; border-radius:6px; font-size:12px; cursor:pointer;" onclick="limpiarFiltroFecha()">Ver todo</button>
+            <button class="btn-print-report" onclick="imprimirReporteVentas()">🖨️ Imprimir / Exportar Reporte</button>
           </div>
-          <div class="summary-card">
-            <span>PEDIDOS REGISTRADOS</span>
-            <h4 id="resumenCantPedidos">0</h4>
+
+          <div class="accounting-summary">
+            <div class="summary-card">
+              <span>TOTAL INGRESOS</span>
+              <h4 id="resumenMontoTotal">S/ 0.00</h4>
+            </div>
+            <div class="summary-card">
+              <span>PEDIDOS REGISTRADOS</span>
+              <h4 id="resumenCantPedidos">0</h4>
+            </div>
+            <div class="summary-card">
+              <span>BALONES VENDIDOS</span>
+              <h4 id="resumenEmpanadasVendidas">0</h4>
+            </div>
           </div>
-          <div class="summary-card">
-            <span>BALONES VENDIDOS</span>
-            <h4 id="resumenEmpanadasVendidas">0</h4>
+
+          <div class="section-subtitle">🔥 Ventas Desglosadas por Tipo de Balón</div>
+          <div class="table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Tipo de Balón</th>
+                  <th>Unidades</th>
+                  <th>Ingreso (S/)</th>
+                  <th>% Participación</th>
+                </tr>
+              </thead>
+              <tbody id="tablaPorTipoBody"></tbody>
+            </table>
+          </div>
+
+          <div class="section-subtitle">📋 Historial con Fecha, Hora y Detalle de Pedidos</div>
+          <div class="table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Fecha y Hora</th>
+                  <th>Cliente</th>
+                  <th>Detalle Pedido</th>
+                  <th>Total</th>
+                  <th>Pago</th>
+                  <th>Ubicación</th>
+                </tr>
+              </thead>
+              <tbody id="tablaContableBody"></tbody>
+            </table>
           </div>
         </div>
+      </div>
 
-        <div class="section-subtitle">🔥 Ventas Desglosadas por Tipo de Gas</div>
-        <div class="table-container">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Tipo de Gas / Balón</th>
-                <th>Unidades Vendidas</th>
-                <th>Ingreso Generado (S/)</th>
-                <th>% Participación</th>
-              </tr>
-            </thead>
-            <tbody id="tablaPorTipoBody"></tbody>
-          </table>
-        </div>
+      <!-- CONFIGURACIÓN DE TELÉFONOS Y WHATSAPP -->
+      <div id="tabTelefonosContenido" style="display: none;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+          <h4 style="color:var(--primary); font-size:15px; margin-bottom:12px;">📞 Configurar Números de Contacto</h4>
+          
+          <div class="admin-field-row" style="margin-bottom:10px;">
+            <label>Número WhatsApp para Pedidos (con código de país, ej: 51950727212):</label>
+            <input type="text" id="configWspNum" class="admin-input">
+          </div>
 
-        <div class="section-subtitle">📋 Historial Detallado de Entregas Realizadas</div>
-        <div class="table-container">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Fecha y Hora</th>
-                <th>Detalle Balones</th>
-                <th>Total</th>
-                <th>Pago</th>
-                <th>Ubicación Entrega</th>
-              </tr>
-            </thead>
-            <tbody id="tablaContableBody"></tbody>
-          </table>
+          <div class="admin-field-row" style="margin-bottom:10px;">
+            <label>Teléfono 1 (Llamada Rápida Claro):</label>
+            <input type="text" id="configTel1" class="admin-input">
+          </div>
+
+          <div class="admin-field-row" style="margin-bottom:10px;">
+            <label>Teléfono 2 (Llamada Rápida Claro):</label>
+            <input type="text" id="configTel2" class="admin-input">
+          </div>
+
+          <div class="admin-field-row" style="margin-bottom:16px;">
+            <label>Teléfono 3 (Fijo o Central Cusco):</label>
+            <input type="text" id="configTel3" class="admin-input">
+          </div>
+
+          <button type="button" class="btn-admin-save" style="width:100%;" onclick="guardarConfiguracionTelefonos()">
+            💾 Guardar Números de Contacto
+          </button>
         </div>
       </div>
 
@@ -1507,7 +1654,7 @@
         <div class="gps-toggle-panel">
           <div>
             <strong>Transmisión en Vivo de tu Ubicación:</strong>
-            <p style="font-size:13px; color:#64748b;">Al activarlo desde tu celular mientras manejas tu moto o camión de gas, tu ubicación se mostrará en el mapa para los clientes.</p>
+            <p style="font-size:13px; color:#64748b;">Al activarlo desde tu celular, tu moto o camión se verá en el mapa para tus clientes.</p>
           </div>
           <button id="btnGPSSwitch" class="btn-gps-connect" onclick="alternarRastreoGPSTitular()">Conectar GPS en Vivo</button>
         </div>
@@ -1523,15 +1670,24 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    const WHATSAPP_NUMERO = "51969773064";
+    // CONFIGURACIÓN DE TELÉFONOS POR DEFECTO
+    const configTelefonosInicial = {
+      whatsapp: "51969773064",
+      tel1: "950 727 212",
+      tel2: "984 285 500",
+      tel3: "(084) 501111"
+    };
+
+    let configTelefonos = JSON.parse(localStorage.getItem('gas_telefonos')) || configTelefonosInicial;
 
     const menuInicial = [
       {
         id: "gas-1",
-        nombre: "Balón LeoGas 10kg Normal o Regural",
+        nombre: "Balón LeoGas 10kg Normal o Regular",
         tag: "El Moradito Rendidor",
         descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad garantizado.",
         precio: 50.00,
+        disponible: true,
         imagen: "1000360632_2.jpg"
       },
       {
@@ -1540,6 +1696,7 @@
         tag: "Máximo Rendimiento",
         descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
         precio: 55.00,
+        disponible: true,
         imagen: "1000360632_2.jpg"
       }
     ];
@@ -1569,6 +1726,26 @@
     let capaVentas = null;
     let watchIdGPS = null;
     let rastreoActivo = false;
+
+    // RENDERIZAR BOTONES DE CONTACTO EN EL FLYER
+    function renderizarTelefonosFlyer() {
+      const container = document.getElementById('contenedorTelefonosFlyer');
+      const cleanTel1 = configTelefonos.tel1.replace(/\D/g,'');
+      const cleanTel2 = configTelefonos.tel2.replace(/\D/g,'');
+      const cleanTel3 = configTelefonos.tel3.replace(/\D/g,'');
+
+      container.innerHTML = `
+        <a href="tel:${cleanTel1}" class="contact-button">
+          <span>📞</span> ${configTelefonos.tel1}
+        </a>
+        <a href="tel:${cleanTel2}" class="contact-button">
+          <span>📞</span> ${configTelefonos.tel2}
+        </a>
+        <a href="tel:${cleanTel3}" class="contact-button">
+          <span>☎️</span> ${configTelefonos.tel3}
+        </a>
+      `;
+    }
 
     // MAPA
     function iniciarMapaCusco() {
@@ -1609,7 +1786,7 @@
             opacity: 1,
             fillOpacity: 0.85
           });
-          m.bindPopup(`<b>Entrega LeoGas: S/ ${v.total.toFixed(2)}</b><br>${v.fecha}<br>${v.pago}`);
+          m.bindPopup(`<b>Entrega LeoGas: S/ ${v.total.toFixed(2)}</b><br>${v.fecha}<br>${v.cliente || ''}<br>${v.pago}`);
           capaVentas.addLayer(m);
         }
       });
@@ -1670,11 +1847,14 @@
       contenedor.innerHTML = '';
 
       catalogo.forEach(item => {
+        const estaDisponible = item.disponible !== false;
         const card = document.createElement('article');
-        card.className = 'card';
+        card.className = `card ${estaDisponible ? '' : 'agotado'}`;
         card.innerHTML = `
           <div class="card-img-wrapper">
-            <span class="card-tag">${item.tag || 'Sellado'}</span>
+            <span class="card-tag" style="background:${estaDisponible ? 'rgba(107, 33, 168, 0.9)' : '#dc2626'}">
+              ${estaDisponible ? (item.tag || 'Sellado') : 'Agotado Temporalmente'}
+            </span>
             <img src="${item.imagen}" alt="${item.nombre}" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
           </div>
           <div class="card-body">
@@ -1682,7 +1862,9 @@
             <p class="card-desc">${item.descripcion}</p>
             <div class="card-footer">
               <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
-              <button class="btn-add" onclick="agregarAlPedido('${item.id}')">+ Pedir Balón</button>
+              <button class="btn-add" ${estaDisponible ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}')">
+                ${estaDisponible ? '+ Pedir Balón' : 'Agotado'}
+              </button>
             </div>
           </div>
         `;
@@ -1881,6 +2063,8 @@
         return;
       }
 
+      const nombreCliente = document.getElementById('nombreClienteInput').value.trim();
+
       let total = 0;
       let detalleTexto = "";
       let detalleProductos = [];
@@ -1923,12 +2107,13 @@
 
       const fechaActual = new Date();
       const fechaISO = fechaActual.toISOString().split('T')[0];
-      const fechaFormato = fechaActual.toLocaleString();
+      const fechaFormato = fechaActual.toLocaleDateString() + ' ' + fechaActual.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       const nuevaVenta = {
         id: Date.now(),
         fecha: fechaFormato,
         fechaFiltro: fechaISO,
+        cliente: nombreCliente || 'Cliente particular',
         productos: detalleProductos.join(', '),
         items: itemsParaContabilidad,
         unidades: totalBalones,
@@ -1938,11 +2123,14 @@
         lng: ubicacionClienteCoords ? ubicacionClienteCoords.lng : null
       };
 
-      registroVentas.push(nuevaVenta);
+      registroVentas.unshift(nuevaVenta);
       localStorage.setItem('gas_ventas', JSON.stringify(registroVentas));
       dibujarVentasEnMapa();
 
       let mensaje = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
+      if (nombreCliente) {
+        mensaje += `*👤 Preguntar por:* ${nombreCliente}\n`;
+      }
       mensaje += `*Detalle:*\n${detalleTexto}\n`;
       mensaje += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
       mensaje += `*Paga con:* ${pagoDetalle}\n`;
@@ -1955,11 +2143,13 @@
 
       mensaje += `\n¿Me confirman tiempo estimado de entrega a mi domicilio?`;
 
-      const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+      const numWspDestino = configTelefonos.whatsapp.replace(/\D/g,'');
+      const url = `https://wa.me/${numWspDestino}?text=${encodeURIComponent(mensaje)}`;
       window.open(url, '_blank');
       
       for (const k in pedido) pedido[k].cantidad = 0;
       document.getElementById('montoEfectivoIngresado').value = '';
+      document.getElementById('nombreClienteInput').value = '';
       actualizarVistaPopup();
       cerrarModalCarrito();
     }
@@ -1994,6 +2184,7 @@
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('tabCatalogoContenido').style.display = 'none';
       document.getElementById('tabContabilidadContenido').style.display = 'none';
+      document.getElementById('tabTelefonosContenido').style.display = 'none';
       document.getElementById('tabGPSContenido').style.display = 'none';
 
       if (tab === 'catalogo') {
@@ -2003,6 +2194,10 @@
         document.getElementById('tabBtnContabilidad').classList.add('active');
         document.getElementById('tabContabilidadContenido').style.display = 'block';
         actualizarReporteContable();
+      } else if (tab === 'telefonos') {
+        document.getElementById('tabBtnTelefonos').classList.add('active');
+        document.getElementById('tabTelefonosContenido').style.display = 'block';
+        cargarConfigTelefonosEnInputs();
       } else if (tab === 'gps') {
         document.getElementById('tabBtnGPS').classList.add('active');
         document.getElementById('tabGPSContenido').style.display = 'block';
@@ -2027,14 +2222,40 @@
               <input type="number" step="0.5" class="admin-input" id="edit-pre-${index}" value="${item.precio}">
             </div>
           </div>
+
+          <div class="admin-field-row inline-row">
+            <div style="flex:1;">
+              <label>Estado de Stock:</label>
+              <select class="admin-input" id="edit-disp-${index}">
+                <option value="true" ${item.disponible !== false ? 'selected' : ''}>🟢 Disponible para venta</option>
+                <option value="false" ${item.disponible === false ? 'selected' : ''}>🔴 Agotado / Sin stock</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <label>Etiqueta / Presentación:</label>
+              <input type="text" class="admin-input" id="edit-tag-${index}" value="${item.tag || 'Sellado 10kg'}">
+            </div>
+          </div>
+
           <div class="admin-field-row">
-            <label>Descripción</label>
+            <label>Descripción del Balón</label>
             <input type="text" class="admin-input" id="edit-desc-${index}" value="${item.descripcion}">
           </div>
+
           <div class="admin-field-row">
-            <label>Imagen (Nombre o URL)</label>
-            <input type="text" class="admin-input" id="edit-img-${index}" value="${item.imagen}">
+            <label>Imagen del Producto (Subir archivo o mantener actual):</label>
+            <div class="admin-img-preview-box">
+              <img id="preview-img-${index}" class="admin-thumb" src="${item.imagen}" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
+              <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
+                <input type="file" accept="image/*" id="file-img-${index}" onchange="procesarSubidaImagen(event, ${index})" style="font-size:12px;">
+                <button type="button" style="background:none; border:none; color:#dc2626; font-size:11px; text-align:left; cursor:pointer; text-decoration:underline;" onclick="quitarImagenProducto(${index})">
+                  🗑️ Quitar imagen / Usar volante por defecto
+                </button>
+              </div>
+            </div>
+            <input type="hidden" id="edit-img-${index}" value="${item.imagen}">
           </div>
+
           <div class="admin-card-actions">
             <button type="button" class="btn-admin-save" onclick="guardarFila(${index})">💾 Guardar Cambios</button>
             <button type="button" class="btn-admin-delete" onclick="eliminarProducto(${index})">🗑️ Eliminar</button>
@@ -2047,10 +2268,32 @@
       cambiarTab('catalogo');
     }
 
+    // SUBIR IMAGEN DESDE CELULAR (BASE64)
+    function procesarSubidaImagen(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result;
+        document.getElementById(`edit-img-${index}`).value = base64Data;
+        document.getElementById(`preview-img-${index}`).src = base64Data;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function quitarImagenProducto(index) {
+      const defaultImg = "1000360632_2.jpg";
+      document.getElementById(`edit-img-${index}`).value = defaultImg;
+      document.getElementById(`preview-img-${index}`).src = defaultImg;
+    }
+
     function guardarFila(index) {
       catalogo[index].nombre = document.getElementById(`edit-nom-${index}`).value.trim();
       catalogo[index].precio = parseFloat(document.getElementById(`edit-pre-${index}`).value) || 0;
       catalogo[index].descripcion = document.getElementById(`edit-desc-${index}`).value.trim();
+      catalogo[index].tag = document.getElementById(`edit-tag-${index}`).value.trim();
+      catalogo[index].disponible = document.getElementById(`edit-disp-${index}`).value === 'true';
       catalogo[index].imagen = document.getElementById(`edit-img-${index}`).value.trim();
 
       localStorage.setItem('gas_menu', JSON.stringify(catalogo));
@@ -2082,6 +2325,7 @@
         tag: "Sellado",
         descripcion: "Balón de 10kg con válvula de seguridad y peso exacto.",
         precio: 50.00,
+        disponible: true,
         imagen: "1000360632_2.jpg"
       };
 
@@ -2093,6 +2337,7 @@
       mostrarDashboard();
     }
 
+    // REPORTE CONTABLE Y VENTAS
     function actualizarReporteContable() {
       const filtro = document.getElementById('filtroFechaContable').value;
       const tbodyDetalle = document.getElementById('tablaContableBody');
@@ -2125,7 +2370,8 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${v.fecha}</td>
+          <td><strong>${v.fecha}</strong></td>
+          <td>${v.cliente || 'Particular'}</td>
           <td>${v.productos}</td>
           <td><strong>S/ ${v.total.toFixed(2)}</strong></td>
           <td>${v.pago}</td>
@@ -2167,7 +2413,31 @@
       actualizarReporteContable();
     }
 
+    function imprimirReporteVentas() {
+      window.print();
+    }
+
+    // CONFIGURACIÓN DE TELÉFONOS
+    function cargarConfigTelefonosEnInputs() {
+      document.getElementById('configWspNum').value = configTelefonos.whatsapp;
+      document.getElementById('configTel1').value = configTelefonos.tel1;
+      document.getElementById('configTel2').value = configTelefonos.tel2;
+      document.getElementById('configTel3').value = configTelefonos.tel3;
+    }
+
+    function guardarConfiguracionTelefonos() {
+      configTelefonos.whatsapp = document.getElementById('configWspNum').value.trim();
+      configTelefonos.tel1 = document.getElementById('configTel1').value.trim();
+      configTelefonos.tel2 = document.getElementById('configTel2').value.trim();
+      configTelefonos.tel3 = document.getElementById('configTel3').value.trim();
+
+      localStorage.setItem('gas_telefonos', JSON.stringify(configTelefonos));
+      renderizarTelefonosFlyer();
+      alert("Números de contacto actualizados correctamente.");
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      renderizarTelefonosFlyer();
       sincronizarEstructuraPedido();
       renderizarMenu();
       iniciarMapaCusco();
@@ -2176,3 +2446,5 @@
   </script>
 </body>
 </html>
+
+```
