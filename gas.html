@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gas Express Cusco | Balones de Gas a Domicilio</title>
+  
+  <!-- Leaflet CSS para Mapas -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <style>
+    :root {
+      --primary: #0284c7;        /* Azul gas/energía */
+      --primary-dark: #0369a1;
+      --accent: #ea580c;         /* Naranja llama */
+      --chat-blue: #2563eb;
+      --chat-blue-hover: #1d4ed8;
+      --dark: #0f172a;
+      --gray-light: #f8fafc;
+      --text: #334155;
+      --white: #ffffff;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--gray-light);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 90px;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--white);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--dark);
+    }
+
+    .brand-icon {
+      background: var(--primary);
+      color: var(--white);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+    }
+
+    .brand-text h1 {
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--dark);
+    }
+
+    .brand-text span {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-admin-login {
+      background: #f1f5f9;
+      color: var(--dark);
+      border: 1px solid #cbd5e1;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-admin-login:hover {
+      background: #e2e8f0;
+    }
+
+    .nav-cta {
+      background: var(--primary);
+      color: var(--white);
+      padding: 8px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      padding: 44px 20px 60px;
+      text-align: center;
+      border-bottom: 1px solid #bae6fd;
+    }
+
+    .hero-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .badge-hero {
+      display: inline-block;
+      background: #e0f2fe;
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      border: 1px solid #7dd3fc;
+      text-transform: uppercase;
+    }
+
+    .hero h2 {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--dark);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .hero-features {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .feature-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    /* MAPA EN VIVO */
+    .map-section {
+      max-width: 1200px;
+      margin: 20px auto 40px;
+      padding: 0 20px;
+    }
+
+    .map-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid #bae6fd;
+    }
+
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .map-header h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gps-badge-status {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: #e2e8f0;
+      color: #64748b;
+    }
+
+    .gps-badge-status.active {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    #cuscoMap {
+      width: 100%;
+      height: 340px;
+      border-radius: 10px;
+      z-index: 10;
+    }
+
+    /* PRODUCTOS */
+    .section-menu {
+      max-width: 1200px;
+      margin: 20px auto 40px;
+      padding: 0 20px;
+    }
+
+    .menu-header {
+      background: var(--white);
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .menu-header h3 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .grid-empanadas {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #f1f5f9;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card-img-wrapper {
+      position: relative;
+      height: 190px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .card-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 16px;
+    }
+
+    .card-body {
+      padding: 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 14px;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    .price {
+      font-size: 19px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .btn-add {
+      background: var(--dark);
+      color: var(--white);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-add:hover {
+      background: var(--primary);
+    }
+
+    /* GLOBITO FLOTANTE AZUL PEQUEÑO */
+    .chat-bubble-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      background-color: var(--chat-blue);
+      border-radius: 50%;
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1500;
+      border: none;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .chat-bubble-btn:hover {
+      transform: scale(1.08);
+      background-color: var(--chat-blue-hover);
+    }
+
+    .chat-bubble-icon {
+      width: 28px;
+      height: 28px;
+      fill: var(--white);
+    }
+
+    .chat-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background-color: var(--accent);
+      color: var(--white);
+      border: 2px solid var(--white);
+      font-size: 11px;
+      font-weight: 800;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* MODAL DE CHECKOUT */
+    .cart-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0;
+    }
+
+    .cart-modal-card {
+      background: var(--white);
+      width: 100%;
+      max-width: 500px;
+      border-radius: 20px 20px 0 0;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .cart-modal-header {
+      padding: 16px 20px;
+      background: var(--dark);
+      color: var(--white);
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cart-modal-header h3 {
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-close-cart {
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .cart-modal-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .cart-header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .btn-vaciar-cart {
+      background: none;
+      border: none;
+      color: #dc2626;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: underline;
+    }
+
+    .btn-vaciar-cart:hover {
+      color: #b91c1c;
+    }
+
+    .cart-items-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 230px;
+      overflow-y: auto;
+    }
+
+    .cart-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      transition: background 0.2s;
+    }
+
+    .cart-item-row.item-activo {
+      background: #f0f9ff;
+      border-color: #7dd3fc;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .cart-item-sub {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .cart-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-qty {
+      background: #e2e8f0;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-qty:hover {
+      background: #cbd5e1;
+    }
+
+    .cart-item-price-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 10px;
+    }
+
+    .cart-item-price {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      min-width: 55px;
+      text-align: right;
+    }
+
+    .btn-trash-item {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .btn-trash-item:hover {
+      color: #dc2626;
+      background: #fee2e2;
+    }
+
+    .popup-section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #64748b;
+      letter-spacing: 0.5px;
+    }
+
+    .grid-payments {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .btn-pay-option {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: var(--dark);
+      padding: 7px 4px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-pay-option.active {
+      background: var(--primary);
+      border-color: var(--primary-dark);
+      color: var(--white);
+    }
+
+    .geo-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 10px 12px;
+      border-radius: 8px;
+    }
+
+    .btn-geo {
+      background: var(--chat-blue);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-geo:hover {
+      background: var(--chat-blue-hover);
+    }
+
+    .geo-status {
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+    }
+
+    .geo-status.ready {
+      color: #15803d;
+      font-weight: bold;
+    }
+
+    .cart-modal-footer {
+      padding: 14px 20px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--dark);
+    }
+
+    .cart-total-amount {
+      color: var(--primary);
+      font-size: 19px;
+    }
+
+    .btn-order-wsp {
+      background: #25d366;
+      color: var(--white);
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-order-wsp:hover {
+      background: #1eb857;
+    }
+
+    /* ADMIN TARJETAS VERTICALES */
+    .admin-cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .admin-edit-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .admin-field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .admin-field-row.inline-row {
+      flex-direction: row;
+      gap: 10px;
+    }
+
+    .admin-field-row label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .admin-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      color: var(--dark);
+      background: var(--white);
+    }
+
+    .admin-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .admin-card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-admin-save {
+      flex: 2;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      padding: 9px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-admin-save:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-admin-delete {
+      flex: 1;
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+      padding: 9px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-admin-delete:hover {
+      background: #fecaca;
+    }
+
+    .btn-add-product-main {
+      width: 100%;
+      background: #16a34a;
+      color: var(--white);
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
+    }
+
+    .btn-add-product-main:hover {
+      background: #15803d;
+    }
+
+    /* MODALES & DASHBOARD */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 2100;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .modal-box {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+    }
+
+    .modal-box.wide {
+      max-width: 650px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-box h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+
+    .dashboard-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 6px 10px;
+      color: #64748b;
+      cursor: pointer;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: #e0f2fe;
+      color: var(--primary-dark);
+    }
+
+    .gps-toggle-panel {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn-gps-connect {
+      background: #16a34a;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-gps-connect.disconnect {
+      background: #dc2626;
+    }
+
+    .accounting-filter {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+
+    .accounting-filter input {
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .accounting-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .summary-card span {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: bold;
+    }
+
+    .summary-card h4 {
+      font-size: 18px;
+      color: var(--primary-dark);
+      font-weight: 900;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--dark);
+      margin: 16px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .custom-table th, .custom-table td {
+      border: 1px solid #e2e8f0;
+      padding: 8px 10px;
+    }
+
+    .custom-table th {
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .btn-close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    @media (max-width: 600px) {
+      .grid-payments {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .chat-bubble-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+      }
+      .modal-box.wide {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <div class="brand-icon">🔥</div>
+        <div class="brand-text">
+          <h1>Gas Express Cusco</h1>
+          <span>Reparto a Domicilio Rápido</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <button class="btn-admin-login" id="btnAdminTrigger" onclick="abrirModalAdmin()">
+          🔒 Admin / Reportes
+        </button>
+        <a href="#menu" class="nav-cta">Pedir Gas</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-container">
+      <span class="badge-hero">Peso Exacto Garantizado & Válvula Segura</span>
+      <h2>Tu balón de gas en la puerta de tu hogar</h2>
+      <p>Servicio rápido y seguro en Cusco. Sigue la ruta del repartidor en el mapa y paga con tu método preferido.</p>
+      
+      <div class="hero-features">
+        <div class="feature-pill">📍 Rastreo en Vivo</div>
+        <div class="feature-pill">⚖️ Balón Sellado 10kg</div>
+        <div class="feature-pill">⚡ Entrega Inmediata</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAPA CUSCO -->
+  <section class="map-section">
+    <div class="map-card">
+      <div class="map-header">
+        <h3>📍 Repartidor en Ruta - Cusco</h3>
+        <span class="gps-badge-status" id="gpsBadgeHeader">GPS Repartidor: En espera</span>
+      </div>
+      <div id="cuscoMap"></div>
+    </div>
+  </section>
+
+  <!-- PRODUCTOS -->
+  <section class="section-menu" id="menu">
+    <div class="menu-header">
+      <div>
+        <h3>Elige tu Balón de Gas</h3>
+        <p style="font-size: 13px; color: #64748b;">Selecciona entre Gas Normal o Premium e indícanos tu ubicación exacta.</p>
+      </div>
+    </div>
+
+    <div class="grid-empanadas" id="contenedorEmpanadas"></div>
+  </section>
+
+  <!-- GLOBITO AZUL FLOTANTE -->
+  <button class="chat-bubble-btn" id="btnGlobitoChat" onclick="abrirModalCarrito()">
+    <svg class="chat-bubble-icon" viewBox="0 0 24 24">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+    </svg>
+    <div class="chat-badge" id="badgeContador">0</div>
+  </button>
+
+  <!-- MODAL DE CHECKOUT -->
+  <div class="cart-modal-overlay" id="cartModalOverlay" onclick="cerrarSiClickAfuera(event)">
+    <div class="cart-modal-card">
+      
+      <div class="cart-modal-header">
+        <h3>🔥 Tu Pedido de Gas</h3>
+        <button class="btn-close-cart" onclick="cerrarModalCarrito()">&times;</button>
+      </div>
+
+      <div class="cart-modal-body">
+        
+        <div>
+          <div class="cart-header-actions">
+            <span class="popup-section-label">Balones seleccionados:</span>
+            <button type="button" class="btn-vaciar-cart" onclick="vaciarPedidoConConfirmacion()">
+              🗑️ Vaciar pedido
+            </button>
+          </div>
+          <div class="cart-items-box" id="popupItemsList"></div>
+        </div>
+
+        <div>
+          <div class="popup-section-label" style="margin-bottom:6px;">Forma de Pago:</div>
+          <div class="grid-payments">
+            <button type="button" class="btn-pay-option active" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
+            <button type="button" class="btn-pay-option" onclick="elegirPago('Yape', this)">🟣 Yape</button>
+            <button type="button" class="btn-pay-option" onclick="elegirPago('Plin', this)">🔵 Plin</button>
+            <button type="button" class="btn-pay-option" onclick="elegirPago('Transferencia', this)">🏦 Transf.</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="popup-section-label" style="margin-bottom:6px;">Dirección de Entrega:</div>
+          <div class="geo-box">
+            <button type="button" class="btn-geo" onclick="capturarGPSCliente()">📍 Activar mi ubicación exacta</button>
+            <span class="geo-status" id="geoStatus">Envía tus coordenadas para llevar el balón hasta tu casa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cart-modal-footer">
+        <div class="cart-total-row">
+          <span id="cartLabelTotalConCantidad">Total a pagar (0 balones):</span>
+          <span class="cart-total-amount" id="cartTotalMonto">S/ 0.00</span>
+        </div>
+        <button class="btn-order-wsp" onclick="enviarPedidoWhatsApp()">
+          <span>Pedir Gas por WhatsApp</span> 💬
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN ADMIN -->
+  <div class="modal-overlay" id="modalLogin">
+    <div class="modal-box">
+      <button class="btn-close-modal" onclick="cerrarModales()" style="position:absolute; top:12px; right:14px;">&times;</button>
+      <h3>Acceso de Administrador</h3>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 14px;">Inicia sesión para gestionar balones, precios, GPS y ventas.</p>
+      
+      <form onsubmit="autenticarAdmin(event)">
+        <div style="margin-bottom: 12px;">
+          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Usuario</label>
+          <input type="text" id="adminUser" required placeholder="admin" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Contraseña</label>
+          <input type="password" id="adminPass" required placeholder="••••••••" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+        </div>
+        <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">
+          Credenciales: <strong>admin</strong> / <strong>regocijo123</strong>
+        </div>
+        <button type="submit" style="width:100%; background:var(--primary); color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">
+          Ingresar al Panel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DASHBOARD -->
+  <div class="modal-overlay" id="modalDashboard">
+    <div class="modal-box wide">
+      <button class="btn-close-modal" onclick="cerrarModales()" style="position:absolute; top:12px; right:14px;">&times;</button>
+      <h3>Panel de Control - Gas Express</h3>
+      
+      <div class="dashboard-tabs">
+        <button class="tab-btn active" id="tabBtnCatalogo" onclick="cambiarTab('catalogo')">📝 Balones y Precios</button>
+        <button class="tab-btn" id="tabBtnContabilidad" onclick="cambiarTab('contabilidad')">📊 Reporte Contable & Ventas</button>
+        <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 GPS en Vivo Repartidor</button>
+      </div>
+
+      <!-- CATÁLOGO ADMIN -->
+      <div id="tabCatalogoContenido">
+        <button type="button" class="btn-add-product-main" onclick="agregarNuevoProducto()">
+          ➕ Agregar Nuevo Producto / Accesorio
+        </button>
+
+        <div class="admin-cards-container" id="adminCardsList"></div>
+      </div>
+
+      <!-- REPORTE CONTABLE -->
+      <div id="tabContabilidadContenido" style="display: none;">
+        <div class="accounting-filter">
+          <label style="font-size: 13px; font-weight:bold;">Filtrar por fecha:</label>
+          <input type="date" id="filtroFechaContable" onchange="actualizarReporteContable()">
+          <button style="padding:6px 10px; background:#e2e8f0; border:none; border-radius:6px; font-size:12px; cursor:pointer;" onclick="limpiarFiltroFecha()">Ver todo el historial</button>
+        </div>
+
+        <div class="accounting-summary">
+          <div class="summary-card">
+            <span>TOTAL INGRESOS</span>
+            <h4 id="resumenMontoTotal">S/ 0.00</h4>
+          </div>
+          <div class="summary-card">
+            <span>PEDIDOS REGISTRADOS</span>
+            <h4 id="resumenCantPedidos">0</h4>
+          </div>
+          <div class="summary-card">
+            <span>BALONES VENDIDOS</span>
+            <h4 id="resumenEmpanadasVendidas">0</h4>
+          </div>
+        </div>
+
+        <div class="section-subtitle">🔥 Ventas Desglosadas por Tipo de Gas</div>
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Tipo de Gas / Balón</th>
+                <th>Unidades Vendidas</th>
+                <th>Ingreso Generado (S/)</th>
+                <th>% Participación</th>
+              </tr>
+            </thead>
+            <tbody id="tablaPorTipoBody"></tbody>
+          </table>
+        </div>
+
+        <div class="section-subtitle">📋 Historial Detallado de Entregas Realizadas</div>
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Fecha y Hora</th>
+                <th>Detalle Balones</th>
+                <th>Total</th>
+                <th>Pago</th>
+                <th>Ubicación Entrega</th>
+              </tr>
+            </thead>
+            <tbody id="tablaContableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GPS TITULAR -->
+      <div id="tabGPSContenido" style="display: none;">
+        <div class="gps-toggle-panel">
+          <div>
+            <strong>Transmisión en Vivo de tu Ubicación:</strong>
+            <p style="font-size:13px; color:#64748b;">Al activarlo desde tu celular mientras manejas tu moto o camión de gas, tu ubicación se mostrará en el mapa para los clientes.</p>
+          </div>
+          <button id="btnGPSSwitch" class="btn-gps-connect" onclick="alternarRastreoGPSTitular()">Conectar GPS en Vivo</button>
+        </div>
+        <div style="font-size: 12px; color: #64748b;" id="gpsCoordenadasTexto">
+          Estado: Desconectado.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const WHATSAPP_NUMERO = "51969773064";
+
+    // 2 PRODUCTOS PRINCIPALES INICIALES: GAS NORMAL Y GAS PREMIUM
+    const menuInicial = [
+      {
+        id: "gas-1",
+        nombre: "Gas Normal (10kg)",
+        tag: "Uso Doméstico",
+        descripcion: "Balón sellado de 10kg con precinto de seguridad garantizado. Llama azul y combustión limpia para el hogar.",
+        precio: 50.00,
+        imagen: "https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        id: "gas-2",
+        nombre: "Gas Premium (10kg)",
+        tag: "Mayor Rendimiento",
+        descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad. Ideal para cocinas de alto rendimiento y restaurantes.",
+        precio: 55.00,
+        imagen: "https://images.unsplash.com/photo-1584281722572-881e18d6cb25?auto=format&fit=crop&w=600&q=80"
+      }
+    ];
+
+    let catalogo = JSON.parse(localStorage.getItem('gas_menu')) || menuInicial;
+    let registroVentas = JSON.parse(localStorage.getItem('gas_ventas')) || [];
+
+    const pedido = {};
+    function sincronizarEstructuraPedido() {
+      catalogo.forEach(item => {
+        if (!pedido[item.id]) {
+          pedido[item.id] = { id: item.id, nombre: item.nombre, precio: item.precio, cantidad: 0 };
+        } else {
+          pedido[item.id].nombre = item.nombre;
+          pedido[item.id].precio = item.precio;
+        }
+      });
+    }
+
+    let metodoPago = "Yape";
+    let ubicacionClienteCoords = null;
+    let esAdminAutenticado = false;
+
+    let map = null;
+    let marcadorTitular = null;
+    let capaVentas = null;
+    let watchIdGPS = null;
+    let rastreoActivo = false;
+
+    // MAPA
+    function iniciarMapaCusco() {
+      const cuscoLat = -13.5167;
+      const cuscoLng = -71.9788;
+
+      map = L.map('cuscoMap').setView([cuscoLat, cuscoLng], 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contribuyentes'
+      }).addTo(map);
+
+      // Icono de repartidor de gas
+      const iconoTitular = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#0284c7; color:white; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:18px; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4);'>🔥</div>",
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
+      });
+
+      marcadorTitular = L.marker([cuscoLat, cuscoLng], { icon: iconoTitular }).addTo(map)
+        .bindPopup("<b>Gas Express Cusco</b><br>Repartidor en Ruta");
+
+      capaVentas = L.layerGroup().addTo(map);
+      dibujarVentasEnMapa();
+    }
+
+    function dibujarVentasEnMapa() {
+      if (!capaVentas) return;
+      capaVentas.clearLayers();
+
+      registroVentas.forEach(v => {
+        if (v.lat && v.lng) {
+          const m = L.circleMarker([v.lat, v.lng], {
+            radius: 7,
+            fillColor: "#ea580c",
+            color: "#c2410c",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+          });
+          m.bindPopup(`<b>Entrega: S/ ${v.total.toFixed(2)}</b><br>${v.fecha}<br>${v.pago}`);
+          capaVentas.addLayer(m);
+        }
+      });
+    }
+
+    function alternarRastreoGPSTitular() {
+      const btn = document.getElementById('btnGPSSwitch');
+      const badge = document.getElementById('gpsBadgeHeader');
+      const coordTexto = document.getElementById('gpsCoordenadasTexto');
+
+      if (!rastreoActivo) {
+        if (!navigator.geolocation) {
+          alert("Geolocalización no soportada.");
+          return;
+        }
+
+        watchIdGPS = navigator.geolocation.watchPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            if (marcadorTitular) {
+              marcadorTitular.setLatLng([lat, lng]);
+              map.panTo([lat, lng]);
+              marcadorTitular.getPopup().setContent(`<b>🔥 Repartidor en Ruta</b><br>Precisión: ${Math.round(pos.coords.accuracy)}m`).openOn(map);
+            }
+
+            coordTexto.innerText = `Transmitiendo: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)} (${new Date().toLocaleTimeString()})`;
+          },
+          (err) => {
+            coordTexto.innerText = "Error GPS: " + err.message;
+          },
+          { enableHighAccuracy: true, maximumAge: 1000 }
+        );
+
+        rastreoActivo = true;
+        btn.innerText = "Desconectar GPS en Vivo";
+        btn.className = "btn-gps-connect disconnect";
+        badge.innerText = "GPS Repartidor: Conectado en Vivo 🟢";
+        badge.className = "gps-badge-status active";
+      } else {
+        if (watchIdGPS !== null) {
+          navigator.geolocation.clearWatch(watchIdGPS);
+          watchIdGPS = null;
+        }
+        rastreoActivo = false;
+        btn.innerText = "Conectar GPS en Vivo";
+        btn.className = "btn-gps-connect";
+        badge.innerText = "GPS Repartidor: Desconectado";
+        badge.className = "gps-badge-status";
+        coordTexto.innerText = "Estado: Desconectado.";
+      }
+    }
+
+    // CATÁLOGO PÚBLICO
+    function renderizarMenu() {
+      const contenedor = document.getElementById('contenedorEmpanadas');
+      contenedor.innerHTML = '';
+
+      catalogo.forEach(item => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-img-wrapper">
+            <span class="card-tag">${item.tag || 'Sellado'}</span>
+            <img src="${item.imagen}" alt="${item.nombre}">
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">${item.nombre}</h4>
+            <p class="card-desc">${item.descripcion}</p>
+            <div class="card-footer">
+              <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
+              <button class="btn-add" onclick="agregarAlPedido('${item.id}')">+ Pedir Balón</button>
+            </div>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    // GESTIÓN DEL CARRITO
+    function agregarAlPedido(id) {
+      sincronizarEstructuraPedido();
+      if (pedido[id]) {
+        pedido[id].cantidad += 1;
+        actualizarVistaPopup();
+      }
+    }
+
+    function cambiarCantidad(id, delta) {
+      if (pedido[id]) {
+        pedido[id].cantidad += delta;
+        if (pedido[id].cantidad < 0) {
+          pedido[id].cantidad = 0;
+        }
+        actualizarVistaPopup();
+      }
+    }
+
+    function anularProducto(id) {
+      if (pedido[id]) {
+        pedido[id].cantidad = 0;
+        actualizarVistaPopup();
+      }
+    }
+
+    function vaciarPedidoConConfirmacion() {
+      if (confirm("¿Deseas reiniciar las cantidades de tu pedido a cero?")) {
+        for (const k in pedido) {
+          pedido[k].cantidad = 0;
+        }
+        actualizarVistaPopup();
+      }
+    }
+
+    function abrirModalCarrito() {
+      sincronizarEstructuraPedido();
+      actualizarVistaPopup();
+      document.getElementById('cartModalOverlay').style.display = 'flex';
+    }
+
+    function cerrarModalCarrito() {
+      document.getElementById('cartModalOverlay').style.display = 'none';
+    }
+
+    function cerrarSiClickAfuera(e) {
+      if (e.target.id === 'cartModalOverlay') {
+        cerrarModalCarrito();
+      }
+    }
+
+    function actualizarVistaPopup() {
+      let totalUnidades = 0;
+      let totalMonto = 0;
+      const listContainer = document.getElementById('popupItemsList');
+      listContainer.innerHTML = '';
+
+      catalogo.forEach(catItem => {
+        const item = pedido[catItem.id] || { id: catItem.id, nombre: catItem.nombre, precio: catItem.precio, cantidad: 0 };
+        const subtotal = item.cantidad * item.precio;
+        totalUnidades += item.cantidad;
+        totalMonto += subtotal;
+
+        const row = document.createElement('div');
+        row.className = `cart-item-row ${item.cantidad > 0 ? 'item-activo' : ''}`;
+        row.innerHTML = `
+          <div class="cart-item-info">
+            <div class="cart-item-title">${item.nombre}</div>
+            <div class="cart-item-sub">S/ ${item.precio.toFixed(2)} c/u</div>
+          </div>
+          <div class="cart-controls">
+            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', -1)">-</button>
+            <span style="font-weight:bold; font-size:13px; min-width:18px; text-align:center;">${item.cantidad}</span>
+            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', 1)">+</button>
+          </div>
+          <div class="cart-item-price-wrapper">
+            <div class="cart-item-price">S/ ${subtotal.toFixed(2)}</div>
+            <button type="button" class="btn-trash-item" title="Resetear cantidad a 0" onclick="anularProducto('${item.id}')">
+              🗑️
+            </button>
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+
+      document.getElementById('badgeContador').innerText = `${totalUnidades}`;
+
+      const textoCantidad = `${totalUnidades} ${totalUnidades === 1 ? 'balón seleccionado' : 'balones seleccionados'}`;
+      document.getElementById('cartLabelTotalConCantidad').innerText = `Total a pagar (${textoCantidad}):`;
+      document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
+    }
+
+    function elegirPago(metodo, boton) {
+      metodoPago = metodo;
+      document.querySelectorAll('.btn-pay-option').forEach(btn => btn.classList.remove('active'));
+      boton.classList.add('active');
+    }
+
+    function capturarGPSCliente() {
+      const status = document.getElementById('geoStatus');
+      if (!navigator.geolocation) {
+        status.innerText = "GPS no disponible en este dispositivo.";
+        return;
+      }
+      status.innerText = "Obteniendo coordenadas GPS en tiempo real...";
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          ubicacionClienteCoords = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude
+          };
+          status.innerText = "✔ Ubicación registrada para entrega del balón";
+          status.classList.add('ready');
+        },
+        () => {
+          status.innerText = "No se pudo obtener GPS (indica dirección en el chat).";
+        },
+        { enableHighAccuracy: true }
+      );
+    }
+
+    // ENVÍO DE PEDIDO A WHATSAPP
+    function enviarPedidoWhatsApp() {
+      const productosSeleccionados = Object.values(pedido).filter(item => item.cantidad > 0);
+
+      if (productosSeleccionados.length === 0) {
+        alert("Por favor selecciona al menos un balón de gas con cantidad mayor a cero antes de pedir.");
+        return;
+      }
+
+      let total = 0;
+      let detalleTexto = "";
+      let detalleProductos = [];
+      let itemsParaContabilidad = [];
+      let totalBalones = 0;
+
+      productosSeleccionados.forEach(item => {
+        const sub = item.cantidad * item.precio;
+        detalleTexto += `• ${item.cantidad}x ${item.nombre} (S/ ${sub.toFixed(2)})\n`;
+        detalleProductos.push(`${item.cantidad}x ${item.nombre}`);
+        
+        itemsParaContabilidad.push({
+          id: item.id,
+          nombre: item.nombre,
+          precio: item.precio,
+          cantidad: item.cantidad,
+          subtotal: sub
+        });
+
+        totalBalones += item.cantidad;
+        total += sub;
+      });
+
+      const fechaActual = new Date();
+      const fechaISO = fechaActual.toISOString().split('T')[0];
+      const fechaFormato = fechaActual.toLocaleString();
+
+      const nuevaVenta = {
+        id: Date.now(),
+        fecha: fechaFormato,
+        fechaFiltro: fechaISO,
+        productos: detalleProductos.join(', '),
+        items: itemsParaContabilidad,
+        unidades: totalBalones,
+        total: total,
+        pago: metodoPago,
+        lat: ubicacionClienteCoords ? ubicacionClienteCoords.lat : null,
+        lng: ubicacionClienteCoords ? ubicacionClienteCoords.lng : null
+      };
+
+      registroVentas.push(nuevaVenta);
+      localStorage.setItem('gas_ventas', JSON.stringify(registroVentas));
+      dibujarVentasEnMapa();
+
+      let mensaje = `*¡Hola Gas Express Cusco! Deseo hacer un pedido de gas:*\n\n`;
+      mensaje += `*Detalle:*\n${detalleTexto}\n`;
+      mensaje += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
+      mensaje += `*Método de pago:* ${metodoPago}\n`;
+
+      if (ubicacionClienteCoords) {
+        mensaje += `*Ubicación GPS:* https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}\n`;
+      } else {
+        mensaje += `*Ubicación GPS:* (Ubicación pendiente de confirmación en Cusco)\n`;
+      }
+
+      mensaje += `\n¿Me confirman tiempo estimado de entrega?`;
+
+      const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
+      
+      for (const k in pedido) {
+        pedido[k].cantidad = 0;
+      }
+      actualizarVistaPopup();
+      cerrarModalCarrito();
+    }
+
+    // PANEL ADMIN
+    function abrirModalAdmin() {
+      if (esAdminAutenticado) {
+        mostrarDashboard();
+      } else {
+        document.getElementById('modalLogin').style.display = 'flex';
+      }
+    }
+
+    function cerrarModales() {
+      document.getElementById('modalLogin').style.display = 'none';
+      document.getElementById('modalDashboard').style.display = 'none';
+    }
+
+    function autenticarAdmin(e) {
+      e.preventDefault();
+      const u = document.getElementById('adminUser').value.trim();
+      const p = document.getElementById('adminPass').value.trim();
+
+      if (u === 'admin' && p === 'regocijo123') {
+        esAdminAutenticado = true;
+        document.getElementById('modalLogin').style.display = 'none';
+        document.getElementById('btnAdminTrigger').innerText = "⚙️ Panel Activo";
+        mostrarDashboard();
+      } else {
+        alert("Credenciales incorrectas.");
+      }
+    }
+
+    function cambiarTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tabCatalogoContenido').style.display = 'none';
+      document.getElementById('tabContabilidadContenido').style.display = 'none';
+      document.getElementById('tabGPSContenido').style.display = 'none';
+
+      if (tab === 'catalogo') {
+        document.getElementById('tabBtnCatalogo').classList.add('active');
+        document.getElementById('tabCatalogoContenido').style.display = 'block';
+      } else if (tab === 'contabilidad') {
+        document.getElementById('tabBtnContabilidad').classList.add('active');
+        document.getElementById('tabContabilidadContenido').style.display = 'block';
+        actualizarReporteContable();
+      } else if (tab === 'gps') {
+        document.getElementById('tabBtnGPS').classList.add('active');
+        document.getElementById('tabGPSContenido').style.display = 'block';
+      }
+    }
+
+    function mostrarDashboard() {
+      const container = document.getElementById('adminCardsList');
+      container.innerHTML = '';
+
+      catalogo.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'admin-edit-card';
+        card.innerHTML = `
+          <div class="admin-field-row inline-row">
+            <div style="flex:2;">
+              <label>Nombre del Balón / Producto</label>
+              <input type="text" class="admin-input" id="edit-nom-${index}" value="${item.nombre}">
+            </div>
+            <div style="flex:1;">
+              <label>Precio (S/)</label>
+              <input type="number" step="0.5" class="admin-input" id="edit-pre-${index}" value="${item.precio}">
+            </div>
+          </div>
+
+          <div class="admin-field-row">
+            <label>Descripción / Características</label>
+            <input type="text" class="admin-input" id="edit-desc-${index}" value="${item.descripcion}">
+          </div>
+
+          <div class="admin-field-row">
+            <label>Enlace de Imagen (URL)</label>
+            <input type="text" class="admin-input" id="edit-img-${index}" value="${item.imagen}">
+          </div>
+
+          <div class="admin-card-actions">
+            <button type="button" class="btn-admin-save" onclick="guardarFila(${index})">💾 Guardar Cambios</button>
+            <button type="button" class="btn-admin-delete" onclick="eliminarProducto(${index})">🗑️ Eliminar</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('modalDashboard').style.display = 'flex';
+      cambiarTab('catalogo');
+    }
+
+    function guardarFila(index) {
+      catalogo[index].nombre = document.getElementById(`edit-nom-${index}`).value.trim();
+      catalogo[index].precio = parseFloat(document.getElementById(`edit-pre-${index}`).value) || 0;
+      catalogo[index].descripcion = document.getElementById(`edit-desc-${index}`).value.trim();
+      catalogo[index].imagen = document.getElementById(`edit-img-${index}`).value.trim();
+
+      localStorage.setItem('gas_menu', JSON.stringify(catalogo));
+      sincronizarEstructuraPedido();
+      renderizarMenu();
+      actualizarVistaPopup();
+      alert(`Producto "${catalogo[index].nombre}" actualizado correctamente.`);
+    }
+
+    function eliminarProducto(index) {
+      const nombre = catalogo[index].nombre;
+      if (confirm(`¿Estás seguro de que deseas eliminar permanentemente "${nombre}"?`)) {
+        const idEliminado = catalogo[index].id;
+        catalogo.splice(index, 1);
+        delete pedido[idEliminado];
+
+        localStorage.setItem('gas_menu', JSON.stringify(catalogo));
+        sincronizarEstructuraPedido();
+        renderizarMenu();
+        actualizarVistaPopup();
+        mostrarDashboard();
+      }
+    }
+
+    function agregarNuevoProducto() {
+      const nuevoId = "gas-" + Date.now();
+      const nuevoItem = {
+        id: nuevoId,
+        nombre: "Balón Gas Nuevo (10kg)",
+        tag: "Nuevo",
+        descripcion: "Balón sellado con válvula de seguridad y peso verificado.",
+        precio: 50.00,
+        imagen: "https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80"
+      };
+
+      catalogo.unshift(nuevoItem);
+      localStorage.setItem('gas_menu', JSON.stringify(catalogo));
+      sincronizarEstructuraPedido();
+      renderizarMenu();
+      actualizarVistaPopup();
+      mostrarDashboard();
+    }
+
+    function actualizarReporteContable() {
+      const filtro = document.getElementById('filtroFechaContable').value;
+      const tbodyDetalle = document.getElementById('tablaContableBody');
+      const tbodyTipo = document.getElementById('tablaPorTipoBody');
+      tbodyDetalle.innerHTML = '';
+      tbodyTipo.innerHTML = '';
+
+      let ventasFiltradas = registroVentas;
+      if (filtro) {
+        ventasFiltradas = registroVentas.filter(v => v.fechaFiltro === filtro);
+      }
+
+      let sumaTotal = 0;
+      let totalBalones = 0;
+      const desglosePorTipo = {};
+
+      ventasFiltradas.forEach(v => {
+        sumaTotal += v.total;
+        totalBalones += v.unidades;
+
+        if (v.items && Array.isArray(v.items)) {
+          v.items.forEach(it => {
+            if (!desglosePorTipo[it.nombre]) {
+              desglosePorTipo[it.nombre] = { cantidad: 0, ingresos: 0 };
+            }
+            desglosePorTipo[it.nombre].cantidad += it.cantidad;
+            desglosePorTipo[it.nombre].ingresos += it.subtotal;
+          });
+        }
+
+        const ubiTexto = (v.lat && v.lng) 
+          ? `<a href="https://www.google.com/maps?q=${v.lat},${v.lng}" target="_blank" style="color:#0284c7;">Ver Mapa</a>` 
+          : 'No enviada';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${v.fecha}</td>
+          <td>${v.productos}</td>
+          <td><strong>S/ ${v.total.toFixed(2)}</strong></td>
+          <td>${v.pago}</td>
+          <td>${ubiTexto}</td>
+        `;
+        tbodyDetalle.appendChild(tr);
+      });
+
+      const tiposArray = Object.keys(desglosePorTipo);
+      if (tiposArray.length === 0) {
+        tbodyTipo.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:12px;">No hay ventas de gas registradas para este periodo.</td></tr>`;
+      } else {
+        tiposArray.forEach(nombreTipo => {
+          const datos = desglosePorTipo[nombreTipo];
+          const porcentaje = sumaTotal > 0 ? ((datos.ingresos / sumaTotal) * 100).toFixed(1) : 0;
+
+          const trTipo = document.createElement('tr');
+          trTipo.innerHTML = `
+            <td><strong>${nombreTipo}</strong></td>
+            <td>${datos.cantidad} balones</td>
+            <td><strong>S/ ${datos.ingresos.toFixed(2)}</strong></td>
+            <td>
+              <span style="background:#e0f2fe; color:var(--primary-dark); padding:2px 8px; border-radius:10px; font-weight:bold;">
+                ${porcentaje}%
+              </span>
+            </td>
+          `;
+          tbodyTipo.appendChild(trTipo);
+        });
+      }
+
+      document.getElementById('resumenMontoTotal').innerText = `S/ ${sumaTotal.toFixed(2)}`;
+      document.getElementById('resumenCantPedidos').innerText = ventasFiltradas.length;
+      document.getElementById('resumenEmpanadasVendidas').innerText = totalBalones;
+    }
+
+    function limpiarFiltroFecha() {
+      document.getElementById('filtroFechaContable').value = '';
+      actualizarReporteContable();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      sincronizarEstructuraPedido();
+      renderizarMenu();
+      iniciarMapaCusco();
+      actualizarVistaPopup();
+    });
+  </script>
+</body>
+</html>
