@@ -1,18 +1,21 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leo Gas Cusco | Balones de Gas a Domicilio</title>
+  <title>LeoGas Cusco | Balones de Gas a Domicilio</title>
   
   <!-- Leaflet CSS para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <style>
     :root {
-      --primary: #0284c7;        /* Azul gas/energía */
-      --primary-dark: #0369a1;
-      --accent: #ea580c;         /* Naranja llama */
+      --primary: #6b21a8;        /* Morado LeoGas */
+      --primary-dark: #581c87;
+      --primary-light: #f3e8ff;
+      --accent: #eab308;         /* Amarillo LeoGas */
+      --accent-hover: #ca8a04;
       --chat-blue: #2563eb;
       --chat-blue-hover: #1d4ed8;
       --dark: #0f172a;
@@ -20,7 +23,7 @@
       --text: #334155;
       --white: #ffffff;
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-      --radius: 14px;
+      --radius: 16px;
     }
 
     * {
@@ -58,37 +61,39 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       text-decoration: none;
       color: var(--dark);
     }
 
     .brand-icon {
-      background: var(--primary);
-      color: var(--white);
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+      color: var(--primary);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 20px;
+      font-weight: 900;
+      font-size: 24px;
+      box-shadow: 0 3px 8px rgba(234, 179, 8, 0.4);
     }
 
     .brand-text h1 {
-      font-size: 19px;
-      font-weight: 800;
+      font-size: 20px;
+      font-weight: 900;
       line-height: 1.1;
-      color: var(--dark);
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
     }
 
     .brand-text span {
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--accent);
-      font-weight: 700;
+      color: #b45309;
+      font-weight: 800;
     }
 
     .nav-actions {
@@ -101,7 +106,7 @@
       background: #f1f5f9;
       color: var(--dark);
       border: 1px solid #cbd5e1;
-      padding: 7px 14px;
+      padding: 8px 14px;
       border-radius: 20px;
       font-size: 13px;
       font-weight: 700;
@@ -109,6 +114,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.2s;
     }
 
     .btn-admin-login:hover {
@@ -118,19 +124,26 @@
     .nav-cta {
       background: var(--primary);
       color: var(--white);
-      padding: 8px 16px;
+      padding: 9px 18px;
       border-radius: 30px;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 13px;
+      box-shadow: 0 4px 12px rgba(107, 33, 168, 0.25);
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .nav-cta:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
     }
 
     /* HERO */
     .hero {
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-      padding: 44px 20px 60px;
+      background: linear-gradient(135deg, #fdf4ff 0%, #fef08a 100%);
+      padding: 44px 20px 54px;
       text-align: center;
-      border-bottom: 1px solid #bae6fd;
+      border-bottom: 2px solid #fde047;
     }
 
     .hero-container {
@@ -140,35 +153,35 @@
 
     .badge-hero {
       display: inline-block;
-      background: #e0f2fe;
-      color: var(--primary-dark);
-      font-weight: 700;
+      background: #fef08a;
+      color: #854d0e;
+      font-weight: 800;
       font-size: 12px;
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       margin-bottom: 12px;
-      border: 1px solid #7dd3fc;
+      border: 1px solid #facc15;
       text-transform: uppercase;
     }
 
     .hero h2 {
       font-size: 34px;
       font-weight: 900;
-      color: var(--dark);
+      color: var(--primary-dark);
       line-height: 1.2;
       margin-bottom: 12px;
     }
 
     .hero p {
       font-size: 16px;
-      color: #64748b;
-      margin-bottom: 20px;
+      color: #475569;
+      margin-bottom: 22px;
     }
 
     .hero-features {
       display: flex;
       justify-content: center;
-      gap: 14px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
@@ -177,11 +190,222 @@
       align-items: center;
       gap: 6px;
       background: var(--white);
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 30px;
       font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid #f1f5f9;
+    }
+
+    /* SECCIÓN VOLANTE PUBLICITARIO OFICIAL */
+    .flyer-section {
+      max-width: 1200px;
+      margin: 24px auto 40px;
+      padding: 0 20px;
+    }
+
+    .flyer-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 2px solid #fef08a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    @media (min-width: 840px) {
+      .flyer-card {
+        flex-direction: row;
+        align-items: stretch;
+      }
+    }
+
+    .flyer-visual-box {
+      flex: 1;
+      background: #fefce8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      position: relative;
+    }
+
+    .flyer-thumbnail {
+      max-width: 280px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      border: 3px solid #ffffff;
+    }
+
+    .flyer-thumbnail:hover {
+      transform: scale(1.03);
+      box-shadow: 0 14px 30px rgba(107, 33, 168, 0.25);
+    }
+
+    .flyer-zoom-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .flyer-info-box {
+      flex: 1.2;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .flyer-badge {
+      display: inline-block;
+      align-self: flex-start;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .flyer-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--primary-dark);
+      margin-bottom: 8px;
+    }
+
+    .flyer-subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .flyer-contacts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .flyer-contact-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #faf5ff;
+      border: 1px solid #e9d5ff;
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 700;
+      font-size: 14px;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .flyer-contact-btn:hover {
+      background: #f3e8ff;
+      transform: translateX(4px);
+    }
+
+    .contact-badge-claro {
+      background: #dc2626;
+      color: white;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 900;
+    }
+
+    .contact-badge-fijo {
+      background: var(--primary);
+      color: white;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 900;
+    }
+
+    .flyer-payments-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #f8fafc;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .flyer-payments-bar span {
+      font-size: 12px;
+      font-weight: 800;
+      color: #64748b;
+    }
+
+    .pay-chip {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pay-chip.yape { background: #6b21a8; color: #fff; }
+    .pay-chip.plin { background: #0284c7; color: #fff; }
+    .pay-chip.cash { background: #16a34a; color: #fff; }
+
+    /* MODAL LIGHTBOX FLYER */
+    .lightbox-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .lightbox-content {
+      position: relative;
+      max-width: 90%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lightbox-content img {
+      max-width: 100%;
+      max-height: 80vh;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .btn-close-lightbox {
+      position: absolute;
+      top: -38px;
+      right: 0;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     /* MAPA EN VIVO */
@@ -196,7 +420,7 @@
       border-radius: var(--radius);
       padding: 16px;
       box-shadow: var(--shadow);
-      border: 1px solid #bae6fd;
+      border: 1px solid #e9d5ff;
     }
 
     .map-header {
@@ -211,7 +435,7 @@
     .map-header h3 {
       font-size: 18px;
       font-weight: 800;
-      color: var(--dark);
+      color: var(--primary-dark);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -247,7 +471,7 @@
 
     .menu-header {
       background: var(--white);
-      padding: 16px 20px;
+      padding: 18px 20px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       margin-bottom: 24px;
@@ -256,12 +480,13 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
+      border-left: 6px solid var(--accent);
     }
 
     .menu-header h3 {
       font-size: 20px;
       font-weight: 800;
-      color: var(--dark);
+      color: var(--primary-dark);
     }
 
     .grid-empanadas {
@@ -278,11 +503,12 @@
       display: flex;
       flex-direction: column;
       border: 1px solid #f1f5f9;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .card:hover {
       transform: translateY(-4px);
+      box-shadow: 0 14px 28px rgba(0,0,0,0.09);
     }
 
     .card-img-wrapper {
@@ -302,12 +528,12 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(107, 33, 168, 0.9);
       backdrop-filter: blur(4px);
       color: var(--white);
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
+      padding: 3px 10px;
       border-radius: 16px;
     }
 
@@ -319,7 +545,7 @@
     }
 
     .card-title {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 800;
       color: var(--dark);
       margin-bottom: 6px;
@@ -342,24 +568,25 @@
     }
 
     .price {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 900;
       color: var(--primary);
     }
 
     .btn-add {
-      background: var(--dark);
+      background: var(--primary);
       color: var(--white);
       border: none;
-      padding: 8px 14px;
+      padding: 9px 16px;
       border-radius: 8px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
     .btn-add:hover {
-      background: var(--primary);
+      background: var(--primary-dark);
     }
 
     /* GLOBITO FLOTANTE AZUL PEQUEÑO */
@@ -369,9 +596,9 @@
       right: 24px;
       width: 60px;
       height: 60px;
-      background-color: var(--chat-blue);
+      background-color: var(--primary);
       border-radius: 50%;
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+      box-shadow: 0 6px 20px rgba(107, 33, 168, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -383,7 +610,7 @@
 
     .chat-bubble-btn:hover {
       transform: scale(1.08);
-      background-color: var(--chat-blue-hover);
+      background-color: var(--primary-dark);
     }
 
     .chat-bubble-icon {
@@ -397,10 +624,10 @@
       top: -3px;
       right: -3px;
       background-color: var(--accent);
-      color: var(--white);
+      color: #854d0e;
       border: 2px solid var(--white);
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 900;
       min-width: 22px;
       height: 22px;
       border-radius: 50%;
@@ -442,7 +669,7 @@
 
     .cart-modal-header {
       padding: 16px 20px;
-      background: var(--dark);
+      background: var(--primary-dark);
       color: var(--white);
       border-radius: 20px 20px 0 0;
       display: flex;
@@ -494,10 +721,6 @@
       text-decoration: underline;
     }
 
-    .btn-vaciar-cart:hover {
-      color: #b91c1c;
-    }
-
     .cart-items-box {
       display: flex;
       flex-direction: column;
@@ -518,8 +741,8 @@
     }
 
     .cart-item-row.item-activo {
-      background: #f0f9ff;
-      border-color: #7dd3fc;
+      background: #faf5ff;
+      border-color: #d8b4fe;
     }
 
     .cart-item-info {
@@ -556,10 +779,6 @@
       justify-content: center;
     }
 
-    .btn-qty:hover {
-      background: #cbd5e1;
-    }
-
     .cart-item-price-wrapper {
       display: flex;
       align-items: center;
@@ -586,12 +805,6 @@
       justify-content: center;
       padding: 4px;
       border-radius: 4px;
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .btn-trash-item:hover {
-      color: #dc2626;
-      background: #fee2e2;
     }
 
     .popup-section-label {
@@ -631,8 +844,8 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
+      background: #faf5ff;
+      border: 1px solid #e9d5ff;
       padding: 10px 12px;
       border-radius: 8px;
     }
@@ -650,10 +863,6 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-    }
-
-    .btn-geo:hover {
-      background: var(--chat-blue-hover);
     }
 
     .geo-status {
@@ -705,11 +914,7 @@
       gap: 8px;
     }
 
-    .btn-order-wsp:hover {
-      background: #1eb857;
-    }
-
-    /* ADMIN TARJETAS VERTICALES */
+    /* ADMIN DASHBOARD */
     .admin-cards-container {
       display: flex;
       flex-direction: column;
@@ -756,11 +961,6 @@
       background: var(--white);
     }
 
-    .admin-input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
     .admin-card-actions {
       display: flex;
       gap: 8px;
@@ -779,10 +979,6 @@
       cursor: pointer;
     }
 
-    .btn-admin-save:hover {
-      background: var(--primary-dark);
-    }
-
     .btn-admin-delete {
       flex: 1;
       background: #fee2e2;
@@ -793,10 +989,6 @@
       font-weight: 800;
       font-size: 13px;
       cursor: pointer;
-    }
-
-    .btn-admin-delete:hover {
-      background: #fecaca;
     }
 
     .btn-add-product-main {
@@ -813,14 +1005,8 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
     }
 
-    .btn-add-product-main:hover {
-      background: #15803d;
-    }
-
-    /* MODALES & DASHBOARD */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -848,13 +1034,6 @@
       overflow-y: auto;
     }
 
-    .modal-box h3 {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--dark);
-      margin-bottom: 6px;
-    }
-
     .dashboard-tabs {
       display: flex;
       gap: 6px;
@@ -877,7 +1056,7 @@
     }
 
     .tab-btn.active {
-      background: #e0f2fe;
+      background: #f3e8ff;
       color: var(--primary-dark);
     }
 
@@ -920,13 +1099,6 @@
       flex-wrap: wrap;
     }
 
-    .accounting-filter input {
-      padding: 6px 10px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 13px;
-    }
-
     .accounting-summary {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -935,8 +1107,8 @@
     }
 
     .summary-card {
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
+      background: #faf5ff;
+      border: 1px solid #e9d5ff;
       padding: 10px;
       border-radius: 8px;
     }
@@ -958,9 +1130,6 @@
       font-weight: 800;
       color: var(--dark);
       margin: 16px 0 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
     .table-container {
@@ -1003,72 +1172,126 @@
         width: 56px;
         height: 56px;
       }
-      .modal-box.wide {
-        padding: 14px;
-      }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header>
     <div class="nav-container">
       <a href="#" class="brand">
-        <div class="brand-icon">🔥</div>
+        <div class="brand-icon">🦁</div>
         <div class="brand-text">
-          <h1>Gas Express Cusco</h1>
-          <span>Reparto a Domicilio Rápido</span>
+          <h1>LeoGas Cusco</h1>
+          <span>Tu Distribuidora de Confianza</span>
         </div>
       </a>
       <div class="nav-actions">
         <button class="btn-admin-login" id="btnAdminTrigger" onclick="abrirModalAdmin()">
           🔒 Admin / Reportes
         </button>
-        <a href="#menu" class="nav-cta">Pedir Gas</a>
+        <a href="#menu" class="nav-cta">Pedir LeoGas</a>
       </div>
     </div>
   </header>
 
-  <!-- HERO -->
   <section class="hero">
     <div class="hero-container">
-      <span class="badge-hero">Peso Exacto Garantizado & Válvula Segura</span>
-      <h2>Tu balón de gas en la puerta de tu hogar</h2>
-      <p>Servicio rápido y seguro en Cusco. Sigue la ruta del repartidor en el mapa y paga con tu método preferido.</p>
+      <span class="badge-hero">Mayor Seguridad con LeoGas | El Moradito Rendidor</span>
+      <h2>Tu balón de gas en minutos en Cusco</h2>
+      <p>Sólo la seguridad hace la diferencia. Ordena con peso garantizado, rastreo en vivo y paga con Yape, Plin o efectivo.</p>
       
       <div class="hero-features">
-        <div class="feature-pill">📍 Rastreo en Vivo</div>
-        <div class="feature-pill">⚖️ Balón Sellado 10kg</div>
+        <div class="feature-pill">📍 GPS Repartidor en Vivo</div>
+        <div class="feature-pill">💜 Balón Moradito 10kg</div>
         <div class="feature-pill">⚡ Entrega Inmediata</div>
+        <div class="feature-pill">💵 Yape / Plin / Efectivo</div>
       </div>
     </div>
   </section>
 
-  <!-- MAPA CUSCO -->
+  <section class="flyer-section">
+    <div class="flyer-card">
+      <div class="flyer-visual-box">
+        <img 
+          src="1000360632.jpg" 
+          alt="Volante Oficial LeoGas Cusco" 
+          class="flyer-thumbnail"
+          id="imgFlyerThumb"
+          onclick="abrirModalVolante()"
+          onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'"
+        />
+        <div class="flyer-zoom-hint" onclick="abrirModalVolante()">
+          🔍 <span>Toca para ampliar el volante oficial</span>
+        </div>
+      </div>
+
+      <div class="flyer-info-box">
+        <span class="flyer-badge">🌟 Volante Oficial & Pedidos Express</span>
+        <h3 class="flyer-title">LeoGas Llamagas - Cusco</h3>
+        <p class="flyer-subtitle">
+          Ordena tu pedido directamente a través de nuestras líneas telefónicas autorizadas o escaneando el código QR del volante oficial.
+        </p>
+
+        <div class="flyer-contacts-list">
+          <a href="tel:950727212" class="flyer-contact-btn">
+            <span class="contact-badge-claro">Claro</span>
+            <span>📱 950 727 212</span>
+            <span style="margin-left:auto; font-size:12px; color:var(--primary);">Llamar &rarr;</span>
+          </a>
+
+          <a href="tel:984285500" class="flyer-contact-btn">
+            <span class="contact-badge-claro">Claro</span>
+            <span>📱 984 285 500</span>
+            <span style="margin-left:auto; font-size:12px; color:var(--primary);">Llamar &rarr;</span>
+          </a>
+
+          <a href="tel:084501111" class="flyer-contact-btn">
+            <span class="contact-badge-fijo">Fijo Cusco</span>
+            <span>☎️ (084) 501111</span>
+            <span style="margin-left:auto; font-size:12px; color:var(--primary);">Llamar &rarr;</span>
+          </a>
+        </div>
+
+        <div class="flyer-payments-bar">
+          <span>PAGA CON:</span>
+          <span class="pay-chip yape">🟣 Yape</span>
+          <span class="pay-chip plin">🔵 Plin</span>
+          <span class="pay-chip cash">💵 Efectivo</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIGHTBOX MODAL PARA EL VOLANTE -->
+  <div class="lightbox-overlay" id="lightboxModal" onclick="cerrarModalVolante(event)">
+    <div class="lightbox-content">
+      <button class="btn-close-lightbox" onclick="cerrarModalVolanteBtn()">&times;</button>
+      <img src="1000360632.jpg" id="imgFlyerFull" alt="Volante LeoGas Completo" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
+    </div>
+  </div>
+
   <section class="map-section">
     <div class="map-card">
       <div class="map-header">
-        <h3>📍 Repartidor en Ruta - Cusco</h3>
+        <h3>📍 Repartidor LeoGas en Ruta - Cusco</h3>
         <span class="gps-badge-status" id="gpsBadgeHeader">GPS Repartidor: En espera</span>
       </div>
       <div id="cuscoMap"></div>
     </div>
   </section>
 
-  <!-- PRODUCTOS -->
   <section class="section-menu" id="menu">
     <div class="menu-header">
       <div>
-        <h3>Elige tu Balón de Gas</h3>
-        <p style="font-size: 13px; color: #64748b;">Selecciona entre Gas Normal o Premium e indícanos tu ubicación exacta.</p>
+        <h3>Balones de Gas LeoGas</h3>
+        <p style="font-size: 13px; color: #64748b;">Selecciona tu balón de gas sellado de 10kg o accesorios para tu hogar en Cusco.</p>
       </div>
     </div>
 
     <div class="grid-empanadas" id="contenedorEmpanadas"></div>
   </section>
 
-  <!-- GLOBITO AZUL FLOTANTE -->
   <button class="chat-bubble-btn" id="btnGlobitoChat" onclick="abrirModalCarrito()">
     <svg class="chat-bubble-icon" viewBox="0 0 24 24">
       <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
@@ -1076,17 +1299,15 @@
     <div class="chat-badge" id="badgeContador">0</div>
   </button>
 
-  <!-- MODAL DE CHECKOUT -->
   <div class="cart-modal-overlay" id="cartModalOverlay" onclick="cerrarSiClickAfuera(event)">
     <div class="cart-modal-card">
       
       <div class="cart-modal-header">
-        <h3>🔥 Tu Pedido de Gas</h3>
+        <h3>🦁 Tu Pedido LeoGas Cusco</h3>
         <button class="btn-close-cart" onclick="cerrarModalCarrito()">&times;</button>
       </div>
 
       <div class="cart-modal-body">
-        
         <div>
           <div class="cart-header-actions">
             <span class="popup-section-label">Balones seleccionados:</span>
@@ -1111,7 +1332,7 @@
           <div class="popup-section-label" style="margin-bottom:6px;">Dirección de Entrega:</div>
           <div class="geo-box">
             <button type="button" class="btn-geo" onclick="capturarGPSCliente()">📍 Activar mi ubicación exacta</button>
-            <span class="geo-status" id="geoStatus">Envía tus coordenadas para llevar el balón hasta tu casa</span>
+            <span class="geo-status" id="geoStatus">Envía tus coordenadas para que el móvil de LeoGas llegue directo a tu casa</span>
           </div>
         </div>
       </div>
@@ -1122,18 +1343,17 @@
           <span class="cart-total-amount" id="cartTotalMonto">S/ 0.00</span>
         </div>
         <button class="btn-order-wsp" onclick="enviarPedidoWhatsApp()">
-          <span>Pedir Gas por WhatsApp</span> 💬
+          <span>Pedir a LeoGas por WhatsApp</span> 💬
         </button>
       </div>
 
     </div>
   </div>
 
-  <!-- MODAL LOGIN ADMIN -->
   <div class="modal-overlay" id="modalLogin">
     <div class="modal-box">
       <button class="btn-close-modal" onclick="cerrarModales()" style="position:absolute; top:12px; right:14px;">&times;</button>
-      <h3>Acceso de Administrador</h3>
+      <h3>Acceso Administrador LeoGas</h3>
       <p style="font-size: 13px; color: #64748b; margin-bottom: 14px;">Inicia sesión para gestionar balones, precios, GPS y ventas.</p>
       
       <form onsubmit="autenticarAdmin(event)">
@@ -1155,11 +1375,10 @@
     </div>
   </div>
 
-  <!-- MODAL DASHBOARD -->
   <div class="modal-overlay" id="modalDashboard">
     <div class="modal-box wide">
       <button class="btn-close-modal" onclick="cerrarModales()" style="position:absolute; top:12px; right:14px;">&times;</button>
-      <h3>Panel de Control - Gas Express</h3>
+      <h3>Panel de Control - LeoGas Cusco</h3>
       
       <div class="dashboard-tabs">
         <button class="tab-btn active" id="tabBtnCatalogo" onclick="cambiarTab('catalogo')">📝 Balones y Precios</button>
@@ -1170,7 +1389,7 @@
       <!-- CATÁLOGO ADMIN -->
       <div id="tabCatalogoContenido">
         <button type="button" class="btn-add-product-main" onclick="agregarNuevoProducto()">
-          ➕ Agregar Nuevo Producto / Accesorio
+          ➕ Agregar Nuevo Balón / Accesorio LeoGas
         </button>
 
         <div class="admin-cards-container" id="adminCardsList"></div>
@@ -1199,7 +1418,7 @@
           </div>
         </div>
 
-        <div class="section-subtitle">🔥 Ventas Desglosadas por Tipo de Gas</div>
+        <div class="section-subtitle">🔥 Ventas Desglosadas por Balón LeoGas</div>
         <div class="table-container">
           <table class="custom-table">
             <thead>
@@ -1214,7 +1433,7 @@
           </table>
         </div>
 
-        <div class="section-subtitle">📋 Historial Detallado de Entregas Realizadas</div>
+        <div class="section-subtitle">📋 Historial Detallado de Entregas LeoGas</div>
         <div class="table-container">
           <table class="custom-table">
             <thead>
@@ -1235,8 +1454,8 @@
       <div id="tabGPSContenido" style="display: none;">
         <div class="gps-toggle-panel">
           <div>
-            <strong>Transmisión en Vivo de tu Ubicación:</strong>
-            <p style="font-size:13px; color:#64748b;">Al activarlo desde tu celular mientras manejas tu moto o camión de gas, tu ubicación se mostrará en el mapa para los clientes.</p>
+            <strong>Transmisión en Vivo de Repartidor LeoGas:</strong>
+            <p style="font-size:13px; color:#64748b;">Al activarlo desde tu celular en tu vehículo de reparto, los clientes verán tu ubicación en tiempo real en Cusco.</p>
           </div>
           <button id="btnGPSSwitch" class="btn-gps-connect" onclick="alternarRastreoGPSTitular()">Conectar GPS en Vivo</button>
         </div>
@@ -1254,21 +1473,21 @@
   <script>
     const WHATSAPP_NUMERO = "51969773064";
 
-    // 2 PRODUCTOS PRINCIPALES INICIALES: GAS NORMAL Y GAS PREMIUM
+    // CATÁLOGO INICIAL LEOGAS
     const menuInicial = [
       {
         id: "gas-1",
-        nombre: "Gas Normal (10kg)",
-        tag: "Uso Doméstico",
-        descripcion: "Balón sellado de 10kg con precinto de seguridad garantizado. Llama azul y combustión limpia para el hogar.",
+        nombre: "LeoGas Moradito (10kg)",
+        tag: "El Moradito Rendidor",
+        descripcion: "Balón sellado de 10kg con válvula de alta seguridad. Llama azul, mayor rendimiento para el hogar cusqueño.",
         precio: 50.00,
-        imagen: "https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80"
+        imagen: "1000360632.jpg"
       },
       {
         id: "gas-2",
-        nombre: "Gas Premium (10kg)",
-        tag: "Mayor Rendimiento",
-        descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad. Ideal para cocinas de alto rendimiento y restaurantes.",
+        nombre: "LeoGas Premium (10kg)",
+        tag: "Máxima Pureza",
+        descripcion: "GLP de alto rendimiento con regulador inteligente anti-fugas y máxima durabilidad para restaurantes y familias.",
         precio: 55.00,
         imagen: "https://images.unsplash.com/photo-1584281722572-881e18d6cb25?auto=format&fit=crop&w=600&q=80"
       }
@@ -1299,7 +1518,7 @@
     let watchIdGPS = null;
     let rastreoActivo = false;
 
-    // MAPA
+    // MAPA CUSCO
     function iniciarMapaCusco() {
       const cuscoLat = -13.5167;
       const cuscoLng = -71.9788;
@@ -1310,16 +1529,15 @@
         attribution: '&copy; OpenStreetMap contribuyentes'
       }).addTo(map);
 
-      // Icono de repartidor de gas
       const iconoTitular = L.divIcon({
         className: 'custom-div-icon',
-        html: "<div style='background-color:#0284c7; color:white; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:18px; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4);'>🔥</div>",
-        iconSize: [34, 34],
-        iconAnchor: [17, 17]
+        html: "<div style='background-color:#6b21a8; color:white; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; border:2px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.4);'>🦁</div>",
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
       });
 
       marcadorTitular = L.marker([cuscoLat, cuscoLng], { icon: iconoTitular }).addTo(map)
-        .bindPopup("<b>Gas Express Cusco</b><br>Repartidor en Ruta");
+        .bindPopup("<b>LeoGas Cusco</b><br>Repartidor en Ruta");
 
       capaVentas = L.layerGroup().addTo(map);
       dibujarVentasEnMapa();
@@ -1333,13 +1551,13 @@
         if (v.lat && v.lng) {
           const m = L.circleMarker([v.lat, v.lng], {
             radius: 7,
-            fillColor: "#ea580c",
-            color: "#c2410c",
+            fillColor: "#eab308",
+            color: "#6b21a8",
             weight: 2,
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: 0.85
           });
-          m.bindPopup(`<b>Entrega: S/ ${v.total.toFixed(2)}</b><br>${v.fecha}<br>${v.pago}`);
+          m.bindPopup(`<b>LeoGas Entrega: S/ ${v.total.toFixed(2)}</b><br>${v.fecha}<br>${v.pago}`);
           capaVentas.addLayer(m);
         }
       });
@@ -1352,7 +1570,7 @@
 
       if (!rastreoActivo) {
         if (!navigator.geolocation) {
-          alert("Geolocalización no soportada.");
+          alert("Geolocalización no disponible.");
           return;
         }
 
@@ -1364,7 +1582,7 @@
             if (marcadorTitular) {
               marcadorTitular.setLatLng([lat, lng]);
               map.panTo([lat, lng]);
-              marcadorTitular.getPopup().setContent(`<b>🔥 Repartidor en Ruta</b><br>Precisión: ${Math.round(pos.coords.accuracy)}m`).openOn(map);
+              marcadorTitular.getPopup().setContent(`<b>🦁 LeoGas en Ruta</b><br>Precisión: ${Math.round(pos.coords.accuracy)}m`).openOn(map);
             }
 
             coordTexto.innerText = `Transmitiendo: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)} (${new Date().toLocaleTimeString()})`;
@@ -1378,7 +1596,7 @@
         rastreoActivo = true;
         btn.innerText = "Desconectar GPS en Vivo";
         btn.className = "btn-gps-connect disconnect";
-        badge.innerText = "GPS Repartidor: Conectado en Vivo 🟢";
+        badge.innerText = "GPS LeoGas: Conectado en Vivo 🟢";
         badge.className = "gps-badge-status active";
       } else {
         if (watchIdGPS !== null) {
@@ -1394,7 +1612,6 @@
       }
     }
 
-    // CATÁLOGO PÚBLICO
     function renderizarMenu() {
       const contenedor = document.getElementById('contenedorEmpanadas');
       contenedor.innerHTML = '';
@@ -1404,8 +1621,8 @@
         card.className = 'card';
         card.innerHTML = `
           <div class="card-img-wrapper">
-            <span class="card-tag">${item.tag || 'Sellado'}</span>
-            <img src="${item.imagen}" alt="${item.nombre}">
+            <span class="card-tag">${item.tag || 'LeoGas Oficial'}</span>
+            <img src="${item.imagen}" alt="${item.nombre}" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
           </div>
           <div class="card-body">
             <h4 class="card-title">${item.nombre}</h4>
@@ -1420,7 +1637,6 @@
       });
     }
 
-    // GESTIÓN DEL CARRITO
     function agregarAlPedido(id) {
       sincronizarEstructuraPedido();
       if (pedido[id]) {
@@ -1432,9 +1648,7 @@
     function cambiarCantidad(id, delta) {
       if (pedido[id]) {
         pedido[id].cantidad += delta;
-        if (pedido[id].cantidad < 0) {
-          pedido[id].cantidad = 0;
-        }
+        if (pedido[id].cantidad < 0) pedido[id].cantidad = 0;
         actualizarVistaPopup();
       }
     }
@@ -1497,7 +1711,7 @@
           </div>
           <div class="cart-item-price-wrapper">
             <div class="cart-item-price">S/ ${subtotal.toFixed(2)}</div>
-            <button type="button" class="btn-trash-item" title="Resetear cantidad a 0" onclick="anularProducto('${item.id}')">
+            <button type="button" class="btn-trash-item" title="Resetear a 0" onclick="anularProducto('${item.id}')">
               🗑️
             </button>
           </div>
@@ -1506,7 +1720,6 @@
       });
 
       document.getElementById('badgeContador').innerText = `${totalUnidades}`;
-
       const textoCantidad = `${totalUnidades} ${totalUnidades === 1 ? 'balón seleccionado' : 'balones seleccionados'}`;
       document.getElementById('cartLabelTotalConCantidad').innerText = `Total a pagar (${textoCantidad}):`;
       document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
@@ -1542,12 +1755,26 @@
       );
     }
 
-    // ENVÍO DE PEDIDO A WHATSAPP
+    // MODAL LIGHTBOX FLYER
+    function abrirModalVolante() {
+      document.getElementById('lightboxModal').style.display = 'flex';
+    }
+
+    function cerrarModalVolanteBtn() {
+      document.getElementById('lightboxModal').style.display = 'none';
+    }
+
+    function cerrarModalVolante(e) {
+      if (e.target.id === 'lightboxModal') {
+        document.getElementById('lightboxModal').style.display = 'none';
+      }
+    }
+
     function enviarPedidoWhatsApp() {
       const productosSeleccionados = Object.values(pedido).filter(item => item.cantidad > 0);
 
       if (productosSeleccionados.length === 0) {
-        alert("Por favor selecciona al menos un balón de gas con cantidad mayor a cero antes de pedir.");
+        alert("Por favor selecciona al menos un balón de gas antes de pedir.");
         return;
       }
 
@@ -1595,7 +1822,7 @@
       localStorage.setItem('gas_ventas', JSON.stringify(registroVentas));
       dibujarVentasEnMapa();
 
-      let mensaje = `*¡Hola Gas Express Cusco! Deseo hacer un pedido de gas:*\n\n`;
+      let mensaje = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
       mensaje += `*Detalle:*\n${detalleTexto}\n`;
       mensaje += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
       mensaje += `*Método de pago:* ${metodoPago}\n`;
@@ -1606,7 +1833,7 @@
         mensaje += `*Ubicación GPS:* (Ubicación pendiente de confirmación en Cusco)\n`;
       }
 
-      mensaje += `\n¿Me confirman tiempo estimado de entrega?`;
+      mensaje += `\n¿Me confirman tiempo de llegada del repartidor LeoGas?`;
 
       const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
       window.open(url, '_blank');
@@ -1676,7 +1903,7 @@
         card.innerHTML = `
           <div class="admin-field-row inline-row">
             <div style="flex:2;">
-              <label>Nombre del Balón / Producto</label>
+              <label>Nombre del Balón / Accesorio</label>
               <input type="text" class="admin-input" id="edit-nom-${index}" value="${item.nombre}">
             </div>
             <div style="flex:1;">
@@ -1691,7 +1918,7 @@
           </div>
 
           <div class="admin-field-row">
-            <label>Enlace de Imagen (URL)</label>
+            <label>Enlace o Nombre de Imagen</label>
             <input type="text" class="admin-input" id="edit-img-${index}" value="${item.imagen}">
           </div>
 
@@ -1717,7 +1944,7 @@
       sincronizarEstructuraPedido();
       renderizarMenu();
       actualizarVistaPopup();
-      alert(`Producto "${catalogo[index].nombre}" actualizado correctamente.`);
+      alert(`Producto LeoGas "${catalogo[index].nombre}" actualizado.`);
     }
 
     function eliminarProducto(index) {
@@ -1739,11 +1966,11 @@
       const nuevoId = "gas-" + Date.now();
       const nuevoItem = {
         id: nuevoId,
-        nombre: "Balón Gas Nuevo (10kg)",
-        tag: "Nuevo",
-        descripcion: "Balón sellado con válvula de seguridad y peso verificado.",
+        nombre: "Balón LeoGas 10kg Adicional",
+        tag: "Sellado",
+        descripcion: "Balón moradito sellado con precinto de garantía LeoGas.",
         precio: 50.00,
-        imagen: "https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80"
+        imagen: "1000360632.jpg"
       };
 
       catalogo.unshift(nuevoItem);
@@ -1785,7 +2012,7 @@
         }
 
         const ubiTexto = (v.lat && v.lng) 
-          ? `<a href="https://www.google.com/maps?q=${v.lat},${v.lng}" target="_blank" style="color:#0284c7;">Ver Mapa</a>` 
+          ? `<a href="https://www.google.com/maps?q=${v.lat},${v.lng}" target="_blank" style="color:var(--primary);">Ver Mapa</a>` 
           : 'No enviada';
 
         const tr = document.createElement('tr');
@@ -1801,7 +2028,7 @@
 
       const tiposArray = Object.keys(desglosePorTipo);
       if (tiposArray.length === 0) {
-        tbodyTipo.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:12px;">No hay ventas de gas registradas para este periodo.</td></tr>`;
+        tbodyTipo.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:12px;">No hay ventas registradas para este periodo en LeoGas.</td></tr>`;
       } else {
         tiposArray.forEach(nombreTipo => {
           const datos = desglosePorTipo[nombreTipo];
@@ -1813,7 +2040,7 @@
             <td>${datos.cantidad} balones</td>
             <td><strong>S/ ${datos.ingresos.toFixed(2)}</strong></td>
             <td>
-              <span style="background:#e0f2fe; color:var(--primary-dark); padding:2px 8px; border-radius:10px; font-weight:bold;">
+              <span style="background:#f3e8ff; color:var(--primary-dark); padding:2px 8px; border-radius:10px; font-weight:bold;">
                 ${porcentaje}%
               </span>
             </td>
@@ -1841,3 +2068,4 @@
   </script>
 </body>
 </html>
+```
