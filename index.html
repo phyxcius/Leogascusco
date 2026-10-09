@@ -1,4 +1,15 @@
+Aquí tienes el código completo y listo para copiar en tu archivo `index.html`.
 
+Incluye todas las funciones solicitadas:
+
+1. **Fecha y hora detallada** en cada pedido del reporte contable.
+2. **Botón para Imprimir / Exportar Reporte a PDF** con estilos limpios de impresión.
+3. **Subir imagen desde el celular/dispositivo** y **eliminar imagen** por cada producto en el panel de balones.
+4. **Nueva pestaña en el panel de administración** para cambiar los 3 teléfonos del volante y el número de WhatsApp oficial.
+5. **Campo "¿Por quién preguntamos? (Nombre del cliente)"** en el carrito, enviado directamente en el mensaje de WhatsApp.
+6. **Estado de stock (Disponible / Agotado)** para que el repartidor controle qué productos están a la venta.
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1348,7 +1359,7 @@
   <section class="flyer-section">
     <div class="flyer-card">
       <div class="flyer-img-container" onclick="abrirLightboxFlyer()">
-        <img id="imgFlyerOficial" src="1000360632_2.jpg" alt="Volante Oficial LeoGas Cusco" onerror="this.src='1791513590376.jpg'">
+        <img id="imgFlyerOficial" src="1000360632_2.jpg" alt="Volante Oficial LeoGas Cusco" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
         <div class="flyer-hint">🔍 Toca para ampliar el volante</div>
       </div>
       <div class="flyer-info">
@@ -1844,7 +1855,7 @@
             <span class="card-tag" style="background:${estaDisponible ? 'rgba(107, 33, 168, 0.9)' : '#dc2626'}">
               ${estaDisponible ? (item.tag || 'Sellado') : 'Agotado Temporalmente'}
             </span>
-            <img src="${item.imagen}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
+            <img src="${item.imagen}" alt="${item.nombre}" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
           </div>
           <div class="card-body">
             <h4 class="card-title">${item.nombre}</h4>
