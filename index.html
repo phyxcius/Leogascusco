@@ -977,4 +977,403 @@
         </div>
 
         <div>
-          <div class="popup-section-label" style="margin-bottom:
+          <div class="popup-section-label" style="margin-bottom:6px;">Forma de Pago:</div>
+          <div class="grid-payments">
+            <button type="button" class="btn-pay-option active" id="btnPayEfectivo" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
+            <button type="button" class="btn-pay-option" onclick="elegirPago('Yape', this)">🟣 Yape</button>
+            <button type="button" class="btn-pay-option" onclick="elegirPago('Plin', this)">🔵 Plin</button>
+            <button type="button" class="btn-pay-option" onclick="elegirPago('Transferencia', this)">🏦 Transf.</button>
+          </div>
+
+          <div class="cash-box-drawer" id="cajaEfectivoDesplegable">
+            <div style="font-size: 12px; font-weight: 800; color: var(--primary);">💵 ¿Con cuánto en efectivo pagarás?</div>
+            <div class="cash-input-row">
+              <span style="font-weight: 800; font-size: 14px; color: var(--primary);">S/</span>
+              <input type="number" id="montoEfectivoIngresado" class="cash-input" placeholder="Ej. 100" min="0" step="5" oninput="calcularVueltoEfectivo()"/>
+            </div>
+            <div class="cash-quick-btns">
+              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido('exacto')">Pagar Exacto</button>
+              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(50)">S/ 50</button>
+              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(100)">S/ 100</button>
+              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(200)">S/ 200</button>
+            </div>
+            <div class="vuelto-badge-box" id="cajaRespuestaVuelto">
+              <span id="textoDetalleVuelto">Ingresa con cuánto pagarás para calcular el vuelto</span>
+              <span id="montoCalculadoVuelto" style="font-size: 15px;"></span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="popup-section-label" style="margin-bottom:6px;">Dirección de Entrega:</div>
+          <div class="geo-box">
+            <button type="button" class="btn-geo" onclick="capturarGPSCliente()">📍 Activar mi ubicación exacta</button>
+            <span class="geo-status" id="geoStatus">Envía tus coordenadas para llevar el balón hasta tu casa</span>
+          </div>
+        </div>
+
+        <div class="client-name-box">
+          <label class="popup-section-label" for="nombreClienteInput">¿Por quién preguntamos? (Nombre o referencia):</label>
+          <input type="text" id="nombreClienteInput" class="client-name-input" placeholder="Ej: Sra. Carmen / Familia Quispe"/>
+        </div>
+      </div>
+
+      <div class="cart-modal-footer">
+        <div class="cart-total-row">
+          <span id="cartLabelTotalConCantidad">Total a pagar (0 balones):</span>
+          <span class="cart-total-amount" id="cartTotalMonto">S/ 0.00</span>
+        </div>
+        <button class="btn-order-wsp" onclick="enviarPedidoWhatsApp()">
+          <span>Pedir a LeoGas por WhatsApp</span> 💬
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const WHATSAPP_NUMERO = "51969773064";
+
+    let catalogo = [
+      {
+        id: "gas-1",
+        nombre: "Balón LeoGas 10kg Normal o Regular",
+        tag: "El Moradito Rendidor",
+        descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad garantizado.",
+        precio: 50.00,
+        disponible: true,
+        imagen: "1791513590376.jpg"
+      },
+      {
+        id: "gas-2",
+        nombre: "Balón Gas Premium 10kg",
+        tag: "Máximo Rendimiento",
+        descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
+        precio: 55.00,
+        disponible: true,
+        imagen: "1791513590376.jpg"
+      }
+    ];
+
+    const pedido = {};
+
+    function sincronizarEstructuraPedido() {
+      catalogo.forEach(item => {
+        const estaDisponible = (item.disponible !== false);
+        if (!pedido[item.id]) {
+          pedido[item.id] = { id: item.id, nombre: item.nombre, precio: item.precio, cantidad: 0, disponible: estaDisponible };
+        } else {
+          pedido[item.id].nombre = item.nombre;
+          pedido[item.id].precio = item.precio;
+          pedido[item.id].disponible = estaDisponible;
+          if (!estaDisponible) pedido[item.id].cantidad = 0;
+        }
+      });
+    }
+
+    let metodoPago = "Efectivo";
+    let ubicacionClienteCoords = null;
+    let ultimoTotalPagar = 0;
+    let map = null;
+
+    function iniciarMapaCusco() {
+      const cuscoLat = -13.5167;
+      const cuscoLng = -71.9788;
+      map = L.map('cuscoMap').setView([cuscoLat, cuscoLng], 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      const iconoTitular = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#6b21a8; color:#facc15; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; border:2px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.4);'>🦁</div>",
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+
+      L.marker([cuscoLat, cuscoLng], { icon: iconoTitular }).addTo(map)
+        .bindPopup("<b>LeoGas Cusco</b><br>Repartidor en Ruta");
+    }
+
+    function renderizarMenu() {
+      const contenedor = document.getElementById('contenedorEmpanadas');
+      contenedor.innerHTML = '';
+
+      catalogo.forEach(item => {
+        const estaDisponible = (item.disponible !== false);
+        const card = document.createElement('article');
+        card.className = `card ${estaDisponible ? '' : 'agotado'}`;
+        card.innerHTML = `
+          <div class="card-img-wrapper">
+            <span class="card-tag" style="background:${estaDisponible ? 'rgba(107, 33, 168, 0.9)' : '#dc2626'}">
+              ${estaDisponible ? (item.tag || 'Sellado') : 'Agotado'}
+            </span>
+            <img src="${item.imagen}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">${item.nombre}</h4>
+            <p class="card-desc">${item.descripcion}</p>
+            <div class="card-footer">
+              <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
+              <button class="btn-add" ${estaDisponible ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}')">
+                ${estaDisponible ? '+ Pedir Balón' : 'Agotado'}
+              </button>
+            </div>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    function agregarAlPedido(id) {
+      sincronizarEstructuraPedido();
+      const itemCatalogo = catalogo.find(c => c.id === id);
+      if (itemCatalogo && itemCatalogo.disponible === false) {
+        alert("Este balón está agotado.");
+        return;
+      }
+      if (pedido[id]) {
+        pedido[id].cantidad += 1;
+        actualizarVistaPopup();
+      }
+    }
+
+    function cambiarCantidad(id, delta) {
+      if (pedido[id]) {
+        const itemCatalogo = catalogo.find(c => c.id === id);
+        if (delta > 0 && itemCatalogo && itemCatalogo.disponible === false) {
+          alert("Este balón está agotado.");
+          return;
+        }
+        pedido[id].cantidad += delta;
+        if (pedido[id].cantidad < 0) pedido[id].cantidad = 0;
+        actualizarVistaPopup();
+      }
+    }
+
+    function anularProducto(id) {
+      if (pedido[id]) {
+        pedido[id].cantidad = 0;
+        actualizarVistaPopup();
+      }
+    }
+
+    function vaciarPedidoConConfirmacion() {
+      if (confirm("¿Deseas reiniciar tu pedido?")) {
+        for (const k in pedido) pedido[k].cantidad = 0;
+        actualizarVistaPopup();
+      }
+    }
+
+    function abrirModalCarrito() {
+      sincronizarEstructuraPedido();
+      actualizarVistaPopup();
+      document.getElementById('cartModalOverlay').style.display = 'flex';
+    }
+
+    function cerrarModalCarrito() {
+      document.getElementById('cartModalOverlay').style.display = 'none';
+    }
+
+    function cerrarSiClickAfuera(e) {
+      if (e.target.id === 'cartModalOverlay') cerrarModalCarrito();
+    }
+
+    function abrirLightboxFlyer() {
+      document.getElementById('lightboxModal').style.display = 'flex';
+    }
+
+    function cerrarLightboxFlyer() {
+      document.getElementById('lightboxModal').style.display = 'none';
+    }
+
+    function actualizarVistaPopup() {
+      let totalUnidades = 0;
+      let totalMonto = 0;
+      const listContainer = document.getElementById('popupItemsList');
+      listContainer.innerHTML = '';
+
+      catalogo.forEach(catItem => {
+        const item = pedido[catItem.id] || { id: catItem.id, nombre: catItem.nombre, precio: catItem.precio, cantidad: 0, disponible: catItem.disponible !== false };
+        const estaDisponible = (catItem.disponible !== false);
+
+        if (!estaDisponible) item.cantidad = 0;
+
+        const subtotal = item.cantidad * item.precio;
+        totalUnidades += item.cantidad;
+        totalMonto += subtotal;
+
+        const row = document.createElement('div');
+        row.className = `cart-item-row ${!estaDisponible ? 'item-bloqueado' : (item.cantidad > 0 ? 'item-activo' : '')}`;
+        row.innerHTML = `
+          <div class="cart-item-info">
+            <div class="cart-item-title">${item.nombre} ${!estaDisponible ? '<span style="color:#dc2626; font-size:11px;">(Agotado)</span>' : ''}</div>
+            <div class="cart-item-sub">S/ ${item.precio.toFixed(2)} c/u</div>
+          </div>
+          <div class="cart-controls">
+            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', -1)" ${(!estaDisponible || item.cantidad === 0) ? 'disabled' : ''}>-</button>
+            <span style="font-weight:bold; font-size:13px; min-width:18px; text-align:center;">${item.cantidad}</span>
+            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', 1)" ${!estaDisponible ? 'disabled' : ''}>+</button>
+          </div>
+          <div class="cart-item-price-wrapper">
+            <div class="cart-item-price">S/ ${subtotal.toFixed(2)}</div>
+            <button type="button" class="btn-trash-item" onclick="anularProducto('${item.id}')">🗑️</button>
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+
+      ultimoTotalPagar = totalMonto;
+      document.getElementById('badgeContador').innerText = `${totalUnidades}`;
+      const textoCantidad = `${totalUnidades} ${totalUnidades === 1 ? 'balón seleccionado' : 'balones seleccionados'}`;
+      document.getElementById('cartLabelTotalConCantidad').innerText = `Total a pagar (${textoCantidad}):`;
+      document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
+
+      if (metodoPago === 'Efectivo') calcularVueltoEfectivo();
+    }
+
+    function elegirPago(metodo, boton) {
+      metodoPago = metodo;
+      document.querySelectorAll('.btn-pay-option').forEach(btn => btn.classList.remove('active'));
+      boton.classList.add('active');
+      document.getElementById('cajaEfectivoDesplegable').style.display = (metodo === 'Efectivo') ? 'block' : 'none';
+      if (metodo === 'Efectivo') calcularVueltoEfectivo();
+    }
+
+    function setMontoEfectivoRapido(monto) {
+      const input = document.getElementById('montoEfectivoIngresado');
+      input.value = (monto === 'exacto') ? (ultimoTotalPagar > 0 ? ultimoTotalPagar : '') : monto;
+      calcularVueltoEfectivo();
+    }
+
+    function calcularVueltoEfectivo() {
+      const input = document.getElementById('montoEfectivoIngresado');
+      const box = document.getElementById('cajaRespuestaVuelto');
+      const txt = document.getElementById('textoDetalleVuelto');
+      const montoTxt = document.getElementById('montoCalculadoVuelto');
+      const pagaCon = parseFloat(input.value);
+
+      if (isNaN(pagaCon) || pagaCon <= 0) {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "Ingresa con cuánto pagarás para calcular el vuelto";
+        montoTxt.innerText = "";
+        return;
+      }
+
+      if (ultimoTotalPagar <= 0) {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "Selecciona al menos un balón disponible";
+        montoTxt.innerText = "";
+        return;
+      }
+
+      const vuelto = pagaCon - ultimoTotalPagar;
+      if (vuelto < 0) {
+        box.className = "vuelto-badge-box alerta";
+        txt.innerText = `⚠️ Falta dinero (Faltan S/ ${Math.abs(vuelto).toFixed(2)})`;
+        montoTxt.innerText = "";
+      } else if (vuelto === 0) {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "✔ Pago exacto";
+        montoTxt.innerText = "S/ 0.00";
+      } else {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "💵 Vuelto a entregar:";
+        montoTxt.innerText = `S/ ${vuelto.toFixed(2)}`;
+      }
+    }
+
+    function capturarGPSCliente() {
+      const status = document.getElementById('geoStatus');
+      if (!navigator.geolocation) return status.innerText = "GPS no disponible.";
+      status.innerText = "Obteniendo ubicación...";
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          ubicacionClienteCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          status.innerText = "✔ Ubicación registrada para entrega";
+          status.classList.add('ready');
+        },
+        () => { status.innerText = "No se pudo obtener GPS."; },
+        { enableHighAccuracy: true }
+      );
+    }
+
+    function enviarPedidoWhatsApp() {
+      sincronizarEstructuraPedido();
+      const productosSeleccionados = Object.values(pedido).filter(item => item.cantidad > 0 && item.disponible !== false);
+
+      if (productosSeleccionados.length === 0) {
+        alert("Por favor selecciona al menos un balón disponible.");
+        return;
+      }
+
+      const nombreCliente = document.getElementById('nombreClienteInput').value.trim();
+      let total = 0;
+      let detalleTexto = "";
+
+      productosSeleccionados.forEach(item => {
+        const sub = item.cantidad * item.precio;
+        detalleTexto += `• ${item.cantidad}x ${item.nombre} (S/ ${sub.toFixed(2)})\n`;
+        total += sub;
+      });
+
+      let pagoDetalle = metodoPago;
+      if (metodoPago === 'Efectivo') {
+        const inputEfectivo = parseFloat(document.getElementById('montoEfectivoIngresado').value);
+        if (!isNaN(inputEfectivo) && inputEfectivo > 0) {
+          const vuelto = inputEfectivo - total;
+          pagoDetalle = vuelto > 0 
+            ? `Efectivo (Paga con S/ ${inputEfectivo.toFixed(2)} | Vuelto: S/ ${vuelto.toFixed(2)})`
+            : `Efectivo (Exacto S/ ${inputEfectivo.toFixed(2)})`;
+        }
+      }
+
+      let mensaje = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
+      if (nombreCliente) mensaje += `*👤 Cliente:* ${nombreCliente}\n`;
+      mensaje += `*Detalle:*\n${detalleTexto}\n`;
+      mensaje += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
+      mensaje += `*Paga con:* ${pagoDetalle}\n`;
+
+      if (ubicacionClienteCoords) {
+        mensaje += `*Ubicación GPS:* https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}\n`;
+      }
+
+      mensaje += `\n¿Me confirman tiempo estimado de entrega?`;
+
+      window.open(`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`, '_blank');
+
+      for (const k in pedido) pedido[k].cantidad = 0;
+      document.getElementById('montoEfectivoIngresado').value = '';
+      document.getElementById('nombreClienteInput').value = '';
+      actualizarVistaPopup();
+      cerrarModalCarrito();
+    }
+
+    async function cargarCatalogoDesdeGitHub() {
+      try {
+        const res = await fetch('productos.json?v=' + Date.now());
+        if (res.ok) {
+          catalogo = await res.json();
+          sincronizarEstructuraPedido();
+          renderizarMenu();
+          actualizarVistaPopup();
+        }
+      } catch (err) {
+        console.log("Error al cargar productos.json:", err);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      sincronizarEstructuraPedido();
+      renderizarMenu();
+      iniciarMapaCusco();
+      actualizarVistaPopup();
+      cargarCatalogoDesdeGitHub();
+    });
+  </script>
+</body>
+</html>
