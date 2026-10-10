@@ -7,6 +7,10 @@
   
   <!-- Leaflet CSS para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Firebase Realtime Database (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   
   <style>
     :root {
@@ -99,7 +103,7 @@
       font-weight: 700;
     }
 
-    /* LOGO LA CHUSPA EN LA PARTE SUPERIOR */
+    /* LOGO LA CHUSPA EN LA CABECERA */
     .chuspa-nav-badge {
       display: flex;
       align-items: center;
@@ -258,18 +262,6 @@
       display: block;
     }
 
-    .flyer-img-container:hover img {
-      transform: scale(1.02);
-    }
-
-    .flyer-hint {
-      text-align: center;
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 8px;
-      font-weight: bold;
-    }
-
     .flyer-info {
       flex: 2;
       min-width: 280px;
@@ -349,31 +341,39 @@
       gap: 8px;
     }
 
-    /* LEYENDA ONLINE / OFFLINE SOBRE EL MAPA */
+    /* LEYENDA ONLINE / OFFLINE DINÁMICA */
     .gps-legend-box {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       background: #f8fafc;
       border: 1px solid #cbd5e1;
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
     .legend-item {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 11.5px;
+      font-size: 12px;
       font-weight: 800;
+      opacity: 0.35;
+      transition: all 0.3s ease;
     }
 
-    .legend-item.online {
+    .legend-item.activo {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    .legend-item.online.activo {
       color: #15803d;
     }
 
-    .legend-item.offline {
-      color: #64748b;
+    .legend-item.offline.activo {
+      color: #dc2626;
     }
 
     .legend-divider {
@@ -394,7 +394,7 @@
       z-index: 10;
     }
 
-    /* EFECTO GPS: LEONCITO CON LLAMA ARDIENTE Y PULSO */
+    /* MARCADORES GPS DEL REPARTIDOR */
     .custom-gps-marker {
       position: relative;
       width: 48px;
@@ -404,6 +404,7 @@
       justify-content: center;
     }
 
+    /* Pulso radar en vivo */
     .gps-radar-pulse {
       position: absolute;
       width: 58px;
@@ -434,8 +435,25 @@
       font-size: 23px;
       box-shadow: 0 4px 12px rgba(107, 33, 168, 0.55);
       z-index: 2;
+      transition: all 0.3s ease;
     }
 
+    /* Modo apagado / Offline */
+    .custom-gps-marker.offline .lion-badge-circle {
+      background: #64748b;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      filter: grayscale(0.7);
+    }
+
+    .custom-gps-marker.offline .gps-radar-pulse {
+      display: none;
+    }
+
+    .custom-gps-marker.offline .fire-flame-emitter {
+      display: none;
+    }
+
+    /* Fuego ardiente en modo Online */
     .fire-flame-emitter {
       position: absolute;
       top: -15px;
@@ -449,18 +467,9 @@
     }
 
     @keyframes flameFlicker {
-      0% {
-        transform: translateX(-50%) translateY(0) scale(0.9) rotate(-3deg);
-        filter: drop-shadow(0 0 4px #f59e0b) drop-shadow(0 0 7px #ea580c);
-      }
-      50% {
-        transform: translateX(-48%) translateY(-2.5px) scale(1.15) rotate(2deg);
-        filter: drop-shadow(0 0 8px #facc15) drop-shadow(0 0 12px #dc2626);
-      }
-      100% {
-        transform: translateX(-52%) translateY(-4px) scale(1.05) rotate(-2deg);
-        filter: drop-shadow(0 0 6px #f59e0b) drop-shadow(0 0 10px #b91c1c);
-      }
+      0% { transform: translateX(-50%) translateY(0) scale(0.9) rotate(-3deg); filter: drop-shadow(0 0 4px #f59e0b) drop-shadow(0 0 7px #ea580c); }
+      50% { transform: translateX(-48%) translateY(-2.5px) scale(1.15) rotate(2deg); filter: drop-shadow(0 0 8px #facc15) drop-shadow(0 0 12px #dc2626); }
+      100% { transform: translateX(-52%) translateY(-4px) scale(1.05) rotate(-2deg); filter: drop-shadow(0 0 6px #f59e0b) drop-shadow(0 0 10px #b91c1c); }
     }
 
     /* PRODUCTOS */
@@ -502,13 +511,8 @@
       position: relative;
     }
 
-    .card:hover {
-      transform: translateY(-4px);
-    }
-
-    .card.agotado {
-      opacity: 0.65;
-    }
+    .card:hover { transform: translateY(-4px); }
+    .card.agotado { opacity: 0.65; }
 
     .card-img-wrapper {
       position: relative;
@@ -583,14 +587,8 @@
       cursor: pointer;
     }
 
-    .btn-add:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-add:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
+    .btn-add:hover { background: var(--primary-dark); }
+    .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
 
     /* BOTÓN FLOTANTE */
     .chat-bubble-container {
@@ -625,10 +623,6 @@
       50% { transform: scale(1.04); }
     }
 
-    .chat-bubble-container:hover .chat-bubble-label {
-      transform: scale(1.08);
-    }
-
     .chat-bubble-btn {
       position: relative;
       width: 62px;
@@ -642,10 +636,7 @@
       border: 2px solid #facc15;
     }
 
-    .chat-bubble-lion-icon {
-      font-size: 32px;
-      line-height: 1;
-    }
+    .chat-bubble-lion-icon { font-size: 32px; line-height: 1; }
 
     .chat-badge {
       position: absolute;
@@ -704,13 +695,7 @@
       align-items: center;
     }
 
-    .btn-close-cart {
-      background: none;
-      border: none;
-      color: var(--white);
-      font-size: 24px;
-      cursor: pointer;
-    }
+    .btn-close-cart { background: none; border: none; color: var(--white); font-size: 24px; cursor: pointer; }
 
     .cart-modal-body {
       padding: 16px 20px;
@@ -755,37 +740,14 @@
       border: 1px solid #e2e8f0;
     }
 
-    .cart-item-row.item-activo {
-      background: #faf5ff;
-      border-color: #d8b4fe;
-    }
+    .cart-item-row.item-activo { background: #faf5ff; border-color: #d8b4fe; }
+    .cart-item-row.item-bloqueado { background: #fef2f2; border-color: #fecaca; opacity: 0.75; }
 
-    .cart-item-row.item-bloqueado {
-      background: #fef2f2;
-      border-color: #fecaca;
-      opacity: 0.75;
-    }
+    .cart-item-info { flex: 1; }
+    .cart-item-title { font-size: 13px; font-weight: 700; color: var(--dark); }
+    .cart-item-sub { font-size: 11px; color: #64748b; }
 
-    .cart-item-info {
-      flex: 1;
-    }
-
-    .cart-item-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--dark);
-    }
-
-    .cart-item-sub {
-      font-size: 11px;
-      color: #64748b;
-    }
-
-    .cart-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .cart-controls { display: flex; align-items: center; gap: 6px; }
 
     .btn-qty {
       background: #e2e8f0;
@@ -797,34 +759,11 @@
       cursor: pointer;
     }
 
-    .btn-qty:disabled {
-      background: #f1f5f9;
-      color: #cbd5e1;
-      cursor: not-allowed;
-    }
+    .btn-qty:disabled { background: #f1f5f9; color: #cbd5e1; cursor: not-allowed; }
 
-    .cart-item-price-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: 10px;
-    }
-
-    .cart-item-price {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--primary);
-      min-width: 55px;
-      text-align: right;
-    }
-
-    .btn-trash-item {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 15px;
-      color: #94a3b8;
-    }
+    .cart-item-price-wrapper { display: flex; align-items: center; gap: 8px; margin-left: 10px; }
+    .cart-item-price { font-size: 13px; font-weight: 800; color: var(--primary); min-width: 55px; text-align: right; }
+    .btn-trash-item { background: none; border: none; cursor: pointer; font-size: 15px; color: #94a3b8; }
 
     .popup-section-label {
       font-size: 11px;
@@ -834,11 +773,7 @@
       letter-spacing: 0.5px;
     }
 
-    .grid-payments {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
+    .grid-payments { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 
     .btn-pay-option {
       background: #f1f5f9;
@@ -852,11 +787,7 @@
       text-align: center;
     }
 
-    .btn-pay-option.active {
-      background: var(--primary);
-      border-color: var(--primary-dark);
-      color: var(--white);
-    }
+    .btn-pay-option.active { background: var(--primary); border-color: var(--primary-dark); color: var(--white); }
 
     .cash-box-drawer {
       display: block;
@@ -867,12 +798,7 @@
       margin-top: 8px;
     }
 
-    .cash-input-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 6px;
-    }
+    .cash-input-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
 
     .cash-input {
       flex: 1;
@@ -885,12 +811,7 @@
       background: #fff;
     }
 
-    .cash-quick-btns {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
+    .cash-quick-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 
     .btn-quick-cash {
       background: #fff;
@@ -917,11 +838,7 @@
       border: 1px solid #86efac;
     }
 
-    .vuelto-badge-box.alerta {
-      background: #fee2e2;
-      color: #b91c1c;
-      border-color: #fca5a5;
-    }
+    .vuelto-badge-box.alerta { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
     .geo-box {
       display: flex;
@@ -948,30 +865,11 @@
       gap: 6px;
     }
 
-    .geo-status {
-      font-size: 11px;
-      color: #64748b;
-      text-align: center;
-    }
+    .geo-status { font-size: 11px; color: #64748b; text-align: center; }
+    .geo-status.ready { color: #15803d; font-weight: bold; }
 
-    .geo-status.ready {
-      color: #15803d;
-      font-weight: bold;
-    }
-
-    .client-name-box {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .client-name-input {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 14px;
-    }
+    .client-name-box { display: flex; flex-direction: column; gap: 4px; }
+    .client-name-input { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
 
     .cart-modal-footer {
       padding: 14px 20px;
@@ -990,10 +888,7 @@
       font-weight: 900;
     }
 
-    .cart-total-amount {
-      color: var(--primary);
-      font-size: 19px;
-    }
+    .cart-total-amount { color: var(--primary); font-size: 19px; }
 
     .btn-order-wsp {
       background: #25d366;
@@ -1021,30 +916,18 @@
       padding: 16px;
     }
 
-    .lightbox-overlay img {
-      max-width: 95%;
-      max-height: 90vh;
-      border-radius: 12px;
-    }
+    .lightbox-overlay img { max-width: 95%; max-height: 90vh; border-radius: 12px; }
 
     @media (max-width: 650px) {
-      .nav-container {
-        justify-content: center;
-      }
-      .brand-section {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .map-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+      .nav-container { justify-content: center; }
+      .brand-section { flex-wrap: wrap; justify-content: center; }
+      .map-header { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER CON LOGO LEOGAS Y LOGO LA CHUSPA EN EL MEDIO -->
+  <!-- HEADER -->
   <header>
     <div class="nav-container">
       <div class="brand-section">
@@ -1110,21 +993,21 @@
     </div>
   </section>
 
-  <!-- MAPA CUSCO CON LEYENDA ONLINE/OFFLINE -->
+  <!-- MAPA CUSCO CON LEYENDA DINÁMICA -->
   <section class="map-section">
     <div class="map-card">
       <div class="map-header">
         <h3>📍 Repartidor en Ruta LeoGas - Cusco</h3>
         
-        <!-- LEYENDA DEL ESTADO DEL LEONCITO -->
-        <div class="gps-legend-box">
-          <div class="legend-item online" title="Repartidor activo con ubicación">
-            <span style="font-size:14px;">🦁🔥</span>
+        <!-- LEYENDA CENTRALIZADA DEL ESTADO DEL LEONCITO -->
+        <div class="gps-legend-box" id="legendBoxGPS">
+          <div class="legend-item online" id="legendOnline">
+            <span style="font-size:15px;">🦁🔥</span>
             <span>Online</span>
           </div>
           <span class="legend-divider">|</span>
-          <div class="legend-item offline" title="Repartidor desconectado">
-            <span style="font-size:14px; opacity:0.6;">🦁💤</span>
+          <div class="legend-item offline activo" id="legendOffline">
+            <span style="font-size:15px;">🦁💤</span>
             <span>Offline</span>
           </div>
         </div>
@@ -1260,10 +1143,7 @@
           pedido[item.id].nombre = item.nombre;
           pedido[item.id].precio = item.precio;
           pedido[item.id].disponible = estaDisponible;
-          // Si fue bloqueado en admin.html se anula cualquier cantidad
-          if (!estaDisponible) {
-            pedido[item.id].cantidad = 0;
-          }
+          if (!estaDisponible) pedido[item.id].cantidad = 0;
         }
       });
     }
@@ -1272,6 +1152,8 @@
     let ubicacionClienteCoords = null;
     let ultimoTotalPagar = 0;
     let map = null;
+    let marcadorRepartidor = null;
+    let repartidorOnline = false;
 
     function renderizarTelefonosFlyer() {
       const container = document.getElementById('contenedorTelefonosFlyer');
@@ -1286,7 +1168,7 @@
       `;
     }
 
-    // MAPA CUSCO CON ICONO EN LLAMAS (ONLINE)
+    // MAPA CUSCO
     function iniciarMapaCusco() {
       const cuscoLat = -13.5167;
       const cuscoLng = -71.9788;
@@ -1296,21 +1178,54 @@
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
-      const iconoTitularConFuego = L.divIcon({
+      actualizarVisualizadorGPS(false, cuscoLat, cuscoLng);
+    }
+
+    // ACTUALIZA EL ESTADO ONLINE / OFFLINE DEL LEONCITO DE FORMA CENTRALIZADA
+    function actualizarVisualizadorGPS(estaOnline, lat, lng) {
+      repartidorOnline = estaOnline;
+
+      const legOnline = document.getElementById('legendOnline');
+      const legOffline = document.getElementById('legendOffline');
+
+      if (estaOnline) {
+        legOnline.classList.add('activo');
+        legOffline.classList.remove('activo');
+      } else {
+        legOnline.classList.remove('activo');
+        legOffline.classList.add('activo');
+      }
+
+      const iconoHTML = estaOnline ? `
+        <div class="custom-gps-marker">
+          <div class="gps-radar-pulse"></div>
+          <div class="fire-flame-emitter">🔥</div>
+          <div class="lion-badge-circle">🦁</div>
+        </div>
+      ` : `
+        <div class="custom-gps-marker offline">
+          <div class="lion-badge-circle">🦁</div>
+        </div>
+      `;
+
+      const nuevoIcono = L.divIcon({
         className: 'custom-gps-container',
-        html: `
-          <div class="custom-gps-marker">
-            <div class="gps-radar-pulse"></div>
-            <div class="fire-flame-emitter">🔥</div>
-            <div class="lion-badge-circle">🦁</div>
-          </div>
-        `,
+        html: iconoHTML,
         iconSize: [48, 48],
         iconAnchor: [24, 24]
       });
 
-      L.marker([cuscoLat, cuscoLng], { icon: iconoTitularConFuego }).addTo(map)
-        .bindPopup("<b>🦁 LeoGas Cusco</b><br>Repartidor en Ruta (Online 🔥)");
+      const popupTexto = estaOnline 
+        ? "<b>🦁 LeoGas Cusco</b><br>Repartidor en Ruta Activo 🔥 (Online)"
+        : "<b>🦁 LeoGas Cusco</b><br>Repartidor Fuera de Servicio (Offline 💤)";
+
+      if (!marcadorRepartidor) {
+        marcadorRepartidor = L.marker([lat, lng], { icon: nuevoIcono }).addTo(map).bindPopup(popupTexto);
+      } else {
+        marcadorRepartidor.setIcon(nuevoIcono);
+        marcadorRepartidor.setLatLng([lat, lng]);
+        marcadorRepartidor.setPopupContent(popupTexto);
+      }
     }
 
     function renderizarMenu() {
@@ -1405,7 +1320,6 @@
       document.getElementById('lightboxModal').style.display = 'none';
     }
 
-    // BLOQUEO EN EL CARRITO SI NO HAY STOCK
     function actualizarVistaPopup() {
       let totalUnidades = 0;
       let totalMonto = 0;
@@ -1423,7 +1337,6 @@
 
         const estaDisponible = (catItem.disponible !== false);
 
-        // Si fue bloqueado desde admin.html, resetea la cantidad
         if (!estaDisponible) {
           item.cantidad = 0;
         }
@@ -1583,6 +1496,7 @@
       cerrarModalCarrito();
     }
 
+    // CARGA DE DATOS CENTRALIZADOS Y ESTADO GPS
     async function cargarCatalogoDesdeGitHub() {
       try {
         const res = await fetch('productos.json?v=' + Date.now());
@@ -1596,6 +1510,10 @@
               telefonos = datos.telefonos;
               whatsappNumero = telefonos.whatsapp;
               renderizarTelefonosFlyer();
+            }
+            // Sincroniza estado Online / Offline global
+            if (datos.gps) {
+              actualizarVisualizadorGPS(datos.gps.online === true, datos.gps.lat || -13.5167, datos.gps.lng || -71.9788);
             }
           }
           sincronizarEstructuraPedido();
@@ -1614,6 +1532,8 @@
       iniciarMapaCusco();
       actualizarVistaPopup();
       cargarCatalogoDesdeGitHub();
+      // Sondeo para sincronizar el estado cada 30 segundos
+      setInterval(cargarCatalogoDesdeGitHub, 30000);
     });
   </script>
 </body>
