@@ -10,14 +10,11 @@
   
   <style>
     :root {
-      --primary: #6b21a8;        /* Morado LeoGas */
+      --primary: #6b21a8;
       --primary-dark: #581c87;
-      --accent: #f59e0b;         /* Amarillo/Dorado LeoGas */
+      --accent: #f59e0b;
       --accent-hover: #d97706;
-      --chat-blue: #2563eb;
-      --chat-blue-hover: #1d4ed8;
       --dark: #1e1b4b;
-      --gray-light: #fefce8;
       --text: #334155;
       --white: #ffffff;
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
@@ -94,38 +91,14 @@
       font-weight: 700;
     }
 
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .btn-admin-login {
-      background: #f1f5f9;
-      color: var(--dark);
-      border: 1px solid #cbd5e1;
-      padding: 7px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-admin-login:hover {
-      background: #e2e8f0;
-    }
-
     .nav-cta {
       background: var(--primary);
       color: var(--white);
-      padding: 8px 16px;
+      padding: 8px 18px;
       border-radius: 30px;
       text-decoration: none;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 14px;
       transition: background 0.2s;
     }
 
@@ -194,7 +167,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
-    /* SECCIÓN VOLANTE */
+    /* VOLANTE */
     .flyer-section {
       max-width: 1200px;
       margin: 30px auto;
@@ -288,7 +261,7 @@
       border-color: #818cf8;
     }
 
-    /* MAPA EN VIVO */
+    /* MAPA */
     .map-section {
       max-width: 1200px;
       margin: 20px auto 40px;
@@ -321,20 +294,6 @@
       gap: 8px;
     }
 
-    .gps-badge-status {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 12px;
-      background: #e2e8f0;
-      color: #64748b;
-    }
-
-    .gps-badge-status.active {
-      background: #dcfce7;
-      color: #15803d;
-    }
-
     #cuscoMap {
       width: 100%;
       height: 340px;
@@ -355,11 +314,6 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       margin-bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
     }
 
     .menu-header h3 {
@@ -476,7 +430,7 @@
       cursor: not-allowed;
     }
 
-    /* BOTÓN FLOTANTE: TEXTO "PEDIDOS" + LEONCITO */
+    /* BOTÓN FLOTANTE */
     .chat-bubble-container {
       position: fixed;
       bottom: 24px;
@@ -501,7 +455,6 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      transition: transform 0.2s ease;
       animation: pulseLabel 2.5s infinite;
     }
 
@@ -525,12 +478,6 @@
       align-items: center;
       justify-content: center;
       border: 2px solid #facc15;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .chat-bubble-container:hover .chat-bubble-btn {
-      transform: scale(1.08);
-      box-shadow: 0 8px 25px rgba(107, 33, 168, 0.6);
     }
 
     .chat-bubble-lion-icon {
@@ -556,7 +503,7 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
-    /* MODAL DE CHECKOUT */
+    /* CARRITO */
     .cart-modal-overlay {
       display: none;
       position: fixed;
@@ -566,7 +513,6 @@
       z-index: 2000;
       justify-content: center;
       align-items: flex-end;
-      padding: 0;
     }
 
     .cart-modal-card {
@@ -594,14 +540,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .cart-modal-header h3 {
-      font-size: 16px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .btn-close-cart {
@@ -634,9 +572,6 @@
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
       text-decoration: underline;
     }
 
@@ -656,12 +591,17 @@
       padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid #e2e8f0;
-      transition: background 0.2s;
     }
 
     .cart-item-row.item-activo {
       background: #faf5ff;
       border-color: #d8b4fe;
+    }
+
+    .cart-item-row.item-bloqueado {
+      background: #fef2f2;
+      border-color: #fecaca;
+      opacity: 0.75;
     }
 
     .cart-item-info {
@@ -693,13 +633,12 @@
       border-radius: 5px;
       font-weight: bold;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    .btn-qty:hover {
-      background: #cbd5e1;
+    .btn-qty:disabled {
+      background: #f1f5f9;
+      color: #cbd5e1;
+      cursor: not-allowed;
     }
 
     .cart-item-price-wrapper {
@@ -723,8 +662,6 @@
       cursor: pointer;
       font-size: 15px;
       color: #94a3b8;
-      padding: 4px;
-      border-radius: 4px;
     }
 
     .popup-section-label {
@@ -751,7 +688,6 @@
       font-weight: 700;
       cursor: pointer;
       text-align: center;
-      transition: all 0.2s;
     }
 
     .btn-pay-option.active {
@@ -760,7 +696,6 @@
       color: var(--white);
     }
 
-    /* CAJA DE EFECTIVO */
     .cash-box-drawer {
       display: block;
       background: #fdf4ff;
@@ -804,10 +739,6 @@
       padding: 4px 8px;
       border-radius: 6px;
       cursor: pointer;
-    }
-
-    .btn-quick-cash:hover {
-      background: #f3e8ff;
     }
 
     .vuelto-badge-box {
@@ -855,10 +786,6 @@
       gap: 6px;
     }
 
-    .btn-geo:hover {
-      background: var(--primary-dark);
-    }
-
     .geo-status {
       font-size: 11px;
       color: #64748b;
@@ -870,7 +797,6 @@
       font-weight: bold;
     }
 
-    /* CAMPO DE NOMBRE CLIENTE */
     .client-name-box {
       display: flex;
       flex-direction: column;
@@ -883,14 +809,6 @@
       border: 1px solid #cbd5e1;
       border-radius: 8px;
       font-size: 14px;
-      color: var(--dark);
-      background: var(--white);
-    }
-
-    .client-name-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(107, 33, 168, 0.15);
     }
 
     .cart-modal-footer {
@@ -908,7 +826,6 @@
       align-items: center;
       font-size: 15px;
       font-weight: 900;
-      color: var(--dark);
     }
 
     .cart-total-amount {
@@ -931,11 +848,6 @@
       gap: 8px;
     }
 
-    .btn-order-wsp:hover {
-      background: #1eb857;
-    }
-
-    /* LIGHTBOX */
     .lightbox-overlay {
       display: none;
       position: fixed;
@@ -951,359 +863,6 @@
       max-width: 95%;
       max-height: 90vh;
       border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    /* ADMIN */
-    .admin-cards-container {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-top: 12px;
-    }
-
-    .admin-edit-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .admin-field-row {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .admin-field-row.inline-row {
-      flex-direction: row;
-      gap: 10px;
-    }
-
-    .admin-field-row label {
-      font-size: 11px;
-      font-weight: 800;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .admin-input {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 14px;
-      color: var(--dark);
-      background: var(--white);
-    }
-
-    .admin-img-preview-box {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 4px;
-      background: #fff;
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .admin-thumb {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 6px;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-    }
-
-    .admin-card-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-    }
-
-    .btn-admin-save {
-      flex: 2;
-      background: var(--primary);
-      color: var(--white);
-      border: none;
-      padding: 9px;
-      border-radius: 6px;
-      font-weight: 800;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .btn-admin-delete {
-      flex: 1;
-      background: #fee2e2;
-      color: #dc2626;
-      border: 1px solid #fca5a5;
-      padding: 9px;
-      border-radius: 6px;
-      font-weight: 800;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .btn-add-product-main {
-      width: 100%;
-      background: #16a34a;
-      color: var(--white);
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 800;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 2100;
-      justify-content: center;
-      align-items: center;
-      padding: 12px;
-    }
-
-    .modal-box {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 20px;
-      width: 100%;
-      max-width: 440px;
-      position: relative;
-    }
-
-    .modal-box.wide {
-      max-width: 750px;
-      max-height: 92vh;
-      overflow-y: auto;
-    }
-
-    .modal-box h3 {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--dark);
-      margin-bottom: 6px;
-    }
-
-    .dashboard-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 14px;
-      border-bottom: 2px solid #f1f5f9;
-      padding-bottom: 8px;
-      overflow-x: auto;
-    }
-
-    .tab-btn {
-      background: none;
-      border: none;
-      font-weight: 700;
-      font-size: 12px;
-      padding: 6px 10px;
-      color: #64748b;
-      cursor: pointer;
-      border-radius: 6px;
-      white-space: nowrap;
-    }
-
-    .tab-btn.active {
-      background: #f3e8ff;
-      color: var(--primary-dark);
-    }
-
-    .gps-toggle-panel {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 14px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .btn-gps-connect {
-      background: #16a34a;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .btn-gps-connect.disconnect {
-      background: #dc2626;
-    }
-
-    .accounting-filter {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 14px;
-      background: #f8fafc;
-      padding: 10px;
-      border-radius: 8px;
-      flex-wrap: wrap;
-    }
-
-    .accounting-filter input {
-      padding: 6px 10px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 13px;
-    }
-
-    .btn-print-report {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 7px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-left: auto;
-    }
-
-    .btn-print-report:hover {
-      background: var(--primary-dark);
-    }
-
-    .accounting-summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .summary-card {
-      background: #faf5ff;
-      border: 1px solid #e9d5ff;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    .summary-card span {
-      font-size: 10px;
-      color: #64748b;
-      font-weight: bold;
-    }
-
-    .summary-card h4 {
-      font-size: 18px;
-      color: var(--primary-dark);
-      font-weight: 900;
-    }
-
-    .section-subtitle {
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--dark);
-      margin: 16px 0 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      margin-bottom: 16px;
-    }
-
-    .custom-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      text-align: left;
-    }
-
-    .custom-table th, .custom-table td {
-      border: 1px solid #e2e8f0;
-      padding: 8px 10px;
-    }
-
-    .custom-table th {
-      background: #f1f5f9;
-      color: #334155;
-    }
-
-    .btn-close-modal {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: #64748b;
-    }
-
-    /* ESTILOS DE IMPRESIÓN */
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #areaParaImprimir, #areaParaImprimir * {
-        visibility: visible;
-      }
-      #areaParaImprimir {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-      }
-      .accounting-filter, .dashboard-tabs, .btn-print-report, .btn-close-modal {
-        display: none !important;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .grid-payments {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .chat-bubble-container {
-        bottom: 20px;
-        right: 18px;
-      }
-      .chat-bubble-btn {
-        width: 56px;
-        height: 56px;
-      }
-      .chat-bubble-lion-icon {
-        font-size: 28px;
-      }
-      .chat-bubble-label {
-        font-size: 12px;
-        padding: 6px 10px;
-      }
-      .flyer-card {
-        padding: 16px;
-      }
-      .btn-print-report {
-        margin-left: 0;
-        width: 100%;
-        justify-content: center;
-      }
     }
   </style>
 </head>
@@ -1320,9 +879,6 @@
         </div>
       </a>
       <div class="nav-actions">
-        <button class="btn-admin-login" id="btnAdminTrigger" onclick="abrirModalAdmin()">
-          🔒 Admin / Reportes
-        </button>
         <a href="#menu" class="nav-cta">Pedir Gas</a>
       </div>
     </div>
@@ -1343,7 +899,7 @@
     </div>
   </section>
 
-  <!-- SECCIÓN VOLANTE OFICIAL LEOGAS -->
+  <!-- VOLANTE OFICIAL -->
   <section class="flyer-section">
     <div class="flyer-card">
       <div class="flyer-img-container" onclick="abrirLightboxFlyer()">
@@ -1359,8 +915,10 @@
         </p>
 
         <div class="popup-section-label" style="margin-bottom:8px;">Teléfonos de Pedido Inmediato:</div>
-        <div class="flyer-contact-grid" id="contenedorTelefonosFlyer">
-          <!-- Renderizado dinámico desde configuración -->
+        <div class="flyer-contact-grid">
+          <a href="tel:950727212" class="contact-button"><span>📞</span> 950 727 212</a>
+          <a href="tel:984285500" class="contact-button"><span>📞</span> 984 285 500</a>
+          <a href="tel:084501111" class="contact-button"><span>☎️</span> (084) 501111</a>
         </div>
       </div>
     </div>
@@ -1371,7 +929,6 @@
     <div class="map-card">
       <div class="map-header">
         <h3>📍 Repartidor en Ruta LeoGas - Cusco</h3>
-        <span class="gps-badge-status" id="gpsBadgeHeader">GPS Repartidor: En espera</span>
       </div>
       <div id="cuscoMap"></div>
     </div>
@@ -1380,21 +937,18 @@
   <!-- PRODUCTOS -->
   <section class="section-menu" id="menu">
     <div class="menu-header">
-      <div>
-        <h3>Elige tu Balón de Gas</h3>
-        <p style="font-size: 13px; color: #64748b;">Selecciona tu balón de 10 kg e indícanos tu dirección exacta.</p>
-      </div>
+      <h3>Elige tu Balón de Gas</h3>
+      <p style="font-size: 13px; color: #64748b;">Selecciona tu balón de 10 kg e indícanos tu dirección exacta.</p>
     </div>
-
     <div class="grid-empanadas" id="contenedorEmpanadas"></div>
   </section>
 
   <!-- LIGHTBOX -->
   <div class="lightbox-overlay" id="lightboxModal" onclick="cerrarLightboxFlyer()">
-    <img src="1791513590376.jpg" alt="Volante Completo LeoGas" onerror="this.src='1791513590376.jpg'">
+    <img src="1791513590376.jpg" alt="Volante Completo LeoGas">
   </div>
 
-  <!-- BOTÓN FLOTANTE CON TEXTO 'PEDIDOS' Y LEONCITO -->
+  <!-- BOTÓN FLOTANTE PEDIDOS -->
   <div class="chat-bubble-container" id="btnFlotanteContenedor" onclick="abrirModalCarrito()">
     <div class="chat-bubble-label">
       <span>🔥 Pedidos</span>
@@ -1405,10 +959,9 @@
     </div>
   </div>
 
-  <!-- MODAL DE CHECKOUT -->
+  <!-- MODAL CHECKOUT -->
   <div class="cart-modal-overlay" id="cartModalOverlay" onclick="cerrarSiClickAfuera(event)">
     <div class="cart-modal-card">
-      
       <div class="cart-modal-header">
         <h3>🦁 Pedido LeoGas Cusco</h3>
         <button class="btn-close-cart" onclick="cerrarModalCarrito()">&times;</button>
@@ -1418,1034 +971,10 @@
         <div>
           <div class="cart-header-actions">
             <span class="popup-section-label">Balones seleccionados:</span>
-            <button type="button" class="btn-vaciar-cart" onclick="vaciarPedidoConConfirmacion()">
-              🗑️ Vaciar pedido
-            </button>
+            <button type="button" class="btn-vaciar-cart" onclick="vaciarPedidoConConfirmacion()">🗑️ Vaciar pedido</button>
           </div>
           <div class="cart-items-box" id="popupItemsList"></div>
         </div>
 
         <div>
-          <div class="popup-section-label" style="margin-bottom:6px;">Forma de Pago (Paga Con):</div>
-          <div class="grid-payments">
-            <button type="button" class="btn-pay-option active" id="btnPayEfectivo" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
-            <button type="button" class="btn-pay-option" onclick="elegirPago('Yape', this)">🟣 Yape</button>
-            <button type="button" class="btn-pay-option" onclick="elegirPago('Plin', this)">🔵 Plin</button>
-            <button type="button" class="btn-pay-option" onclick="elegirPago('Transferencia', this)">🏦 Transf.</button>
-          </div>
-
-          <!-- DESPLEGABLE DINÁMICO DE EFECTIVO Y VUELTO -->
-          <div class="cash-box-drawer" id="cajaEfectivoDesplegable">
-            <div style="font-size: 12px; font-weight: 800; color: var(--primary);">
-              💵 ¿Con cuánto en efectivo pagarás?
-            </div>
-            
-            <div class="cash-input-row">
-              <span style="font-weight: 800; font-size: 14px; color: var(--primary);">S/</span>
-              <input 
-                type="number" 
-                id="montoEfectivoIngresado" 
-                class="cash-input" 
-                placeholder="Ej. 100" 
-                min="0"
-                step="5"
-                oninput="calcularVueltoEfectivo()"
-              />
-            </div>
-
-            <div class="cash-quick-btns">
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido('exacto')">Pagar Exacto</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(50)">S/ 50</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(100)">S/ 100</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(200)">S/ 200</button>
-            </div>
-
-            <div class="vuelto-badge-box" id="cajaRespuestaVuelto">
-              <span id="textoDetalleVuelto">Ingresa con cuánto pagarás para calcular el vuelto</span>
-              <span id="montoCalculadoVuelto" style="font-size: 15px;"></span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div class="popup-section-label" style="margin-bottom:6px;">Dirección de Entrega:</div>
-          <div class="geo-box">
-            <button type="button" class="btn-geo" onclick="capturarGPSCliente()">📍 Activar mi ubicación exacta</button>
-            <span class="geo-status" id="geoStatus">Envía tus coordenadas para llevar el balón hasta tu casa</span>
-          </div>
-        </div>
-
-        <!-- TEXT BOX: NOMBRE DEL CLIENTE -->
-        <div class="client-name-box">
-          <label class="popup-section-label" for="nombreClienteInput">¿Por quién preguntamos? (Nombre completo o referencia):</label>
-          <input 
-            type="text" 
-            id="nombreClienteInput" 
-            class="client-name-input" 
-            placeholder="Ej: Sra. Carmen / Familia Quispe"
-          />
-        </div>
-      </div>
-
-      <div class="cart-modal-footer">
-        <div class="cart-total-row">
-          <span id="cartLabelTotalConCantidad">Total a pagar (0 balones):</span>
-          <span class="cart-total-amount" id="cartTotalMonto">S/ 0.00</span>
-        </div>
-        <button class="btn-order-wsp" onclick="enviarPedidoWhatsApp()">
-          <span>Pedir a LeoGas por WhatsApp</span> 💬
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- MODAL LOGIN ADMIN -->
-  <div class="modal-overlay" id="modalLogin">
-    <div class="modal-box">
-      <button class="btn-close-modal" onclick="cerrarModales()" style="position:absolute; top:12px; right:14px;">&times;</button>
-      <h3>Acceso Administrador LeoGas</h3>
-      <p style="font-size: 13px; color: #64748b; margin-bottom: 14px;">Inicia sesión para gestionar balones, precios, GPS y ventas.</p>
-      
-      <form onsubmit="autenticarAdmin(event)">
-        <div style="margin-bottom: 12px;">
-          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Usuario</label>
-          <input type="text" id="adminUser" required placeholder="admin" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
-        </div>
-        <div style="margin-bottom: 14px;">
-          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Contraseña</label>
-          <input type="password" id="adminPass" required placeholder="••••••••" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
-        </div>
-        <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">
-          Credenciales: <strong>admin</strong> / <strong>regocijo123</strong>
-        </div>
-        <button type="submit" style="width:100%; background:var(--primary); color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">
-          Ingresar al Panel
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL DASHBOARD -->
-  <div class="modal-overlay" id="modalDashboard">
-    <div class="modal-box wide">
-      <button class="btn-close-modal" onclick="cerrarModales()" style="position:absolute; top:12px; right:14px;">&times;</button>
-      <h3>Panel de Control - LeoGas Cusco</h3>
-      
-      <div class="dashboard-tabs">
-        <button class="tab-btn active" id="tabBtnCatalogo" onclick="cambiarTab('catalogo')">📝 Balones y Precios</button>
-        <button class="tab-btn" id="tabBtnContabilidad" onclick="cambiarTab('contabilidad')">📊 Reporte Contable & Ventas</button>
-        <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos y WhatsApp</button>
-        <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 GPS Repartidor</button>
-      </div>
-
-      <!-- CATÁLOGO ADMIN -->
-      <div id="tabCatalogoContenido">
-        <button type="button" class="btn-add-product-main" onclick="agregarNuevoProducto()">
-          ➕ Agregar Nuevo Balón / Accesorio
-        </button>
-        <div class="admin-cards-container" id="adminCardsList"></div>
-      </div>
-
-      <!-- REPORTE CONTABLE -->
-      <div id="tabContabilidadContenido" style="display: none;">
-        <div id="areaParaImprimir">
-          <div class="accounting-filter">
-            <label style="font-size: 13px; font-weight:bold;">Filtrar fecha:</label>
-            <input type="date" id="filtroFechaContable" onchange="actualizarReporteContable()">
-            <button style="padding:6px 10px; background:#e2e8f0; border:none; border-radius:6px; font-size:12px; cursor:pointer;" onclick="limpiarFiltroFecha()">Ver todo</button>
-            <button class="btn-print-report" onclick="imprimirReporteVentas()">🖨️ Imprimir / Exportar Reporte</button>
-          </div>
-
-          <div class="accounting-summary">
-            <div class="summary-card">
-              <span>TOTAL INGRESOS</span>
-              <h4 id="resumenMontoTotal">S/ 0.00</h4>
-            </div>
-            <div class="summary-card">
-              <span>PEDIDOS REGISTRADOS</span>
-              <h4 id="resumenCantPedidos">0</h4>
-            </div>
-            <div class="summary-card">
-              <span>BALONES VENDIDOS</span>
-              <h4 id="resumenEmpanadasVendidas">0</h4>
-            </div>
-          </div>
-
-          <div class="section-subtitle">🔥 Ventas Desglosadas por Tipo de Balón</div>
-          <div class="table-container">
-            <table class="custom-table">
-              <thead>
-                <tr>
-                  <th>Tipo de Balón</th>
-                  <th>Unidades</th>
-                  <th>Ingreso (S/)</th>
-                  <th>% Participación</th>
-                </tr>
-              </thead>
-              <tbody id="tablaPorTipoBody"></tbody>
-            </table>
-          </div>
-
-          <div class="section-subtitle">📋 Historial con Fecha, Hora y Detalle de Pedidos</div>
-          <div class="table-container">
-            <table class="custom-table">
-              <thead>
-                <tr>
-                  <th>Fecha y Hora</th>
-                  <th>Cliente</th>
-                  <th>Detalle Pedido</th>
-                  <th>Total</th>
-                  <th>Pago</th>
-                  <th>Ubicación</th>
-                </tr>
-              </thead>
-              <tbody id="tablaContableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- CONFIGURACIÓN DE TELÉFONOS Y WHATSAPP -->
-      <div id="tabTelefonosContenido" style="display: none;">
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-          <h4 style="color:var(--primary); font-size:15px; margin-bottom:12px;">📞 Configurar Números de Contacto</h4>
-          
-          <div class="admin-field-row" style="margin-bottom:10px;">
-            <label>Número WhatsApp para Pedidos (con código de país, ej: 51950727212):</label>
-            <input type="text" id="configWspNum" class="admin-input">
-          </div>
-
-          <div class="admin-field-row" style="margin-bottom:10px;">
-            <label>Teléfono 1 (Llamada Rápida Claro):</label>
-            <input type="text" id="configTel1" class="admin-input">
-          </div>
-
-          <div class="admin-field-row" style="margin-bottom:10px;">
-            <label>Teléfono 2 (Llamada Rápida Claro):</label>
-            <input type="text" id="configTel2" class="admin-input">
-          </div>
-
-          <div class="admin-field-row" style="margin-bottom:16px;">
-            <label>Teléfono 3 (Fijo o Central Cusco):</label>
-            <input type="text" id="configTel3" class="admin-input">
-          </div>
-
-          <button type="button" class="btn-admin-save" style="width:100%;" onclick="guardarConfiguracionTelefonos()">
-            💾 Guardar Números de Contacto
-          </button>
-        </div>
-      </div>
-
-      <!-- GPS TITULAR -->
-      <div id="tabGPSContenido" style="display: none;">
-        <div class="gps-toggle-panel">
-          <div>
-            <strong>Transmisión en Vivo de tu Ubicación:</strong>
-            <p style="font-size:13px; color:#64748b;">Al activarlo desde tu celular, tu moto o camión se verá en el mapa para tus clientes.</p>
-          </div>
-          <button id="btnGPSSwitch" class="btn-gps-connect" onclick="alternarRastreoGPSTitular()">Conectar GPS en Vivo</button>
-        </div>
-        <div style="font-size: 12px; color: #64748b;" id="gpsCoordenadasTexto">
-          Estado: Desconectado.
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <script>
-    // CONFIGURACIÓN DE TELÉFONOS POR DEFECTO
-    const configTelefonosInicial = {
-      whatsapp: "51969773064",
-      tel1: "950 727 212",
-      tel2: "984 285 500",
-      tel3: "(084) 501111"
-    };
-
-    let configTelefonos = JSON.parse(localStorage.getItem('gas_telefonos')) || configTelefonosInicial;
-
-    const menuInicial = [
-      {
-        id: "gas-1",
-        nombre: "Balón LeoGas 10kg Normal o Regular",
-        tag: "El Moradito Rendidor",
-        descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad garantizado.",
-        precio: 50.00,
-        disponible: true,
-        imagen: "medidas-de-balon-de-gas-de-10-Kg (1).png"
-      },
-      {
-        id: "gas-2",
-        nombre: "Balón Gas Premium 10kg",
-        tag: "Máximo Rendimiento",
-        descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
-        precio: 55.00,
-        disponible: true,
-        imagen: "medidas-de-balon-de-gas-de-10-Kg (1).png"
-      }
-    ];
-
-    let catalogo = JSON.parse(localStorage.getItem('gas_menu')) || menuInicial;
-    let registroVentas = JSON.parse(localStorage.getItem('gas_ventas')) || [];
-
-    const pedido = {};
-    function sincronizarEstructuraPedido() {
-      catalogo.forEach(item => {
-        if (!pedido[item.id]) {
-          pedido[item.id] = { id: item.id, nombre: item.nombre, precio: item.precio, cantidad: 0 };
-        } else {
-          pedido[item.id].nombre = item.nombre;
-          pedido[item.id].precio = item.precio;
-        }
-      });
-    }
-
-    let metodoPago = "Efectivo";
-    let ubicacionClienteCoords = null;
-    let esAdminAutenticado = false;
-    let ultimoTotalPagar = 0;
-
-    let map = null;
-    let marcadorTitular = null;
-    let capaVentas = null;
-    let watchIdGPS = null;
-    let rastreoActivo = false;
-
-    // RENDERIZAR BOTONES DE CONTACTO EN EL FLYER
-    function renderizarTelefonosFlyer() {
-      const container = document.getElementById('contenedorTelefonosFlyer');
-      const cleanTel1 = configTelefonos.tel1.replace(/\D/g,'');
-      const cleanTel2 = configTelefonos.tel2.replace(/\D/g,'');
-      const cleanTel3 = configTelefonos.tel3.replace(/\D/g,'');
-
-      container.innerHTML = `
-        <a href="tel:${cleanTel1}" class="contact-button">
-          <span>📞</span> ${configTelefonos.tel1}
-        </a>
-        <a href="tel:${cleanTel2}" class="contact-button">
-          <span>📞</span> ${configTelefonos.tel2}
-        </a>
-        <a href="tel:${cleanTel3}" class="contact-button">
-          <span>☎️</span> ${configTelefonos.tel3}
-        </a>
-      `;
-    }
-
-    // MAPA
-    function iniciarMapaCusco() {
-      const cuscoLat = -13.5167;
-      const cuscoLng = -71.9788;
-
-      map = L.map('cuscoMap').setView([cuscoLat, cuscoLng], 14);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contribuyentes'
-      }).addTo(map);
-
-      const iconoTitular = L.divIcon({
-        className: 'custom-div-icon',
-        html: "<div style='background-color:#6b21a8; color:#facc15; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; border:2px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.4);'>🦁</div>",
-        iconSize: [36, 36],
-        iconAnchor: [18, 18]
-      });
-
-      marcadorTitular = L.marker([cuscoLat, cuscoLng], { icon: iconoTitular }).addTo(map)
-        .bindPopup("<b>LeoGas Cusco</b><br>Repartidor en Ruta");
-
-      capaVentas = L.layerGroup().addTo(map);
-      dibujarVentasEnMapa();
-    }
-
-    function dibujarVentasEnMapa() {
-      if (!capaVentas) return;
-      capaVentas.clearLayers();
-
-      registroVentas.forEach(v => {
-        if (v.lat && v.lng) {
-          const m = L.circleMarker([v.lat, v.lng], {
-            radius: 7,
-            fillColor: "#6b21a8",
-            color: "#f59e0b",
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.85
-          });
-          m.bindPopup(`<b>Entrega LeoGas: S/ ${v.total.toFixed(2)}</b><br>${v.fecha}<br>${v.cliente || ''}<br>${v.pago}`);
-          capaVentas.addLayer(m);
-        }
-      });
-    }
-
-    function alternarRastreoGPSTitular() {
-      const btn = document.getElementById('btnGPSSwitch');
-      const badge = document.getElementById('gpsBadgeHeader');
-      const coordTexto = document.getElementById('gpsCoordenadasTexto');
-
-      if (!rastreoActivo) {
-        if (!navigator.geolocation) {
-          alert("Geolocalización no soportada.");
-          return;
-        }
-
-        watchIdGPS = navigator.geolocation.watchPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-
-            if (marcadorTitular) {
-              marcadorTitular.setLatLng([lat, lng]);
-              map.panTo([lat, lng]);
-              marcadorTitular.getPopup().setContent(`<b>🦁 LeoGas Repartidor en Ruta</b><br>Precisión: ${Math.round(pos.coords.accuracy)}m`).openOn(map);
-            }
-
-            coordTexto.innerText = `Transmitiendo: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)} (${new Date().toLocaleTimeString()})`;
-          },
-          (err) => {
-            coordTexto.innerText = "Error GPS: " + err.message;
-          },
-          { enableHighAccuracy: true, maximumAge: 1000 }
-        );
-
-        rastreoActivo = true;
-        btn.innerText = "Desconectar GPS en Vivo";
-        btn.className = "btn-gps-connect disconnect";
-        badge.innerText = "GPS Repartidor: Conectado en Vivo 🟢";
-        badge.className = "gps-badge-status active";
-      } else {
-        if (watchIdGPS !== null) {
-          navigator.geolocation.clearWatch(watchIdGPS);
-          watchIdGPS = null;
-        }
-        rastreoActivo = false;
-        btn.innerText = "Conectar GPS en Vivo";
-        btn.className = "btn-gps-connect";
-        badge.innerText = "GPS Repartidor: Desconectado";
-        badge.className = "gps-badge-status";
-        coordTexto.innerText = "Estado: Desconectado.";
-      }
-    }
-
-    // CATÁLOGO PÚBLICO
-    function renderizarMenu() {
-      const contenedor = document.getElementById('contenedorEmpanadas');
-      contenedor.innerHTML = '';
-
-      catalogo.forEach(item => {
-        const estaDisponible = item.disponible !== false;
-        const card = document.createElement('article');
-        card.className = `card ${estaDisponible ? '' : 'agotado'}`;
-        card.innerHTML = `
-          <div class="card-img-wrapper">
-            <span class="card-tag" style="background:${estaDisponible ? 'rgba(107, 33, 168, 0.9)' : '#dc2626'}">
-              ${estaDisponible ? (item.tag || 'Sellado') : 'Agotado Temporalmente'}
-            </span>
-            <img src="${item.imagen}" alt="${item.nombre}" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
-          </div>
-          <div class="card-body">
-            <h4 class="card-title">${item.nombre}</h4>
-            <p class="card-desc">${item.descripcion}</p>
-            <div class="card-footer">
-              <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
-              <button class="btn-add" ${estaDisponible ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}')">
-                ${estaDisponible ? '+ Pedir Balón' : 'Agotado'}
-              </button>
-            </div>
-          </div>
-        `;
-        contenedor.appendChild(card);
-      });
-    }
-
-    function agregarAlPedido(id) {
-      sincronizarEstructuraPedido();
-      if (pedido[id]) {
-        pedido[id].cantidad += 1;
-        actualizarVistaPopup();
-      }
-    }
-
-    function cambiarCantidad(id, delta) {
-      if (pedido[id]) {
-        pedido[id].cantidad += delta;
-        if (pedido[id].cantidad < 0) pedido[id].cantidad = 0;
-        actualizarVistaPopup();
-      }
-    }
-
-    function anularProducto(id) {
-      if (pedido[id]) {
-        pedido[id].cantidad = 0;
-        actualizarVistaPopup();
-      }
-    }
-
-    function vaciarPedidoConConfirmacion() {
-      if (confirm("¿Deseas reiniciar tu pedido?")) {
-        for (const k in pedido) pedido[k].cantidad = 0;
-        actualizarVistaPopup();
-      }
-    }
-
-    function abrirModalCarrito() {
-      sincronizarEstructuraPedido();
-      actualizarVistaPopup();
-      document.getElementById('cartModalOverlay').style.display = 'flex';
-    }
-
-    function cerrarModalCarrito() {
-      document.getElementById('cartModalOverlay').style.display = 'none';
-    }
-
-    function cerrarSiClickAfuera(e) {
-      if (e.target.id === 'cartModalOverlay') cerrarModalCarrito();
-    }
-
-    function abrirLightboxFlyer() {
-      document.getElementById('lightboxModal').style.display = 'flex';
-    }
-
-    function cerrarLightboxFlyer() {
-      document.getElementById('lightboxModal').style.display = 'none';
-    }
-
-    function actualizarVistaPopup() {
-      let totalUnidades = 0;
-      let totalMonto = 0;
-      const listContainer = document.getElementById('popupItemsList');
-      listContainer.innerHTML = '';
-
-      catalogo.forEach(catItem => {
-        const item = pedido[catItem.id] || { id: catItem.id, nombre: catItem.nombre, precio: catItem.precio, cantidad: 0 };
-        const subtotal = item.cantidad * item.precio;
-        totalUnidades += item.cantidad;
-        totalMonto += subtotal;
-
-        const row = document.createElement('div');
-        row.className = `cart-item-row ${item.cantidad > 0 ? 'item-activo' : ''}`;
-        row.innerHTML = `
-          <div class="cart-item-info">
-            <div class="cart-item-title">${item.nombre}</div>
-            <div class="cart-item-sub">S/ ${item.precio.toFixed(2)} c/u</div>
-          </div>
-          <div class="cart-controls">
-            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', -1)">-</button>
-            <span style="font-weight:bold; font-size:13px; min-width:18px; text-align:center;">${item.cantidad}</span>
-            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', 1)">+</button>
-          </div>
-          <div class="cart-item-price-wrapper">
-            <div class="cart-item-price">S/ ${subtotal.toFixed(2)}</div>
-            <button type="button" class="btn-trash-item" title="Eliminar" onclick="anularProducto('${item.id}')">🗑️</button>
-          </div>
-        `;
-        listContainer.appendChild(row);
-      });
-
-      ultimoTotalPagar = totalMonto;
-      document.getElementById('badgeContador').innerText = `${totalUnidades}`;
-      const textoCantidad = `${totalUnidades} ${totalUnidades === 1 ? 'balón seleccionado' : 'balones seleccionados'}`;
-      document.getElementById('cartLabelTotalConCantidad').innerText = `Total a pagar (${textoCantidad}):`;
-      document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
-
-      if (metodoPago === 'Efectivo') {
-        calcularVueltoEfectivo();
-      }
-    }
-
-    // CONTROL DE MÉTODOS DE PAGO Y EFECTIVO
-    function elegirPago(metodo, boton) {
-      metodoPago = metodo;
-      document.querySelectorAll('.btn-pay-option').forEach(btn => btn.classList.remove('active'));
-      boton.classList.add('active');
-
-      const cajaEfectivo = document.getElementById('cajaEfectivoDesplegable');
-      if (metodo === 'Efectivo') {
-        cajaEfectivo.style.display = 'block';
-        calcularVueltoEfectivo();
-      } else {
-        cajaEfectivo.style.display = 'none';
-      }
-    }
-
-    function setMontoEfectivoRapido(monto) {
-      const input = document.getElementById('montoEfectivoIngresado');
-      if (monto === 'exacto') {
-        input.value = ultimoTotalPagar > 0 ? ultimoTotalPagar : '';
-      } else {
-        input.value = monto;
-      }
-      calcularVueltoEfectivo();
-    }
-
-    function calcularVueltoEfectivo() {
-      const input = document.getElementById('montoEfectivoIngresado');
-      const box = document.getElementById('cajaRespuestaVuelto');
-      const txt = document.getElementById('textoDetalleVuelto');
-      const montoTxt = document.getElementById('montoCalculadoVuelto');
-
-      const pagaCon = parseFloat(input.value);
-
-      if (isNaN(pagaCon) || pagaCon <= 0) {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "Ingresa con cuánto pagarás para calcular el vuelto";
-        montoTxt.innerText = "";
-        return;
-      }
-
-      if (ultimoTotalPagar <= 0) {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "Selecciona al menos un balón para calcular el vuelto";
-        montoTxt.innerText = "";
-        return;
-      }
-
-      const vuelto = pagaCon - ultimoTotalPagar;
-
-      if (vuelto < 0) {
-        box.className = "vuelto-badge-box alerta";
-        txt.innerText = `⚠️ El monto es menor al total (Faltan S/ ${Math.abs(vuelto).toFixed(2)})`;
-        montoTxt.innerText = "";
-      } else if (vuelto === 0) {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "✔ Pago exacto (No requiere vuelto)";
-        montoTxt.innerText = "S/ 0.00";
-      } else {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "💵 Vuelto a entregar por el repartidor:";
-        montoTxt.innerText = `S/ ${vuelto.toFixed(2)}`;
-      }
-    }
-
-    function capturarGPSCliente() {
-      const status = document.getElementById('geoStatus');
-      if (!navigator.geolocation) {
-        status.innerText = "GPS no disponible.";
-        return;
-      }
-      status.innerText = "Obteniendo coordenadas GPS en tiempo real...";
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          ubicacionClienteCoords = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude
-          };
-          status.innerText = "✔ Ubicación registrada para entrega del balón";
-          status.classList.add('ready');
-        },
-        () => {
-          status.innerText = "No se pudo obtener GPS (indica dirección en el chat).";
-        },
-        { enableHighAccuracy: true }
-      );
-    }
-
-    function enviarPedidoWhatsApp() {
-      const productosSeleccionados = Object.values(pedido).filter(item => item.cantidad > 0);
-
-      if (productosSeleccionados.length === 0) {
-        alert("Por favor selecciona al menos un balón de gas con cantidad mayor a cero.");
-        return;
-      }
-
-      const nombreCliente = document.getElementById('nombreClienteInput').value.trim();
-
-      let total = 0;
-      let detalleTexto = "";
-      let detalleProductos = [];
-      let itemsParaContabilidad = [];
-      let totalBalones = 0;
-
-      productosSeleccionados.forEach(item => {
-        const sub = item.cantidad * item.precio;
-        detalleTexto += `• ${item.cantidad}x ${item.nombre} (S/ ${sub.toFixed(2)})\n`;
-        detalleProductos.push(`${item.cantidad}x ${item.nombre}`);
-        
-        itemsParaContabilidad.push({
-          id: item.id,
-          nombre: item.nombre,
-          precio: item.precio,
-          cantidad: item.cantidad,
-          subtotal: sub
-        });
-
-        totalBalones += item.cantidad;
-        total += sub;
-      });
-
-      let pagoDetalle = metodoPago;
-      if (metodoPago === 'Efectivo') {
-        const inputEfectivo = parseFloat(document.getElementById('montoEfectivoIngresado').value);
-        if (!isNaN(inputEfectivo) && inputEfectivo > 0) {
-          const vuelto = inputEfectivo - total;
-          if (vuelto > 0) {
-            pagoDetalle = `Efectivo (Paga con S/ ${inputEfectivo.toFixed(2)} | Llevar vuelto de S/ ${vuelto.toFixed(2)})`;
-          } else if (vuelto === 0) {
-            pagoDetalle = `Efectivo (Pago exacto de S/ ${inputEfectivo.toFixed(2)})`;
-          } else {
-            pagoDetalle = `Efectivo (Indica pagar con S/ ${inputEfectivo.toFixed(2)}, monto menor al total)`;
-          }
-        } else {
-          pagoDetalle = "Efectivo (Sin vuelto especificado)";
-        }
-      }
-
-      const fechaActual = new Date();
-      const fechaISO = fechaActual.toISOString().split('T')[0];
-      const fechaFormato = fechaActual.toLocaleDateString() + ' ' + fechaActual.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-      const nuevaVenta = {
-        id: Date.now(),
-        fecha: fechaFormato,
-        fechaFiltro: fechaISO,
-        cliente: nombreCliente || 'Cliente particular',
-        productos: detalleProductos.join(', '),
-        items: itemsParaContabilidad,
-        unidades: totalBalones,
-        total: total,
-        pago: pagoDetalle,
-        lat: ubicacionClienteCoords ? ubicacionClienteCoords.lat : null,
-        lng: ubicacionClienteCoords ? ubicacionClienteCoords.lng : null
-      };
-
-      registroVentas.unshift(nuevaVenta);
-      localStorage.setItem('gas_ventas', JSON.stringify(registroVentas));
-      dibujarVentasEnMapa();
-
-      let mensaje = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
-      if (nombreCliente) {
-        mensaje += `*👤 Preguntar por:* ${nombreCliente}\n`;
-      }
-      mensaje += `*Detalle:*\n${detalleTexto}\n`;
-      mensaje += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
-      mensaje += `*Paga con:* ${pagoDetalle}\n`;
-
-      if (ubicacionClienteCoords) {
-        mensaje += `*Ubicación GPS:* https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}\n`;
-      } else {
-        mensaje += `*Ubicación GPS:* (Ubicación pendiente de confirmación en Cusco)\n`;
-      }
-
-      mensaje += `\n¿Me confirman tiempo estimado de entrega a mi domicilio?`;
-
-      const numWspDestino = configTelefonos.whatsapp.replace(/\D/g,'');
-      const url = `https://wa.me/${numWspDestino}?text=${encodeURIComponent(mensaje)}`;
-      window.open(url, '_blank');
-      
-      for (const k in pedido) pedido[k].cantidad = 0;
-      document.getElementById('montoEfectivoIngresado').value = '';
-      document.getElementById('nombreClienteInput').value = '';
-      actualizarVistaPopup();
-      cerrarModalCarrito();
-    }
-
-    // PANEL ADMIN
-    function abrirModalAdmin() {
-      if (esAdminAutenticado) mostrarDashboard();
-      else document.getElementById('modalLogin').style.display = 'flex';
-    }
-
-    function cerrarModales() {
-      document.getElementById('modalLogin').style.display = 'none';
-      document.getElementById('modalDashboard').style.display = 'none';
-    }
-
-    function autenticarAdmin(e) {
-      e.preventDefault();
-      const u = document.getElementById('adminUser').value.trim();
-      const p = document.getElementById('adminPass').value.trim();
-
-      if (u === 'admin' && p === 'regocijo123') {
-        esAdminAutenticado = true;
-        document.getElementById('modalLogin').style.display = 'none';
-        document.getElementById('btnAdminTrigger').innerText = "⚙️ Panel Activo";
-        mostrarDashboard();
-      } else {
-        alert("Credenciales incorrectas.");
-      }
-    }
-
-    function cambiarTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tabCatalogoContenido').style.display = 'none';
-      document.getElementById('tabContabilidadContenido').style.display = 'none';
-      document.getElementById('tabTelefonosContenido').style.display = 'none';
-      document.getElementById('tabGPSContenido').style.display = 'none';
-
-      if (tab === 'catalogo') {
-        document.getElementById('tabBtnCatalogo').classList.add('active');
-        document.getElementById('tabCatalogoContenido').style.display = 'block';
-      } else if (tab === 'contabilidad') {
-        document.getElementById('tabBtnContabilidad').classList.add('active');
-        document.getElementById('tabContabilidadContenido').style.display = 'block';
-        actualizarReporteContable();
-      } else if (tab === 'telefonos') {
-        document.getElementById('tabBtnTelefonos').classList.add('active');
-        document.getElementById('tabTelefonosContenido').style.display = 'block';
-        cargarConfigTelefonosEnInputs();
-      } else if (tab === 'gps') {
-        document.getElementById('tabBtnGPS').classList.add('active');
-        document.getElementById('tabGPSContenido').style.display = 'block';
-      }
-    }
-
-    function mostrarDashboard() {
-      const container = document.getElementById('adminCardsList');
-      container.innerHTML = '';
-
-      catalogo.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'admin-edit-card';
-        card.innerHTML = `
-          <div class="admin-field-row inline-row">
-            <div style="flex:2;">
-              <label>Nombre del Balón / Producto</label>
-              <input type="text" class="admin-input" id="edit-nom-${index}" value="${item.nombre}">
-            </div>
-            <div style="flex:1;">
-              <label>Precio (S/)</label>
-              <input type="number" step="0.5" class="admin-input" id="edit-pre-${index}" value="${item.precio}">
-            </div>
-          </div>
-
-          <div class="admin-field-row inline-row">
-            <div style="flex:1;">
-              <label>Estado de Stock:</label>
-              <select class="admin-input" id="edit-disp-${index}">
-                <option value="true" ${item.disponible !== false ? 'selected' : ''}>🟢 Disponible para venta</option>
-                <option value="false" ${item.disponible === false ? 'selected' : ''}>🔴 Agotado / Sin stock</option>
-              </select>
-            </div>
-            <div style="flex:1;">
-              <label>Etiqueta / Presentación:</label>
-              <input type="text" class="admin-input" id="edit-tag-${index}" value="${item.tag || 'Sellado 10kg'}">
-            </div>
-          </div>
-
-          <div class="admin-field-row">
-            <label>Descripción del Balón</label>
-            <input type="text" class="admin-input" id="edit-desc-${index}" value="${item.descripcion}">
-          </div>
-
-          <div class="admin-field-row">
-            <label>Imagen del Producto (Subir archivo o mantener actual):</label>
-            <div class="admin-img-preview-box">
-              <img id="preview-img-${index}" class="admin-thumb" src="${item.imagen}" onerror="this.src='https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80'">
-              <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
-                <input type="file" accept="image/*" id="file-img-${index}" onchange="procesarSubidaImagen(event, ${index})" style="font-size:12px;">
-                <button type="button" style="background:none; border:none; color:#dc2626; font-size:11px; text-align:left; cursor:pointer; text-decoration:underline;" onclick="quitarImagenProducto(${index})">
-                  🗑️ Quitar imagen / Usar volante por defecto
-                </button>
-              </div>
-            </div>
-            <input type="hidden" id="edit-img-${index}" value="${item.imagen}">
-          </div>
-
-          <div class="admin-card-actions">
-            <button type="button" class="btn-admin-save" onclick="guardarFila(${index})">💾 Guardar Cambios</button>
-            <button type="button" class="btn-admin-delete" onclick="eliminarProducto(${index})">🗑️ Eliminar</button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-
-      document.getElementById('modalDashboard').style.display = 'flex';
-      cambiarTab('catalogo');
-    }
-
-    // SUBIR IMAGEN DESDE CELULAR (BASE64)
-    function procesarSubidaImagen(event, index) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64Data = e.target.result;
-        document.getElementById(`edit-img-${index}`).value = base64Data;
-        document.getElementById(`preview-img-${index}`).src = base64Data;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function quitarImagenProducto(index) {
-      const defaultImg = "1000360632_2.jpg";
-      document.getElementById(`edit-img-${index}`).value = defaultImg;
-      document.getElementById(`preview-img-${index}`).src = defaultImg;
-    }
-
-    function guardarFila(index) {
-      catalogo[index].nombre = document.getElementById(`edit-nom-${index}`).value.trim();
-      catalogo[index].precio = parseFloat(document.getElementById(`edit-pre-${index}`).value) || 0;
-      catalogo[index].descripcion = document.getElementById(`edit-desc-${index}`).value.trim();
-      catalogo[index].tag = document.getElementById(`edit-tag-${index}`).value.trim();
-      catalogo[index].disponible = document.getElementById(`edit-disp-${index}`).value === 'true';
-      catalogo[index].imagen = document.getElementById(`edit-img-${index}`).value.trim();
-
-      localStorage.setItem('gas_menu', JSON.stringify(catalogo));
-      sincronizarEstructuraPedido();
-      renderizarMenu();
-      actualizarVistaPopup();
-      alert(`Producto "${catalogo[index].nombre}" guardado.`);
-    }
-
-    function eliminarProducto(index) {
-      const nombre = catalogo[index].nombre;
-      if (confirm(`¿Eliminar "${nombre}"?`)) {
-        const idEliminado = catalogo[index].id;
-        catalogo.splice(index, 1);
-        delete pedido[idEliminado];
-
-        localStorage.setItem('gas_menu', JSON.stringify(catalogo));
-        sincronizarEstructuraPedido();
-        renderizarMenu();
-        actualizarVistaPopup();
-        mostrarDashboard();
-      }
-    }
-
-    function agregarNuevoProducto() {
-      const nuevoItem = {
-        id: "gas-" + Date.now(),
-        nombre: "Balón Gas Nuevo (10kg)",
-        tag: "Sellado",
-        descripcion: "Balón de 10kg con válvula de seguridad y peso exacto.",
-        precio: 50.00,
-        disponible: true,
-        imagen: "medidas-de-balon-de-gas-de-10-Kg (1).png"
-      };
-
-      catalogo.unshift(nuevoItem);
-      localStorage.setItem('gas_menu', JSON.stringify(catalogo));
-      sincronizarEstructuraPedido();
-      renderizarMenu();
-      actualizarVistaPopup();
-      mostrarDashboard();
-    }
-
-    // REPORTE CONTABLE Y VENTAS
-    function actualizarReporteContable() {
-      const filtro = document.getElementById('filtroFechaContable').value;
-      const tbodyDetalle = document.getElementById('tablaContableBody');
-      const tbodyTipo = document.getElementById('tablaPorTipoBody');
-      tbodyDetalle.innerHTML = '';
-      tbodyTipo.innerHTML = '';
-
-      let ventasFiltradas = registroVentas;
-      if (filtro) ventasFiltradas = registroVentas.filter(v => v.fechaFiltro === filtro);
-
-      let sumaTotal = 0;
-      let totalBalones = 0;
-      const desglosePorTipo = {};
-
-      ventasFiltradas.forEach(v => {
-        sumaTotal += v.total;
-        totalBalones += v.unidades;
-
-        if (v.items && Array.isArray(v.items)) {
-          v.items.forEach(it => {
-            if (!desglosePorTipo[it.nombre]) desglosePorTipo[it.nombre] = { cantidad: 0, ingresos: 0 };
-            desglosePorTipo[it.nombre].cantidad += it.cantidad;
-            desglosePorTipo[it.nombre].ingresos += it.subtotal;
-          });
-        }
-
-        const ubiTexto = (v.lat && v.lng) 
-          ? `<a href="https://www.google.com/maps?q=${v.lat},${v.lng}" target="_blank" style="color:#6b21a8; font-weight:bold;">Ver Mapa</a>` 
-          : 'No enviada';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${v.fecha}</strong></td>
-          <td>${v.cliente || 'Particular'}</td>
-          <td>${v.productos}</td>
-          <td><strong>S/ ${v.total.toFixed(2)}</strong></td>
-          <td>${v.pago}</td>
-          <td>${ubiTexto}</td>
-        `;
-        tbodyDetalle.appendChild(tr);
-      });
-
-      const tiposArray = Object.keys(desglosePorTipo);
-      if (tiposArray.length === 0) {
-        tbodyTipo.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:12px;">No hay ventas registradas en este periodo.</td></tr>`;
-      } else {
-        tiposArray.forEach(nombreTipo => {
-          const datos = desglosePorTipo[nombreTipo];
-          const porcentaje = sumaTotal > 0 ? ((datos.ingresos / sumaTotal) * 100).toFixed(1) : 0;
-
-          const trTipo = document.createElement('tr');
-          trTipo.innerHTML = `
-            <td><strong>${nombreTipo}</strong></td>
-            <td>${datos.cantidad} balones</td>
-            <td><strong>S/ ${datos.ingresos.toFixed(2)}</strong></td>
-            <td>
-              <span style="background:#f3e8ff; color:var(--primary-dark); padding:2px 8px; border-radius:10px; font-weight:bold;">
-                ${porcentaje}%
-              </span>
-            </td>
-          `;
-          tbodyTipo.appendChild(trTipo);
-        });
-      }
-
-      document.getElementById('resumenMontoTotal').innerText = `S/ ${sumaTotal.toFixed(2)}`;
-      document.getElementById('resumenCantPedidos').innerText = ventasFiltradas.length;
-      document.getElementById('resumenEmpanadasVendidas').innerText = totalBalones;
-    }
-
-    function limpiarFiltroFecha() {
-      document.getElementById('filtroFechaContable').value = '';
-      actualizarReporteContable();
-    }
-
-    function imprimirReporteVentas() {
-      window.print();
-    }
-
-    // CONFIGURACIÓN DE TELÉFONOS
-    function cargarConfigTelefonosEnInputs() {
-      document.getElementById('configWspNum').value = configTelefonos.whatsapp;
-      document.getElementById('configTel1').value = configTelefonos.tel1;
-      document.getElementById('configTel2').value = configTelefonos.tel2;
-      document.getElementById('configTel3').value = configTelefonos.tel3;
-    }
-
-    function guardarConfiguracionTelefonos() {
-      configTelefonos.whatsapp = document.getElementById('configWspNum').value.trim();
-      configTelefonos.tel1 = document.getElementById('configTel1').value.trim();
-      configTelefonos.tel2 = document.getElementById('configTel2').value.trim();
-      configTelefonos.tel3 = document.getElementById('configTel3').value.trim();
-
-      localStorage.setItem('gas_telefonos', JSON.stringify(configTelefonos));
-      renderizarTelefonosFlyer();
-      alert("Números de contacto actualizados correctamente.");
-    }
-
-async function cargarCatalogoDesdeGitHub() {
-      try {
-        const res = await fetch('productos.json?v=' + Date.now());
-        if (res.ok) {
-          catalogo = await res.json();
-          sincronizarEstructuraPedido();
-          renderizarMenu();
-          actualizarVistaPopup();
-        }
-      } catch (err) {
-        console.log("Error al cargar productos.json, usando catálogo por defecto:", err);
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      renderizarTelefonosFlyer();
-      sincronizarEstructuraPedido();
-      renderizarMenu();
-      iniciarMapaCusco();
-      actualizarVistaPopup();
-      cargarCatalogoDesdeGitHub();
-    });
-  </script>
-</body>
-</html>
+          <div class="popup-section-label" style="margin-bottom:
