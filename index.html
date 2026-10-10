@@ -1659,7 +1659,22 @@ Aquí tienes el código completo con la pestaña de Teléfonos y WhatsApp elimin
       }
     ];
 
-    let catalogo = JSON.parse(localStorage.getItem('gas_menu')) || menuInicial;
+    let catalogo = menuInicial;
+
+async function cargarCatalogoDesdeJSON() {
+  try {
+    // Añadimos timestamp para evitar que el navegador guarde en caché el archivo viejo
+    const res = await fetch('productos.json?v=' + Date.now());
+    if (res.ok) {
+      catalogo = await res.json();
+      sincronizarEstructuraPedido();
+      renderizarMenu();
+      actualizarVistaPopup();
+    }
+  } catch (e) {
+    console.log("Cargando catálogo por defecto...", e);
+  }
+}
     let registroVentas = JSON.parse(localStorage.getItem('gas_ventas')) || [];
 
     const pedido = {};
