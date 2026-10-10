@@ -2388,6 +2388,7 @@ async function cargarCatalogoDesdeJSON() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  cargarCatalogoDesdeJSON();
   sincronizarEstructuraPedido();
   renderizarMenu();
   iniciarMapaCusco();
