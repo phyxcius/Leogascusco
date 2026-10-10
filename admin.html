@@ -5,50 +5,98 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LeoGas Cusco</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 680px; margin: auto; line-height: 1.5; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 800px; margin: auto; }
     h2 { color: #6b21a8; margin-bottom: 6px; }
+    
+    .dashboard-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+    .tab-btn { background: none; border: none; font-weight: 800; font-size: 14px; padding: 8px 14px; color: #64748b; cursor: pointer; border-radius: 8px; }
+    .tab-btn.active { background: #f3e8ff; color: #581c87; }
+
+    .token-box { background: #fef08a; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #eab308; }
     .card { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    
     label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; }
     input, textarea, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    
     .btn { padding: 10px 14px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; }
     .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; }
     .btn-add { background: #16a34a; color: white; margin-bottom: 14px; width: 100%; font-size: 14px; }
     .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; margin-top: 10px; font-size: 12px; }
-    .token-box { background: #fef08a; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #eab308; }
-    .status-msg { margin-top: 10px; font-weight: bold; font-size: 13px; text-align: center; }
+    
+    .admin-img-preview-box { display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #faf5ff; padding: 10px; border-radius: 8px; border: 1px solid #e9d5ff; }
+    .admin-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; }
+
+    /* TABLA REPORTES */
+    .custom-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; margin-top: 10px; }
+    .custom-table th, .custom-table td { border: 1px solid #e2e8f0; padding: 8px 10px; }
+    .custom-table th { background: #f1f5f9; color: #334155; }
+    .btn-print { background: #2563eb; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #areaImpresion, #areaImpresion * { visibility: visible; }
+      #areaImpresion { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body>
 
-  <h2>🦁 Panel de Gestión LeoGas</h2>
-  <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
-    Cualquier cambio guardado aquí se enviará directamente a GitHub.
-  </p>
+  <h2>🦁 Panel de Administración LeoGas</h2>
+  <p style="font-size: 13px; color: #64748b;">Gestiona tus productos y reportes. Los cambios se guardan directamente en GitHub.</p>
 
-  <div class="token-box">
+  <div class="token-box no-print">
     <label for="ghToken">Token Personal de GitHub:</label>
     <input type="password" id="ghToken" placeholder="github_pat_...">
     <button class="btn" style="background:#1e1b4b; color:#fff; padding:6px 12px; font-size:12px; margin-top:6px;" onclick="guardarTokenManual()">Guardar Token</button>
   </div>
 
-  <button class="btn btn-add" onclick="agregarNuevoProducto()">➕ Agregar Balón al Catálogo</button>
-  
-  <div id="listaProductos">Cargando productos desde GitHub...</div>
-  
-  <button class="btn btn-save" id="btnPublicar" onclick="sincronizarConGitHub()">🚀 Guardar y Publicar en GitHub</button>
-  <div class="status-msg" id="statusMsg"></div>
+  <div class="dashboard-tabs no-print">
+    <button class="tab-btn active" id="tabBtnProductos" onclick="cambiarTab('productos')">📝 Balones y Precios</button>
+    <button class="tab-btn" id="tabBtnReportes" onclick="cambiarTab('reportes')">📊 Reporte Contable & Ventas</button>
+  </div>
+
+  <!-- SECCIÓN BALONES -->
+  <div id="seccionProductos">
+    <button class="btn btn-add no-print" onclick="agregarNuevoProducto()">➕ Agregar Nuevo Balón</button>
+    <div id="listaProductos">Cargando catálogo...</div>
+    <button class="btn btn-save no-print" id="btnPublicar" onclick="sincronizarConGitHub()">🚀 Guardar y Publicar en GitHub</button>
+    <div id="statusMsg" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
+  </div>
+
+  <!-- SECCIÓN REPORTES -->
+  <div id="seccionReportes" style="display: none;">
+    <div id="areaImpresion">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>Reporte de Entregas Realizadas</h3>
+        <button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir Reporte</button>
+      </div>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Cliente</th>
+            <th>Detalle</th>
+            <th>Total</th>
+            <th>Pago</th>
+          </tr>
+        </thead>
+        <tbody id="tablaVentasBody"></tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
     const USUARIO = "phyxcius";
     const REPOSITORIO = "Leogascusco";
     const ARCHIVO = "productos.json";
-    const TOKEN_POR_DEFECTO = "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 ";
+    const TOKEN_DEFAULT = "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";
 
     let productos = [];
     let fileSha = "";
 
     function obtenerToken() {
-      return localStorage.getItem('gh_admin_token') || TOKEN_POR_DEFECTO;
+      return localStorage.getItem('gh_admin_token') || TOKEN_DEFAULT;
     }
 
     function guardarTokenManual() {
@@ -59,61 +107,50 @@
       cargarDesdeGitHub();
     }
 
+    function cambiarTab(tab) {
+      document.getElementById('tabBtnProductos').classList.toggle('active', tab === 'productos');
+      document.getElementById('tabBtnReportes').classList.toggle('active', tab === 'reportes');
+      document.getElementById('seccionProductos').style.display = (tab === 'productos') ? 'block' : 'none';
+      document.getElementById('seccionReportes').style.display = (tab === 'reportes') ? 'block' : 'none';
+      if (tab === 'reportes') renderizarReporte();
+    }
+
     async function cargarDesdeGitHub() {
       const token = obtenerToken();
       document.getElementById('ghToken').value = token;
 
       try {
         const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
-          headers: {
-            "Authorization": `token ${token}`,
-            "Accept": "application/vnd.github.v3+json"
-          }
+          headers: { "Authorization": `token ${token}` }
         });
 
         if (res.ok) {
           const data = await res.json();
           fileSha = data.sha;
-          const contenidoDecodificado = decodeURIComponent(escape(atob(data.content)));
-          productos = JSON.parse(contenidoDecodificado);
+          productos = JSON.parse(decodeURIComponent(escape(atob(data.content))));
         } else {
           productos = [
-            {
-              id: "gas-1",
-              nombre: "Balón LeoGas 10kg Normal o Regular",
-              tag: "El Moradito Rendidor",
-              descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad garantizado.",
-              precio: 50,
-              disponible: true,
-              imagen: "medidas-de-balon-de-gas-de-10-Kg (1).png"
-            },
-            {
-              id: "gas-2",
-              nombre: "Balón Gas Premium 10kg",
-              tag: "Máximo Rendimiento",
-              descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
-              precio: 55,
-              disponible: true,
-              imagen: "medidas-de-balon-de-gas-de-10-Kg (1).png"
-            }
+            { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad.", precio: 50, disponible: true, imagen: "1791513590376.jpg" },
+            { id: "gas-2", nombre: "Balón Gas Premium 10kg", tag: "Máximo Rendimiento", descripcion: "GLP de alta pureza con válvula anti-fugas.", precio: 55, disponible: true, imagen: "1791513590376.jpg" }
           ];
         }
       } catch (e) {
         console.error(e);
       }
-      renderizar();
+      renderizarProductos();
     }
 
-    function renderizar() {
+    function renderizarProductos() {
       const cont = document.getElementById('listaProductos');
       cont.innerHTML = '';
+
       productos.forEach((p, i) => {
         const div = document.createElement('div');
         div.className = 'card';
         div.innerHTML = `
-          <label>Nombre del Producto:</label>
+          <label>Nombre:</label>
           <input type="text" value="${p.nombre}" onchange="productos[${i}].nombre = this.value">
-          
+
           <div style="display:flex; gap:10px;">
             <div style="flex:1;">
               <label>Precio (S/):</label>
@@ -131,13 +168,30 @@
           <label>Descripción:</label>
           <input type="text" value="${p.descripcion || ''}" onchange="productos[${i}].descripcion = this.value">
 
-          <label>Archivo de imagen:</label>
-          <input type="text" value="${p.imagen}" onchange="productos[${i}].imagen = this.value">
+          <label>Imagen del Balón:</label>
+          <div class="admin-img-preview-box">
+            <img id="prev-${i}" class="admin-thumb" src="${p.imagen}" onerror="this.src='1791513590376.jpg'">
+            <div style="flex:1;">
+              <input type="file" accept="image/*" onchange="subirImagen(event, ${i})" style="font-size:12px;">
+              <input type="text" value="${p.imagen}" placeholder="o escribe nombre de archivo" onchange="productos[${i}].imagen = this.value; document.getElementById('prev-${i}').src = this.value;" style="margin-top:4px;">
+            </div>
+          </div>
 
-          <button class="btn btn-del" onclick="eliminar(${i})">🗑️ Eliminar Balón</button>
+          <button class="btn btn-del" onclick="eliminarProducto(${i})">🗑️ Eliminar Producto</button>
         `;
         cont.appendChild(div);
       });
+    }
+
+    function subirImagen(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        productos[index].imagen = e.target.result;
+        document.getElementById(`prev-${index}`).src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
 
     function agregarNuevoProducto() {
@@ -145,18 +199,18 @@
         id: "gas-" + Date.now(),
         nombre: "Nuevo Balón de Gas",
         tag: "Sellado",
-        descripcion: "Balón sellado con peso verificado.",
+        descripcion: "Balón con precinto de garantía y peso exacto.",
         precio: 50.00,
         disponible: true,
-        imagen: "1000360632_2.jpg"
+        imagen: "1791513590376.jpg"
       });
-      renderizar();
+      renderizarProductos();
     }
 
-    function eliminar(i) {
+    function eliminarProducto(i) {
       if (confirm(`¿Eliminar "${productos[i].nombre}"?`)) {
         productos.splice(i, 1);
-        renderizar();
+        renderizarProductos();
       }
     }
 
@@ -166,25 +220,21 @@
       const msg = document.getElementById('statusMsg');
       btn.disabled = true;
       btn.innerText = "⏳ Guardando en GitHub...";
-      msg.innerText = "";
 
-      // Si no tenemos el SHA, intentamos obtenerlo antes de enviar
-      if (!fileSha) {
-        try {
-          const checkRes = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
-            headers: { "Authorization": `token ${token}` }
-          });
-          if (checkRes.ok) {
-            const checkData = await checkRes.json();
-            fileSha = checkData.sha;
-          }
-        } catch (e) {}
-      }
+      // Obtener SHA actualizado antes de guardar
+      try {
+        const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
+          headers: { "Authorization": `token ${token}` }
+        });
+        if (check.ok) {
+          const d = await check.json();
+          fileSha = d.sha;
+        }
+      } catch (e) {}
 
-      const nuevoContenido = btoa(unescape(encodeURIComponent(JSON.stringify(productos, null, 2))));
       const payload = {
-        message: "Actualización de precios desde admin.html",
-        content: nuevoContenido,
+        message: "Actualización de catálogo LeoGas desde admin.html",
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(productos, null, 2)))),
         branch: "main"
       };
       if (fileSha) payload.sha = fileSha;
@@ -199,24 +249,47 @@
           body: JSON.stringify(payload)
         });
 
-        const respData = await res.json();
-
         if (!res.ok) {
-          throw new Error(respData.message || "Error desconocido");
+          const err = await res.json();
+          throw new Error(err.message || "Error al actualizar");
         }
 
-        fileSha = respData.content.sha;
+        const data = await res.json();
+        fileSha = data.content.sha;
         msg.style.color = "#15803d";
         msg.innerText = "✔ ¡Catálogo guardado en GitHub exitosamente!";
-        alert("✔ ¡Guardado con éxito! En ~30 segundos se actualizará en todos los dispositivos.");
+        alert("✔ ¡Guardado con éxito! En ~30 segundos se verá en todas partes.");
       } catch (err) {
         msg.style.color = "#dc2626";
         msg.innerText = "Error: " + err.message;
-        alert("Detalle del error devuelto por GitHub: " + err.message);
+        alert("Error de GitHub: " + err.message);
       } finally {
         btn.disabled = false;
         btn.innerText = "🚀 Guardar y Publicar en GitHub";
       }
+    }
+
+    function renderizarReporte() {
+      const ventas = JSON.parse(localStorage.getItem('gas_ventas')) || [];
+      const tbody = document.getElementById('tablaVentasBody');
+      tbody.innerHTML = '';
+
+      if (ventas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:12px; color:#94a3b8;">No hay ventas registradas aún.</td></tr>';
+        return;
+      }
+
+      ventas.forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${v.fecha}</td>
+          <td>${v.cliente || 'Particular'}</td>
+          <td>${v.productos}</td>
+          <td><strong>S/ ${v.total.toFixed(2)}</strong></td>
+          <td>${v.pago}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     window.onload = cargarDesdeGitHub;
