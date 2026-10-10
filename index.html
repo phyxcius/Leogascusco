@@ -47,10 +47,18 @@
     .nav-container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 12px 20px;
+      padding: 10px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .brand {
@@ -76,7 +84,7 @@
     }
 
     .brand-text h1 {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 900;
       line-height: 1.1;
       color: var(--primary);
@@ -89,6 +97,53 @@
       letter-spacing: 1px;
       color: var(--dark);
       font-weight: 700;
+    }
+
+    /* LOGO LA CHUSPA EN LA PARTE SUPERIOR */
+    .chuspa-nav-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fefce8;
+      border: 1.5px solid #eab308;
+      padding: 5px 12px 5px 6px;
+      border-radius: 26px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(234, 179, 8, 0.2);
+    }
+
+    .chuspa-nav-badge:hover {
+      transform: scale(1.04);
+      background: #ffffff;
+      box-shadow: 0 4px 10px rgba(107, 33, 168, 0.25);
+    }
+
+    .chuspa-nav-img {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #ca8a04;
+      background: #fff;
+    }
+
+    .chuspa-nav-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .chuspa-nav-title {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .chuspa-nav-sub {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #b45309;
     }
 
     .nav-cta {
@@ -109,7 +164,7 @@
     /* HERO */
     .hero {
       background: linear-gradient(135deg, #fef08a 0%, #fde047 50%, #facc15 100%);
-      padding: 44px 20px 50px;
+      padding: 38px 20px 44px;
       text-align: center;
       border-bottom: 2px solid #eab308;
     }
@@ -133,7 +188,7 @@
     }
 
     .hero h2 {
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 900;
       color: var(--dark);
       line-height: 1.2;
@@ -143,7 +198,7 @@
     .hero p {
       font-size: 16px;
       color: #475569;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       font-weight: 600;
     }
 
@@ -170,26 +225,26 @@
     /* VOLANTE */
     .flyer-section {
       max-width: 1200px;
-      margin: 30px auto;
+      margin: 26px auto;
       padding: 0 20px;
     }
 
     .flyer-card {
       background: var(--white);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 22px;
       box-shadow: var(--shadow);
       border: 2px solid #fde047;
       display: flex;
-      gap: 28px;
+      gap: 26px;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .flyer-img-container {
       flex: 1;
-      min-width: 260px;
-      max-width: 380px;
+      min-width: 250px;
+      max-width: 360px;
       margin: 0 auto;
       cursor: pointer;
     }
@@ -221,24 +276,24 @@
     }
 
     .flyer-info h3 {
-      font-size: 24px;
+      font-size: 23px;
       font-weight: 900;
       color: var(--primary);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .flyer-slogan {
       font-size: 15px;
       font-weight: 700;
       color: #c2410c;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .flyer-contact-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .contact-button {
@@ -261,10 +316,10 @@
       border-color: #818cf8;
     }
 
-    /* MAPA */
+    /* MAPA Y LEYENDA */
     .map-section {
       max-width: 1200px;
-      margin: 20px auto 40px;
+      margin: 20px auto 36px;
       padding: 0 20px;
     }
 
@@ -274,7 +329,6 @@
       padding: 16px;
       box-shadow: var(--shadow);
       border: 1px solid #e2e8f0;
-      position: relative;
     }
 
     .map-header {
@@ -283,7 +337,7 @@
       align-items: center;
       margin-bottom: 12px;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
     }
 
     .map-header h3 {
@@ -295,16 +349,36 @@
       gap: 8px;
     }
 
-    .gps-badge-status {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 12px;
-      background: #dcfce7;
-      color: #15803d;
+    /* LEYENDA ONLINE / OFFLINE SOBRE EL MAPA */
+    .gps-legend-box {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+
+    .legend-item.online {
+      color: #15803d;
+    }
+
+    .legend-item.offline {
+      color: #64748b;
+    }
+
+    .legend-divider {
+      color: #cbd5e1;
+      font-size: 12px;
     }
 
     .map-wrapper {
@@ -320,62 +394,7 @@
       z-index: 10;
     }
 
-    /* BADGE EN ESQUINA: LA CHUSPA TECH (BY LA CHUSPA ANUNCIOS) */
-    .brand-partner-badge {
-      position: absolute;
-      bottom: 14px;
-      right: 14px;
-      z-index: 999;
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(6px);
-      padding: 6px 12px 6px 8px;
-      border-radius: 30px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
-      border: 1px solid #eab308;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      text-decoration: none;
-      transition: all 0.25s ease;
-    }
-
-    .brand-partner-badge:hover {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 6px 18px rgba(107, 33, 168, 0.3);
-      background: #ffffff;
-      border-color: #ca8a04;
-    }
-
-    .brand-partner-img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid #eab308;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      background: #fff;
-    }
-
-    .brand-partner-texts {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.15;
-    }
-
-    .brand-partner-name {
-      font-size: 12px;
-      font-weight: 900;
-      color: #6b21a8;
-      letter-spacing: 0.3px;
-    }
-
-    .brand-partner-sub {
-      font-size: 9.5px;
-      font-weight: 700;
-      color: #b45309;
-    }
-
-    /* EFECTO GPS: LEONCITO CON LLAMA ARDIENTE Y PULSO TIPO GOOGLE MAPS */
+    /* EFECTO GPS: LEONCITO CON LLAMA ARDIENTE Y PULSO */
     .custom-gps-marker {
       position: relative;
       width: 48px;
@@ -385,7 +404,6 @@
       justify-content: center;
     }
 
-    /* Pulso radar exterior Google Maps */
     .gps-radar-pulse {
       position: absolute;
       width: 58px;
@@ -398,21 +416,11 @@
     }
 
     @keyframes radarPulse {
-      0% {
-        transform: scale(0.6);
-        opacity: 0.9;
-      }
-      70% {
-        transform: scale(1.6);
-        opacity: 0.15;
-      }
-      100% {
-        transform: scale(1.9);
-        opacity: 0;
-      }
+      0% { transform: scale(0.6); opacity: 0.9; }
+      70% { transform: scale(1.6); opacity: 0.15; }
+      100% { transform: scale(1.9); opacity: 0; }
     }
 
-    /* Círculo base del leoncito */
     .lion-badge-circle {
       position: relative;
       width: 42px;
@@ -428,7 +436,6 @@
       z-index: 2;
     }
 
-    /* Fuego ardiente que brota en la cabeza del leoncito */
     .fire-flame-emitter {
       position: absolute;
       top: -15px;
@@ -1019,20 +1026,46 @@
       max-height: 90vh;
       border-radius: 12px;
     }
+
+    @media (max-width: 650px) {
+      .nav-container {
+        justify-content: center;
+      }
+      .brand-section {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .map-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- HEADER CON LOGO LEOGAS Y LOGO LA CHUSPA EN EL MEDIO -->
   <header>
     <div class="nav-container">
-      <a href="#" class="brand">
-        <div class="brand-icon">🦁</div>
-        <div class="brand-text">
-          <h1>LeoGas Cusco</h1>
-          <span>Llamagas • El Moradito Rendidor</span>
-        </div>
-      </a>
+      <div class="brand-section">
+        <a href="#" class="brand">
+          <div class="brand-icon">🦁</div>
+          <div class="brand-text">
+            <h1>LeoGas Cusco</h1>
+            <span>Llamagas • El Moradito Rendidor</span>
+          </div>
+        </a>
+
+        <!-- LOGO LA CHUSPA TECH AL COSTADO -->
+        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-nav-badge" title="Visitar La Chuspa Anuncios">
+          <img src="CHUSPITA-circulo.png" alt="La Chuspa Anuncios" class="chuspa-nav-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+          <div class="chuspa-nav-info">
+            <span class="chuspa-nav-title">La Chuspa Tech</span>
+            <span class="chuspa-nav-sub">by La Chuspa Anuncios</span>
+          </div>
+        </a>
+      </div>
+
       <div class="nav-actions">
         <a href="#menu" class="nav-cta">Pedir Gas</a>
       </div>
@@ -1077,27 +1110,28 @@
     </div>
   </section>
 
-  <!-- MAPA CUSCO -->
+  <!-- MAPA CUSCO CON LEYENDA ONLINE/OFFLINE -->
   <section class="map-section">
     <div class="map-card">
       <div class="map-header">
         <h3>📍 Repartidor en Ruta LeoGas - Cusco</h3>
-        <span class="gps-badge-status">
-          <span style="font-size:10px;">●</span> En Servicio Activo
-        </span>
+        
+        <!-- LEYENDA DEL ESTADO DEL LEONCITO -->
+        <div class="gps-legend-box">
+          <div class="legend-item online" title="Repartidor activo con ubicación">
+            <span style="font-size:14px;">🦁🔥</span>
+            <span>Online</span>
+          </div>
+          <span class="legend-divider">|</span>
+          <div class="legend-item offline" title="Repartidor desconectado">
+            <span style="font-size:14px; opacity:0.6;">🦁💤</span>
+            <span>Offline</span>
+          </div>
+        </div>
       </div>
 
       <div class="map-wrapper">
         <div id="cuscoMap"></div>
-
-        <!-- INSIGNIA FLOTANTE: LA CHUSPA TECH (BY LA CHUSPA ANUNCIOS) -->
-        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="brand-partner-badge" title="Visitar La Chuspa Anuncios">
-          <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="brand-partner-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
-          <div class="brand-partner-texts">
-            <span class="brand-partner-name">La Chuspa Tech</span>
-            <span class="brand-partner-sub">by La Chuspa Anuncios</span>
-          </div>
-        </a>
       </div>
     </div>
   </section>
@@ -1226,7 +1260,10 @@
           pedido[item.id].nombre = item.nombre;
           pedido[item.id].precio = item.precio;
           pedido[item.id].disponible = estaDisponible;
-          if (!estaDisponible) pedido[item.id].cantidad = 0;
+          // Si fue bloqueado en admin.html se anula cualquier cantidad
+          if (!estaDisponible) {
+            pedido[item.id].cantidad = 0;
+          }
         }
       });
     }
@@ -1249,7 +1286,7 @@
       `;
     }
 
-    // INICIALIZAR MAPA CON EFECTO DE UBICACIÓN Y FUEGO ARDIENTE EN EL LEONCITO
+    // MAPA CUSCO CON ICONO EN LLAMAS (ONLINE)
     function iniciarMapaCusco() {
       const cuscoLat = -13.5167;
       const cuscoLng = -71.9788;
@@ -1259,7 +1296,6 @@
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
-      // Icono de leoncito con pulso radar de Google Maps y fuego ardiente sobre su cabeza
       const iconoTitularConFuego = L.divIcon({
         className: 'custom-gps-container',
         html: `
@@ -1274,7 +1310,7 @@
       });
 
       L.marker([cuscoLat, cuscoLng], { icon: iconoTitularConFuego }).addTo(map)
-        .bindPopup("<b>🦁 LeoGas Cusco</b><br>Repartidor en Ruta Activo 🔥");
+        .bindPopup("<b>🦁 LeoGas Cusco</b><br>Repartidor en Ruta (Online 🔥)");
     }
 
     function renderizarMenu() {
@@ -1311,7 +1347,7 @@
       sincronizarEstructuraPedido();
       const itemCatalogo = catalogo.find(c => c.id === id);
       if (itemCatalogo && itemCatalogo.disponible === false) {
-        alert("Este balón está agotado.");
+        alert("Este producto se encuentra agotado temporalmente.");
         return;
       }
       if (pedido[id]) {
@@ -1324,7 +1360,7 @@
       if (pedido[id]) {
         const itemCatalogo = catalogo.find(c => c.id === id);
         if (delta > 0 && itemCatalogo && itemCatalogo.disponible === false) {
-          alert("Este balón está agotado.");
+          alert("Este producto no tiene stock disponible.");
           return;
         }
         pedido[id].cantidad += delta;
@@ -1369,6 +1405,7 @@
       document.getElementById('lightboxModal').style.display = 'none';
     }
 
+    // BLOQUEO EN EL CARRITO SI NO HAY STOCK
     function actualizarVistaPopup() {
       let totalUnidades = 0;
       let totalMonto = 0;
@@ -1376,10 +1413,20 @@
       listContainer.innerHTML = '';
 
       catalogo.forEach(catItem => {
-        const item = pedido[catItem.id] || { id: catItem.id, nombre: catItem.nombre, precio: catItem.precio, cantidad: 0, disponible: catItem.disponible !== false };
+        const item = pedido[catItem.id] || { 
+          id: catItem.id, 
+          nombre: catItem.nombre, 
+          precio: catItem.precio, 
+          cantidad: 0, 
+          disponible: catItem.disponible !== false 
+        };
+
         const estaDisponible = (catItem.disponible !== false);
 
-        if (!estaDisponible) item.cantidad = 0;
+        // Si fue bloqueado desde admin.html, resetea la cantidad
+        if (!estaDisponible) {
+          item.cantidad = 0;
+        }
 
         const subtotal = item.cantidad * item.precio;
         totalUnidades += item.cantidad;
@@ -1389,7 +1436,10 @@
         row.className = `cart-item-row ${!estaDisponible ? 'item-bloqueado' : (item.cantidad > 0 ? 'item-activo' : '')}`;
         row.innerHTML = `
           <div class="cart-item-info">
-            <div class="cart-item-title">${item.nombre} ${!estaDisponible ? '<span style="color:#dc2626; font-size:11px;">(Agotado)</span>' : ''}</div>
+            <div class="cart-item-title">
+              ${item.nombre} 
+              ${!estaDisponible ? '<span style="color:#dc2626; font-size:11px; font-weight:800;">(Agotado)</span>' : ''}
+            </div>
             <div class="cart-item-sub">S/ ${item.precio.toFixed(2)} c/u</div>
           </div>
           <div class="cart-controls">
@@ -1399,7 +1449,7 @@
           </div>
           <div class="cart-item-price-wrapper">
             <div class="cart-item-price">S/ ${subtotal.toFixed(2)}</div>
-            <button type="button" class="btn-trash-item" onclick="anularProducto('${item.id}')">🗑️</button>
+            <button type="button" class="btn-trash-item" title="Eliminar" onclick="anularProducto('${item.id}')">🗑️</button>
           </div>
         `;
         listContainer.appendChild(row);
@@ -1444,7 +1494,7 @@
 
       if (ultimoTotalPagar <= 0) {
         box.className = "vuelto-badge-box";
-        txt.innerText = "Selecciona al menos un balón disponible";
+        txt.innerText = "Selecciona al menos un balón disponible con stock";
         montoTxt.innerText = "";
         return;
       }
@@ -1486,7 +1536,7 @@
       const productosSeleccionados = Object.values(pedido).filter(item => item.cantidad > 0 && item.disponible !== false);
 
       if (productosSeleccionados.length === 0) {
-        alert("Por favor selecciona al menos un balón disponible.");
+        alert("Por favor selecciona al menos un balón disponible para realizar tu pedido.");
         return;
       }
 
