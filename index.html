@@ -7,10 +7,6 @@
   
   <!-- Leaflet CSS para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Firebase Realtime Database (CDN) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   
   <style>
     :root {
@@ -404,7 +400,6 @@
       justify-content: center;
     }
 
-    /* Pulso radar en vivo */
     .gps-radar-pulse {
       position: absolute;
       width: 58px;
@@ -438,22 +433,17 @@
       transition: all 0.3s ease;
     }
 
-    /* Modo apagado / Offline */
     .custom-gps-marker.offline .lion-badge-circle {
       background: #64748b;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       filter: grayscale(0.7);
     }
 
-    .custom-gps-marker.offline .gps-radar-pulse {
-      display: none;
-    }
-
+    .custom-gps-marker.offline .gps-radar-pulse,
     .custom-gps-marker.offline .fire-flame-emitter {
       display: none;
     }
 
-    /* Fuego ardiente en modo Online */
     .fire-flame-emitter {
       position: absolute;
       top: -15px;
@@ -1152,8 +1142,9 @@
     let ubicacionClienteCoords = null;
     let ultimoTotalPagar = 0;
     let map = null;
-    let marcadorRepartidor = null;
-    let repartidorOnline = false;
+
+    // ALMACENAMIENTO DE MARCADORES MULTI-REPARTIDOR
+    let marcadoresFlota = {};
 
     function renderizarTelefonosFlyer() {
       const container = document.getElementById('contenedorTelefonosFlyer');
@@ -1168,7 +1159,7 @@
       `;
     }
 
-    // MAPA CUSCO
+    // INICIALIZACIÓN DEL MAPA
     function iniciarMapaCusco() {
       const cuscoLat = -13.5167;
       const cuscoLng = -71.9788;
@@ -1178,53 +1169,63 @@
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
-      actualizarVisualizadorGPS(false, cuscoLat, cuscoLng);
+      // Flota inicial temporal hasta que cargue productos.json
+      actualizarVisualizadorGPS([
+        { id: "rep-1", nombre: "Repartidor 1", online: false, lat: cuscoLat, lng: cuscoLng }
+      ]);
     }
 
-    // ACTUALIZA EL ESTADO ONLINE / OFFLINE DEL LEONCITO DE FORMA CENTRALIZADA
-    function actualizarVisualizadorGPS(estaOnline, lat, lng) {
-      repartidorOnline = estaOnline;
+    // FUNCIÓN CENTRALIZADA: DIBUJA A TODOS LOS REPARTIDORES DE LA FLOTA
+    function actualizarVisualizadorGPS(flotaRepartidores) {
+      if (!Array.isArray(flotaRepartidores)) return;
 
+      let hayAlgunoOnline = false;
+
+      flotaRepartidores.forEach(rep => {
+        const estaOnline = (rep.online === true);
+        if (estaOnline) hayAlgunoOnline = true;
+
+        const iconoHTML = estaOnline ? `
+          <div class="custom-gps-marker">
+            <div class="gps-radar-pulse"></div>
+            <div class="fire-flame-emitter">🔥</div>
+            <div class="lion-badge-circle">🦁</div>
+          </div>
+        ` : `
+          <div class="custom-gps-marker offline">
+            <div class="lion-badge-circle">🦁</div>
+          </div>
+        `;
+
+        const icono = L.divIcon({
+          className: 'custom-gps-container',
+          html: iconoHTML,
+          iconSize: [48, 48],
+          iconAnchor: [24, 24]
+        });
+
+        const popupTexto = `<b>🦁 ${rep.nombre}</b><br>${estaOnline ? 'En Ruta Activo 🔥 (Online)' : 'Fuera de Ruta 💤 (Offline)'}`;
+
+        if (!marcadoresFlota[rep.id]) {
+          marcadoresFlota[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono })
+            .addTo(map)
+            .bindPopup(popupTexto);
+        } else {
+          marcadoresFlota[rep.id].setIcon(icono);
+          marcadoresFlota[rep.id].setLatLng([rep.lat, rep.lng]);
+          marcadoresFlota[rep.id].setPopupContent(popupTexto);
+        }
+      });
+
+      // Leyenda superior activa Online si al menos uno está en ruta
       const legOnline = document.getElementById('legendOnline');
       const legOffline = document.getElementById('legendOffline');
-
-      if (estaOnline) {
+      if (hayAlgunoOnline) {
         legOnline.classList.add('activo');
         legOffline.classList.remove('activo');
       } else {
         legOnline.classList.remove('activo');
         legOffline.classList.add('activo');
-      }
-
-      const iconoHTML = estaOnline ? `
-        <div class="custom-gps-marker">
-          <div class="gps-radar-pulse"></div>
-          <div class="fire-flame-emitter">🔥</div>
-          <div class="lion-badge-circle">🦁</div>
-        </div>
-      ` : `
-        <div class="custom-gps-marker offline">
-          <div class="lion-badge-circle">🦁</div>
-        </div>
-      `;
-
-      const nuevoIcono = L.divIcon({
-        className: 'custom-gps-container',
-        html: iconoHTML,
-        iconSize: [48, 48],
-        iconAnchor: [24, 24]
-      });
-
-      const popupTexto = estaOnline 
-        ? "<b>🦁 LeoGas Cusco</b><br>Repartidor en Ruta Activo 🔥 (Online)"
-        : "<b>🦁 LeoGas Cusco</b><br>Repartidor Fuera de Servicio (Offline 💤)";
-
-      if (!marcadorRepartidor) {
-        marcadorRepartidor = L.marker([lat, lng], { icon: nuevoIcono }).addTo(map).bindPopup(popupTexto);
-      } else {
-        marcadorRepartidor.setIcon(nuevoIcono);
-        marcadorRepartidor.setLatLng([lat, lng]);
-        marcadorRepartidor.setPopupContent(popupTexto);
       }
     }
 
@@ -1320,6 +1321,7 @@
       document.getElementById('lightboxModal').style.display = 'none';
     }
 
+    // BLOQUEO EN EL CARRITO SI NO HAY STOCK
     function actualizarVistaPopup() {
       let totalUnidades = 0;
       let totalMonto = 0;
@@ -1496,7 +1498,7 @@
       cerrarModalCarrito();
     }
 
-    // CARGA DE DATOS CENTRALIZADOS Y ESTADO GPS
+    // CARGA DE DATOS Y RASTREO MULTI-REPARTIDOR
     async function cargarCatalogoDesdeGitHub() {
       try {
         const res = await fetch('productos.json?v=' + Date.now());
@@ -1511,9 +1513,9 @@
               whatsappNumero = telefonos.whatsapp;
               renderizarTelefonosFlyer();
             }
-            // Sincroniza estado Online / Offline global
-            if (datos.gps) {
-              actualizarVisualizadorGPS(datos.gps.online === true, datos.gps.lat || -13.5167, datos.gps.lng || -71.9788);
+            // Sincroniza la flota de repartidores en tiempo real
+            if (datos.repartidores) {
+              actualizarVisualizadorGPS(datos.repartidores);
             }
           }
           sincronizarEstructuraPedido();
@@ -1532,8 +1534,8 @@
       iniciarMapaCusco();
       actualizarVistaPopup();
       cargarCatalogoDesdeGitHub();
-      // Sondeo para sincronizar el estado cada 30 segundos
-      setInterval(cargarCatalogoDesdeGitHub, 30000);
+      // Sondeo periódico cada 20 segundos para reflejar cambios de repartidores
+      setInterval(cargarCatalogoDesdeGitHub, 20000);
     });
   </script>
 </body>
