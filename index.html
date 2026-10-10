@@ -274,6 +274,7 @@
       padding: 16px;
       box-shadow: var(--shadow);
       border: 1px solid #e2e8f0;
+      position: relative;
     }
 
     .map-header {
@@ -294,11 +295,165 @@
       gap: 8px;
     }
 
+    .gps-badge-status {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: #dcfce7;
+      color: #15803d;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .map-wrapper {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
     #cuscoMap {
       width: 100%;
-      height: 340px;
+      height: 350px;
       border-radius: 10px;
       z-index: 10;
+    }
+
+    /* BADGE EN ESQUINA: LA CHUSPA TECH (BY LA CHUSPA ANUNCIOS) */
+    .brand-partner-badge {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      z-index: 999;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(6px);
+      padding: 6px 12px 6px 8px;
+      border-radius: 30px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+      border: 1px solid #eab308;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .brand-partner-badge:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 6px 18px rgba(107, 33, 168, 0.3);
+      background: #ffffff;
+      border-color: #ca8a04;
+    }
+
+    .brand-partner-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #eab308;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      background: #fff;
+    }
+
+    .brand-partner-texts {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .brand-partner-name {
+      font-size: 12px;
+      font-weight: 900;
+      color: #6b21a8;
+      letter-spacing: 0.3px;
+    }
+
+    .brand-partner-sub {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #b45309;
+    }
+
+    /* EFECTO GPS: LEONCITO CON LLAMA ARDIENTE Y PULSO TIPO GOOGLE MAPS */
+    .custom-gps-marker {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Pulso radar exterior Google Maps */
+    .gps-radar-pulse {
+      position: absolute;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: rgba(107, 33, 168, 0.28);
+      animation: radarPulse 2s ease-out infinite;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    @keyframes radarPulse {
+      0% {
+        transform: scale(0.6);
+        opacity: 0.9;
+      }
+      70% {
+        transform: scale(1.6);
+        opacity: 0.15;
+      }
+      100% {
+        transform: scale(1.9);
+        opacity: 0;
+      }
+    }
+
+    /* Círculo base del leoncito */
+    .lion-badge-circle {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #7e22ce 0%, #4c1d95 100%);
+      border: 2.5px solid #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 23px;
+      box-shadow: 0 4px 12px rgba(107, 33, 168, 0.55);
+      z-index: 2;
+    }
+
+    /* Fuego ardiente que brota en la cabeza del leoncito */
+    .fire-flame-emitter {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 17px;
+      z-index: 3;
+      filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 10px rgba(239, 68, 68, 0.8));
+      animation: flameFlicker 0.75s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes flameFlicker {
+      0% {
+        transform: translateX(-50%) translateY(0) scale(0.9) rotate(-3deg);
+        filter: drop-shadow(0 0 4px #f59e0b) drop-shadow(0 0 7px #ea580c);
+      }
+      50% {
+        transform: translateX(-48%) translateY(-2.5px) scale(1.15) rotate(2deg);
+        filter: drop-shadow(0 0 8px #facc15) drop-shadow(0 0 12px #dc2626);
+      }
+      100% {
+        transform: translateX(-52%) translateY(-4px) scale(1.05) rotate(-2deg);
+        filter: drop-shadow(0 0 6px #f59e0b) drop-shadow(0 0 10px #b91c1c);
+      }
     }
 
     /* PRODUCTOS */
@@ -899,7 +1054,7 @@
     </div>
   </section>
 
-  <!-- VOLANTE OFICIAL -->
+  <!-- VOLANTE -->
   <section class="flyer-section">
     <div class="flyer-card">
       <div class="flyer-img-container" onclick="abrirLightboxFlyer()">
@@ -915,10 +1070,8 @@
         </p>
 
         <div class="popup-section-label" style="margin-bottom:8px;">Teléfonos de Pedido Inmediato:</div>
-        <div class="flyer-contact-grid">
-          <a href="tel:950727212" class="contact-button"><span>📞</span> 950 727 212</a>
-          <a href="tel:984285500" class="contact-button"><span>📞</span> 984 285 500</a>
-          <a href="tel:084501111" class="contact-button"><span>☎️</span> (084) 501111</a>
+        <div class="flyer-contact-grid" id="contenedorTelefonosFlyer">
+          <!-- Renderizado dinámico desde productos.json -->
         </div>
       </div>
     </div>
@@ -929,8 +1082,23 @@
     <div class="map-card">
       <div class="map-header">
         <h3>📍 Repartidor en Ruta LeoGas - Cusco</h3>
+        <span class="gps-badge-status">
+          <span style="font-size:10px;">●</span> En Servicio Activo
+        </span>
       </div>
-      <div id="cuscoMap"></div>
+
+      <div class="map-wrapper">
+        <div id="cuscoMap"></div>
+
+        <!-- INSIGNIA FLOTANTE: LA CHUSPA TECH (BY LA CHUSPA ANUNCIOS) -->
+        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="brand-partner-badge" title="Visitar La Chuspa Anuncios">
+          <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="brand-partner-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+          <div class="brand-partner-texts">
+            <span class="brand-partner-name">La Chuspa Tech</span>
+            <span class="brand-partner-sub">by La Chuspa Anuncios</span>
+          </div>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -1034,27 +1202,17 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    const WHATSAPP_NUMERO = "51969773064";
+    let whatsappNumero = "51969773064";
+    let telefonos = {
+      whatsapp: "51969773064",
+      tel1: "950 727 212",
+      tel2: "984 285 500",
+      tel3: "(084) 501111"
+    };
 
     let catalogo = [
-      {
-        id: "gas-1",
-        nombre: "Balón LeoGas 10kg Normal o Regular",
-        tag: "El Moradito Rendidor",
-        descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad garantizado.",
-        precio: 50.00,
-        disponible: true,
-        imagen: "1791513590376.jpg"
-      },
-      {
-        id: "gas-2",
-        nombre: "Balón Gas Premium 10kg",
-        tag: "Máximo Rendimiento",
-        descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
-        precio: 55.00,
-        disponible: true,
-        imagen: "1791513590376.jpg"
-      }
+      { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad.", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" },
+      { id: "gas-2", nombre: "Balón Gas Premium 10kg", tag: "Máximo Rendimiento", descripcion: "GLP de alta pureza con válvula anti-fugas.", precio: 55.00, disponible: true, imagen: "1791513590376.jpg" }
     ];
 
     const pedido = {};
@@ -1078,6 +1236,20 @@
     let ultimoTotalPagar = 0;
     let map = null;
 
+    function renderizarTelefonosFlyer() {
+      const container = document.getElementById('contenedorTelefonosFlyer');
+      const clean1 = telefonos.tel1.replace(/\D/g,'');
+      const clean2 = telefonos.tel2.replace(/\D/g,'');
+      const clean3 = telefonos.tel3.replace(/\D/g,'');
+
+      container.innerHTML = `
+        <a href="tel:${clean1}" class="contact-button"><span>📞</span> ${telefonos.tel1}</a>
+        <a href="tel:${clean2}" class="contact-button"><span>📞</span> ${telefonos.tel2}</a>
+        <a href="tel:${clean3}" class="contact-button"><span>☎️</span> ${telefonos.tel3}</a>
+      `;
+    }
+
+    // INICIALIZAR MAPA CON EFECTO DE UBICACIÓN Y FUEGO ARDIENTE EN EL LEONCITO
     function iniciarMapaCusco() {
       const cuscoLat = -13.5167;
       const cuscoLng = -71.9788;
@@ -1087,15 +1259,22 @@
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
-      const iconoTitular = L.divIcon({
-        className: 'custom-div-icon',
-        html: "<div style='background-color:#6b21a8; color:#facc15; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; border:2px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.4);'>🦁</div>",
-        iconSize: [36, 36],
-        iconAnchor: [18, 18]
+      // Icono de leoncito con pulso radar de Google Maps y fuego ardiente sobre su cabeza
+      const iconoTitularConFuego = L.divIcon({
+        className: 'custom-gps-container',
+        html: `
+          <div class="custom-gps-marker">
+            <div class="gps-radar-pulse"></div>
+            <div class="fire-flame-emitter">🔥</div>
+            <div class="lion-badge-circle">🦁</div>
+          </div>
+        `,
+        iconSize: [48, 48],
+        iconAnchor: [24, 24]
       });
 
-      L.marker([cuscoLat, cuscoLng], { icon: iconoTitular }).addTo(map)
-        .bindPopup("<b>LeoGas Cusco</b><br>Repartidor en Ruta");
+      L.marker([cuscoLat, cuscoLng], { icon: iconoTitularConFuego }).addTo(map)
+        .bindPopup("<b>🦁 LeoGas Cusco</b><br>Repartidor en Ruta Activo 🔥");
     }
 
     function renderizarMenu() {
@@ -1344,7 +1523,8 @@
 
       mensaje += `\n¿Me confirman tiempo estimado de entrega?`;
 
-      window.open(`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`, '_blank');
+      const numDestino = (telefonos.whatsapp || whatsappNumero).replace(/\D/g,'');
+      window.open(`https://wa.me/${numDestino}?text=${encodeURIComponent(mensaje)}`, '_blank');
 
       for (const k in pedido) pedido[k].cantidad = 0;
       document.getElementById('montoEfectivoIngresado').value = '';
@@ -1357,7 +1537,17 @@
       try {
         const res = await fetch('productos.json?v=' + Date.now());
         if (res.ok) {
-          catalogo = await res.json();
+          const datos = await res.json();
+          if (Array.isArray(datos)) {
+            catalogo = datos;
+          } else {
+            catalogo = datos.productos || catalogo;
+            if (datos.telefonos) {
+              telefonos = datos.telefonos;
+              whatsappNumero = telefonos.whatsapp;
+              renderizarTelefonosFlyer();
+            }
+          }
           sincronizarEstructuraPedido();
           renderizarMenu();
           actualizarVistaPopup();
@@ -1368,6 +1558,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      renderizarTelefonosFlyer();
       sincronizarEstructuraPedido();
       renderizarMenu();
       iniciarMapaCusco();
