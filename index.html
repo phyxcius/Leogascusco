@@ -2371,6 +2371,29 @@ async function cargarCatalogoDesdeJSON() {
       renderizarMenu();
       iniciarMapaCusco();
       actualizarVistaPopup();
+
+      async function cargarProductosDesdeGitHub() {
+  try {
+    // Se agrega el parámetro ?v= para evitar que el navegador guarde la versión vieja en caché
+    const res = await fetch('productos.json?v=' + Date.now());
+    if (res.ok) {
+      catalogo = await res.json();
+      sincronizarEstructuraPedido();
+      renderizarMenu();
+      actualizarVistaPopup();
+    }
+  } catch (e) {
+    console.log("Usando catálogo inicial por defecto");
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  sincronizarEstructuraPedido();
+  renderizarMenu();
+  iniciarMapaCusco();
+  actualizarVistaPopup();
+  cargarProductosDesdeGitHub(); // <-- Agrega esta línea
+});
     });
   </script>
 </body>
