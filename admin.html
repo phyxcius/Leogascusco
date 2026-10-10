@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LeoGas Cusco</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 800px; margin: auto; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 820px; margin: auto; }
     h2 { color: #6b21a8; margin-bottom: 6px; }
     
-    .dashboard-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-    .tab-btn { background: none; border: none; font-weight: 800; font-size: 14px; padding: 8px 14px; color: #64748b; cursor: pointer; border-radius: 8px; }
+    .dashboard-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; overflow-x: auto; }
+    .tab-btn { background: none; border: none; font-weight: 800; font-size: 13px; padding: 8px 14px; color: #64748b; cursor: pointer; border-radius: 8px; white-space: nowrap; }
     .tab-btn.active { background: #f3e8ff; color: #581c87; }
 
     .token-box { background: #fef08a; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #eab308; }
@@ -25,6 +25,11 @@
     
     .admin-img-preview-box { display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #faf5ff; padding: 10px; border-radius: 8px; border: 1px solid #e9d5ff; }
     .admin-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; }
+
+    /* PANEL GPS */
+    .gps-panel { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px; border-radius: 10px; margin-bottom: 16px; }
+    .btn-gps { background: #16a34a; color: #fff; padding: 10px 18px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; }
+    .btn-gps.disconnect { background: #dc2626; }
 
     /* TABLA REPORTES */
     .custom-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; margin-top: 10px; }
@@ -43,7 +48,7 @@
 <body>
 
   <h2>🦁 Panel de Administración LeoGas</h2>
-  <p style="font-size: 13px; color: #64748b;">Gestiona tus productos y reportes. Los cambios se guardan directamente en GitHub.</p>
+  <p style="font-size: 13px; color: #64748b;">Administra productos, teléfonos, GPS y reportes contables directamente en GitHub.</p>
 
   <div class="token-box no-print">
     <label for="ghToken">Token Personal de GitHub:</label>
@@ -53,10 +58,12 @@
 
   <div class="dashboard-tabs no-print">
     <button class="tab-btn active" id="tabBtnProductos" onclick="cambiarTab('productos')">📝 Balones y Precios</button>
+    <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos y WhatsApp</button>
+    <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 GPS Repartidor</button>
     <button class="tab-btn" id="tabBtnReportes" onclick="cambiarTab('reportes')">📊 Reporte Contable & Ventas</button>
   </div>
 
-  <!-- SECCIÓN BALONES -->
+  <!-- PESTAÑA 1: BALONES -->
   <div id="seccionProductos">
     <button class="btn btn-add no-print" onclick="agregarNuevoProducto()">➕ Agregar Nuevo Balón</button>
     <div id="listaProductos">Cargando catálogo...</div>
@@ -64,11 +71,46 @@
     <div id="statusMsg" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
   </div>
 
-  <!-- SECCIÓN REPORTES -->
+  <!-- PESTAÑA 2: TELÉFONOS -->
+  <div id="seccionTelefonos" style="display: none;">
+    <div class="card">
+      <h3 style="color:var(--primary); font-size:16px; margin-bottom:12px;">📞 Edición de Teléfonos del Volante y Pedidos</h3>
+      
+      <label>Número WhatsApp para Pedidos (con código de país, ej: 51969773064):</label>
+      <input type="text" id="telWhatsApp" placeholder="51969773064">
+
+      <label>Teléfono 1 (Llamada Rápida 1):</label>
+      <input type="text" id="telFijo1" placeholder="950 727 212">
+
+      <label>Teléfono 2 (Llamada Rápida 2):</label>
+      <input type="text" id="telFijo2" placeholder="984 285 500">
+
+      <label>Teléfono 3 (Fijo o Central Cusco):</label>
+      <input type="text" id="telFijo3" placeholder="(084) 501111">
+
+      <button class="btn btn-save" onclick="sincronizarConGitHub()" style="margin-top:16px;">💾 Guardar Teléfonos en GitHub</button>
+    </div>
+  </div>
+
+  <!-- PESTAÑA 3: GPS REPARTIDOR -->
+  <div id="seccionGPS" style="display: none;">
+    <div class="gps-panel">
+      <h3 style="color:#15803d; margin-bottom:6px;">📍 Transmisión de Ubicación: Repartidor en Ruta LeoGas</h3>
+      <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">
+        Activa esta opción desde tu celular mientras realizas las entregas de balones para emitir tu ubicación.
+      </p>
+      <button id="btnGPSSwitch" class="btn-gps" onclick="alternarRastreoGPSTitular()">Conectar GPS en Vivo</button>
+      <div id="gpsTextoEstado" style="margin-top:10px; font-size:12px; font-weight:bold; color:#64748b;">
+        Estado: Desconectado.
+      </div>
+    </div>
+  </div>
+
+  <!-- PESTAÑA 4: REPORTES -->
   <div id="seccionReportes" style="display: none;">
     <div id="areaImpresion">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3>Reporte de Entregas Realizadas</h3>
+        <h3>📋 Reporte de Entregas Realizadas</h3>
         <button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir Reporte</button>
       </div>
       <table class="custom-table">
@@ -93,7 +135,16 @@
     const TOKEN_DEFAULT = "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";
 
     let productos = [];
+    let telefonos = {
+      whatsapp: "51969773064",
+      tel1: "950 727 212",
+      tel2: "984 285 500",
+      tel3: "(084) 501111"
+    };
+
     let fileSha = "";
+    let watchIdGPS = null;
+    let rastreoActivo = false;
 
     function obtenerToken() {
       return localStorage.getItem('gh_admin_token') || TOKEN_DEFAULT;
@@ -108,11 +159,27 @@
     }
 
     function cambiarTab(tab) {
-      document.getElementById('tabBtnProductos').classList.toggle('active', tab === 'productos');
-      document.getElementById('tabBtnReportes').classList.toggle('active', tab === 'reportes');
-      document.getElementById('seccionProductos').style.display = (tab === 'productos') ? 'block' : 'none';
-      document.getElementById('seccionReportes').style.display = (tab === 'reportes') ? 'block' : 'none';
-      if (tab === 'reportes') renderizarReporte();
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('seccionProductos').style.display = 'none';
+      document.getElementById('seccionTelefonos').style.display = 'none';
+      document.getElementById('seccionGPS').style.display = 'none';
+      document.getElementById('seccionReportes').style.display = 'none';
+
+      if (tab === 'productos') {
+        document.getElementById('tabBtnProductos').classList.add('active');
+        document.getElementById('seccionProductos').style.display = 'block';
+      } else if (tab === 'telefonos') {
+        document.getElementById('tabBtnTelefonos').classList.add('active');
+        document.getElementById('seccionTelefonos').style.display = 'block';
+        cargarValoresTelefonosEnFormulario();
+      } else if (tab === 'gps') {
+        document.getElementById('tabBtnGPS').classList.add('active');
+        document.getElementById('seccionGPS').style.display = 'block';
+      } else if (tab === 'reportes') {
+        document.getElementById('tabBtnReportes').classList.add('active');
+        document.getElementById('seccionReportes').style.display = 'block';
+        renderizarReporte();
+      }
     }
 
     async function cargarDesdeGitHub() {
@@ -127,7 +194,14 @@
         if (res.ok) {
           const data = await res.json();
           fileSha = data.sha;
-          productos = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+          const datos = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+
+          if (Array.isArray(datos)) {
+            productos = datos;
+          } else {
+            productos = datos.productos || [];
+            if (datos.telefonos) telefonos = datos.telefonos;
+          }
         } else {
           productos = [
             { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad.", precio: 50, disponible: true, imagen: "1791513590376.jpg" },
@@ -138,6 +212,14 @@
         console.error(e);
       }
       renderizarProductos();
+      cargarValoresTelefonosEnFormulario();
+    }
+
+    function cargarValoresTelefonosEnFormulario() {
+      document.getElementById('telWhatsApp').value = telefonos.whatsapp || "51969773064";
+      document.getElementById('telFijo1').value = telefonos.tel1 || "950 727 212";
+      document.getElementById('telFijo2').value = telefonos.tel2 || "984 285 500";
+      document.getElementById('telFijo3').value = telefonos.tel3 || "(084) 501111";
     }
 
     function renderizarProductos() {
@@ -221,7 +303,16 @@
       btn.disabled = true;
       btn.innerText = "⏳ Guardando en GitHub...";
 
-      // Obtener SHA actualizado antes de guardar
+      telefonos.whatsapp = document.getElementById('telWhatsApp').value.trim();
+      telefonos.tel1 = document.getElementById('telFijo1').value.trim();
+      telefonos.tel2 = document.getElementById('telFijo2').value.trim();
+      telefonos.tel3 = document.getElementById('telFijo3').value.trim();
+
+      const objetoCompleto = {
+        productos: productos,
+        telefonos: telefonos
+      };
+
       try {
         const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
           headers: { "Authorization": `token ${token}` }
@@ -233,8 +324,8 @@
       } catch (e) {}
 
       const payload = {
-        message: "Actualización de catálogo LeoGas desde admin.html",
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(productos, null, 2)))),
+        message: "Actualización de catálogo y contactos LeoGas desde admin.html",
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(objetoCompleto, null, 2)))),
         branch: "main"
       };
       if (fileSha) payload.sha = fileSha;
@@ -257,8 +348,8 @@
         const data = await res.json();
         fileSha = data.content.sha;
         msg.style.color = "#15803d";
-        msg.innerText = "✔ ¡Catálogo guardado en GitHub exitosamente!";
-        alert("✔ ¡Guardado con éxito! En ~30 segundos se verá en todas partes.");
+        msg.innerText = "✔ ¡Cambios guardados en GitHub con éxito!";
+        alert("✔ ¡Guardado con éxito! Los balones y teléfonos se actualizarán en ~30 segundos.");
       } catch (err) {
         msg.style.color = "#dc2626";
         msg.innerText = "Error: " + err.message;
@@ -266,6 +357,40 @@
       } finally {
         btn.disabled = false;
         btn.innerText = "🚀 Guardar y Publicar en GitHub";
+      }
+    }
+
+    // CONTROL GPS REPARTIDOR
+    function alternarRastreoGPSTitular() {
+      const btn = document.getElementById('btnGPSSwitch');
+      const txt = document.getElementById('gpsTextoEstado');
+
+      if (!rastreoActivo) {
+        if (!navigator.geolocation) return alert("Geolocalización no soportada.");
+
+        watchIdGPS = navigator.geolocation.watchPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            txt.innerText = `Transmitiendo: Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)} (${new Date().toLocaleTimeString()})`;
+          },
+          (err) => { txt.innerText = "Error GPS: " + err.message; },
+          { enableHighAccuracy: true, maximumAge: 1000 }
+        );
+
+        rastreoActivo = true;
+        btn.innerText = "Desconectar GPS en Vivo";
+        btn.className = "btn-gps disconnect";
+        txt.innerText = "GPS conectado y emitiendo coordenadas 🟢";
+      } else {
+        if (watchIdGPS !== null) {
+          navigator.geolocation.clearWatch(watchIdGPS);
+          watchIdGPS = null;
+        }
+        rastreoActivo = false;
+        btn.innerText = "Conectar GPS en Vivo";
+        btn.className = "btn-gps";
+        txt.innerText = "Estado: Desconectado.";
       }
     }
 
