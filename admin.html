@@ -1,1 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración | LeoGas Cusco</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 680px; margin: auto; line-height: 1.5; }
+    h2 { color: #6b21a8; margin-bottom: 6px; }
+    .card { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; }
+    input, textarea, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    .btn { padding: 10px 14px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; }
+    .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; }
+    .btn-add { background: #16a34a; color: white; margin-bottom: 14px; width: 100%; font-size: 14px; }
+    .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; margin-top: 10px; font-size: 12px; }
+    .token-box { background: #fef08a; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #eab308; }
+    .status-msg { margin-top: 10px; font-weight: bold; font-size: 13px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <h2>🦁 Panel de Gestión LeoGas</h2>
+  <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
+    Cualquier cambio guardado aquí se enviará directamente a GitHub.
+  </p>
+
+  <div class="token-box">
+    <label for="ghToken">Token Personal de GitHub:</label>
+    <input type="password" id="ghToken" placeholder="github_pat_...">
+    <button class="btn" style="background:#1e1b4b; color:#fff; padding:6px 12px; font-size:12px; margin-top:6px;" onclick="guardarTokenManual()">Guardar Token</button>
+  </div>
+
+  <button class="btn btn-add" onclick="agregarNuevoProducto()">➕ Agregar Balón al Catálogo</button>
+  
+  <div id="listaProductos">Cargando productos desde GitHub...</div>
+  
+  <button class="btn btn-save" id="btnPublicar" onclick="sincronizarConGitHub()">🚀 Guardar y Publicar en GitHub</button>
+  <div class="status-msg" id="statusMsg"></div>
+
+  <script>
+    const USUARIO = "phyxcius";
+    const REPOSITORIO = "Leogascusco";
+    const ARCHIVO = "productos.json";
+    const TOKEN_POR_DEFECTO = "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 ";
+
+    let productos = [];
+    let fileSha = "";
+
+    function obtenerToken() {
+      return localStorage.getItem('gh_admin_token') || TOKEN_POR_DEFECTO;
+    }
+
+    function guardarTokenManual() {
+      const t = document.getElementById('ghToken').value.trim();
+      if (!t) return alert("Pega un token válido.");
+      localStorage.setItem('gh_admin_token', t);
+      alert("Token guardado localmente.");
+      cargarDesdeGitHub();
+    }
+
+    async function cargarDesdeGitHub() {
+      const token = obtenerToken();
+      document.getElementById('ghToken').value = token;
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
+          headers: {
+            "Authorization": `token ${token}`,
+            "Accept": "application/vnd.github.v3+json"
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          fileSha = data.sha;
+          const contenidoDecodificado = decodeURIComponent(escape(atob(data.content)));
+          productos = JSON.parse(contenidoDecodificado);
+        } else {
+          productos = [
+            {
+              id: "gas-1",
+              nombre: "Balón LeoGas 10kg Normal o Regular",
+              tag: "El Moradito Rendidor",
+              descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad garantizado.",
+              precio: 50,
+              disponible: true,
+              imagen: "medidas-de-balon-de-gas-de-10-Kg (1).png"
+            },
+            {
+              id: "gas-2",
+              nombre: "Balón Gas Premium 10kg",
+              tag: "Máximo Rendimiento",
+              descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
+              precio: 55,
+              disponible: true,
+              imagen: "medidas-de-balon-de-gas-de-10-Kg (1).png"
+            }
+          ];
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      renderizar();
+    }
+
+    function renderizar() {
+      const cont = document.getElementById('listaProductos');
+      cont.innerHTML = '';
+      productos.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <label>Nombre del Producto:</label>
+          <input type="text" value="${p.nombre}" onchange="productos[${i}].nombre = this.value">
+          
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+              <label>Precio (S/):</label>
+              <input type="number" step="0.5" value="${p.precio}" onchange="productos[${i}].precio = parseFloat(this.value) || 0">
+            </div>
+            <div style="flex:1;">
+              <label>Disponibilidad:</label>
+              <select onchange="productos[${i}].disponible = (this.value === 'true')">
+                <option value="true" ${p.disponible !== false ? 'selected' : ''}>🟢 Disponible</option>
+                <option value="false" ${p.disponible === false ? 'selected' : ''}>🔴 Agotado</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Descripción:</label>
+          <input type="text" value="${p.descripcion || ''}" onchange="productos[${i}].descripcion = this.value">
+
+          <label>Archivo de imagen:</label>
+          <input type="text" value="${p.imagen}" onchange="productos[${i}].imagen = this.value">
+
+          <button class="btn btn-del" onclick="eliminar(${i})">🗑️ Eliminar Balón</button>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    function agregarNuevoProducto() {
+      productos.push({
+        id: "gas-" + Date.now(),
+        nombre: "Nuevo Balón de Gas",
+        tag: "Sellado",
+        descripcion: "Balón sellado con peso verificado.",
+        precio: 50.00,
+        disponible: true,
+        imagen: "1000360632_2.jpg"
+      });
+      renderizar();
+    }
+
+    function eliminar(i) {
+      if (confirm(`¿Eliminar "${productos[i].nombre}"?`)) {
+        productos.splice(i, 1);
+        renderizar();
+      }
+    }
+
+    async function sincronizarConGitHub() {
+      const token = obtenerToken();
+      const btn = document.getElementById('btnPublicar');
+      const msg = document.getElementById('statusMsg');
+      btn.disabled = true;
+      btn.innerText = "⏳ Guardando en GitHub...";
+      msg.innerText = "";
+
+      // Si no tenemos el SHA, intentamos obtenerlo antes de enviar
+      if (!fileSha) {
+        try {
+          const checkRes = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
+            headers: { "Authorization": `token ${token}` }
+          });
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            fileSha = checkData.sha;
+          }
+        } catch (e) {}
+      }
+
+      const nuevoContenido = btoa(unescape(encodeURIComponent(JSON.stringify(productos, null, 2))));
+      const payload = {
+        message: "Actualización de precios desde admin.html",
+        content: nuevoContenido,
+        branch: "main"
+      };
+      if (fileSha) payload.sha = fileSha;
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const respData = await res.json();
+
+        if (!res.ok) {
+          throw new Error(respData.message || "Error desconocido");
+        }
+
+        fileSha = respData.content.sha;
+        msg.style.color = "#15803d";
+        msg.innerText = "✔ ¡Catálogo guardado en GitHub exitosamente!";
+        alert("✔ ¡Guardado con éxito! En ~30 segundos se actualizará en todos los dispositivos.");
+      } catch (err) {
+        msg.style.color = "#dc2626";
+        msg.innerText = "Error: " + err.message;
+        alert("Detalle del error devuelto por GitHub: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "🚀 Guardar y Publicar en GitHub";
+      }
+    }
+
+    window.onload = cargarDesdeGitHub;
+  </script>
+</body>
+</html>
 
