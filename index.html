@@ -1,3 +1,4 @@
+Aquí tienes el código completo con la pestaña de Teléfonos y WhatsApp eliminada del panel de control. Los números de contacto y el número de recepción de pedidos por WhatsApp ahora quedan fijos directamente en el script (950 727 212, 984 285 500, (084) 501111 y WhatsApp 51969773064):
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1359,8 +1360,16 @@
         </p>
 
         <div class="popup-section-label" style="margin-bottom:8px;">Teléfonos de Pedido Inmediato:</div>
-        <div class="flyer-contact-grid" id="contenedorTelefonosFlyer">
-          <!-- Renderizado dinámico desde configuración -->
+        <div class="flyer-contact-grid">
+          <a href="tel:950727212" class="contact-button">
+            <span>📞</span> 950 727 212
+          </a>
+          <a href="tel:984285500" class="contact-button">
+            <span>📞</span> 984 285 500
+          </a>
+          <a href="tel:084501111" class="contact-button">
+            <span>☎️</span> (084) 501111
+          </a>
         </div>
       </div>
     </div>
@@ -1535,7 +1544,6 @@
       <div class="dashboard-tabs">
         <button class="tab-btn active" id="tabBtnCatalogo" onclick="cambiarTab('catalogo')">📝 Balones y Precios</button>
         <button class="tab-btn" id="tabBtnContabilidad" onclick="cambiarTab('contabilidad')">📊 Reporte Contable & Ventas</button>
-        <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos y WhatsApp</button>
         <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 GPS Repartidor</button>
       </div>
 
@@ -1606,37 +1614,6 @@
         </div>
       </div>
 
-      <!-- CONFIGURACIÓN DE TELÉFONOS Y WHATSAPP -->
-      <div id="tabTelefonosContenido" style="display: none;">
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-          <h4 style="color:var(--primary); font-size:15px; margin-bottom:12px;">📞 Configurar Números de Contacto</h4>
-          
-          <div class="admin-field-row" style="margin-bottom:10px;">
-            <label>Número WhatsApp para Pedidos (con código de país, ej: 51950727212):</label>
-            <input type="text" id="configWspNum" class="admin-input">
-          </div>
-
-          <div class="admin-field-row" style="margin-bottom:10px;">
-            <label>Teléfono 1 (Llamada Rápida Claro):</label>
-            <input type="text" id="configTel1" class="admin-input">
-          </div>
-
-          <div class="admin-field-row" style="margin-bottom:10px;">
-            <label>Teléfono 2 (Llamada Rápida Claro):</label>
-            <input type="text" id="configTel2" class="admin-input">
-          </div>
-
-          <div class="admin-field-row" style="margin-bottom:16px;">
-            <label>Teléfono 3 (Fijo o Central Cusco):</label>
-            <input type="text" id="configTel3" class="admin-input">
-          </div>
-
-          <button type="button" class="btn-admin-save" style="width:100%;" onclick="guardarConfiguracionTelefonos()">
-            💾 Guardar Números de Contacto
-          </button>
-        </div>
-      </div>
-
       <!-- GPS TITULAR -->
       <div id="tabGPSContenido" style="display: none;">
         <div class="gps-toggle-panel">
@@ -1658,15 +1635,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // CONFIGURACIÓN DE TELÉFONOS POR DEFECTO
-    const configTelefonosInicial = {
-      whatsapp: "51969773064",
-      tel1: "950 727 212",
-      tel2: "984 285 500",
-      tel3: "(084) 501111"
-    };
-
-    let configTelefonos = JSON.parse(localStorage.getItem('gas_telefonos')) || configTelefonosInicial;
+    // NÚMERO OFICIAL PARA PEDIDOS POR WHATSAPP
+    const WHATSAPP_NUMERO = "51969773064";
 
     const menuInicial = [
       {
@@ -1714,26 +1684,6 @@
     let capaVentas = null;
     let watchIdGPS = null;
     let rastreoActivo = false;
-
-    // RENDERIZAR BOTONES DE CONTACTO EN EL FLYER
-    function renderizarTelefonosFlyer() {
-      const container = document.getElementById('contenedorTelefonosFlyer');
-      const cleanTel1 = configTelefonos.tel1.replace(/\D/g,'');
-      const cleanTel2 = configTelefonos.tel2.replace(/\D/g,'');
-      const cleanTel3 = configTelefonos.tel3.replace(/\D/g,'');
-
-      container.innerHTML = `
-        <a href="tel:${cleanTel1}" class="contact-button">
-          <span>📞</span> ${configTelefonos.tel1}
-        </a>
-        <a href="tel:${cleanTel2}" class="contact-button">
-          <span>📞</span> ${configTelefonos.tel2}
-        </a>
-        <a href="tel:${cleanTel3}" class="contact-button">
-          <span>☎️</span> ${configTelefonos.tel3}
-        </a>
-      `;
-    }
 
     // MAPA
     function iniciarMapaCusco() {
@@ -2131,7 +2081,7 @@
 
       mensaje += `\n¿Me confirman tiempo estimado de entrega a mi domicilio?`;
 
-      const numWspDestino = configTelefonos.whatsapp.replace(/\D/g,'');
+      const numWspDestino = WHATSAPP_NUMERO.replace(/\D/g,'');
       const url = `https://wa.me/${numWspDestino}?text=${encodeURIComponent(mensaje)}`;
       window.open(url, '_blank');
       
@@ -2172,7 +2122,6 @@
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('tabCatalogoContenido').style.display = 'none';
       document.getElementById('tabContabilidadContenido').style.display = 'none';
-      document.getElementById('tabTelefonosContenido').style.display = 'none';
       document.getElementById('tabGPSContenido').style.display = 'none';
 
       if (tab === 'catalogo') {
@@ -2182,10 +2131,6 @@
         document.getElementById('tabBtnContabilidad').classList.add('active');
         document.getElementById('tabContabilidadContenido').style.display = 'block';
         actualizarReporteContable();
-      } else if (tab === 'telefonos') {
-        document.getElementById('tabBtnTelefonos').classList.add('active');
-        document.getElementById('tabTelefonosContenido').style.display = 'block';
-        cargarConfigTelefonosEnInputs();
       } else if (tab === 'gps') {
         document.getElementById('tabBtnGPS').classList.add('active');
         document.getElementById('tabGPSContenido').style.display = 'block';
@@ -2405,27 +2350,7 @@
       window.print();
     }
 
-    // CONFIGURACIÓN DE TELÉFONOS
-    function cargarConfigTelefonosEnInputs() {
-      document.getElementById('configWspNum').value = configTelefonos.whatsapp;
-      document.getElementById('configTel1').value = configTelefonos.tel1;
-      document.getElementById('configTel2').value = configTelefonos.tel2;
-      document.getElementById('configTel3').value = configTelefonos.tel3;
-    }
-
-    function guardarConfiguracionTelefonos() {
-      configTelefonos.whatsapp = document.getElementById('configWspNum').value.trim();
-      configTelefonos.tel1 = document.getElementById('configTel1').value.trim();
-      configTelefonos.tel2 = document.getElementById('configTel2').value.trim();
-      configTelefonos.tel3 = document.getElementById('configTel3').value.trim();
-
-      localStorage.setItem('gas_telefonos', JSON.stringify(configTelefonos));
-      renderizarTelefonosFlyer();
-      alert("Números de contacto actualizados correctamente.");
-    }
-
     window.addEventListener('DOMContentLoaded', () => {
-      renderizarTelefonosFlyer();
       sincronizarEstructuraPedido();
       renderizarMenu();
       iniciarMapaCusco();
@@ -2435,4 +2360,3 @@
 </body>
 </html>
 
-```
