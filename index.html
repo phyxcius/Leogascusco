@@ -2424,12 +2424,27 @@
       alert("Números de contacto actualizados correctamente.");
     }
 
+async function cargarCatalogoDesdeGitHub() {
+      try {
+        const res = await fetch('productos.json?v=' + Date.now());
+        if (res.ok) {
+          catalogo = await res.json();
+          sincronizarEstructuraPedido();
+          renderizarMenu();
+          actualizarVistaPopup();
+        }
+      } catch (err) {
+        console.log("Error al cargar productos.json, usando catálogo por defecto:", err);
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       renderizarTelefonosFlyer();
       sincronizarEstructuraPedido();
       renderizarMenu();
       iniciarMapaCusco();
       actualizarVistaPopup();
+      cargarCatalogoDesdeGitHub();
     });
   </script>
 </body>
