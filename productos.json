@@ -81,9 +81,10 @@
       "cliente": "edwin oblitas",
       "direccion": "edwin oblitas",
       "gpsUrl": "https://www.google.com/maps?q=-13.5380849,-71.9803639",
-      "etapa": 1,
+      "etapa": 2,
       "estado": "activo",
-      "horaAsignacion": "11:35:33"
+      "horaAsignacion": "11:35:33",
+      "horaActualizacion": "11:42:23 a.m."
     }
   ],
   "ventas": [
