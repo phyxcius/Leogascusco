@@ -3,84 +3,348 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acceso Repartidor | LeoGas Cusco</title>
+  <title>Panel de Administración | LeoGas Cusco</title>
+  
+  <!-- Leaflet CSS para Mapas -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f8fafc; color: #1e1b4b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 18px; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 960px; margin: auto; }
+    
+    .header-admin {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-    .driver-card { background: #ffffff; width: 100%; max-width: 460px; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0; padding: 24px 20px; text-align: center; }
-    h1 { font-size: 22px; font-weight: 900; color: #6b21a8; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 12px; }
+    .header-left-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    h2 { color: #6b21a8; margin: 0; font-size: 20px; }
 
-    select { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 15px; font-weight: 700; color: #1e1b4b; background: #f8fafc; margin-bottom: 14px; }
+    /* LOGO LA CHUSPA TECH */
+    .chuspa-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fefce8;
+      border: 1.5px solid #eab308;
+      padding: 4px 10px 4px 6px;
+      border-radius: 20px;
+      text-decoration: none;
+      box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2);
+    }
+    .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid #ca8a04; background: #fff; }
+    .chuspa-text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
+    .chuspa-title { font-size: 11px; font-weight: 900; color: #6b21a8; }
+    .chuspa-sub { font-size: 8.5px; font-weight: 700; color: #b45309; }
+    
+    /* PESTAÑAS */
+    .dashboard-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; overflow-x: auto; }
+    .tab-btn { background: none; border: none; font-weight: 800; font-size: 13px; padding: 8px 14px; color: #64748b; cursor: pointer; border-radius: 8px; white-space: nowrap; }
+    .tab-btn.active { background: #f3e8ff; color: #581c87; }
 
-    .status-panel { padding: 10px; border-radius: 10px; background: #f1f5f9; margin-bottom: 16px; font-size: 12px; }
-    .status-panel.online { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; font-weight: 800; }
+    .card { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; }
+    input, textarea, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    
+    .btn { padding: 9px 12px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; }
+    .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 15px; padding: 12px; margin-top: 10px; }
+    .btn-add { background: #16a34a; color: white; margin-bottom: 14px; width: 100%; font-size: 14px; }
+    .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+    .btn-edit { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    
+    .admin-img-preview-box { display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #faf5ff; padding: 10px; border-radius: 8px; border: 1px solid #e9d5ff; }
+    .admin-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; }
 
-    .order-box { background: #faf5ff; border: 2px solid #c084fc; border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: left; }
-    .order-box.empty { background: #f8fafc; border: 1.5px dashed #cbd5e1; text-align: center; color: #64748b; }
+    /* REPARTIDORES */
+    .repartidor-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+    .repartidor-card.activo { border-color: #86efac; background: #f0fdf4; }
+    .badge-status { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; background: #e2e8f0; color: #64748b; }
+    .badge-status.online { background: #dcfce7; color: #15803d; }
 
-    .cultura-bar { display: flex; border-radius: 8px; overflow: hidden; border: 2px solid #cbd5e1; background: #e2e8f0; gap: 3px; margin-top: 8px; }
-    .cultura-step { flex: 1; padding: 12px 4px; border: none; cursor: pointer; color: #ffffff; font-weight: 900; font-size: 11px; text-align: center; opacity: 0.3; }
-    .step-rojo { background-color: #e52329; }
-    .step-gris-osc { background-color: #555557; }
-    .step-gris-claro { background-color: #8b8e91; }
-    .cultura-step.activo { opacity: 1 !important; }
-    .cultura-step:disabled { cursor: not-allowed; }
+    /* SECUENCIA */
+    .secuencia-mini-bar { display: flex; border-radius: 6px; overflow: hidden; height: 24px; margin-top: 6px; background: #e2e8f0; gap: 2px; }
+    .sec-block { flex: 1; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 800; opacity: 0.25; }
+    .sec-block.activo { opacity: 1; font-weight: 900; }
+    .sec-rojo { background-color: #e52329; }
+    .sec-gris-osc { background-color: #555557; }
+    .sec-gris-claro { background-color: #8b8e91; }
 
-    .btn-action { width: 100%; padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; margin-bottom: 8px; }
-    .btn-connect { background: #16a34a; color: #ffffff; }
-    .btn-disconnect { background: #dc2626; color: #ffffff; display: none; }
+    #adminMap { width: 100%; height: 320px; border-radius: 10px; border: 1px solid #cbd5e1; margin-top: 12px; }
+
+    /* REPORTES */
+    .report-filters-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #fff; padding: 12px 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
+    .filter-pill-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; color: #475569; }
+    .filter-pill-btn.active { background: #6b21a8; color: #fff; border-color: #581c87; }
+    
+    .report-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .summary-card { background: #fff; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .summary-card-title { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+    .summary-card-val { font-size: 20px; font-weight: 900; color: #6b21a8; margin-top: 4px; }
+    
+    .custom-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; margin-top: 10px; }
+    .custom-table th, .custom-table td { border: 1px solid #e2e8f0; padding: 8px 10px; }
+    .custom-table th { background: #f1f5f9; color: #334155; }
+    .btn-export { background: #16a34a; color: #fff; }
+    .btn-print { background: #2563eb; color: #fff; }
+
+    /* MODAL DE EDICIÓN DE ORDEN */
+    .edit-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 99999; justify-content: center; align-items: center; padding: 16px; backdrop-filter: blur(4px); }
+    .edit-modal-box { background: #fff; max-width: 440px; width: 100%; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+    /* MODAL DE NOTIFICACIÓN DE ENTREGA */
+    .delivery-modal-center { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); z-index: 99999; justify-content: center; align-items: center; padding: 16px; }
+    .delivery-modal-box { background: #ffffff; max-width: 400px; width: 100%; border-radius: 20px; padding: 24px; text-align: center; border: 3px solid #16a34a; }
+
+    /* LOGIN */
+    .login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+    .login-card { background: #fff; padding: 24px 28px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 380px; }
+
+    /* ENCABEZADO FORMAL PARA IMPRESIÓN (SOLO VISIBLE AL IMPRIMIR) */
+    #printHeaderReport { display: none; }
+
+    @media print {
+      body { background: #fff; padding: 0; color: #000; }
+      body * { visibility: hidden; }
+      #areaImpresion, #areaImpresion * { visibility: visible; }
+      #areaImpresion { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+      #printHeaderReport { display: block !important; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 12px; }
+      .custom-table th { background: #eee !important; color: #000 !important; }
+      .custom-table th, .custom-table td { border: 1px solid #999 !important; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="driver-card">
-    <div style="font-size:44px;">🦁</div>
-    <h1>LeoGas Cusco</h1>
-    <p class="subtitle">Panel de Navegación y Secuencia de Entrega</p>
-
-    <div style="text-align:left;">
-      <label style="font-size:11px; font-weight:800; color:#64748b;">SELECCIONA TU IDENTIFICADOR:</label>
-      <select id="selectChofer" onchange="cambioDeChofer()">
-        <option value="">Cargando repartidores desde Firebase...</option>
-      </select>
+  <!-- PANTALLA LOGIN -->
+  <div id="pantallaLogin" class="login-container">
+    <div class="login-card">
+      <div style="text-align:center; font-size:38px;">🦁</div>
+      <h3 style="color:#6b21a8; text-align:center; margin-bottom:4px;">Acceso Administrador</h3>
+      <p style="font-size:12px; color:#64748b; text-align:center; margin-bottom:12px;">LeoGas Cusco • Sistema Firebase</p>
+      
+      <form onsubmit="verificarLoginAdmin(event)">
+        <label>Usuario</label>
+        <input type="text" id="loginUsuario" placeholder="admin" required autofocus>
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required>
+        <button type="submit" class="btn btn-save" style="margin-top:16px;">Ingresar al Panel</button>
+      </form>
     </div>
-
-    <div class="status-panel" id="panelEstado">
-      <span id="textoEstado">Offline 💤 (Desconectado)</span>
-    </div>
-
-    <div id="cajaOrdenAsignada" class="order-box empty">
-      Esperando comanda asignada desde caja...
-    </div>
-
-    <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px;">
-      <div style="font-size:11px; font-weight:800; color:#475569; display:flex; justify-content:space-between;">
-        <span>Secuencia de Entrega</span>
-        <span id="estadoActualTag" style="color:#6b21a8;">En espera</span>
-      </div>
-
-      <div class="cultura-bar">
-        <button type="button" id="btnPaso1" class="cultura-step step-rojo" onclick="avanzarSecuencia(1)" disabled>
-          <span>🟥 PASO 1</span><br>En Camino
-        </button>
-        <button type="button" id="btnPaso2" class="cultura-step step-gris-osc" onclick="avanzarSecuencia(2)" disabled>
-          <span>⬛ PASO 2</span><br>Entregado
-        </button>
-        <button type="button" id="btnPaso3" class="cultura-step step-gris-claro" onclick="avanzarSecuencia(3)" disabled>
-          <span>⬜ PASO 3</span><br>Completado
-        </button>
-      </div>
-    </div>
-
-    <button id="btnConectar" class="btn-action btn-connect" onclick="iniciarGPS()">
-      ▶️ CONECTAR GPS EN RUTA
-    </button>
-    <button id="btnDesconectar" class="btn-action btn-disconnect" onclick="detenerGPS()">
-      ⏹️ TERMINAR TURNO (Desconectar)
-    </button>
   </div>
+
+  <!-- PANEL PRINCIPAL -->
+  <div id="panelAdminPrincipal" style="display: none;">
+
+    <div class="header-admin no-print">
+      <div class="header-left-group">
+        <h2>🦁 Panel de Control LeoGas</h2>
+        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
+          <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+          <div class="chuspa-text">
+            <span class="chuspa-title">La Chuspa Tech</span>
+            <span class="chuspa-sub">by La Chuspa Anuncios</span>
+          </div>
+        </a>
+      </div>
+      <button class="btn" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; font-size:12px;" onclick="cerrarSesionAdmin()">🚪 Salir</button>
+    </div>
+
+    <!-- PESTAÑAS -->
+    <div class="dashboard-tabs no-print">
+      <button class="tab-btn active" id="tabBtnPedidos" onclick="cambiarTab('pedidos')">📦 Pedidos y Flota en Vivo</button>
+      <button class="tab-btn" id="tabBtnProductos" onclick="cambiarTab('productos')">📝 Balones y Precios</button>
+      <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos y WhatsApp</button>
+      <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 Gestión Repartidores</button>
+      <button class="tab-btn" id="tabBtnReportes" onclick="cambiarTab('reportes')">📊 Reporte Contable & Ventas</button>
+    </div>
+
+    <!-- PESTAÑA 1: PEDIDOS EN VIVO -->
+    <div id="seccionPedidos">
+      <!-- BANDEJA DE ENTRADA AUTOMÁTICA -->
+      <div class="card" style="border: 2px solid #eab308; background: #fefce8; margin-bottom: 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Web Entrantes (Por Encomendar)</h3>
+          <span id="badgeContadorEntrantes" style="background:#eab308; color:#fff; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">0 pendientes</span>
+        </div>
+        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente cuando el cliente pide por WhatsApp. Puedes asignarlas, editarlas o anularlas.</p>
+        <div id="listaOrdenesEntrantes">
+          <p style="font-size:12px; color:#a16207;">Esperando nuevos pedidos en tiempo real...</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:6px;">🛵 Secuencia de Flota y Entregas en Ruta</h3>
+        <div id="contenedorSecuenciasRepartidores">Cargando flota...</div>
+        <h4 style="margin-top:16px; font-size:14px;">📍 Mapa en Tiempo Real de Cusco:</h4>
+        <div id="adminMap"></div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 2: PRODUCTOS Y PRECIOS -->
+    <div id="seccionProductos" style="display: none;">
+      <button class="btn btn-add no-print" onclick="agregarNuevoProducto()">➕ Agregar Nuevo Balón</button>
+      <div id="listaProductos">Cargando catálogo desde Firebase...</div>
+      <button class="btn btn-save no-print" onclick="guardarProductosFirebase()">💾 Guardar Precios y Stock en Firebase</button>
+      <div id="statusMsgProductos" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
+    </div>
+
+    <!-- PESTAÑA 3: TELÉFONOS -->
+    <div id="seccionTelefonos" style="display: none;">
+      <div class="card">
+        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:12px;">📞 Edición de Teléfonos del Volante y Pedidos</h3>
+        <label>Número WhatsApp para Pedidos (con código de país, ej: 51969773064):</label>
+        <input type="text" id="telWhatsApp" placeholder="51969773064">
+
+        <label>Teléfono 1 (Llamada Rápida 1):</label>
+        <input type="text" id="telFijo1" placeholder="950 727 212">
+
+        <label>Teléfono 2 (Llamada Rápida 2):</label>
+        <input type="text" id="telFijo2" placeholder="984 285 500">
+
+        <label>Teléfono 3 (Fijo o Central Cusco):</label>
+        <input type="text" id="telFijo3" placeholder="(084) 501111">
+
+        <button class="btn btn-save" onclick="guardarTelefonosFirebase()" style="margin-top:16px;">💾 Guardar Teléfonos en Firebase</button>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 4: GESTIÓN DE REPARTIDORES -->
+    <div id="seccionGPS" style="display: none;">
+      <button class="btn btn-add" onclick="agregarNuevoRepartidor()">➕ Agregar Nuevo Repartidor a la Flota</button>
+      <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
+    </div>
+
+    <!-- PESTAÑA 5: REPORTES CONTABLES POR FECHAS -->
+    <div id="seccionReportes" style="display: none;">
+      <div class="report-filters-bar no-print">
+        <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtrar por:</span>
+        <button type="button" class="filter-pill-btn active" id="fltTodos" onclick="aplicarFiltroFecha('todos', this)">Todos</button>
+        <button type="button" class="filter-pill-btn" id="fltHoy" onclick="aplicarFiltroFecha('hoy', this)">📅 Hoy</button>
+        <button type="button" class="filter-pill-btn" id="fltSemana" onclick="aplicarFiltroFecha('semana', this)">📆 Esta Semana</button>
+        <button type="button" class="filter-pill-btn" id="fltMes" onclick="aplicarFiltroFecha('mes', this)">🗓️ Este Mes</button>
+
+        <div style="margin-left:auto; display:flex; gap:8px;">
+          <button type="button" class="btn btn-export" onclick="exportarVentasExcelCSV()">📥 Descargar Excel (CSV)</button>
+          <button type="button" class="btn btn-print" onclick="window.print()">🖨️ Imprimir Reporte</button>
+        </div>
+      </div>
+
+      <div class="report-summary-cards no-print">
+        <div class="summary-card">
+          <div class="summary-card-title">Pedidos Completados</div>
+          <div class="summary-card-val" id="resumenCantPedidos">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-title">Total Recaudado (S/)</div>
+          <div class="summary-card-val" id="resumenTotalSoles" style="color:#15803d;">S/ 0.00</div>
+        </div>
+      </div>
+
+      <!-- ÁREA DE IMPRESIÓN (MEMBRETADA) -->
+      <div id="areaImpresion">
+        <!-- CABECERA FORMAL PARA IMPRESIÓN -->
+        <div id="printHeaderReport">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="font-size:38px;">🦁</div>
+              <div>
+                <h1 style="font-size:22px; margin:0; color:#6b21a8;">LeoGas Cusco</h1>
+                <div style="font-size:12px; color:#555;">Distribuidor Oficial Llamagas • El Moradito Rendidor</div>
+                <div style="font-size:11px; color:#777;">Cusco, Perú</div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px; border:1px solid #ccc; padding:6px 12px; border-radius:12px;">
+              <img src="CHUSPITA-circulo.png" style="width:34px; height:34px; border-radius:50%;" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+              <div style="text-align:right;">
+                <div style="font-size:11px; font-weight:bold; color:#6b21a8;">La Chuspa Tech</div>
+                <div style="font-size:9px; color:#b45309;">by La Chuspa Anuncios</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px;">
+            <span><strong>Reporte:</strong> Ventas de Balones de Gas</span>
+            <span><strong>Filtro:</strong> <span id="lblFiltroImpreso">Todos</span></span>
+            <span><strong>Emisión:</strong> <span id="lblFechaEmision"></span></span>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:8px;" class="no-print">📋 Reporte Contable de Entregas Realizadas</h3>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Fecha y Hora</th>
+              <th>Cliente</th>
+              <th>Detalle Balón</th>
+              <th>Repartidor</th>
+              <th>Total</th>
+              <th>Pago</th>
+            </tr>
+          </thead>
+          <tbody id="tablaVentasBody"></tbody>
+        </table>
+
+        <!-- TOTAL AL FINAL PARA IMPRESIÓN -->
+        <div style="margin-top:14px; text-align:right; font-size:15px; font-weight:900;">
+          <span>TOTAL GENERAL RECAUDADO: </span>
+          <span id="lblTotalFinalImpreso" style="color:#15803d;">S/ 0.00</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: EDITAR ORDEN ENTRANTE -->
+  <div class="edit-modal-overlay" id="modalEditarOrden">
+    <div class="edit-modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:16px; color:#6b21a8;">✏️ Editar Orden de Pedido</h3>
+        <button type="button" style="background:none; border:none; font-size:20px; cursor:pointer;" onclick="cerrarModalEditarOrden()">&times;</button>
+      </div>
+
+      <input type="hidden" id="editOrdenId">
+
+      <label>Nombre del Cliente / Referencia:</label>
+      <input type="text" id="editOrdenCliente">
+
+      <label>Detalle del Balón:</label>
+      <input type="text" id="editOrdenTipoBalon">
+
+      <label>Monto a Cobrar (S/):</label>
+      <input type="number" step="0.5" id="editOrdenMonto">
+
+      <label>Método de Pago:</label>
+      <select id="editOrdenPago">
+        <option value="Efectivo">💵 Efectivo</option>
+        <option value="Yape">🟣 Yape</option>
+        <option value="Plin">🔵 Plin</option>
+        <option value="Transferencia">🏦 Transferencia</option>
+      </select>
+
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="button" class="btn btn-save" style="margin:0; flex:1;" onclick="guardarEdicionOrden()">💾 Guardar Cambios</button>
+        <button type="button" class="btn btn-del" style="margin:0;" onclick="cerrarModalEditarOrden()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOTIFICACIÓN DE ENTREGA -->
+  <div class="delivery-modal-center" id="modalNotificacionEntrega">
+    <div class="delivery-modal-box">
+      <div style="font-size:46px;">🎉</div>
+      <h3 style="color:#15803d; font-size:19px; margin:6px 0;">¡ENTREGA COMPLETADA!</h3>
+      <p id="textoModalNotificacion" style="font-size:14px; color:#475569; margin:10px 0 16px;"></p>
+      <button type="button" class="btn btn-save" style="background:#15803d; margin:0;" onclick="cerrarNotificacionCentro()">Entendido ✔️</button>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- SDK DE FIREBASE (TIEMPO REAL) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -101,182 +365,584 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let ordenActiva = null;
-    let watchIdGPS = null;
-    let idUltimaOrdenVista = null;
-    let repartidoresMap = {};
+    let productos = [];
+    let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
+    let repartidoresLocales = {};
+    let pedidosLocales = {};
+    let ventasLocales = [];
+    let ventasFiltradas = [];
+    let filtroFechaActivo = "todos";
+    let estadosPrevios = {};
 
-    function lanzarAlertaChofer(titulo, mensaje) {
-      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
-      if ("Notification" in window && Notification.permission === "granted") {
-        const notif = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
-        notif.onclick = () => { window.focus(); notif.close(); };
-      }
-    }
+    let mapAdmin = null;
+    let marcadoresAdmin = {};
+    let cantidadPedidosEntrantesPrevia = 0;
 
-    // CARGAR DINÁMICAMENTE LOS REPARTIDORES DESDE FIREBASE
-    function escucharRepartidoresFirebase() {
-      db.ref('repartidores').on('value', snap => {
-        const data = snap.val();
-        if (!data) return;
-
-        repartidoresMap = data;
-        const select = document.getElementById('selectChofer');
-        const valorGuardado = localStorage.getItem("leogas_chofer_id") || select.value;
-
-        select.innerHTML = '';
-        Object.values(data).forEach(rep => {
-          const opt = document.createElement('option');
-          opt.value = rep.id;
-          opt.innerText = `${rep.nombre} ${rep.online ? '🟢' : '💤'}`;
-          select.appendChild(opt);
-        });
-
-        // Restaurar selección previa si existe
-        if (valorGuardado && data[valorGuardado]) {
-          select.value = valorGuardado;
-        } else if (select.options.length > 0) {
-          select.selectedIndex = 0;
-          localStorage.setItem("leogas_chofer_id", select.value);
-        }
-
-        escucharComandasEnTiempoReal();
-      });
-    }
-
-    function cambioDeChofer() {
-      idUltimaOrdenVista = null;
-      localStorage.setItem("leogas_chofer_id", document.getElementById('selectChofer').value);
-      escucharComandasEnTiempoReal();
-    }
-
-    function escucharComandasEnTiempoReal() {
-      const repId = document.getElementById('selectChofer').value;
-      if (!repId) return;
-
-      db.ref('pedidos').on('value', snap => {
-        const pedidos = snap.val();
-        ordenActiva = null;
-
-        if (pedidos) {
-          ordenActiva = Object.values(pedidos).find(p => p.repartidorId === repId && p.estado !== 'completado');
-        }
-
-        // Alerta nativa + vibración al asignarse comanda
-        if (ordenActiva && ordenActiva.id !== idUltimaOrdenVista) {
-          if (idUltimaOrdenVista !== null) {
-            lanzarAlertaChofer(
-              "🛵 ¡Nueva orden asignada!",
-              `Llevar ${ordenActiva.tipoBalon} a ${ordenActiva.cliente} (Cobrar: S/ ${ordenActiva.montoCobro})`
-            );
-          }
-          idUltimaOrdenVista = ordenActiva.id;
-        } else if (!ordenActiva) {
-          idUltimaOrdenVista = null;
-        }
-
-        renderizarVistaOrden();
-      });
-    }
-
-    function renderizarVistaOrden() {
-      const caja = document.getElementById('cajaOrdenAsignada');
-      const b1 = document.getElementById('btnPaso1');
-      const b2 = document.getElementById('btnPaso2');
-      const b3 = document.getElementById('btnPaso3');
-
-      if (!ordenActiva) {
-        caja.className = "order-box empty";
-        caja.innerHTML = "💤 No tienes comandas pendientes. Espera a que caja te asigne un balón.";
-        b1.disabled = true; b2.disabled = true; b3.disabled = true;
-        b1.classList.remove('activo'); b2.classList.remove('activo'); b3.classList.remove('activo');
-        document.getElementById('estadoActualTag').innerText = "Sin orden";
-        return;
-      }
-
-      caja.className = "order-box";
-      caja.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-          <strong style="color:#7e22ce;">${ordenActiva.tipoBalon}</strong>
-          <span style="color:#15803d; font-weight:bold;">Cobrar: S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)}</span>
-        </div>
-        <div style="font-size:13px;">👤 <strong>Cliente:</strong> ${ordenActiva.cliente}</div>
-        <div style="font-size:13px;">💵 <strong>Pago:</strong> ${ordenActiva.metodoPago}</div>
-        ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" style="display:inline-block; background:#2563eb; color:#fff; text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:12px; margin-top:8px;">🗺️ Abrir Google Maps</a>` : ''}
-      `;
-
-      const etapa = ordenActiva.etapa || 1;
-      b1.classList.toggle('activo', etapa === 1);
-      b2.classList.toggle('activo', etapa === 2);
-      b3.classList.toggle('activo', etapa === 3);
-
-      if (etapa === 1) {
-        b1.disabled = false; b2.disabled = false; b3.disabled = true;
-        document.getElementById('estadoActualTag').innerText = "Paso 1: En Camino";
-      } else if (etapa === 2) {
-        b1.disabled = true; b2.disabled = false; b3.disabled = false;
-        document.getElementById('estadoActualTag').innerText = "Paso 2: Entregado";
-      } else if (etapa === 3) {
-        b1.disabled = true; b2.disabled = true; b3.disabled = false;
-        document.getElementById('estadoActualTag').innerText = "Paso 3: Completado";
-      }
-    }
-
-    async function avanzarSecuencia(paso) {
-      if (!ordenActiva) return;
-      const etapaActual = ordenActiva.etapa || 1;
-
-      if (etapaActual === 1 && paso === 3) {
-        return alert("⛔ Debes marcar primero 'Paso 2: Entregado' antes de completar.");
-      }
-
-      const updates = { etapa: paso };
-      if (paso === 3) updates.estado = "completado";
-
-      await db.ref(`pedidos/${ordenActiva.id}`).update(updates);
-      if (paso === 3) alert("✔ ¡Entrega finalizada con éxito!");
-    }
-
-    function iniciarGPS() {
-      const repId = document.getElementById('selectChofer').value;
-      if (!repId) return alert("Selecciona un repartidor primero.");
-      if (!navigator.geolocation) return alert("GPS no disponible.");
-
+    function pedirPermisoNotificacionesAdmin() {
       if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
         Notification.requestPermission();
       }
+    }
 
-      navigator.geolocation.getCurrentPosition(pos => {
-        actualizarCoordenadas(repId, true, pos.coords.latitude, pos.coords.longitude);
-        document.getElementById('btnConectar').style.display = "none";
-        document.getElementById('btnDesconectar').style.display = "block";
-        document.getElementById('panelEstado').className = "status-panel online";
-        document.getElementById('textoEstado').innerText = "Online 🔥 (En Ruta Activo)";
+    function emitirCampanada() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.85);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.85);
+      } catch (e) {}
+    }
 
-        watchIdGPS = navigator.geolocation.watchPosition(p => {
-          actualizarCoordenadas(repId, true, p.coords.latitude, p.coords.longitude);
-        }, null, { enableHighAccuracy: true });
+    function verificarLoginAdmin(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginUsuario').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+      if (u === 'admin' && p === 'regocijo123') {
+        sessionStorage.setItem("leogas_auth", "true");
+        mostrarPanel();
+      } else {
+        alert("Credenciales incorrectas.");
+      }
+    }
+
+    function mostrarPanel() {
+      document.getElementById('pantallaLogin').style.display = 'none';
+      document.getElementById('panelAdminPrincipal').style.display = 'block';
+      pedirPermisoNotificacionesAdmin();
+      iniciarMapaAdmin();
+      iniciarEscuchaFirebase();
+    }
+
+    function cerrarSesionAdmin() {
+      sessionStorage.removeItem("leogas_auth");
+      location.reload();
+    }
+
+    function cambiarTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('seccionPedidos').style.display = 'none';
+      document.getElementById('seccionProductos').style.display = 'none';
+      document.getElementById('seccionTelefonos').style.display = 'none';
+      document.getElementById('seccionGPS').style.display = 'none';
+      document.getElementById('seccionReportes').style.display = 'none';
+
+      if (tab === 'pedidos') {
+        document.getElementById('tabBtnPedidos').classList.add('active');
+        document.getElementById('seccionPedidos').style.display = 'block';
+        setTimeout(() => { if (mapAdmin) mapAdmin.invalidateSize(); }, 200);
+      } else if (tab === 'productos') {
+        document.getElementById('tabBtnProductos').classList.add('active');
+        document.getElementById('seccionProductos').style.display = 'block';
+      } else if (tab === 'telefonos') {
+        document.getElementById('tabBtnTelefonos').classList.add('active');
+        document.getElementById('seccionTelefonos').style.display = 'block';
+      } else if (tab === 'gps') {
+        document.getElementById('tabBtnGPS').classList.add('active');
+        document.getElementById('seccionGPS').style.display = 'block';
+      } else if (tab === 'reportes') {
+        document.getElementById('tabBtnReportes').classList.add('active');
+        document.getElementById('seccionReportes').style.display = 'block';
+        renderizarReportesContables();
+      }
+    }
+
+    function iniciarMapaAdmin() {
+      if (mapAdmin) return;
+      mapAdmin = L.map('adminMap').setView([-13.5167, -71.9788], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapAdmin);
+    }
+
+    // CONEXIÓN EN TIEMPO REAL CON FIREBASE
+    function iniciarEscuchaFirebase() {
+      // 1. Escuchar pedidos
+      db.ref('pedidos').on('value', snap => {
+        pedidosLocales = snap.val() || {};
+        procesarVentasParaReportes();
+        
+        const entrantesActuales = Object.values(pedidosLocales).filter(p => p.estado === 'pendiente_asignacion');
+        
+        // Si entra un nuevo pedido web desde index.html
+        if (entrantesActuales.length > cantidadPedidosEntrantesPrevia) {
+          emitirCampanada();
+          if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+          if ("Notification" in window && Notification.permission === "granted") {
+            const ultimo = entrantesActuales[entrantesActuales.length - 1];
+            new Notification("🔔 ¡Nuevo Pedido Entrante!", {
+              body: `Cliente: ${ultimo.cliente || 'Particular'} (Total: S/ ${ultimo.montoCobro})`,
+              icon: "CHUSPITA-circulo.png"
+            });
+          }
+        }
+        cantidadPedidosEntrantesPrevia = entrantesActuales.length;
+
+        renderizarOrdenesEntrantes();
+        renderizarFlotaActiva();
+        renderizarReportesContables();
+      });
+
+      // 2. Escuchar repartidores y GPS
+      db.ref('repartidores').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          repartidoresLocales = data;
+        } else {
+          repartidoresLocales = {
+            "rep-1": { id: "rep-1", nombre: "Edwin", online: false, lat: -13.5167, lng: -71.9788 },
+            "rep-2": { id: "rep-2", nombre: "Moto 2", online: false, lat: -13.5200, lng: -71.9700 }
+          };
+          db.ref('repartidores').set(repartidoresLocales);
+        }
+        renderizarGestionRepartidores();
+        actualizarMapaAdmin();
+        renderizarFlotaActiva();
+        renderizarOrdenesEntrantes();
+      });
+
+      // 3. Catálogo de productos
+      db.ref('productos').on('value', snap => {
+        const p = snap.val();
+        if (p) {
+          productos = Array.isArray(p) ? p : Object.values(p);
+        } else {
+          productos = [
+            { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad.", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" },
+            { id: "gas-2", nombre: "Balón Gas Premium 10kg", tag: "Máximo Rendimiento", descripcion: "GLP de alta pureza con válvula anti-fugas.", precio: 55.00, disponible: true, imagen: "1791513590376.jpg" }
+          ];
+          db.ref('productos').set(productos);
+        }
+        renderizarProductosEditor();
+      });
+
+      // 4. Teléfonos
+      db.ref('telefonos').on('value', snap => {
+        const t = snap.val();
+        if (t) {
+          telefonos = t;
+          document.getElementById('telWhatsApp').value = t.whatsapp || "";
+          document.getElementById('telFijo1').value = t.tel1 || "";
+          document.getElementById('telFijo2').value = t.tel2 || "";
+          document.getElementById('telFijo3').value = t.tel3 || "";
+        }
       });
     }
 
-    function detenerGPS() {
-      if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
-      const repId = document.getElementById('selectChofer').value;
-      if (repId) actualizarCoordenadas(repId, false, null, null);
-      document.getElementById('btnConectar').style.display = "block";
-      document.getElementById('btnDesconectar').style.display = "none";
-      document.getElementById('panelEstado').className = "status-panel";
-      document.getElementById('textoEstado').innerText = "Offline 💤 (Desconectado)";
+    // ---------------- PEDIDOS Y FLOTA ----------------
+    function renderizarOrdenesEntrantes() {
+      const contenedor = document.getElementById('listaOrdenesEntrantes');
+      const badge = document.getElementById('badgeContadorEntrantes');
+      const lista = Object.values(pedidosLocales).filter(p => p.estado === 'pendiente_asignacion');
+      badge.innerText = `${lista.length} pendientes`;
+
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<p style="font-size:12px; color:#a16207;">No hay pedidos pendientes de asignación en este momento.</p>';
+        return;
+      }
+
+      contenedor.innerHTML = '';
+      lista.forEach(ord => {
+        const div = document.createElement('div');
+        div.style.cssText = "background:#fff; border:1px solid #fde047; border-radius:10px; padding:12px; margin-bottom:8px;";
+
+        let opciones = '<option value="">-- Seleccionar Repartidor --</option>';
+        Object.values(repartidoresLocales).forEach(r => {
+          opciones += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
+        });
+
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>👤 ${ord.cliente}</strong>
+            <span style="color:#15803d; font-weight:900; font-size:15px;">S/ ${parseFloat(ord.montoCobro).toFixed(2)}</span>
+          </div>
+          <div style="font-size:12px; color:#475569; margin:2px 0;">🛢️ <strong>${ord.tipoBalon}</strong> | 💵 Pago: <strong>${ord.metodoPago}</strong></div>
+          <div style="font-size:11px; color:#64748b; margin-bottom:4px;">
+            🕒 ${ord.hora || '--'} 
+            ${ord.tipoComprobante ? `| 🧾 <strong>${ord.tipoComprobante}</strong>` : ''} 
+            ${ord.horarioEntrega ? `| 🚀 ${ord.horarioEntrega}` : ''}
+            ${ord.gpsUrl ? `| <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb; font-weight:bold;">📍 Ver Mapa</a>` : ''}
+          </div>
+          
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+            <select id="selRep_${ord.id}" style="flex:2; min-width:180px; margin:0; padding:7px;">${opciones}</select>
+            <button class="btn" style="background:#16a34a; color:#fff;" onclick="asignarOrden('${ord.id}')">Asignar 🛵</button>
+            <button class="btn btn-edit" onclick="abrirModalEditarOrden('${ord.id}')">✏️ Editar</button>
+            <button class="btn btn-del" onclick="anularOrdenEntrante('${ord.id}')">🚫 Anular</button>
+          </div>
+        `;
+        contenedor.appendChild(div);
+      });
     }
 
-    function actualizarCoordenadas(repId, online, lat, lng) {
-      const data = { online: online };
-      if (lat && lng) { data.lat = lat; data.lng = lng; }
-      db.ref(`repartidores/${repId}`).update(data);
+    // ACCIÓN: ANULAR ORDEN ENTRANTE
+    async function anularOrdenEntrante(id) {
+      const comanda = pedidosLocales[id];
+      const clienteNombre = comanda ? comanda.cliente : 'este cliente';
+      if (confirm(`¿Seguro que deseas ANULAR la orden de "${clienteNombre}"?`)) {
+        await db.ref(`pedidos/${id}`).remove();
+        alert("✔ Orden anulada y retirada de la bandeja.");
+      }
+    }
+
+    // ACCIÓN: EDITAR ORDEN ENTRANTE (MODAL)
+    function abrirModalEditarOrden(id) {
+      const ord = pedidosLocales[id];
+      if (!ord) return;
+      document.getElementById('editOrdenId').value = id;
+      document.getElementById('editOrdenCliente').value = ord.cliente || '';
+      document.getElementById('editOrdenTipoBalon').value = ord.tipoBalon || '';
+      document.getElementById('editOrdenMonto').value = ord.montoCobro || 0;
+      document.getElementById('editOrdenPago').value = ord.metodoPago || 'Efectivo';
+      document.getElementById('modalEditarOrden').style.display = 'flex';
+    }
+
+    function cerrarModalEditarOrden() {
+      document.getElementById('modalEditarOrden').style.display = 'none';
+    }
+
+    async function guardarEdicionOrden() {
+      const id = document.getElementById('editOrdenId').value;
+      if (!id) return;
+
+      const nuevoCliente = document.getElementById('editOrdenCliente').value.trim();
+      const nuevoBalon = document.getElementById('editOrdenTipoBalon').value.trim();
+      const nuevoMonto = parseFloat(document.getElementById('editOrdenMonto').value) || 0;
+      const nuevoPago = document.getElementById('editOrdenPago').value;
+
+      await db.ref(`pedidos/${id}`).update({
+        cliente: nuevoCliente,
+        tipoBalon: nuevoBalon,
+        montoCobro: nuevoMonto.toFixed(2),
+        metodoPago: nuevoPago
+      });
+
+      cerrarModalEditarOrden();
+      alert("✔ Orden actualizada con éxito.");
+    }
+
+    async function asignarOrden(id) {
+      const repId = document.getElementById(`selRep_${id}`).value;
+      if (!repId) return alert("Selecciona un repartidor.");
+
+      await db.ref(`pedidos/${id}`).update({
+        repartidorId: repId,
+        estado: "activo",
+        etapa: 1
+      });
+
+      emitirCampanada();
+      alert("✔ Pedido encomendado en tiempo real.");
+    }
+
+    function renderizarFlotaActiva() {
+      const contenedor = document.getElementById('contenedorSecuenciasRepartidores');
+      contenedor.innerHTML = '';
+
+      Object.values(repartidoresLocales).forEach(rep => {
+        const ordenActiva = Object.values(pedidosLocales).find(p => p.repartidorId === rep.id && p.estado !== 'completado');
+        const etapa = ordenActiva ? ordenActiva.etapa : 1;
+
+        if (estadosPrevios[rep.id] && estadosPrevios[rep.id] !== 3 && etapa === 3) {
+          mostrarNotificacionCentro(rep.nombre);
+        }
+        estadosPrevios[rep.id] = etapa;
+
+        const card = document.createElement('div');
+        card.className = `repartidor-card ${rep.online ? 'activo' : ''}`;
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between;">
+            <strong>🦁 ${rep.nombre}</strong>
+            <span class="badge-status ${rep.online ? 'online' : ''}">${rep.online ? 'Online 🟢' : 'Offline 💤'}</span>
+          </div>
+          <div style="font-size:12px; margin-top:2px;">
+            ${ordenActiva ? `🛢️ <strong>${ordenActiva.tipoBalon}</strong> para <em>${ordenActiva.cliente}</em> (S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)})` : '<span style="color:#64748b;">Sin orden activa</span>'}
+          </div>
+          <div class="secuencia-mini-bar">
+            <div class="sec-block sec-rojo ${etapa === 1 && ordenActiva ? 'activo' : ''}">1. EN CAMINO</div>
+            <div class="sec-block sec-gris-osc ${etapa === 2 ? 'activo' : ''}">2. ENTREGADO</div>
+            <div class="sec-block sec-gris-claro ${etapa === 3 ? 'activo' : ''}">3. COMPLETADO</div>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    function actualizarMapaAdmin() {
+      if (!mapAdmin) return;
+      Object.values(repartidoresLocales).forEach(rep => {
+        const online = rep.online === true;
+        const icono = L.divIcon({
+          html: `<div style="background:${online ? '#7e22ce' : '#64748b'}; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:18px;">🦁</div>`,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17]
+        });
+
+        if (!marcadoresAdmin[rep.id]) {
+          marcadoresAdmin[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(mapAdmin).bindPopup(`<b>${rep.nombre}</b><br>${online ? 'En Ruta 🔥' : 'Offline 💤'}`);
+        } else {
+          marcadoresAdmin[rep.id].setIcon(icono);
+          marcadoresAdmin[rep.id].setLatLng([rep.lat, rep.lng]);
+        }
+      });
+    }
+
+    function mostrarNotificacionCentro(nombreRepartidor) {
+      document.getElementById('textoModalNotificacion').innerHTML = `El repartidor <strong>${nombreRepartidor}</strong> acaba de completar su entrega.`;
+      document.getElementById('modalNotificacionEntrega').style.display = 'flex';
+      emitirCampanada();
+      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+    }
+
+    function cerrarNotificacionCentro() {
+      document.getElementById('modalNotificacionEntrega').style.display = 'none';
+    }
+
+    // ---------------- GESTIÓN DE PRODUCTOS Y PRECIOS ----------------
+    function renderizarProductosEditor() {
+      const cont = document.getElementById('listaProductos');
+      cont.innerHTML = '';
+
+      productos.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <label>Nombre:</label>
+          <input type="text" value="${p.nombre}" onchange="productos[${i}].nombre = this.value">
+
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+              <label>Precio (S/):</label>
+              <input type="number" step="0.5" value="${p.precio}" onchange="productos[${i}].precio = parseFloat(this.value) || 0">
+            </div>
+            <div style="flex:1;">
+              <label>Disponibilidad / Stock:</label>
+              <select onchange="productos[${i}].disponible = (this.value === 'true')">
+                <option value="true" ${p.disponible !== false ? 'selected' : ''}>🟢 Disponible</option>
+                <option value="false" ${p.disponible === false ? 'selected' : ''}>🔴 Agotado</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Descripción:</label>
+          <input type="text" value="${p.descripcion || ''}" onchange="productos[${i}].descripcion = this.value">
+
+          <label>Imagen del Balón:</label>
+          <div class="admin-img-preview-box">
+            <img id="prev-${i}" class="admin-thumb" src="${p.imagen}" onerror="this.src='1791513590376.jpg'">
+            <div style="flex:1;">
+              <input type="file" accept="image/*" onchange="subirImagen(event, ${i})" style="font-size:12px;">
+              <input type="text" value="${p.imagen}" placeholder="o escribe nombre de archivo" onchange="productos[${i}].imagen = this.value; document.getElementById('prev-${i}').src = this.value;" style="margin-top:4px;">
+            </div>
+          </div>
+
+          <button class="btn btn-del" style="margin-top:10px;" onclick="eliminarProducto(${i})">🗑️ Eliminar Producto</button>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    function subirImagen(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        productos[index].imagen = e.target.result;
+        document.getElementById(`prev-${index}`).src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function agregarNuevoProducto() {
+      productos.push({
+        id: "gas-" + Date.now(),
+        nombre: "Nuevo Balón de Gas",
+        tag: "Sellado",
+        descripcion: "Balón con precinto de garantía y peso exacto.",
+        precio: 50.00,
+        disponible: true,
+        imagen: "1791513590376.jpg"
+      });
+      renderizarProductosEditor();
+    }
+
+    function eliminarProducto(i) {
+      if (confirm(`¿Eliminar "${productos[i].nombre}"?`)) {
+        productos.splice(i, 1);
+        renderizarProductosEditor();
+      }
+    }
+
+    async function guardarProductosFirebase() {
+      const msg = document.getElementById('statusMsgProductos');
+      msg.style.color = "#6b21a8";
+      msg.innerText = "⏳ Guardando en Firebase...";
+      await db.ref('productos').set(productos);
+      msg.style.color = "#15803d";
+      msg.innerText = "✔ ¡Precios y productos actualizados en tiempo real!";
+      setTimeout(() => { msg.innerText = ""; }, 4000);
+    }
+
+    // ---------------- GESTIÓN DE REPARTIDORES (EDITAR / ELIMINAR) ----------------
+    function renderizarGestionRepartidores() {
+      const cont = document.getElementById('listaRepartidoresConfig');
+      cont.innerHTML = '';
+      const lista = Object.values(repartidoresLocales);
+
+      if (lista.length === 0) {
+        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados.</p>';
+        return;
+      }
+
+      lista.forEach(rep => {
+        const div = document.createElement('div');
+        div.className = 'repartidor-card';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div style="flex:1; min-width:220px;">
+              <input type="text" id="inpRepName_${rep.id}" value="${rep.nombre}" style="font-weight:bold; font-size:15px; margin:0;">
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-edit" onclick="guardarNombreRepartidorManual('${rep.id}')">💾 Guardar Nombre</button>
+              <button class="btn btn-del" onclick="eliminarRepartidor('${rep.id}')">🗑️ Eliminar</button>
+            </div>
+          </div>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    async function agregarNuevoRepartidor() {
+      const nombre = prompt("Nombre del nuevo repartidor (ej. Jorge / Edwin / Moto 3):");
+      if (!nombre || !nombre.trim()) return;
+      const nuevoId = "rep-" + Date.now();
+      await db.ref(`repartidores/${nuevoId}`).set({
+        id: nuevoId,
+        nombre: nombre.trim(),
+        online: false,
+        lat: -13.5167,
+        lng: -71.9788
+      });
+      alert(`✔ Repartidor "${nombre}" agregado a la flota.`);
+    }
+
+    async function guardarNombreRepartidorManual(id) {
+      const input = document.getElementById(`inpRepName_${id}`);
+      if (!input) return;
+      const nuevoNombre = input.value.trim();
+      if (!nuevoNombre) return alert("El nombre no puede estar vacío.");
+
+      await db.ref(`repartidores/${id}/nombre`).set(nuevoNombre);
+      alert("✔ Nombre del repartidor actualizado.");
+    }
+
+    async function eliminarRepartidor(id) {
+      const rep = repartidoresLocales[id];
+      const nombre = rep ? rep.nombre : 'este repartidor';
+      if (confirm(`¿Deseas eliminar a "${nombre}" de la flota?`)) {
+        await db.ref(`repartidores/${id}`).remove();
+        alert("✔ Repartidor eliminado.");
+      }
+    }
+
+    // ---------------- TELÉFONOS ----------------
+    async function guardarTelefonosFirebase() {
+      await db.ref('telefonos').set({
+        whatsapp: document.getElementById('telWhatsApp').value.trim(),
+        tel1: document.getElementById('telFijo1').value.trim(),
+        tel2: document.getElementById('telFijo2').value.trim(),
+        tel3: document.getElementById('telFijo3').value.trim()
+      });
+      alert("✔ Teléfonos guardados al instante en Firebase.");
+    }
+
+    // ---------------- REPORTES CONTABLES POR FECHAS ----------------
+    function procesarVentasParaReportes() {
+      ventasLocales = Object.values(pedidosLocales).filter(p => p.estado === 'completado');
+    }
+
+    function parseFechaSegura(p) {
+      if (p.timestamp) return new Date(p.timestamp);
+      return new Date();
+    }
+
+    function aplicarFiltroFecha(periodo, boton) {
+      filtroFechaActivo = periodo;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      if (boton) boton.classList.add('active');
+      renderizarReportesContables();
+    }
+
+    function renderizarReportesContables() {
+      const ahora = new Date();
+      const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+      const diaSemana = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1;
+      const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diaSemana);
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+
+      ventasFiltradas = ventasLocales.filter(v => {
+        if (filtroFechaActivo === 'todos') return true;
+        const f = parseFechaSegura(v);
+        if (filtroFechaActivo === 'hoy') return f >= inicioHoy;
+        if (filtroFechaActivo === 'semana') return f >= inicioSemana;
+        if (filtroFechaActivo === 'mes') return f >= inicioMes;
+        return true;
+      });
+
+      const tbody = document.getElementById('tablaVentasBody');
+      tbody.innerHTML = '';
+      let sumaTotal = 0;
+
+      if (ventasFiltradas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:12px; color:#94a3b8;">No hay ventas completadas en este periodo.</td></tr>';
+      } else {
+        ventasFiltradas.forEach(v => {
+          const tot = parseFloat(v.montoCobro) || 0;
+          sumaTotal += tot;
+          const chofer = repartidoresLocales[v.repartidorId]?.nombre || v.repartidorId || "General";
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${v.hora || '--'}</td>
+            <td>${v.cliente || 'Particular'}</td>
+            <td>${v.tipoBalon || '--'}</td>
+            <td><strong>${chofer}</strong></td>
+            <td><strong>S/ ${tot.toFixed(2)}</strong></td>
+            <td>${v.metodoPago || 'Efectivo'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('resumenCantPedidos').innerText = `${ventasFiltradas.length}`;
+      document.getElementById('resumenTotalSoles').innerText = `S/ ${sumaTotal.toFixed(2)}`;
+      
+      // Datos para hoja impresa
+      const filtroMap = { 'todos': 'Todos los registros', 'hoy': 'Hoy', 'semana': 'Esta Semana', 'mes': 'Este Mes' };
+      document.getElementById('lblFiltroImpreso').innerText = filtroMap[filtroFechaActivo] || 'Todos';
+      document.getElementById('lblFechaEmision').innerText = new Date().toLocaleString();
+      document.getElementById('lblTotalFinalImpreso').innerText = `S/ ${sumaTotal.toFixed(2)}`;
+    }
+
+    function exportarVentasExcelCSV() {
+      if (ventasFiltradas.length === 0) return alert("No hay ventas en la lista actual para exportar.");
+      let csv = "\uFEFFHora;Cliente;Detalle Balon;Repartidor;Total (S/);Pago\r\n";
+      ventasFiltradas.forEach(v => {
+        const chofer = repartidoresLocales[v.repartidorId]?.nombre || v.repartidorId || "General";
+        csv += `"${v.hora || ''}";"${v.cliente || ''}";"${v.tipoBalon || ''}";"${chofer}";"${parseFloat(v.montoCobro || 0).toFixed(2)}";"${v.metodoPago || ''}"\r\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `Reporte_LeoGas_${filtroFechaActivo}_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
     }
 
     window.onload = () => {
-      escucharRepartidoresFirebase();
+      if (sessionStorage.getItem("leogas_auth") === "true") mostrarPanel();
     };
   </script>
 </body>
