@@ -34,7 +34,60 @@
     .subtitle {
       font-size: 13px;
       color: #64748b;
-      margin-bottom: 22px;
+      margin-bottom: 14px;
+    }
+
+    /* BADGE LA CHUSPA TECH */
+    .chuspa-badge-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .chuspa-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fefce8;
+      border: 1.5px solid #eab308;
+      padding: 4px 12px 4px 6px;
+      border-radius: 22px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(234, 179, 8, 0.2);
+      transition: transform 0.2s ease, background-color 0.2s;
+    }
+
+    .chuspa-badge:hover {
+      transform: scale(1.03);
+      background: #ffffff;
+    }
+
+    .chuspa-img {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #ca8a04;
+      background: #fff;
+    }
+
+    .chuspa-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+      text-align: left;
+    }
+
+    .chuspa-title {
+      font-size: 11px;
+      font-weight: 900;
+      color: #6b21a8;
+    }
+
+    .chuspa-sub {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #b45309;
     }
 
     .box-selector {
@@ -169,6 +222,17 @@
     <h1>LeoGas Cusco</h1>
     <p class="subtitle">Panel de Navegación y Transmisión en Ruta</p>
 
+    <!-- LOGO LA CHUSPA TECH -->
+    <div class="chuspa-badge-container">
+      <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge" title="Tecnología desarrollada por La Chuspa Anuncios">
+        <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+        <div class="chuspa-text">
+          <span class="chuspa-title">La Chuspa Tech</span>
+          <span class="chuspa-sub">by La Chuspa Anuncios</span>
+        </div>
+      </a>
+    </div>
+
     <div class="warning-token-box" id="warningToken">
       ⚠️ Este dispositivo aún no cuenta con la llave de acceso autorizada.
     </div>
@@ -268,7 +332,6 @@
         sel.appendChild(opt);
       });
 
-      // Si ya estaba guardado en memoria de este celular el chofer anterior, preseleccionarlo
       const choferGuardado = localStorage.getItem('leogas_chofer_asignado');
       if (choferGuardado && lista.some(r => r.id === choferGuardado)) {
         sel.value = choferGuardado;
@@ -342,10 +405,8 @@
           document.getElementById('btnConectar').style.display = "none";
           document.getElementById('btnDesconectar').style.display = "flex";
 
-          // 1. Guardar estado ONLINE de este repartidor en GitHub
           await actualizarCoordenadasEnGitHub(repId, true, lat, lng);
 
-          // 2. Rastreo dinámico mientras se desplaza
           if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
           watchIdGPS = navigator.geolocation.watchPosition(
             async (p) => {
@@ -393,7 +454,6 @@
       const token = obtenerTokenSecreto();
       if (!token) return;
 
-      // Consultar siempre la versión más fresca del archivo
       let shaActual = "";
       try {
         const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
@@ -411,7 +471,6 @@
         console.warn("No se pudo obtener SHA previo:", e);
       }
 
-      // Modificar el repartidor que está transmitiendo
       if (Array.isArray(datosCompletos.repartidores)) {
         const index = datosCompletos.repartidores.findIndex(r => r.id === repId);
         if (index !== -1) {
