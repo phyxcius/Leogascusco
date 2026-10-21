@@ -173,17 +173,6 @@
     .btn-disconnect { background: #dc2626; color: #ffffff; display: none; }
     .btn-history-print { background: #334155; color: #ffffff; font-size: 12px; padding: 10px; }
 
-    /* HISTORIAL MODAL DE ENTREGAS */
-    .history-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 14px;
-      text-align: left;
-      font-size: 12px;
-    }
-
     @media print {
       body * { visibility: hidden; }
       #areaLiquidacionChofer, #areaLiquidacionChofer * { visibility: visible; }
@@ -303,6 +292,36 @@
     let datosCompletos = { productos: [], telefonos: {}, repartidores: [], comandas: [] };
     let watchIdGPS = null;
     let ordenActiva = null;
+    let ultimaOrdenIdVista = null;
+
+    // MÉTODO 1: SOLICITAR PERMISO Y DISPARAR NOTIFICACIÓN CON VIBRACIÓN
+    async function solicitarPermisoNotificaciones() {
+      if ("Notification" in window) {
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+          await Notification.requestPermission();
+        }
+      }
+    }
+
+    function lanzarAlertaNativaCelular(titulo, mensaje) {
+      if ("vibrate" in navigator) {
+        navigator.vibrate([300, 150, 300]);
+      }
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        const notif = new Notification(titulo, {
+          body: mensaje,
+          icon: "CHUSPITA-circulo.png",
+          badge: "CHUSPITA-circulo.png",
+          vibrate: [300, 150, 300],
+          tag: "leogas-chofer-alerta"
+        });
+        notif.onclick = function() {
+          window.focus();
+          notif.close();
+        };
+      }
+    }
 
     function obtenerTokenSecreto() {
       return localStorage.getItem(STORAGE_KEY_SECRETA) || "";
@@ -355,9 +374,23 @@
       const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
       if (!rep) return;
 
-      // Buscar si el cajero le encomendó una comanda activa
       const comandas = datosCompletos.comandas || [];
-      ordenActiva = comandas.find(c => c.repartidorId === repId && c.estado !== 'completado');
+      const ordenEncontrada = comandas.find(c => c.repartidorId === repId && c.estado !== 'completado');
+
+      // DETECCIÓN DE NUEVA COMANDA ENTRANTE (DISPARA NOTIFICACIÓN)
+      if (ordenEncontrada && ordenEncontrada.id !== ultimaOrdenIdVista) {
+        if (ultimaOrdenIdVista !== null) {
+          lanzarAlertaNativaCelular(
+            "🛵 ¡Nueva orden asignada!",
+            `Llevar ${ordenEncontrada.tipoBalon} a ${ordenEncontrada.cliente} (Cobrar S/ ${parseFloat(ordenEncontrada.montoCobro).toFixed(2)})`
+          );
+        }
+        ultimaOrdenIdVista = ordenEncontrada.id;
+      } else if (!ordenEncontrada) {
+        ultimaOrdenIdVista = null;
+      }
+
+      ordenActiva = ordenEncontrada;
 
       const caja = document.getElementById('cajaOrdenAsignada');
       const b1 = document.getElementById('btnPaso1');
@@ -378,7 +411,6 @@
         return;
       }
 
-      // Renderizar orden activa
       caja.className = "order-box";
       caja.innerHTML = `
         <div class="order-header">
@@ -408,7 +440,7 @@
       if (etapa === 1) {
         b1.disabled = false;
         b2.disabled = false;
-        b3.disabled = true; // Bloquea saltar al paso 3
+        b3.disabled = true;
         tag.innerText = "Paso 1: En Camino";
         guia.innerHTML = "🟥 Sal con el balón y presiona <strong>[Entregado]</strong> al llegar.";
       } else if (etapa === 2) {
@@ -430,7 +462,6 @@
       if (!ordenActiva) return;
       const etapaActual = ordenActiva.etapa || 1;
 
-      // Validación obligatoria
       if (etapaActual === 1 && pasoDestino === 3) {
         alert("⛔ Secuencia bloqueada: Debes marcar primero 'Paso 2: Entregado' antes de completar.");
         return;
@@ -441,7 +472,6 @@
 
       if (pasoDestino === 3) {
         ordenActiva.estado = 'completado';
-        // Guardar en ventas / liquidaciones del repartidor
         if (!datosCompletos.ventas) datosCompletos.ventas = [];
         datosCompletos.ventas.push({
           fecha: new Date().toLocaleString(),
@@ -466,6 +496,8 @@
       const sel = document.getElementById('selectChofer');
       const repId = sel.value;
       if (!navigator.geolocation) return alert("GPS no disponible.");
+
+      solicitarPermisoNotificaciones();
 
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
@@ -531,7 +563,6 @@
       });
     }
 
-    // IMPRESIÓN DE LIQUIDACIÓN FORMAL
     function prepararImpresionLiquidacion() {
       const sel = document.getElementById('selectChofer');
       const repId = sel.value;
@@ -567,6 +598,7 @@
     }
 
     window.onload = () => {
+      solicitarPermisoNotificaciones();
       const urlParams = new URLSearchParams(window.location.search);
       const t = urlParams.get('set_token') || urlParams.get('token');
       if (t) {
@@ -574,8 +606,7 @@
         window.history.replaceState({}, document.title, window.location.pathname);
       }
       cargarDatosServidor();
-      // Sondeo periódico para recibir la orden enviada por el cajero
-      setInterval(cargarDatosServidor, 12000);
+      setInterval(cargarDatosServidor, 10000);
     };
   </script>
 </body>
