@@ -5,166 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LeoGas Cusco</title>
   
-  <!-- Leaflet CSS para Mapas en Admin -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 900px; margin: auto; }
-    
-    .header-admin {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .header-left-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .header-admin { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px; }
     h2 { color: #6b21a8; margin: 0; font-size: 20px; }
 
-    /* LOGO LA CHUSPA TECH */
-    .chuspa-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #fefce8;
-      border: 1.5px solid #eab308;
-      padding: 4px 10px 4px 5px;
-      border-radius: 20px;
-      text-decoration: none;
-      box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2);
-    }
-    .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid #ca8a04; background: #fff; }
-    .chuspa-text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
-    .chuspa-title { font-size: 11px; font-weight: 900; color: #6b21a8; }
-    .chuspa-sub { font-size: 8.5px; font-weight: 700; color: #b45309; }
+    .chuspa-badge { display: inline-flex; align-items: center; gap: 8px; background: #fefce8; border: 1.5px solid #eab308; padding: 4px 10px; border-radius: 20px; text-decoration: none; }
+    .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
     
     .dashboard-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; overflow-x: auto; }
-    .tab-btn { background: none; border: none; font-weight: 800; font-size: 13px; padding: 8px 14px; color: #64748b; cursor: pointer; border-radius: 8px; white-space: nowrap; }
+    .tab-btn { background: none; border: none; font-weight: 800; font-size: 13px; padding: 8px 14px; color: #64748b; cursor: pointer; border-radius: 8px; }
     .tab-btn.active { background: #f3e8ff; color: #581c87; }
 
     .card { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
     label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; }
-    input, textarea, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    input, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
     
     .btn { padding: 10px 14px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; }
-    .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; }
-    .btn-add { background: #16a34a; color: white; margin-bottom: 14px; width: 100%; font-size: 14px; }
-    .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; margin-top: 10px; font-size: 12px; }
+    .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 14px; }
     
-    .admin-img-preview-box { display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #faf5ff; padding: 10px; border-radius: 8px; border: 1px solid #e9d5ff; }
-    .admin-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; }
-
-    /* TOKEN ACORDEÓN */
-    .token-accordion-wrapper { background: #fdf4ff; border: 1.5px dashed #c084fc; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
-    .token-accordion-trigger { width: 100%; background: none; border: none; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 800; color: #6b21a8; font-size: 13px; }
-    .token-accordion-content { display: none; padding: 14px 16px; background: #fff; border-top: 1px solid #e9d5ff; }
-
-    /* REPARTIDORES Y SECUENCIAS */
-    .repartidor-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .repartidor-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
     .repartidor-card.activo { border-color: #86efac; background: #f0fdf4; }
-    .badge-status { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; background: #e2e8f0; color: #64748b; }
-    .badge-status.online { background: #dcfce7; color: #15803d; }
-
-    /* BARRA SECUENCIA CULTURA EN ADMIN */
-    .secuencia-mini-bar {
-      display: flex;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid #cbd5e1;
-      height: 24px;
-      margin-top: 6px;
-      background: #e2e8f0;
-      gap: 2px;
-    }
-    .sec-block {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 800;
-      opacity: 0.25;
-    }
+    
+    .secuencia-mini-bar { display: flex; border-radius: 6px; overflow: hidden; height: 24px; margin-top: 6px; background: #e2e8f0; gap: 2px; }
+    .sec-block { flex: 1; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 800; opacity: 0.25; }
     .sec-block.activo { opacity: 1; font-weight: 900; }
     .sec-rojo { background-color: #e52329; }
     .sec-gris-osc { background-color: #555557; }
     .sec-gris-claro { background-color: #8b8e91; }
 
-    /* MAPA EN ADMIN */
     #adminMap { width: 100%; height: 320px; border-radius: 10px; border: 1px solid #cbd5e1; margin-top: 12px; }
 
-    /* NOTIFICACIÓN MODAL EN EL MEDIO DE LA PANTALLA */
-    .delivery-modal-center {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(4px);
-      z-index: 99999;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-    .delivery-modal-box {
-      background: #ffffff;
-      max-width: 400px;
-      width: 100%;
-      border-radius: 20px;
-      padding: 24px;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-      border: 3px solid #16a34a;
-      animation: zoomIn 0.25s ease-out;
-    }
-    @keyframes zoomIn {
-      from { transform: scale(0.85); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+    .delivery-modal-center { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); z-index: 99999; justify-content: center; align-items: center; padding: 16px; }
+    .delivery-modal-box { background: #ffffff; max-width: 400px; width: 100%; border-radius: 20px; padding: 24px; text-align: center; border: 3px solid #16a34a; }
 
-    /* PANTALLA LOGIN */
     .login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
     .login-card { background: #fff; padding: 24px 28px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 380px; }
-    .btn-logout { background: #f1f5f9; color: #dc2626; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
-
-    .sound-status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 20px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; cursor: pointer; }
-    .sound-status-badge.muted { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-
-    .custom-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; margin-top: 10px; }
-    .custom-table th, .custom-table td { border: 1px solid #e2e8f0; padding: 8px 10px; }
-    .custom-table th { background: #f1f5f9; color: #334155; }
-    .btn-export { background: #16a34a; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
-    .btn-print { background: #2563eb; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #areaImpresion, #areaImpresion * { visibility: visible; }
-      #areaImpresion { position: absolute; left: 0; top: 0; width: 100%; }
-      .no-print { display: none !important; }
-    }
   </style>
 </head>
 <body>
 
-  <!-- PANTALLA LOGIN -->
   <div id="pantallaLogin" class="login-container">
     <div class="login-card">
-      <div style="text-align:center; font-size:38px; margin-bottom:6px;">🦁</div>
+      <div style="text-align:center; font-size:38px;">🦁</div>
       <h3 style="color:#6b21a8; text-align:center; margin-bottom:4px;">Acceso Administrador</h3>
-      <p style="font-size:12px; color:#64748b; text-align:center; margin-bottom:12px;">LeoGas Cusco • Sistema de Control</p>
+      <p style="font-size:12px; color:#64748b; text-align:center; margin-bottom:12px;">LeoGas Cusco • Sistema Firebase</p>
       
-      <div style="display:flex; justify-content:center; margin-bottom:16px;">
-        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
-          <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
-          <div class="chuspa-text">
-            <span class="chuspa-title">La Chuspa Tech</span>
-            <span class="chuspa-sub">by La Chuspa Anuncios</span>
-          </div>
-        </a>
-      </div>
-
       <form onsubmit="verificarLoginAdmin(event)">
         <label>Usuario</label>
         <input type="text" id="loginUsuario" placeholder="admin" required autofocus>
@@ -175,272 +63,122 @@
     </div>
   </div>
 
-  <!-- PANEL PRINCIPAL -->
   <div id="panelAdminPrincipal" style="display: none;">
-
-    <div class="header-admin no-print">
-      <div class="header-left-group">
-        <h2>🦁 Panel de Administración LeoGas</h2>
-        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
-          <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
-          <div class="chuspa-text">
-            <span class="chuspa-title">La Chuspa Tech</span>
-            <span class="chuspa-sub">by La Chuspa Anuncios</span>
-          </div>
+    <div class="header-admin">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <h2>🦁 Panel de Control LeoGas</h2>
+        <a href="https://lachuspaanuncios.com/" target="_blank" class="chuspa-badge">
+          <img src="CHUSPITA-circulo.png" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+          <span style="font-size:11px; font-weight:800; color:#6b21a8;">La Chuspa Tech</span>
         </a>
-        <div class="sound-status-badge" id="badgeSonidoAlerta" onclick="alternarSonidoAlerta()">
-          <span>🔔</span>
-          <span id="textoSonidoAlerta">Alerta Sonora Activa</span>
-        </div>
       </div>
-      <button class="btn-logout" onclick="cerrarSesionAdmin()">🚪 Salir</button>
+      <button class="btn" style="background:#fee2e2; color:#dc2626;" onclick="cerrarSesionAdmin()">🚪 Salir</button>
     </div>
 
-    <!-- ACORDEÓN PROTEGIDO -->
-    <div class="token-accordion-wrapper no-print">
-      <button class="token-accordion-trigger" type="button" onclick="alternarAcordeonToken()">
-        <span>🔐 Token Personal de GitHub (Acceso Desarrollador)</span>
-        <span id="accordionIcon">🔒 Desplegar</span>
-      </button>
-
-      <div class="token-accordion-content" id="contenidoAcordeonToken">
-        <label for="ghTokenInput">Token Personal de GitHub:</label>
-        <input type="password" id="ghTokenInput" placeholder="Pega el token aquí">
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <button class="btn" style="background:#6b21a8; color:#fff; font-size:12px;" onclick="guardarTokenManual()">💾 Guardar Llave</button>
-          <button class="btn" style="background:#fee2e2; color:#dc2626; font-size:12px;" onclick="borrarTokenManual()">🗑️ Limpiar Llave</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="dashboard-tabs no-print">
+    <div class="dashboard-tabs">
       <button class="tab-btn active" id="tabBtnPedidos" onclick="cambiarTab('pedidos')">📦 Pedidos y Flota en Vivo</button>
-      <button class="tab-btn" id="tabBtnProductos" onclick="cambiarTab('productos')">📝 Balones y Precios</button>
-      <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos y WhatsApp</button>
-      <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 Gestión Repartidores</button>
-      <button class="tab-btn" id="tabBtnReportes" onclick="cambiarTab('reportes')">📊 Reporte Contable & Ventas</button>
+      <button class="tab-btn" id="tabBtnPrecios" onclick="cambiarTab('precios')">📝 Precios y Stock</button>
+      <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos</button>
     </div>
 
-    <!-- PESTAÑA: PEDIDOS Y FLOTA EN VIVO -->
+    <!-- PESTAÑA: PEDIDOS EN VIVO -->
     <div id="seccionPedidos">
-
-      <!-- FORMULARIO DE ENCOMIENDA PARA EL CAJERO / ADMINISTRADOR -->
-      <div class="card" style="border: 1.5px solid #a855f7; background: #faf5ff; margin-bottom: 16px;">
-        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:10px;">🛵 Encomendar Pedido a Repartidor</h3>
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div>
-            <label>Asignar a Repartidor:</label>
-            <select id="cmdRepartidorSelect"></select>
-          </div>
-          <div>
-            <label>Tipo de Balón:</label>
-            <select id="cmdTipoBalon">
-              <option value="Balón LeoGas 10kg Normal">Balón Regular 10kg (Normal)</option>
-              <option value="Balón Gas Premium 10kg">Balón Gas Premium 10kg</option>
-            </select>
-          </div>
+      <!-- BANDEJA DE ENTRADA AUTOMÁTICA -->
+      <div class="card" style="border: 2px solid #eab308; background: #fefce8;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Web Entrantes (Por Encomendar)</h3>
+          <span id="badgeContadorEntrantes" style="background:#eab308; color:#fff; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">0 pendientes</span>
         </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div>
-            <label>Monto a Cobrar (S/):</label>
-            <input type="number" id="cmdMonto" placeholder="Ej. 50.00" value="50.00" step="0.5">
-          </div>
-          <div>
-            <label>Método de Pago:</label>
-            <select id="cmdPago">
-              <option value="Efectivo">Efectivo</option>
-              <option value="Yape">Yape</option>
-              <option value="Plin">Plin</option>
-            </select>
-          </div>
+        <div id="listaOrdenesEntrantes">
+          <p style="font-size:12px; color:#a16207;">Esperando pedidos automáticos...</p>
         </div>
-
-        <label>Nombre del Cliente y Referencia:</label>
-        <input type="text" id="cmdCliente" placeholder="Ej: Sra. Rosa - Frente al colegio San Gabriel">
-
-        <label>Enlace de Ubicación GPS (Google Maps):</label>
-        <input type="text" id="cmdGpsUrl" placeholder="https://maps.google.com/?q=-13.51,-71.97">
-
-        <button type="button" class="btn btn-save" style="margin-top:12px; background:#16a34a;" onclick="encomendarPedidoAlChofer()">
-          📤 Asignar Orden al Repartidor
-        </button>
       </div>
 
       <div class="card">
-        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:6px;">📦 Control de Entregas y Secuencia en Tiempo Real</h3>
-        <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Monitorea la secuencia de cada repartidor (Iniciado, Entregado y Completado) y su posición en Cusco.</p>
-        
+        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:6px;">🛵 Secuencia de Flota y Entregas Activas</h3>
         <div id="contenedorSecuenciasRepartidores">Cargando flota...</div>
-
-        <!-- MAPA EN VIVO DEL ADMIN -->
-        <h4 style="margin-top:16px; font-size:14px; color:#1e1b4b;">📍 Mapa de la Flota en Cusco:</h4>
+        <h4 style="margin-top:16px; font-size:14px;">📍 Mapa en Tiempo Real (Firebase):</h4>
         <div id="adminMap"></div>
       </div>
     </div>
 
-    <!-- PESTAÑA BALONES -->
-    <div id="seccionProductos" style="display: none;">
-      <button class="btn btn-add no-print" onclick="agregarNuevoProducto()">➕ Agregar Nuevo Balón</button>
-      <div id="listaProductos">Cargando catálogo...</div>
-      <button class="btn btn-save no-print" id="btnPublicar" onclick="sincronizarConGitHub()">🚀 Guardar y Publicar en GitHub</button>
-      <div id="statusMsg" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
-    </div>
-
-    <!-- PESTAÑA TELÉFONOS -->
-    <div id="seccionTelefonos" style="display: none;">
+    <!-- PESTAÑA: PRECIOS -->
+    <div id="seccionPrecios" style="display:none;">
       <div class="card">
-        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:12px;">📞 Edición de Teléfonos del Volante y Pedidos</h3>
-        <label>Número WhatsApp para Pedidos:</label>
-        <input type="text" id="telWhatsApp" placeholder="51969773064">
-        <label>Teléfono 1 (Llamada Rápida 1):</label>
-        <input type="text" id="telFijo1" placeholder="950 727 212">
-        <label>Teléfono 2 (Llamada Rápida 2):</label>
-        <input type="text" id="telFijo2" placeholder="984 285 500">
-        <label>Teléfono 3 (Fijo Cusco):</label>
-        <input type="text" id="telFijo3" placeholder="(084) 501111">
-        <button class="btn btn-save" onclick="sincronizarConGitHub()" style="margin-top:16px;">💾 Guardar Teléfonos en GitHub</button>
+        <h3>Modificar Precios y Stock en Tiempo Real</h3>
+        <div id="listaProductosAdmin"></div>
       </div>
     </div>
 
-    <!-- PESTAÑA GESTIÓN REPARTIDORES -->
-    <div id="seccionGPS" style="display: none;">
-      <button class="btn btn-add" onclick="agregarNuevoRepartidor()">➕ Agregar Nuevo Repartidor a la Flota</button>
-      <div id="listaRepartidores">Cargando lista de repartidores...</div>
-      <button class="btn btn-save" onclick="sincronizarConGitHub()">💾 Guardar Cambios de Flota en GitHub</button>
-    </div>
-
-    <!-- PESTAÑA REPORTES -->
-    <div id="seccionReportes" style="display: none;">
-      <div class="no-print" style="display:flex; justify-content:space-between; margin-bottom:12px;">
-        <button type="button" class="btn-export" onclick="exportarVentasExcelCSV()">📥 Descargar Excel (CSV)</button>
-        <button type="button" class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
-      </div>
-      <div id="areaImpresion">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Fecha y Hora</th>
-              <th>Cliente</th>
-              <th>Detalle</th>
-              <th>Total</th>
-              <th>Pago</th>
-            </tr>
-          </thead>
-          <tbody id="tablaVentasBody"></tbody>
-        </table>
+    <!-- PESTAÑA: TELÉFONOS -->
+    <div id="seccionTelefonos" style="display:none;">
+      <div class="card">
+        <h3>📞 Teléfonos de Pedidos</h3>
+        <label>WhatsApp:</label>
+        <input type="text" id="telWhatsApp">
+        <label>Teléfono 1:</label>
+        <input type="text" id="telFijo1">
+        <label>Teléfono 2:</label>
+        <input type="text" id="telFijo2">
+        <label>Teléfono 3:</label>
+        <input type="text" id="telFijo3">
+        <button class="btn btn-save" style="margin-top:12px;" onclick="guardarTelefonosFirebase()">💾 Guardar Teléfonos</button>
       </div>
     </div>
-
   </div>
 
-  <!-- NOTIFICACIÓN EN EL MEDIO DE LA PANTALLA -->
   <div class="delivery-modal-center" id="modalNotificacionEntrega">
     <div class="delivery-modal-box">
-      <div style="font-size: 46px; margin-bottom: 6px;">🎉</div>
-      <h3 style="color: #15803d; font-size: 19px; margin-bottom: 4px;">¡ENTREGA COMPLETADA!</h3>
-      <p id="textoModalNotificacion" style="font-size: 14px; color: #475569; margin-bottom: 16px;">
-        El repartidor ha finalizado el pedido satisfactoriamente.
-      </p>
-      <button type="button" class="btn btn-save" style="margin-top:0; padding:10px 16px; font-size:14px;" onclick="cerrarNotificacionCentro()">
-        Entendido ✔️
-      </button>
+      <div style="font-size:46px;">🎉</div>
+      <h3 style="color:#15803d; font-size:19px;">¡ENTREGA COMPLETADA!</h3>
+      <p id="textoModalNotificacion" style="font-size:14px; color:#475569; margin:10px 0 16px;"></p>
+      <button type="button" class="btn btn-save" style="background:#15803d;" onclick="cerrarNotificacionCentro()">Entendido ✔️</button>
     </div>
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- SDK DE FIREBASE (TIEMPO REAL) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
   <script>
-    const USUARIO = "phyxcius";
-    const REPOSITORIO = "Leogascusco";
-    const ARCHIVO = "productos.json";
-    
-    const CODIGO_CREADOR_TOKEN = "42423549";
-    const STORAGE_KEY_SECRETA = "leogas_vault_secret_token";
-    const STORAGE_KEY_AUTH = "leogas_admin_sesion_activa";
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnYaUN-aZYzEip9z3wsuKnbwdfYscFZkY",
+      authDomain: "leogas-cusco.firebaseapp.com",
+      databaseURL: "https://leogas-cusco-default-rtdb.firebaseio.com",
+      projectId: "leogas-cusco",
+      storageBucket: "leogas-cusco.firebasestorage.app",
+      messagingSenderId: "1042930313066",
+      appId: "1:1042930313066:web:ce6c424afe606f63322713",
+      measurementId: "G-MBYC61L9BL"
+    };
 
-    let productos = [];
-    let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
-    let repartidores = [];
-    let comandas = [];
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
+    let pedidosLocales = {};
+    let repartidoresLocales = {
+      "rep-1": { id: "rep-1", nombre: "Edwin", online: false, lat: -13.5167, lng: -71.9788, etapa: 1 },
+      "rep-2": { id: "rep-2", nombre: "Moto 2", online: false, lat: -13.5200, lng: -71.9700, etapa: 1 }
+    };
     let mapAdmin = null;
-    let marcadoresAdminFlota = {};
-    let alertaSonoraHabilitada = true;
-    let audioContext = null;
-    let estadosPreviosSecuencia = {};
+    let marcadoresAdmin = {};
 
-    // MÉTODO 1: SOLICITAR PERMISO Y LANZAR NOTIFICACIÓN CON VIBRACIÓN
-    async function solicitarPermisoNotificaciones() {
-      if ("Notification" in window) {
-        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-          await Notification.requestPermission();
-        }
-      }
-    }
-
-    function lanzarAlertaNativaAdmin(titulo, mensaje) {
-      if ("vibrate" in navigator) {
-        navigator.vibrate([300, 150, 300]);
-      }
-
-      if ("Notification" in window && Notification.permission === "granted") {
-        const notif = new Notification(titulo, {
-          body: mensaje,
-          icon: "CHUSPITA-circulo.png",
-          badge: "CHUSPITA-circulo.png",
-          vibrate: [300, 150, 300],
-          tag: "leogas-admin-alerta"
-        });
-        notif.onclick = function() {
-          window.focus();
-          notif.close();
-        };
-      }
-    }
-
-    function emitirCampanadaAlerta() {
-      if (!alertaSonoraHabilitada) return;
+    function emitirCampanada() {
       try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!audioContext) audioContext = new AudioCtx();
-        if (audioContext.state === 'suspended') audioContext.resume();
-
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(587.33, audioContext.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880.00, audioContext.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.35, audioContext.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.85);
-
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.85);
         osc.connect(gain);
-        gain.connect(audioContext.destination);
+        gain.connect(ctx.destination);
         osc.start();
-        osc.stop(audioContext.currentTime + 0.85);
+        osc.stop(ctx.currentTime + 0.85);
       } catch (e) {}
-    }
-
-    function alternarSonidoAlerta() {
-      alertaSonoraHabilitada = !alertaSonoraHabilitada;
-      document.getElementById('badgeSonidoAlerta').classList.toggle('muted', !alertaSonoraHabilitada);
-      document.getElementById('textoSonidoAlerta').innerText = alertaSonoraHabilitada ? "Alerta Sonora Activa" : "Alerta Silenciada";
-    }
-
-    function mostrarNotificacionCentro(nombreRepartidor) {
-      document.getElementById('textoModalNotificacion').innerHTML = `El repartidor <strong>${nombreRepartidor}</strong> acaba de completar su entrega en Cusco.`;
-      document.getElementById('modalNotificacionEntrega').style.display = 'flex';
-      emitirCampanadaAlerta();
-      lanzarAlertaNativaAdmin(
-        "🎉 ¡Entrega Finalizada!",
-        `${nombreRepartidor} completó con éxito la entrega del balón.`
-      );
-    }
-
-    function cerrarNotificacionCentro() {
-      document.getElementById('modalNotificacionEntrega').style.display = 'none';
     }
 
     function verificarLoginAdmin(e) {
@@ -448,445 +186,190 @@
       const u = document.getElementById('loginUsuario').value.trim();
       const p = document.getElementById('loginPassword').value.trim();
       if (u === 'admin' && p === 'regocijo123') {
-        sessionStorage.setItem(STORAGE_KEY_AUTH, "true");
-        solicitarPermisoNotificaciones();
-        mostrarPanelAdmin();
+        sessionStorage.setItem("leogas_auth", "true");
+        mostrarPanel();
       } else {
         alert("Credenciales incorrectas.");
       }
     }
 
-    function mostrarPanelAdmin() {
+    function mostrarPanel() {
       document.getElementById('pantallaLogin').style.display = 'none';
       document.getElementById('panelAdminPrincipal').style.display = 'block';
-      solicitarPermisoNotificaciones();
       iniciarMapaAdmin();
-      cargarDesdeGitHub();
-      iniciarMonitoreoSegundoPlano();
+      iniciarEscuchaFirebase();
     }
 
     function cerrarSesionAdmin() {
-      sessionStorage.removeItem(STORAGE_KEY_AUTH);
-      document.getElementById('panelAdminPrincipal').style.display = 'none';
-      document.getElementById('pantallaLogin').style.display = 'flex';
-    }
-
-    function alternarAcordeonToken() {
-      const contenido = document.getElementById('contenidoAcordeonToken');
-      if (contenido.style.display === 'block') {
-        contenido.style.display = 'none';
-        return;
-      }
-      const pass = prompt("🔐 Código de Creador:");
-      if (pass === CODIGO_CREADOR_TOKEN) {
-        contenido.style.display = 'block';
-        document.getElementById('ghTokenInput').value = obtenerTokenSecreto();
-      } else if (pass !== null) {
-        alert("Código incorrecto.");
-      }
-    }
-
-    function obtenerTokenSecreto() {
-      return localStorage.getItem(STORAGE_KEY_SECRETA) || "";
-    }
-
-    function guardarTokenManual() {
-      const t = document.getElementById('ghTokenInput').value.trim();
-      if (!t) return alert("Pega un token válido.");
-      localStorage.setItem(STORAGE_KEY_SECRETA, t);
-      alert("Token guardado.");
-      cargarDesdeGitHub();
-    }
-
-    function borrarTokenManual() {
-      localStorage.removeItem(STORAGE_KEY_SECRETA);
-      document.getElementById('ghTokenInput').value = '';
-      alert("Token eliminado.");
+      sessionStorage.removeItem("leogas_auth");
+      location.reload();
     }
 
     function cambiarTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('seccionPedidos').style.display = 'none';
-      document.getElementById('seccionProductos').style.display = 'none';
+      document.getElementById('seccionPrecios').style.display = 'none';
       document.getElementById('seccionTelefonos').style.display = 'none';
-      document.getElementById('seccionGPS').style.display = 'none';
-      document.getElementById('seccionReportes').style.display = 'none';
 
       if (tab === 'pedidos') {
         document.getElementById('tabBtnPedidos').classList.add('active');
         document.getElementById('seccionPedidos').style.display = 'block';
         setTimeout(() => { if (mapAdmin) mapAdmin.invalidateSize(); }, 200);
-      } else if (tab === 'productos') {
-        document.getElementById('tabBtnProductos').classList.add('active');
-        document.getElementById('seccionProductos').style.display = 'block';
+      } else if (tab === 'precios') {
+        document.getElementById('tabBtnPrecios').classList.add('active');
+        document.getElementById('seccionPrecios').style.display = 'block';
       } else if (tab === 'telefonos') {
         document.getElementById('tabBtnTelefonos').classList.add('active');
         document.getElementById('seccionTelefonos').style.display = 'block';
-      } else if (tab === 'gps') {
-        document.getElementById('tabBtnGPS').classList.add('active');
-        document.getElementById('seccionGPS').style.display = 'block';
-      } else if (tab === 'reportes') {
-        document.getElementById('tabBtnReportes').classList.add('active');
-        document.getElementById('seccionReportes').style.display = 'block';
-        renderizarReporte();
       }
     }
 
     function iniciarMapaAdmin() {
       if (mapAdmin) return;
       mapAdmin = L.map('adminMap').setView([-13.5167, -71.9788], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapAdmin);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapAdmin);
     }
 
-    async function cargarDesdeGitHub() {
-      const token = obtenerTokenSecreto();
-      const headers = token ? { "Authorization": `token ${token}` } : {};
+    function iniciarEscuchaFirebase() {
+      // 1. Escuchar pedidos entrantes en tiempo real
+      db.ref('pedidos').on('value', snap => {
+        pedidosLocales = snap.val() || {};
+        renderizarOrdenesEntrantes();
+        renderizarFlotaActiva();
+      });
 
-      try {
-        const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
-          headers: headers
-        });
+      // 2. Escuchar repartidores y coordenadas GPS
+      db.ref('repartidores').on('value', snap => {
+        const data = snap.val();
+        if (data) repartidoresLocales = data;
+        actualizarMapaAdmin();
+        renderizarFlotaActiva();
+      });
 
-        if (res.ok) {
-          const data = await res.json();
-          const datos = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-
-          productos = datos.productos || [];
-          telefonos = datos.telefonos || telefonos;
-          repartidores = datos.repartidores || [];
-          comandas = datos.comandas || [];
-          if (Array.isArray(datos.ventas)) localStorage.setItem('gas_ventas', JSON.stringify(datos.ventas));
+      // 3. Teléfonos
+      db.ref('telefonos').once('value', snap => {
+        const t = snap.val();
+        if (t) {
+          document.getElementById('telWhatsApp').value = t.whatsapp || "";
+          document.getElementById('telFijo1').value = t.tel1 || "";
+          document.getElementById('telFijo2').value = t.tel2 || "";
+          document.getElementById('telFijo3').value = t.tel3 || "";
         }
-      } catch (e) {
-        console.error(e);
-      }
-
-      renderizarSelectRepartidoresParaComanda();
-      renderizarPedidosSecuencia();
-      renderizarProductos();
-      cargarValoresTelefonosEnFormulario();
-      renderizarRepartidores();
-      actualizarMapaAdmin();
-    }
-
-    function renderizarSelectRepartidoresParaComanda() {
-      const sel = document.getElementById('cmdRepartidorSelect');
-      if (!sel) return;
-      sel.innerHTML = '';
-      if (repartidores.length === 0) {
-        sel.innerHTML = '<option value="">No hay repartidores registrados</option>';
-        return;
-      }
-      repartidores.forEach(rep => {
-        const opt = document.createElement('option');
-        opt.value = rep.id;
-        opt.innerText = `${rep.nombre} ${rep.online ? '🟢' : '💤'}`;
-        sel.appendChild(opt);
       });
     }
 
-    async function encomendarPedidoAlChofer() {
-      const repId = document.getElementById('cmdRepartidorSelect').value;
-      const tipoBalon = document.getElementById('cmdTipoBalon').value;
-      const montoCobro = document.getElementById('cmdMonto').value;
-      const metodoPago = document.getElementById('cmdPago').value;
-      const cliente = document.getElementById('cmdCliente').value.trim();
-      const gpsUrl = document.getElementById('cmdGpsUrl').value.trim();
+    function renderizarOrdenesEntrantes() {
+      const contenedor = document.getElementById('listaOrdenesEntrantes');
+      const badge = document.getElementById('badgeContadorEntrantes');
+      const lista = Object.values(pedidosLocales).filter(p => p.estado === 'pendiente_asignacion');
+      badge.innerText = `${lista.length} pendientes`;
 
-      if (!repId || !cliente) {
-        alert("Por favor selecciona un repartidor y escribe el nombre del cliente.");
+      if (lista.length === 0) {
+        contenedor.innerHTML = '<p style="font-size:12px; color:#a16207;">No hay pedidos pendientes de asignación.</p>';
         return;
       }
 
-      const nuevaComanda = {
-        id: "cmd-" + Date.now(),
-        repartidorId: repId,
-        tipoBalon: tipoBalon,
-        montoCobro: montoCobro,
-        metodoPago: metodoPago,
-        cliente: cliente,
-        direccion: cliente,
-        gpsUrl: gpsUrl,
-        etapa: 1,
-        estado: "activo",
-        horaAsignacion: new Date().toLocaleTimeString()
-      };
+      contenedor.innerHTML = '';
+      lista.forEach(ord => {
+        const div = document.createElement('div');
+        div.style.cssText = "background:#fff; border:1px solid #fde047; border-radius:10px; padding:12px; margin-bottom:8px;";
 
-      const token = obtenerTokenSecreto();
-      if (!token) return alert("Configura tu Token de GitHub para despachar comandas.");
-
-      try {
-        const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
-          headers: { "Authorization": `token ${token}` }
+        let opciones = '<option value="">-- Asignar Repartidor --</option>';
+        Object.values(repartidoresLocales).forEach(r => {
+          opciones += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
         });
 
-        if (check.ok) {
-          const data = await check.json();
-          const objeto = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-          
-          if (!objeto.comandas) objeto.comandas = [];
-          objeto.comandas.push(nuevaComanda);
-
-          const payload = {
-            message: `Asignación de comanda para repartidor ${repId}`,
-            content: btoa(unescape(encodeURIComponent(JSON.stringify(objeto, null, 2)))),
-            sha: data.sha,
-            branch: "main"
-          };
-
-          const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}`, {
-            method: "PUT",
-            headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-
-          if (!res.ok) throw new Error("Error en GitHub al guardar la comanda.");
-
-          alert("✔ ¡Orden enviada! Aparecerá de inmediato en el celular del repartidor.");
-          document.getElementById('cmdCliente').value = '';
-          document.getElementById('cmdGpsUrl').value = '';
-          cargarDesdeGitHub();
-        }
-      } catch (err) {
-        alert("Error al despachar orden: " + err.message);
-      }
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between;">
+            <strong>👤 ${ord.cliente}</strong>
+            <span style="color:#15803d; font-weight:900;">S/ ${parseFloat(ord.montoCobro).toFixed(2)}</span>
+          </div>
+          <div style="font-size:12px; color:#475569;">🛢️ ${ord.tipoBalon} | 💵 ${ord.metodoPago}</div>
+          <div style="font-size:11px; color:#64748b; margin-bottom:6px;">🕒 ${ord.hora} ${ord.gpsUrl ? `| <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb;">📍 Mapa</a>` : ''}</div>
+          <div style="display:flex; gap:8px;">
+            <select id="selRep_${ord.id}" style="flex:1; margin:0; padding:6px;">${opciones}</select>
+            <button class="btn btn-save" style="background:#16a34a; width:auto; padding:6px 14px;" onclick="asignarOrden('${ord.id}')">Asignar 🛵</button>
+          </div>
+        `;
+        contenedor.appendChild(div);
+      });
     }
 
-    function renderizarPedidosSecuencia() {
-      const cont = document.getElementById('contenedorSecuenciasRepartidores');
-      cont.innerHTML = '';
+    async function asignarOrden(id) {
+      const repId = document.getElementById(`selRep_${id}`).value;
+      if (!repId) return alert("Selecciona un repartidor.");
 
-      if (repartidores.length === 0) {
-        cont.innerHTML = '<p style="font-size:13px; color:#64748b;">No hay repartidores registrados.</p>';
-        return;
-      }
+      await db.ref(`pedidos/${id}`).update({
+        repartidorId: repId,
+        estado: "activo",
+        etapa: 1
+      });
 
-      repartidores.forEach(rep => {
-        const comandaRep = comandas.find(c => c.repartidorId === rep.id && c.estado !== 'completado');
-        const etapa = comandaRep ? (comandaRep.etapa || 1) : (rep.etapaSecuencia || 1);
-        const online = rep.online === true;
+      emitirCampanada();
+      alert("✔ Pedido encomendado en tiempo real.");
+    }
+
+    function renderizarFlotaActiva() {
+      const contenedor = document.getElementById('contenedorSecuenciasRepartidores');
+      contenedor.innerHTML = '';
+
+      Object.values(repartidoresLocales).forEach(rep => {
+        const ordenActiva = Object.values(pedidosLocales).find(p => p.repartidorId === rep.id && p.estado !== 'completado');
+        const etapa = ordenActiva ? ordenActiva.etapa : 1;
 
         const card = document.createElement('div');
-        card.className = `repartidor-card ${online ? 'activo' : ''}`;
+        card.className = `repartidor-card ${rep.online ? 'activo' : ''}`;
         card.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; justify-content:space-between;">
             <strong>🦁 ${rep.nombre}</strong>
-            <span class="badge-status ${online ? 'online' : ''}">${online ? 'Online (En Ruta)' : 'Offline (Inactivo)'}</span>
+            <span style="font-size:11px; font-weight:800;">${rep.online ? 'Online 🟢' : 'Offline 💤'}</span>
           </div>
-
           <div style="font-size:12px; margin-top:2px;">
-            ${comandaRep ? `🛢️ <strong>${comandaRep.tipoBalon}</strong> para <em>${comandaRep.cliente}</em> (S/ ${parseFloat(comandaRep.montoCobro).toFixed(2)})` : '<span style="color:#64748b;">Sin orden activa</span>'}
+            ${ordenActiva ? `🛢️ <strong>${ordenActiva.tipoBalon}</strong> para <em>${ordenActiva.cliente}</em>` : '<span style="color:#64748b;">Sin orden</span>'}
           </div>
-
-          <div style="font-size:11px; color:#64748b;">
-            Última acción: <strong>${comandaRep ? (comandaRep.horaActualizacion || comandaRep.horaAsignacion) : (rep.ultimaActualizacionSecuencia || 'Sin registro')}</strong>
-          </div>
-
           <div class="secuencia-mini-bar">
-            <div class="sec-block sec-rojo ${etapa === 1 ? 'activo' : ''}">1. EN CAMINO</div>
+            <div class="sec-block sec-rojo ${etapa === 1 && ordenActiva ? 'activo' : ''}">1. EN CAMINO</div>
             <div class="sec-block sec-gris-osc ${etapa === 2 ? 'activo' : ''}">2. ENTREGADO</div>
             <div class="sec-block sec-gris-claro ${etapa === 3 ? 'activo' : ''}">3. COMPLETADO</div>
           </div>
         `;
-        cont.appendChild(card);
+        contenedor.appendChild(card);
       });
     }
 
     function actualizarMapaAdmin() {
       if (!mapAdmin) return;
-
-      repartidores.forEach(rep => {
-        const estaOnline = rep.online === true;
+      Object.values(repartidoresLocales).forEach(rep => {
+        const online = rep.online === true;
         const icono = L.divIcon({
-          className: 'custom-admin-marker',
-          html: `<div style="background:${estaOnline ? '#7e22ce' : '#64748b'}; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 3px 6px rgba(0,0,0,0.3); font-size:18px;">🦁</div>`,
+          html: `<div style="background:${online ? '#7e22ce' : '#64748b'}; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:18px;">🦁</div>`,
           iconSize: [34, 34],
           iconAnchor: [17, 17]
         });
 
-        const comandaRep = comandas.find(c => c.repartidorId === rep.id && c.estado !== 'completado');
-        const etapa = comandaRep ? comandaRep.etapa : (rep.etapaSecuencia || 1);
-        const texto = `<b>${rep.nombre}</b><br>Estado: ${estaOnline ? 'Online 🔥' : 'Offline 💤'}<br>Secuencia: Paso ${etapa}${comandaRep ? `<br>Balón: ${comandaRep.tipoBalon}` : ''}`;
-
-        if (!marcadoresAdminFlota[rep.id]) {
-          marcadoresAdminFlota[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(mapAdmin).bindPopup(texto);
+        if (!marcadoresAdmin[rep.id]) {
+          marcadoresAdmin[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(mapAdmin).bindPopup(`<b>${rep.nombre}</b>`);
         } else {
-          marcadoresAdminFlota[rep.id].setIcon(icono);
-          marcadoresAdminFlota[rep.id].setLatLng([rep.lat, rep.lng]);
-          marcadoresAdminFlota[rep.id].setPopupContent(texto);
+          marcadoresAdmin[rep.id].setIcon(icono);
+          marcadoresAdmin[rep.id].setLatLng([rep.lat, rep.lng]);
         }
       });
     }
 
-    function iniciarMonitoreoSegundoPlano() {
-      setInterval(async () => {
-        try {
-          const res = await fetch(`productos.json?_t=${Date.now()}`);
-          if (res.ok) {
-            const data = await res.json();
-            const nuevaFlota = data.repartidores || [];
-            comandas = data.comandas || [];
+    function cerrarNotificacionCentro() { document.getElementById('modalNotificacionEntrega').style.display = 'none'; }
 
-            nuevaFlota.forEach(rep => {
-              const comandaRep = comandas.find(c => c.repartidorId === rep.id);
-              const etapaNueva = comandaRep ? comandaRep.etapa : (rep.etapaSecuencia || 1);
-              const etapaAnterior = estadosPreviosSecuencia[rep.id] || 1;
-
-              if (etapaAnterior !== 3 && etapaNueva === 3) {
-                mostrarNotificacionCentro(rep.nombre);
-              }
-              estadosPreviosSecuencia[rep.id] = etapaNueva;
-            });
-
-            repartidores = nuevaFlota;
-            renderizarPedidosSecuencia();
-            actualizarMapaAdmin();
-          }
-        } catch (e) {}
-      }, 10000);
-    }
-
-    function cargarValoresTelefonosEnFormulario() {
-      document.getElementById('telWhatsApp').value = telefonos.whatsapp || "51969773064";
-      document.getElementById('telFijo1').value = telefonos.tel1 || "950 727 212";
-      document.getElementById('telFijo2').value = telefonos.tel2 || "984 285 500";
-      document.getElementById('telFijo3').value = telefonos.tel3 || "(084) 501111";
-    }
-
-    function renderizarProductos() {
-      const cont = document.getElementById('listaProductos');
-      cont.innerHTML = '';
-      productos.forEach((p, i) => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <label>Nombre:</label>
-          <input type="text" value="${p.nombre}" onchange="productos[${i}].nombre = this.value">
-          <label>Precio (S/):</label>
-          <input type="number" step="0.5" value="${p.precio}" onchange="productos[${i}].precio = parseFloat(this.value) || 0">
-          <button class="btn btn-del" onclick="eliminarProducto(${i})">🗑️ Eliminar</button>
-        `;
-        cont.appendChild(div);
+    async function guardarTelefonosFirebase() {
+      await db.ref('telefonos').set({
+        whatsapp: document.getElementById('telWhatsApp').value.trim(),
+        tel1: document.getElementById('telFijo1').value.trim(),
+        tel2: document.getElementById('telFijo2').value.trim(),
+        tel3: document.getElementById('telFijo3').value.trim()
       });
-    }
-
-    function agregarNuevoProducto() {
-      productos.push({ id: "gas-" + Date.now(), nombre: "Nuevo Balón", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" });
-      renderizarProductos();
-    }
-
-    function eliminarProducto(i) {
-      if (confirm("¿Eliminar balón?")) {
-        productos.splice(i, 1);
-        renderizarProductos();
-      }
-    }
-
-    function renderizarRepartidores() {
-      const cont = document.getElementById('listaRepartidores');
-      cont.innerHTML = '';
-      repartidores.forEach((rep, i) => {
-        const div = document.createElement('div');
-        div.className = 'repartidor-card';
-        div.innerHTML = `
-          <input type="text" value="${rep.nombre}" onchange="repartidores[${i}].nombre = this.value">
-          <button class="btn btn-del" onclick="eliminarRepartidor(${i})">🗑️ Eliminar</button>
-        `;
-        cont.appendChild(div);
-      });
-      renderizarSelectRepartidoresParaComanda();
-    }
-
-    function agregarNuevoRepartidor() {
-      const n = prompt("Nombre del repartidor:");
-      if (!n) return;
-      repartidores.push({ id: "rep-" + Date.now(), nombre: n.trim(), online: false, lat: -13.5167, lng: -71.9788, etapaSecuencia: 1 });
-      renderizarRepartidores();
-    }
-
-    function eliminarRepartidor(i) {
-      if (confirm("¿Eliminar repartidor?")) {
-        repartidores.splice(i, 1);
-        renderizarRepartidores();
-      }
-    }
-
-    async function sincronizarConGitHub() {
-      const token = obtenerTokenSecreto();
-      if (!token) return alert("Guarda tu token de GitHub.");
-
-      telefonos.whatsapp = document.getElementById('telWhatsApp').value.trim();
-      telefonos.tel1 = document.getElementById('telFijo1').value.trim();
-      telefonos.tel2 = document.getElementById('telFijo2').value.trim();
-      telefonos.tel3 = document.getElementById('telFijo3').value.trim();
-
-      const objetoCompleto = { 
-        productos, 
-        telefonos, 
-        repartidores, 
-        comandas,
-        ventas: JSON.parse(localStorage.getItem('gas_ventas')) || [] 
-      };
-
-      let shaActual = "";
-      try {
-        const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
-          headers: { "Authorization": `token ${token}` }
-        });
-        if (check.ok) shaActual = (await check.json()).sha;
-      } catch (e) {}
-
-      const payload = {
-        message: "Actualización desde Panel Admin",
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(objetoCompleto, null, 2)))),
-        branch: "main"
-      };
-      if (shaActual) payload.sha = shaActual;
-
-      try {
-        await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}`, {
-          method: "PUT",
-          headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        alert("✔ Cambios guardados con éxito.");
-      } catch (err) {
-        alert("Error: " + err.message);
-      }
-    }
-
-    function renderizarReporte() {
-      const ventas = JSON.parse(localStorage.getItem('gas_ventas')) || [];
-      const tbody = document.getElementById('tablaVentasBody');
-      tbody.innerHTML = '';
-      ventas.forEach(v => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${v.fecha || '--'}</td><td>${v.cliente || 'Particular'}</td><td>${v.productos || '--'}</td><td>S/ ${parseFloat(v.total || 0).toFixed(2)}</td><td>${v.pago || 'Efectivo'}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function exportarVentasExcelCSV() {
-      const ventas = JSON.parse(localStorage.getItem('gas_ventas')) || [];
-      let csv = "\uFEFFFecha y Hora;Cliente;Detalle;Total;Pago\r\n";
-      ventas.forEach(v => {
-        csv += `"${v.fecha || ''}";"${v.cliente || ''}";"${v.productos || ''}";"${v.total || ''}";"${v.pago || ''}"\r\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `Ventas_LeoGas_${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
+      alert("Teléfonos guardados al instante en Firebase.");
     }
 
     window.onload = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenURL = urlParams.get('set_token') || urlParams.get('token');
-      if (tokenURL) {
-        localStorage.setItem(STORAGE_KEY_SECRETA, tokenURL.trim());
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-      if (sessionStorage.getItem(STORAGE_KEY_AUTH) === "true") mostrarPanelAdmin();
+      if (sessionStorage.getItem("leogas_auth") === "true") mostrarPanel();
     };
   </script>
 </body>
