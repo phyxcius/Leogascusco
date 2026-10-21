@@ -71,6 +71,19 @@
       "estado": "activo",
       "horaAsignacion": "11:12:46",
       "horaActualizacion": "11:35:09 a.m."
+    },
+    {
+      "id": "cmd-1792600533663",
+      "repartidorId": "rep-1",
+      "tipoBalon": "Balón Gas Premium 10kg",
+      "montoCobro": "50.00",
+      "metodoPago": "Plin",
+      "cliente": "edwin oblitas",
+      "direccion": "edwin oblitas",
+      "gpsUrl": "https://www.google.com/maps?q=-13.5380849,-71.9803639",
+      "etapa": 1,
+      "estado": "activo",
+      "horaAsignacion": "11:35:33"
     }
   ],
   "ventas": [
