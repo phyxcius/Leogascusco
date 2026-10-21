@@ -401,7 +401,7 @@
       border-radius: 0 !important;
     }
 
-    /* BOTÓN DE AMPLIAR MAPA */
+    /* BOTONES FLOTANTES SOBRE EL MAPA */
     .btn-toggle-fullscreen {
       position: absolute;
       top: 14px;
@@ -429,9 +429,54 @@
       transform: scale(1.04);
     }
 
+    .btn-center-map {
+      position: absolute;
+      top: 60px;
+      right: 14px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+      border: 1.5px solid #2563eb;
+      color: #2563eb;
+      padding: 8px 14px;
+      border-radius: 24px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-center-map:hover {
+      background: #2563eb;
+      color: #fff;
+      transform: scale(1.04);
+    }
+
+    /* RECUADRO FLOTANTE DE DISTANCIA / TIEMPO */
+    .distance-eta-badge {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      z-index: 1000;
+      background: rgba(30, 27, 75, 0.95);
+      backdrop-filter: blur(4px);
+      color: #facc15;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      border: 1px solid #ca8a04;
+      display: none;
+    }
+
     #cuscoMap {
       width: 100%;
-      height: 350px;
+      height: 380px;
       border-radius: 10px;
       z-index: 10;
     }
@@ -707,9 +752,9 @@
     .cart-modal-card {
       background: var(--white);
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       border-radius: 20px 20px 0 0;
-      max-height: 90vh;
+      max-height: 92vh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
@@ -907,6 +952,52 @@
     .client-name-box { display: flex; flex-direction: column; gap: 4px; }
     .client-name-input { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
 
+    /* NUEVO: SELECTOR DE HORARIO DE ENTREGA */
+    .delivery-time-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .grid-delivery-opts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-del-opt {
+      background: #fff;
+      border: 1.5px solid #cbd5e1;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--dark);
+      text-align: center;
+    }
+
+    .btn-del-opt.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary-dark);
+    }
+
+    /* NUEVO: TIPO DE COMPROBANTE */
+    .comprobante-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     .cart-modal-footer {
       padding: 14px 20px;
       background: #f8fafc;
@@ -941,6 +1032,71 @@
       gap: 8px;
     }
 
+    .btn-ticket-modal {
+      background: #3b82f6;
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 13px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* MODAL DE TICKET DIGITAL */
+    .ticket-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 3500;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .ticket-box {
+      background: #fff;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      font-size: 13px;
+      color: #1e1b4b;
+      position: relative;
+    }
+
+    .ticket-header {
+      text-align: center;
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+
+    .ticket-items-list {
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .ticket-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .ticket-footer {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
     .lightbox-overlay {
       display: none;
       position: fixed;
@@ -958,6 +1114,13 @@
       .nav-container { justify-content: center; }
       .brand-section { flex-wrap: wrap; justify-content: center; }
       .map-header { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #ticketImprimible, #ticketImprimible * { visibility: visible; }
+      #ticketImprimible { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; }
+      .no-print { display: none !important; }
     }
   </style>
 </head>
@@ -1022,20 +1185,17 @@
         </p>
 
         <div class="popup-section-label" style="margin-bottom:8px;">Teléfonos de Pedido Inmediato:</div>
-        <div class="flyer-contact-grid" id="contenedorTelefonosFlyer">
-          <!-- Renderizado dinámico desde productos.json -->
-        </div>
+        <div class="flyer-contact-grid" id="contenedorTelefonosFlyer"></div>
       </div>
     </div>
   </section>
 
-  <!-- MAPA CUSCO CON LEYENDA DINÁMICA Y BOTÓN DE AMPLIAR -->
+  <!-- MAPA CUSCO CON COBERTURAS, BOTONES FLOTANTES Y MEDIDOR -->
   <section class="map-section">
     <div class="map-card">
       <div class="map-header">
         <h3>📍 Repartidor en Ruta LeoGas - Cusco</h3>
         
-        <!-- LEYENDA CENTRALIZADA DEL ESTADO DEL LEONCITO -->
         <div class="gps-legend-box" id="legendBoxGPS">
           <div class="legend-item online" id="legendOnline">
             <span style="font-size:15px;">🦁🔥</span>
@@ -1050,11 +1210,21 @@
       </div>
 
       <div class="map-wrapper" id="contenedorEnvolventeMapa">
-        <!-- BOTÓN PARA AMPLIAR / REDUCIR PANTALLA COMPLETA -->
+        <!-- BOTÓN AMPLIAR PANTALLA COMPLETA -->
         <button type="button" class="btn-toggle-fullscreen" onclick="alternarPantallaCompletaMapa()">
           <span id="iconoPantallaCompleta">⛶</span>
           <span id="textoPantallaCompleta">Ampliar Mapa</span>
         </button>
+
+        <!-- BOTÓN CENTRAR EN MI UBICACIÓN -->
+        <button type="button" class="btn-center-map" onclick="centrarEnMiUbicacionCliente()">
+          <span>🎯 Centrar en mi casa</span>
+        </button>
+
+        <!-- RECUADRO FLOTANTE DISTANCIA Y TIEMPO ESTIMADO -->
+        <div id="badgeDistanciaTiempo" class="distance-eta-badge">
+          🛵 Repartidor más cercano a <span id="distanciaKmTexto">--</span> (~<span id="tiempoMinTexto">--</span> min)
+        </div>
 
         <div id="cuscoMap"></div>
       </div>
@@ -1131,6 +1301,31 @@
           </div>
         </div>
 
+        <!-- SELECTOR DE HORARIO DE ENTREGA -->
+        <div class="delivery-time-box">
+          <span class="popup-section-label">Horario de Entrega:</span>
+          <div class="grid-delivery-opts">
+            <button type="button" class="btn-del-opt active" id="btnDelInmediata" onclick="elegirHorarioEntrega('Inmediata', this)">🚀 Inmediata (Lo antes posible)</button>
+            <button type="button" class="btn-del-opt" id="btnDelProgramada" onclick="elegirHorarioEntrega('Programada', this)">🕒 Programar Horario</button>
+          </div>
+          <div id="cajaHoraProgramada" style="display:none; margin-top:6px;">
+            <input type="time" id="inputHoraProgramada" class="client-name-input" value="14:00" />
+          </div>
+        </div>
+
+        <!-- TIPO DE COMPROBANTE -->
+        <div class="comprobante-box">
+          <span class="popup-section-label">Tipo de Comprobante:</span>
+          <div style="display:flex; gap:16px; margin-top:4px;">
+            <label style="font-size:13px; font-weight:700; cursor:pointer;"><input type="radio" name="tipoComp" value="Boleta" checked onchange="alternarCamposComprobante(this.value)"> Boleta</label>
+            <label style="font-size:13px; font-weight:700; cursor:pointer;"><input type="radio" name="tipoComp" value="Factura" onchange="alternarCamposComprobante(this.value)"> Factura</label>
+          </div>
+          <div id="cajaDatosFactura" style="display:none; margin-top:6px; flex-direction:column; gap:6px;">
+            <input type="text" id="inputRucFactura" class="client-name-input" placeholder="Número de RUC (11 dígitos)" maxlength="11" />
+            <input type="text" id="inputRazonSocial" class="client-name-input" placeholder="Razón Social / Nombre Empresa" />
+          </div>
+        </div>
+
         <div>
           <div class="popup-section-label" style="margin-bottom:6px;">Dirección de Entrega:</div>
           <div class="geo-box">
@@ -1153,6 +1348,42 @@
         <button class="btn-order-wsp" onclick="enviarPedidoWhatsApp()">
           <span>Pedir a LeoGas por WhatsApp</span> 💬
         </button>
+        <button type="button" class="btn-ticket-modal" onclick="generarComprobanteModal()">
+          <span>🧾 Ver e Imprimir Comprobante Digital</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE COMPROBANTE / TICKET DIGITAL -->
+  <div class="ticket-modal-overlay" id="ticketModalOverlay">
+    <div class="ticket-box" id="ticketImprimible">
+      <div class="ticket-header">
+        <div style="font-size:24px;">🦁</div>
+        <h2 style="font-size:16px; color:#6b21a8; margin:2px 0;">LeoGas Cusco</h2>
+        <div style="font-size:11px; color:#64748b;">Llamagas • El Moradito Rendidor</div>
+        <div style="font-size:10px; color:#ca8a04; font-weight:bold; margin-top:4px;">Tecnología La Chuspa Tech</div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div><strong>Fecha:</strong> <span id="tickFecha"></span></div>
+        <div><strong>Cliente:</strong> <span id="tickCliente"></span></div>
+        <div><strong>Comprobante:</strong> <span id="tickTipoComp"></span></div>
+        <div id="tickDetalleFactura" style="display:none;"></div>
+        <div><strong>Horario:</strong> <span id="tickHorario"></span></div>
+        <div><strong>Pago:</strong> <span id="tickPago"></span></div>
+      </div>
+
+      <div class="ticket-items-list" id="tickListaProductos"></div>
+
+      <div class="ticket-row" style="font-size:15px; font-weight:900; color:#6b21a8; margin-top:8px;">
+        <span>TOTAL A PAGAR:</span>
+        <span id="tickTotal">S/ 0.00</span>
+      </div>
+
+      <div class="ticket-footer no-print">
+        <button type="button" class="btn-add" style="flex:1;" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+        <button type="button" class="btn-del" style="margin-top:0;" onclick="cerrarModalTicket()">Cerrar</button>
       </div>
     </div>
   </div>
@@ -1191,15 +1422,52 @@
     }
 
     let metodoPago = "Efectivo";
+    let horarioEntrega = "Inmediata";
+    let tipoComprobante = "Boleta";
     let ubicacionClienteCoords = null;
     let ultimoTotalPagar = 0;
     let map = null;
+    let clienteMarker = null;
 
-    // ALMACENAMIENTO DE MARCADORES MULTI-REPARTIDOR
     let marcadoresFlota = {};
-
-    // CONTROL DEL MODO PANTALLA COMPLETA DEL MAPA
+    let flotaActual = [];
     let modoMapaAmpliado = false;
+
+    // CÁLCULO DE DISTANCIA HARVESINE (KM)
+    function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function actualizarDistanciaEstimada() {
+      if (!ubicacionClienteCoords || flotaActual.length === 0) return;
+      const onlineReps = flotaActual.filter(r => r.online && r.lat && r.lng);
+      const badge = document.getElementById('badgeDistanciaTiempo');
+
+      if (onlineReps.length === 0) {
+        badge.style.display = "none";
+        return;
+      }
+
+      let minDist = Infinity;
+      onlineReps.forEach(rep => {
+        const d = calcularDistanciaKm(ubicacionClienteCoords.lat, ubicacionClienteCoords.lng, rep.lat, rep.lng);
+        if (d < minDist) minDist = d;
+      });
+
+      if (minDist !== Infinity) {
+        badge.style.display = "block";
+        document.getElementById('distanciaKmTexto').innerText = minDist.toFixed(1) + " km";
+        const tiempoMin = Math.max(5, Math.round(minDist * 4));
+        document.getElementById('tiempoMinTexto').innerText = tiempoMin;
+      }
+    }
 
     function alternarPantallaCompletaMapa() {
       const contenedor = document.getElementById('contenedorEnvolventeMapa');
@@ -1225,6 +1493,73 @@
       }, 250);
     }
 
+    function centrarEnMiUbicacionCliente() {
+      if (!navigator.geolocation) return alert("Geolocalización no soportada.");
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          ubicacionClienteCoords = { lat, lng };
+
+          if (!clienteMarker) {
+            const iconoCasa = L.divIcon({
+              className: 'custom-home-icon',
+              html: "<div style='background:#2563eb; color:white; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:19px; border:2px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.4);'>🏠</div>",
+              iconSize: [36, 36],
+              iconAnchor: [18, 18]
+            });
+            clienteMarker = L.marker([lat, lng], { icon: iconoCasa }).addTo(map).bindPopup("<b>Tu ubicación (Casa)</b>").openPopup();
+          } else {
+            clienteMarker.setLatLng([lat, lng]).openPopup();
+          }
+
+          map.setView([lat, lng], 15);
+          actualizarDistanciaEstimada();
+        },
+        () => alert("Activa tu GPS para ubicar tu casa en el mapa.")
+      );
+    }
+
+    function trazarZonasCoberturaCusco() {
+      const estiloZonas = (color) => ({
+        color: color,
+        weight: 1.5,
+        opacity: 0.8,
+        fillColor: color,
+        fillOpacity: 0.16
+      });
+
+      const zonaCentro = [
+        [-13.5110, -71.9860], [-13.5135, -71.9720],
+        [-13.5220, -71.9750], [-13.5200, -71.9880]
+      ];
+      L.polygon(zonaCentro, estiloZonas('#8b5cf6')).addTo(map).bindPopup("<b>Zona Centro Histórico</b><br>Cobertura LeoGas Express");
+
+      const zonaWanchaq = [
+        [-13.5200, -71.9750], [-13.5210, -71.9560],
+        [-13.5350, -71.9580], [-13.5330, -71.9740]
+      ];
+      L.polygon(zonaWanchaq, estiloZonas('#f59e0b')).addTo(map).bindPopup("<b>Zona Wanchaq</b><br>Cobertura LeoGas");
+
+      const zonaSanSebastian = [
+        [-13.5210, -71.9560], [-13.5250, -71.9280],
+        [-13.5450, -71.9320], [-13.5350, -71.9580]
+      ];
+      L.polygon(zonaSanSebastian, estiloZonas('#10b981')).addTo(map).bindPopup("<b>Zona San Sebastián</b><br>Cobertura LeoGas");
+
+      const zonaSantiago = [
+        [-13.5220, -71.9880], [-13.5250, -71.9760],
+        [-13.5390, -71.9820], [-13.5360, -71.9950]
+      ];
+      L.polygon(zonaSantiago, estiloZonas('#ef4444')).addTo(map).bindPopup("<b>Zona Santiago</b><br>Cobertura LeoGas");
+
+      const zonaSanJeronimo = [
+        [-13.5250, -71.9280], [-13.5330, -71.8950],
+        [-13.5550, -71.9020], [-13.5450, -71.9320]
+      ];
+      L.polygon(zonaSanJeronimo, estiloZonas('#3b82f6')).addTo(map).bindPopup("<b>Zona San Jerónimo</b><br>Cobertura LeoGas");
+    }
+
     function renderizarTelefonosFlyer() {
       const container = document.getElementById('contenedorTelefonosFlyer');
       const clean1 = telefonos.tel1.replace(/\D/g,'');
@@ -1238,25 +1573,25 @@
       `;
     }
 
-    // INICIALIZACIÓN DEL MAPA
     function iniciarMapaCusco() {
       const cuscoLat = -13.5167;
       const cuscoLng = -71.9788;
-      map = L.map('cuscoMap').setView([cuscoLat, cuscoLng], 14);
+      map = L.map('cuscoMap').setView([cuscoLat, cuscoLng], 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
+
+      trazarZonasCoberturaCusco();
 
       actualizarVisualizadorGPS([
         { id: "rep-1", nombre: "Repartidor 1", online: false, lat: cuscoLat, lng: cuscoLng }
       ]);
     }
 
-    // FUNCIÓN CENTRALIZADA: DIBUJA A TODOS LOS REPARTIDORES DE LA FLOTA
     function actualizarVisualizadorGPS(flotaRepartidores) {
       if (!Array.isArray(flotaRepartidores)) return;
-
+      flotaActual = flotaRepartidores;
       let hayAlgunoOnline = false;
 
       flotaRepartidores.forEach(rep => {
@@ -1304,6 +1639,8 @@
         legOnline.classList.remove('activo');
         legOffline.classList.add('activo');
       }
+
+      actualizarDistanciaEstimada();
     }
 
     function renderizarMenu() {
@@ -1398,7 +1735,6 @@
       document.getElementById('lightboxModal').style.display = 'none';
     }
 
-    // BLOQUEO EN EL CARRITO SI NO HAY STOCK
     function actualizarVistaPopup() {
       let totalUnidades = 0;
       let totalMonto = 0;
@@ -1415,10 +1751,7 @@
         };
 
         const estaDisponible = (catItem.disponible !== false);
-
-        if (!estaDisponible) {
-          item.cantidad = 0;
-        }
+        if (!estaDisponible) item.cantidad = 0;
 
         const subtotal = item.cantidad * item.precio;
         totalUnidades += item.cantidad;
@@ -1462,6 +1795,18 @@
       boton.classList.add('active');
       document.getElementById('cajaEfectivoDesplegable').style.display = (metodo === 'Efectivo') ? 'block' : 'none';
       if (metodo === 'Efectivo') calcularVueltoEfectivo();
+    }
+
+    function elegirHorarioEntrega(tipo, boton) {
+      horarioEntrega = tipo;
+      document.querySelectorAll('.btn-del-opt').forEach(b => b.classList.remove('active'));
+      boton.classList.add('active');
+      document.getElementById('cajaHoraProgramada').style.display = (tipo === 'Programada') ? 'block' : 'none';
+    }
+
+    function alternarCamposComprobante(tipo) {
+      tipoComprobante = tipo;
+      document.getElementById('cajaDatosFactura').style.display = (tipo === 'Factura') ? 'flex' : 'none';
     }
 
     function setMontoEfectivoRapido(monto) {
@@ -1517,6 +1862,20 @@
           ubicacionClienteCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           status.innerText = "✔ Ubicación registrada para entrega";
           status.classList.add('ready');
+
+          if (!clienteMarker) {
+            const iconoCasa = L.divIcon({
+              className: 'custom-home-icon',
+              html: "<div style='background:#2563eb; color:white; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:19px; border:2px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.4);'>🏠</div>",
+              iconSize: [36, 36],
+              iconAnchor: [18, 18]
+            });
+            clienteMarker = L.marker([pos.coords.latitude, pos.coords.longitude], { icon: iconoCasa }).addTo(map).bindPopup("<b>Tu ubicación (Casa)</b>");
+          } else {
+            clienteMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
+          }
+
+          actualizarDistanciaEstimada();
         },
         () => { status.innerText = "No se pudo obtener GPS."; },
         { enableHighAccuracy: true }
@@ -1553,11 +1912,24 @@
         }
       }
 
+      let horarioTexto = (horarioEntrega === 'Inmediata') 
+        ? "Inmediata (Lo antes posible)" 
+        : `Programada (${document.getElementById('inputHoraProgramada').value})`;
+
+      let comprobanteTexto = tipoComprobante;
+      if (tipoComprobante === 'Factura') {
+        const ruc = document.getElementById('inputRucFactura').value.trim();
+        const rz = document.getElementById('inputRazonSocial').value.trim();
+        comprobanteTexto = `Factura (RUC: ${ruc || 'Sin RUC'} - Razón Social: ${rz || 'Sin Razón Social'})`;
+      }
+
       let mensaje = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
       if (nombreCliente) mensaje += `*👤 Cliente:* ${nombreCliente}\n`;
       mensaje += `*Detalle:*\n${detalleTexto}\n`;
       mensaje += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
       mensaje += `*Paga con:* ${pagoDetalle}\n`;
+      mensaje += `*Horario de entrega:* ${horarioTexto}\n`;
+      mensaje += `*Comprobante solicitado:* ${comprobanteTexto}\n`;
 
       if (ubicacionClienteCoords) {
         mensaje += `*Ubicación GPS:* https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}\n`;
@@ -1567,15 +1939,58 @@
 
       const numDestino = (telefonos.whatsapp || whatsappNumero).replace(/\D/g,'');
       window.open(`https://wa.me/${numDestino}?text=${encodeURIComponent(mensaje)}`, '_blank');
-
-      for (const k in pedido) pedido[k].cantidad = 0;
-      document.getElementById('montoEfectivoIngresado').value = '';
-      document.getElementById('nombreClienteInput').value = '';
-      actualizarVistaPopup();
-      cerrarModalCarrito();
     }
 
-    // CARGA DE DATOS Y RASTREO MULTI-REPARTIDOR
+    // GENERAR TICKET / COMPROBANTE DIGITAL
+    function generarComprobanteModal() {
+      sincronizarEstructuraPedido();
+      const seleccionados = Object.values(pedido).filter(item => item.cantidad > 0 && item.disponible !== false);
+
+      if (seleccionados.length === 0) {
+        alert("Selecciona al menos un balón para generar el comprobante.");
+        return;
+      }
+
+      const nombre = document.getElementById('nombreClienteInput').value.trim() || 'Particular';
+      document.getElementById('tickCliente').innerText = nombre;
+      document.getElementById('tickFecha').innerText = new Date().toLocaleString();
+      document.getElementById('tickTipoComp').innerText = tipoComprobante;
+
+      const cajaFactura = document.getElementById('tickDetalleFactura');
+      if (tipoComprobante === 'Factura') {
+        cajaFactura.style.display = "block";
+        cajaFactura.innerHTML = `<strong>RUC:</strong> ${document.getElementById('inputRucFactura').value || '--'} | <strong>Razón Social:</strong> ${document.getElementById('inputRazonSocial').value || '--'}`;
+      } else {
+        cajaFactura.style.display = "none";
+      }
+
+      const horario = (horarioEntrega === 'Inmediata') 
+        ? "Inmediata" 
+        : `Programada (${document.getElementById('inputHoraProgramada').value})`;
+      document.getElementById('tickHorario').innerText = horario;
+      document.getElementById('tickPago').innerText = metodoPago;
+
+      const contItems = document.getElementById('tickListaProductos');
+      contItems.innerHTML = '';
+      let total = 0;
+
+      seleccionados.forEach(item => {
+        const sub = item.cantidad * item.precio;
+        total += sub;
+        const row = document.createElement('div');
+        row.className = 'ticket-row';
+        row.innerHTML = `<span>${item.cantidad}x ${item.nombre}</span><span>S/ ${sub.toFixed(2)}</span>`;
+        contItems.appendChild(row);
+      });
+
+      document.getElementById('tickTotal').innerText = `S/ ${total.toFixed(2)}`;
+      document.getElementById('ticketModalOverlay').style.display = 'flex';
+    }
+
+    function cerrarModalTicket() {
+      document.getElementById('ticketModalOverlay').style.display = 'none';
+    }
+
     async function cargarCatalogoDesdeGitHub() {
       try {
         const res = await fetch('productos.json?v=' + Date.now());
