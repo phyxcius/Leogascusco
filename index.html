@@ -88,7 +88,6 @@
 
     .section-menu { max-width: 1200px; margin: 20px auto 40px; padding: 0 20px; }
     .menu-header { background: var(--white); padding: 16px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
-    .menu-header h3 { font-size: 20px; font-weight: 800; color: var(--dark); }
     .grid-empanadas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; }
     .card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; border: 1px solid #f1f5f9; }
     .card.agotado { opacity: 0.65; }
@@ -108,6 +107,7 @@
     .chat-bubble-btn { position: relative; width: 62px; height: 62px; background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); border-radius: 50%; box-shadow: 0 6px 20px rgba(107, 33, 168, 0.45); display: flex; align-items: center; justify-content: center; border: 2px solid #facc15; }
     .chat-badge { position: absolute; top: -3px; right: -3px; background-color: #ef4444; color: var(--white); border: 2px solid var(--white); font-size: 11px; font-weight: 800; min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
+    /* CARRITO MODAL */
     .cart-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: flex-end; }
     .cart-modal-card { background: var(--white); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 -10px 30px rgba(0,0,0,0.25); animation: slideUp 0.25s ease-out; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -148,6 +148,59 @@
     .btn-order-wsp { background: #25d366; color: var(--white); padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-ticket-modal { background: #3b82f6; color: #fff; padding: 10px; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
+    /* ALERTAS VISUALES AL CENTRO DE LA PANTALLA (MODALES) */
+    .center-alert-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 5000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .center-alert-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      animation: zoomInAlert 0.25s ease-out;
+    }
+
+    @keyframes zoomInAlert {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .alert-icon-circle {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+
+    .alert-icon-success { background: #dcfce7; border: 2px solid #22c55e; }
+    .alert-icon-warning { background: #fef9c3; border: 2px solid #eab308; }
+
+    .center-alert-card h3 { font-size: 20px; font-weight: 900; color: #1e1b4b; margin-bottom: 8px; }
+    .center-alert-card p { font-size: 13.5px; color: #475569; margin-bottom: 18px; line-height: 1.45; }
+
+    .alert-btn-group { display: flex; flex-direction: column; gap: 8px; }
+    .btn-alert-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; border: none; cursor: pointer; }
+    .btn-alert-primary { background: var(--primary); color: #fff; }
+    .btn-alert-success { background: #16a34a; color: #fff; }
+    .btn-alert-secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+    /* MODAL TICKET DIGITAL */
     .ticket-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 3500; justify-content: center; align-items: center; padding: 16px; }
     .ticket-box { background: #fff; width: 100%; max-width: 380px; border-radius: 16px; padding: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 13px; color: #1e1b4b; }
     .ticket-header { text-align: center; border-bottom: 2px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px; }
@@ -362,11 +415,50 @@
           <span id="cartLabelTotalConCantidad">Total a pagar:</span>
           <span style="color:var(--primary); font-size:19px;" id="cartTotalMonto">S/ 0.00</span>
         </div>
-        <button class="btn-order-wsp" onclick="enviarPedidoWhatsApp()">
+        <button class="btn-order-wsp" id="btnPrincipalPedirWsp" onclick="enviarPedidoWhatsApp()">
           <span>Pedir a LeoGas por WhatsApp</span> 💬
         </button>
         <button type="button" class="btn-ticket-modal" onclick="generarComprobanteModal()">
           <span>🧾 Ver e Imprimir Comprobante Digital</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTA 1: PEDIDO REALIZADO CON ÉXITO AL CENTRO DE LA PANTALLA -->
+  <div class="center-alert-overlay" id="modalAlertaExito">
+    <div class="center-alert-card">
+      <div class="alert-icon-circle alert-icon-success">🎉</div>
+      <h3>¡Tu Pedido fue Registrado!</h3>
+      <p id="textoAlertaExito">
+        Tu pedido ha sido enviado con éxito a la central de <strong>LeoGas Cusco</strong> y despachado por WhatsApp.
+      </p>
+      <div class="alert-btn-group">
+        <button type="button" class="btn-alert-action btn-alert-success" onclick="cerrarAlertaExito()">
+          Entendido ✔️ (Ver Repartidor en Mapa)
+        </button>
+        <button type="button" class="btn-alert-action btn-alert-secondary" onclick="cerrarAlertaExito(); generarComprobanteModal();">
+          🧾 Ver Comprobante Digital
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTA 2: ADVERTENCIA DE SEGUNDO PEDIDO (BLOQUEO) AL CENTRO DE LA PANTALLA -->
+  <div class="center-alert-overlay" id="modalAlertaSegundoPedido">
+    <div class="center-alert-card" style="border: 2px solid #eab308;">
+      <div class="alert-icon-circle alert-icon-warning">⚠️</div>
+      <h3 style="color:#b45309;">Pedido en Proceso</h3>
+      <p>
+        Ya realizaste un pedido recientemente que está en cola o en camino.<br><br>
+        <strong>¿Deseas tramitar un SEGUNDO pedido adicional de gas?</strong>
+      </p>
+      <div class="alert-btn-group">
+        <button type="button" class="btn-alert-action btn-alert-primary" onclick="confirmarSegundoPedido()">
+          Sí, Continuar con Segundo Pedido ➕
+        </button>
+        <button type="button" class="btn-alert-action btn-alert-secondary" onclick="cerrarAlertaSegundoPedido()">
+          No, Esperar mi Pedido Actual ⏳
         </button>
       </div>
     </div>
@@ -444,7 +536,9 @@
     let flotaActual = [];
     let modoMapaAmpliado = false;
 
-    // NOTIFICACIONES NATIVAS CON VIBRACIÓN
+    // ESTADO DE CONTROL DE COMPARTIDO / PEDIDO DUPLICADO
+    let pedidoYaRealizado = false;
+
     function pedirPermisoNotificacionesCliente() {
       if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
         Notification.requestPermission();
@@ -461,7 +555,6 @@
 
     // CONEXIÓN EN TIEMPO REAL CON FIREBASE
     function iniciarEscuchaFirebase() {
-      // 1. Escuchar repartidores y GPS
       db.ref('repartidores').on('value', snap => {
         const data = snap.val();
         if (data) {
@@ -470,7 +563,6 @@
         }
       });
 
-      // 2. Escuchar productos
       db.ref('productos').on('value', snap => {
         const data = snap.val();
         if (data) {
@@ -479,7 +571,6 @@
         }
       });
 
-      // 3. Escuchar teléfonos
       db.ref('telefonos').on('value', snap => {
         const data = snap.val();
         if (data) {
@@ -488,7 +579,6 @@
         }
       });
 
-      // 4. Monitorear mi pedido personal
       const miCliente = localStorage.getItem('leogas_mi_pedido_cliente');
       if (miCliente) {
         db.ref('pedidos').on('value', snap => {
@@ -496,6 +586,7 @@
           if (pedidos) {
             const miOrden = Object.values(pedidos).find(p => p.cliente && p.cliente.toLowerCase() === miCliente.toLowerCase() && p.estado !== 'completado');
             if (miOrden) {
+              pedidoYaRealizado = true;
               if (miOrden.etapa === 1 && miOrden.notificado !== 1) {
                 lanzarNotificacionCliente("🔥 LeoGas Cusco: ¡Balón en camino!", `Tu repartidor ya salió de la base con tu pedido.`);
                 db.ref(`pedidos/${miOrden.id}`).update({ notificado: 1 });
@@ -503,6 +594,8 @@
                 lanzarNotificacionCliente("🦁 LeoGas Cusco: ¡Repartidor en tu puerta!", "Tu balón de gas ha llegado a tu dirección.");
                 db.ref(`pedidos/${miOrden.id}`).update({ notificado: 2 });
               }
+            } else {
+              pedidoYaRealizado = false;
             }
           }
         });
@@ -825,11 +918,51 @@
       document.getElementById('ticketModalOverlay').style.display = 'none';
     }
 
-    // ENVIAR ORDEN A FIREBASE Y ABRIR WHATSAPP
+    // CONTROL DE ALERTAS AL CENTRO DE LA PANTALLA
+    function mostrarAlertaExito(nombreCliente, detalle) {
+      document.getElementById('textoAlertaExito').innerHTML = `
+        Hola <strong>${nombreCliente}</strong>, tu pedido de <strong>${detalle}</strong> ha sido enviado con éxito a la central de LeoGas Cusco y transferido a WhatsApp.<br><br>
+        Ya puedes monitorear al repartidor en tiempo real en el mapa.
+      `;
+      document.getElementById('modalAlertaExito').style.display = 'flex';
+      if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+    }
+
+    function cerrarAlertaExito() {
+      document.getElementById('modalAlertaExito').style.display = 'none';
+    }
+
+    function mostrarAlertaSegundoPedido() {
+      document.getElementById('modalAlertaSegundoPedido').style.display = 'flex';
+      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+    }
+
+    function cerrarAlertaSegundoPedido() {
+      document.getElementById('modalAlertaSegundoPedido').style.display = 'none';
+    }
+
+    function confirmarSegundoPedido() {
+      cerrarAlertaSegundoPedido();
+      pedidoYaRealizado = false; // Desbloquea para procesar el nuevo pedido
+      ejecutarEnvioPedidoReal();
+    }
+
+    // ENVIAR ORDEN A FIREBASE Y ABRIR WHATSAPP CON PROTECCIÓN Y ALERTAS VISUALES
     async function enviarPedidoWhatsApp() {
       const items = Object.values(pedido).filter(p => p.cantidad > 0);
-      if (items.length === 0) return alert("Selecciona al menos un balón.");
+      if (items.length === 0) return alert("Selecciona al menos un balón disponible.");
 
+      // Si ya compartió una vez y vuelve a tocar el botón: BLOQUEAR Y PREGUNTAR
+      if (pedidoYaRealizado) {
+        mostrarAlertaSegundoPedido();
+        return;
+      }
+
+      await ejecutarEnvioPedidoReal();
+    }
+
+    async function ejecutarEnvioPedidoReal() {
+      const items = Object.values(pedido).filter(p => p.cantidad > 0);
       const nombre = document.getElementById('nombreClienteInput').value.trim() || "Particular";
       let total = 0;
       let nombres = [];
@@ -848,7 +981,7 @@
         comprobanteTexto = `Factura (RUC: ${ruc || 'Sin RUC'} - Razón Social: ${rz || 'Sin Razón Social'})`;
       }
 
-      // Guardar en Firebase Realtime Database
+      // 1. Guardar en Firebase Realtime Database
       const nuevoPedidoRef = db.ref('pedidos').push();
       await nuevoPedidoRef.set({
         id: nuevoPedidoRef.key,
@@ -867,10 +1000,12 @@
         hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
       });
 
+      // 2. Marcar pedido activo en memoria
+      pedidoYaRealizado = true;
       localStorage.setItem('leogas_mi_pedido_cliente', nombre);
       pedirPermisoNotificacionesCliente();
 
-      // Abrir mensaje en WhatsApp
+      // 3. Redactar y abrir WhatsApp
       let msg = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
       msg += `*👤 Cliente:* ${nombre}\n`;
       msg += `*Detalle:* ${detalle}\n`;
@@ -882,7 +1017,10 @@
       msg += `\n¿Me confirman tiempo de entrega?`;
 
       window.open(`https://wa.me/${telefonos.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+      
+      // 4. Cerrar popup de compra y desplegar ALERTA VISUAL CENTRADA
       cerrarModalCarrito();
+      mostrarAlertaExito(nombre, detalle);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
