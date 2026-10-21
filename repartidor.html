@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso Repartidor | LeoGas Cusco</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f8fafc; color: #1e1b4b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 18px; }
+
+    .driver-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 440px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      border: 1px solid #e2e8f0;
+      padding: 26px 22px;
+      text-align: center;
+    }
+
+    .brand-icon {
+      font-size: 46px;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 900;
+      color: #6b21a8;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 22px;
+    }
+
+    .box-selector {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #cbd5e1;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e1b4b;
+      background: #f8fafc;
+      outline: none;
+    }
+
+    select:focus {
+      border-color: #9333ea;
+      background: #fff;
+    }
+
+    /* ESTADO VISUAL */
+    .status-panel {
+      padding: 14px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      margin-bottom: 22px;
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s;
+    }
+
+    .status-panel.online {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+
+    .status-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #475569;
+    }
+
+    .status-panel.online .status-title {
+      color: #15803d;
+    }
+
+    .status-coords {
+      font-size: 11.5px;
+      color: #64748b;
+      margin-top: 4px;
+      font-family: monospace;
+    }
+
+    /* BOTONES */
+    .btn-action {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.15s ease, background-color 0.2s;
+    }
+
+    .btn-action:active {
+      transform: scale(0.98);
+    }
+
+    .btn-connect {
+      background: #16a34a;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+    }
+
+    .btn-connect:hover {
+      background: #15803d;
+    }
+
+    .btn-disconnect {
+      background: #dc2626;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+      display: none;
+    }
+
+    .btn-disconnect:hover {
+      background: #b91c1c;
+    }
+
+    .info-footer {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 18px;
+      line-height: 1.4;
+    }
+
+    /* MENSAJE DE CONFIGURACIÓN */
+    .warning-token-box {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #991b1b;
+      margin-bottom: 14px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="driver-card">
+    <div class="brand-icon">🦁</div>
+    <h1>LeoGas Cusco</h1>
+    <p class="subtitle">Panel de Navegación y Transmisión en Ruta</p>
+
+    <div class="warning-token-box" id="warningToken">
+      ⚠️ Este dispositivo aún no cuenta con la llave de acceso autorizada.
+    </div>
+
+    <div class="box-selector">
+      <label for="selectChofer">Selecciona tu Unidad / Repartidor:</label>
+      <select id="selectChofer" onchange="verificarEstadoRepartidorSeleccionado()">
+        <option value="">Cargando lista de repartidores...</option>
+      </select>
+    </div>
+
+    <div class="status-panel" id="panelEstado">
+      <div class="status-title" id="textoEstado">Offline 💤 (Desconectado)</div>
+      <div class="status-coords" id="textoCoords">Ubicación GPS no sincronizada</div>
+    </div>
+
+    <button id="btnConectar" class="btn-action btn-connect" onclick="iniciarTransmisionGPS()">
+      <span>▶️ INICIAR RUTA (Conectar GPS)</span>
+    </button>
+
+    <button id="btnDesconectar" class="btn-action btn-disconnect" onclick="detenerTransmisionGPS()">
+      <span>⏹️ TERMINAR RUTA (Desconectar)</span>
+    </button>
+
+    <p class="info-footer">
+      Mantén abierta esta pantalla en segundo plano mientras te trasladas por Cusco para actualizar el mapa de los clientes.
+    </p>
+  </div>
+
+  <script>
+    const USUARIO = "phyxcius";
+    const REPOSITORIO = "Leogascusco";
+    const ARCHIVO = "productos.json";
+    const STORAGE_KEY_SECRETA = "leogas_vault_secret_token";
+
+    let datosCompletos = { productos: [], telefonos: {}, repartidores: [] };
+    let watchIdGPS = null;
+    let repartidorIdActivo = null;
+
+    // CAPTURA AUTOMÁTICA DEL TOKEN DESDE ENLACE DE 1 SOLA VEZ
+    function gestionarTokenSeguro() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenURL = urlParams.get('set_token') || urlParams.get('token');
+
+      if (tokenURL) {
+        localStorage.setItem(STORAGE_KEY_SECRETA, tokenURL.trim());
+        window.history.replaceState({}, document.title, window.location.pathname);
+        alert("✔ Llave de transmisión GPS autorizada para este teléfono.");
+      }
+
+      const tokenGuardado = localStorage.getItem(STORAGE_KEY_SECRETA);
+      if (!tokenGuardado) {
+        document.getElementById('warningToken').style.display = 'block';
+      } else {
+        document.getElementById('warningToken').style.display = 'none';
+      }
+    }
+
+    function obtenerTokenSecreto() {
+      return localStorage.getItem(STORAGE_KEY_SECRETA) || "";
+    }
+
+    // CARGAR LISTA DE REPARTIDORES DISPONIBLES EN productos.json
+    async function cargarRepartidores() {
+      const token = obtenerTokenSecreto();
+      const headers = token ? { "Authorization": `token ${token}` } : {};
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
+          headers: headers
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          datosCompletos = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+          renderizarSelectChoferes();
+        }
+      } catch (e) {
+        console.error("Error al cargar repartidores:", e);
+      }
+    }
+
+    function renderizarSelectChoferes() {
+      const sel = document.getElementById('selectChofer');
+      sel.innerHTML = '';
+
+      const lista = datosCompletos.repartidores || [];
+      if (lista.length === 0) {
+        sel.innerHTML = '<option value="">No hay repartidores registrados</option>';
+        return;
+      }
+
+      lista.forEach(rep => {
+        const opt = document.createElement('option');
+        opt.value = rep.id;
+        opt.innerText = `${rep.nombre} ${rep.online ? '🟢 (En ruta)' : '💤'}`;
+        sel.appendChild(opt);
+      });
+
+      // Si ya estaba guardado en memoria de este celular el chofer anterior, preseleccionarlo
+      const choferGuardado = localStorage.getItem('leogas_chofer_asignado');
+      if (choferGuardado && lista.some(r => r.id === choferGuardado)) {
+        sel.value = choferGuardado;
+      }
+
+      verificarEstadoRepartidorSeleccionado();
+    }
+
+    function verificarEstadoRepartidorSeleccionado() {
+      const sel = document.getElementById('selectChofer');
+      const repId = sel.value;
+      const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
+
+      const panel = document.getElementById('panelEstado');
+      const txt = document.getElementById('textoEstado');
+      const coords = document.getElementById('textoCoords');
+      const btnCon = document.getElementById('btnConectar');
+      const btnDes = document.getElementById('btnDesconectar');
+
+      if (!rep) return;
+
+      if (rep.online && watchIdGPS !== null) {
+        panel.classList.add('online');
+        txt.innerText = "Online 🔥 (En Ruta Activo)";
+        btnCon.style.display = "none";
+        btnDes.style.display = "flex";
+      } else {
+        panel.classList.remove('online');
+        txt.innerText = "Offline 💤 (Desconectado)";
+        coords.innerText = "Listo para iniciar turno";
+        btnCon.style.display = "flex";
+        btnDes.style.display = "none";
+      }
+    }
+
+    // INICIAR CONEXIÓN GPS EN TIEMPO REAL
+    function iniciarTransmisionGPS() {
+      const token = obtenerTokenSecreto();
+      if (!token) {
+        alert("⚠️ Este celular no tiene autorización para guardar en GitHub. Pide al administrador el enlace con el token.");
+        return;
+      }
+
+      const sel = document.getElementById('selectChofer');
+      const repId = sel.value;
+      if (!repId) return alert("Por favor selecciona tu nombre en la lista.");
+
+      localStorage.setItem('leogas_chofer_asignado', repId);
+      repartidorIdActivo = repId;
+
+      if (!navigator.geolocation) {
+        alert("Tu dispositivo móvil no soporta geolocalización.");
+        return;
+      }
+
+      const panel = document.getElementById('panelEstado');
+      const txt = document.getElementById('textoEstado');
+      const coords = document.getElementById('textoCoords');
+
+      txt.innerText = "Capturando satélites GPS...";
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          panel.classList.add('online');
+          txt.innerText = "Online 🔥 (En Ruta Activo)";
+          coords.innerText = `Lat: ${lat.toFixed(5)} | Lng: ${lng.toFixed(5)}`;
+
+          document.getElementById('btnConectar').style.display = "none";
+          document.getElementById('btnDesconectar').style.display = "flex";
+
+          // 1. Guardar estado ONLINE de este repartidor en GitHub
+          await actualizarCoordenadasEnGitHub(repId, true, lat, lng);
+
+          // 2. Rastreo dinámico mientras se desplaza
+          if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
+          watchIdGPS = navigator.geolocation.watchPosition(
+            async (p) => {
+              const nuevaLat = p.coords.latitude;
+              const nuevaLng = p.coords.longitude;
+              coords.innerText = `Lat: ${nuevaLat.toFixed(5)} | Lng: ${nuevaLng.toFixed(5)}`;
+              await actualizarCoordenadasEnGitHub(repId, true, nuevaLat, nuevaLng);
+            },
+            (err) => console.warn("Error en actualización continua:", err),
+            { enableHighAccuracy: true, maximumAge: 10000 }
+          );
+        },
+        (err) => {
+          alert("Error al acceder al sensor GPS: " + err.message + ". Asegúrate de activar la Ubicación de tu teléfono.");
+          txt.innerText = "Offline 💤 (Desconectado)";
+        },
+        { enableHighAccuracy: true }
+      );
+    }
+
+    // DETENER CONEXIÓN GPS
+    async function detenerTransmisionGPS() {
+      if (watchIdGPS !== null) {
+        navigator.geolocation.clearWatch(watchIdGPS);
+        watchIdGPS = null;
+      }
+
+      const sel = document.getElementById('selectChofer');
+      const repId = repartidorIdActivo || sel.value;
+
+      document.getElementById('panelEstado').classList.remove('online');
+      document.getElementById('textoEstado').innerText = "Offline 💤 (Desconectado)";
+      document.getElementById('textoCoords').innerText = "Ruta finalizada";
+
+      document.getElementById('btnConectar').style.display = "flex";
+      document.getElementById('btnDesconectar').style.display = "none";
+
+      await actualizarCoordenadasEnGitHub(repId, false, null, null);
+      repartidorIdActivo = null;
+      alert("✔ Has finalizado tu turno. Ahora apareces Offline en el mapa.");
+    }
+
+    // ENVÍO DE COORDENADAS A GITHUB EVITANDO CONFLICTOS DE SHA
+    async function actualizarCoordenadasEnGitHub(repId, online, lat, lng) {
+      const token = obtenerTokenSecreto();
+      if (!token) return;
+
+      // Consultar siempre la versión más fresca del archivo
+      let shaActual = "";
+      try {
+        const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
+          headers: {
+            "Authorization": `token ${token}`,
+            "Accept": "application/vnd.github.v3+json"
+          }
+        });
+        if (check.ok) {
+          const d = await check.json();
+          shaActual = d.sha;
+          datosCompletos = JSON.parse(decodeURIComponent(escape(atob(d.content))));
+        }
+      } catch (e) {
+        console.warn("No se pudo obtener SHA previo:", e);
+      }
+
+      // Modificar el repartidor que está transmitiendo
+      if (Array.isArray(datosCompletos.repartidores)) {
+        const index = datosCompletos.repartidores.findIndex(r => r.id === repId);
+        if (index !== -1) {
+          datosCompletos.repartidores[index].online = online;
+          if (lat && lng) {
+            datosCompletos.repartidores[index].lat = lat;
+            datosCompletos.repartidores[index].lng = lng;
+          }
+        }
+      }
+
+      const payload = {
+        message: `GPS ${online ? 'ONLINE' : 'OFFLINE'} - Repartidor ${repId}`,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(datosCompletos, null, 2)))),
+        branch: "main"
+      };
+      if (shaActual) payload.sha = shaActual;
+
+      try {
+        await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.error("Error al actualizar ubicación en GitHub:", err);
+      }
+    }
+
+    window.onload = () => {
+      gestionarTokenSeguro();
+      cargarRepartidores();
+    };
+  </script>
+</body>
+</html>
