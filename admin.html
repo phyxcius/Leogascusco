@@ -372,6 +372,35 @@
     let audioContext = null;
     let estadosPreviosSecuencia = {};
 
+    // MÉTODO 1: SOLICITAR PERMISO Y LANZAR NOTIFICACIÓN CON VIBRACIÓN
+    async function solicitarPermisoNotificaciones() {
+      if ("Notification" in window) {
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+          await Notification.requestPermission();
+        }
+      }
+    }
+
+    function lanzarAlertaNativaAdmin(titulo, mensaje) {
+      if ("vibrate" in navigator) {
+        navigator.vibrate([300, 150, 300]);
+      }
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        const notif = new Notification(titulo, {
+          body: mensaje,
+          icon: "CHUSPITA-circulo.png",
+          badge: "CHUSPITA-circulo.png",
+          vibrate: [300, 150, 300],
+          tag: "leogas-admin-alerta"
+        });
+        notif.onclick = function() {
+          window.focus();
+          notif.close();
+        };
+      }
+    }
+
     function emitirCampanadaAlerta() {
       if (!alertaSonoraHabilitada) return;
       try {
@@ -404,6 +433,10 @@
       document.getElementById('textoModalNotificacion').innerHTML = `El repartidor <strong>${nombreRepartidor}</strong> acaba de completar su entrega en Cusco.`;
       document.getElementById('modalNotificacionEntrega').style.display = 'flex';
       emitirCampanadaAlerta();
+      lanzarAlertaNativaAdmin(
+        "🎉 ¡Entrega Finalizada!",
+        `${nombreRepartidor} completó con éxito la entrega del balón.`
+      );
     }
 
     function cerrarNotificacionCentro() {
@@ -416,6 +449,7 @@
       const p = document.getElementById('loginPassword').value.trim();
       if (u === 'admin' && p === 'regocijo123') {
         sessionStorage.setItem(STORAGE_KEY_AUTH, "true");
+        solicitarPermisoNotificaciones();
         mostrarPanelAdmin();
       } else {
         alert("Credenciales incorrectas.");
@@ -425,6 +459,7 @@
     function mostrarPanelAdmin() {
       document.getElementById('pantallaLogin').style.display = 'none';
       document.getElementById('panelAdminPrincipal').style.display = 'block';
+      solicitarPermisoNotificaciones();
       iniciarMapaAdmin();
       cargarDesdeGitHub();
       iniciarMonitoreoSegundoPlano();
@@ -534,7 +569,6 @@
       actualizarMapaAdmin();
     }
 
-    // RENDERIZAR REPARTIDORES EN EL SELECT DE DESPACHO
     function renderizarSelectRepartidoresParaComanda() {
       const sel = document.getElementById('cmdRepartidorSelect');
       if (!sel) return;
@@ -551,7 +585,6 @@
       });
     }
 
-    // ENVIAR COMANDA AL REPARTIDOR SELECCIONADO
     async function encomendarPedidoAlChofer() {
       const repId = document.getElementById('cmdRepartidorSelect').value;
       const tipoBalon = document.getElementById('cmdTipoBalon').value;
@@ -580,10 +613,7 @@
       };
 
       const token = obtenerTokenSecreto();
-      if (!token) {
-        alert("Configura tu Token de GitHub para despachar comandas.");
-        return;
-      }
+      if (!token) return alert("Configura tu Token de GitHub para despachar comandas.");
 
       try {
         const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
@@ -652,7 +682,6 @@
             Última acción: <strong>${comandaRep ? (comandaRep.horaActualizacion || comandaRep.horaAsignacion) : (rep.ultimaActualizacionSecuencia || 'Sin registro')}</strong>
           </div>
 
-          <!-- Barra de secuencia estilo Cultura -->
           <div class="secuencia-mini-bar">
             <div class="sec-block sec-rojo ${etapa === 1 ? 'activo' : ''}">1. EN CAMINO</div>
             <div class="sec-block sec-gris-osc ${etapa === 2 ? 'activo' : ''}">2. ENTREGADO</div>
@@ -703,7 +732,6 @@
               const etapaNueva = comandaRep ? comandaRep.etapa : (rep.etapaSecuencia || 1);
               const etapaAnterior = estadosPreviosSecuencia[rep.id] || 1;
 
-              // Detectar si el repartidor completó la entrega (Paso 3)
               if (etapaAnterior !== 3 && etapaNueva === 3) {
                 mostrarNotificacionCentro(rep.nombre);
               }
