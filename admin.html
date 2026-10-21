@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LeoGas Cusco</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 820px; margin: auto; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 860px; margin: auto; }
     
     .header-admin {
       display: flex;
@@ -126,10 +125,91 @@
       cursor: pointer;
     }
 
+    /* FILTROS Y CONTROLES DE REPORTES */
+    .report-filters-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: #fff;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 12px;
+    }
+
+    .filter-pill-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #475569;
+    }
+
+    .filter-pill-btn.active {
+      background: #6b21a8;
+      color: #fff;
+      border-color: #581c87;
+    }
+
+    .report-summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .summary-card {
+      background: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .summary-card-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .summary-card-val {
+      font-size: 20px;
+      font-weight: 900;
+      color: #6b21a8;
+      margin-top: 4px;
+    }
+
+    .sound-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .sound-status-badge.muted {
+      background: #fef2f2;
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+
     /* TABLA REPORTES */
     .custom-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; margin-top: 10px; }
     .custom-table th, .custom-table td { border: 1px solid #e2e8f0; padding: 8px 10px; }
     .custom-table th { background: #f1f5f9; color: #334155; }
+    
+    .btn-export { background: #16a34a; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
     .btn-print { background: #2563eb; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
 
     @media print {
@@ -165,7 +245,13 @@
   <div id="panelAdminPrincipal" style="display: none;">
 
     <div class="header-admin no-print">
-      <h2>🦁 Panel de Administración LeoGas</h2>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <h2>🦁 Panel de Administración LeoGas</h2>
+        <div class="sound-status-badge" id="badgeSonidoAlerta" onclick="alternarSonidoAlerta()" title="Clic para silenciar o activar alarma de pedidos">
+          <span>🔔</span>
+          <span id="textoSonidoAlerta">Alerta Sonora Activa</span>
+        </div>
+      </div>
       <button class="btn-logout" onclick="cerrarSesionAdmin()">🚪 Salir</button>
     </div>
     <p style="font-size: 13px; color: #64748b;" class="no-print">Administra tus productos, teléfonos, GPS y ventas.</p>
@@ -238,10 +324,35 @@
 
     <!-- PESTAÑA 4: REPORTES -->
     <div id="seccionReportes" style="display: none;">
+      <!-- FILTROS DE FECHAS -->
+      <div class="report-filters-bar no-print">
+        <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtrar por:</span>
+        <button type="button" class="filter-pill-btn active" id="fltTodos" onclick="aplicarFiltroFecha('todos', this)">Todos</button>
+        <button type="button" class="filter-pill-btn" id="fltHoy" onclick="aplicarFiltroFecha('hoy', this)">📅 Hoy</button>
+        <button type="button" class="filter-pill-btn" id="fltSemana" onclick="aplicarFiltroFecha('semana', this)">📆 Esta Semana</button>
+        <button type="button" class="filter-pill-btn" id="fltMes" onclick="aplicarFiltroFecha('mes', this)">🗓️ Este Mes</button>
+
+        <div style="margin-left:auto; display:flex; gap:8px;">
+          <button type="button" class="btn-export" onclick="exportarVentasExcelCSV()">📥 Descargar Excel (CSV)</button>
+          <button type="button" class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
+        </div>
+      </div>
+
+      <!-- TARJETAS DE TOTALES FILTRADOS -->
+      <div class="report-summary-cards no-print">
+        <div class="summary-card">
+          <div class="summary-card-title">Pedidos Registrados</div>
+          <div class="summary-card-val" id="resumenCantPedidos">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-title">Total Recaudado (S/)</div>
+          <div class="summary-card-val" id="resumenTotalSoles" style="color:#15803d;">S/ 0.00</div>
+        </div>
+      </div>
+
       <div id="areaImpresion">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h3>📋 Reporte de Entregas Realizadas</h3>
-          <button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir Reporte</button>
+          <h3 id="tituloImpresionReporte">📋 Reporte de Entregas Realizadas</h3>
         </div>
         <table class="custom-table">
           <thead>
@@ -286,6 +397,59 @@
     let repartidorActivoId = null;
     let tokenDesbloqueado = false;
 
+    // ESTADO DE ALERTAS Y REPORTES
+    let filtroFechaActivo = "todos";
+    let ventasCargadas = [];
+    let ventasFiltradas = [];
+    let conteoPrevioVentas = 0;
+    let alertaSonoraHabilitada = true;
+    let audioContext = null;
+
+    // SISTEMA DE NOTIFICACIÓN SONORA PROFESIONAL (Web Audio API)
+    function emitirCampanadaAlerta() {
+      if (!alertaSonoraHabilitada) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!audioContext) audioContext = new AudioCtx();
+        if (audioContext.state === 'suspended') audioContext.resume();
+
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        osc.type = "sine";
+        // Tono bitonal agradable: 587Hz (D5) sube a 880Hz (A5)
+        osc.frequency.setValueAtTime(587.33, audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880.00, audioContext.currentTime + 0.15);
+
+        gain.gain.setValueAtTime(0.35, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.85);
+
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.start();
+        osc.stop(audioContext.currentTime + 0.85);
+      } catch (e) {
+        console.warn("No se pudo reproducir audio:", e);
+      }
+    }
+
+    function alternarSonidoAlerta() {
+      alertaSonoraHabilitada = !alertaSonoraHabilitada;
+      const badge = document.getElementById('badgeSonidoAlerta');
+      const txt = document.getElementById('textoSonidoAlerta');
+
+      if (alertaSonoraHabilitada) {
+        badge.classList.remove('muted');
+        txt.innerText = "Alerta Sonora Activa";
+        emitirCampanadaAlerta(); // Prueba de sonido inmediata
+      } else {
+        badge.classList.add('muted');
+        txt.innerText = "Alerta Silenciada";
+      }
+    }
+
     // LOGIN INICIAL
     function verificarLoginAdmin(e) {
       e.preventDefault();
@@ -304,6 +468,7 @@
       document.getElementById('pantallaLogin').style.display = 'none';
       document.getElementById('panelAdminPrincipal').style.display = 'block';
       cargarDesdeGitHub();
+      iniciarVigilanciaVentas();
     }
 
     function cerrarSesionAdmin() {
@@ -386,7 +551,7 @@
       } else if (tab === 'reportes') {
         document.getElementById('tabBtnReportes').classList.add('active');
         document.getElementById('seccionReportes').style.display = 'block';
-        renderizarReporte();
+        cargarYRenderizarReportes();
       }
     }
 
@@ -410,6 +575,9 @@
             productos = datos.productos || [];
             if (datos.telefonos) telefonos = datos.telefonos;
             if (datos.repartidores) repartidores = datos.repartidores;
+            if (Array.isArray(datos.ventas)) {
+              localStorage.setItem('gas_ventas', JSON.stringify(datos.ventas));
+            }
           }
         }
       } catch (e) {
@@ -418,6 +586,7 @@
       renderizarProductos();
       cargarValoresTelefonosEnFormulario();
       renderizarRepartidores();
+      cargarYRenderizarReportes();
     }
 
     function cargarValoresTelefonosEnFormulario() {
@@ -621,10 +790,11 @@
       const objetoCompleto = {
         productos: productos,
         telefonos: telefonos,
-        repartidores: repartidores
+        repartidores: repartidores,
+        ventas: JSON.parse(localStorage.getItem('gas_ventas')) || []
       };
 
-      // 1. OBTENER SIEMPRE EL SHA MÁS RECIENTE DIRECTO DE GITHUB (ELIMINA ERROR DE CONFLICTO)
+      // 1. OBTENER SHA MÁS RECIENTE DIRECTO DE GITHUB
       let shaActual = "";
       try {
         const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
@@ -684,28 +854,136 @@
       }
     }
 
-    // REPORTES
-    function renderizarReporte() {
-      const ventas = JSON.parse(localStorage.getItem('gas_ventas')) || [];
+    // GESTIÓN AVANZADA DE REPORTES: FILTROS, EXCEL Y AUDITORÍA
+    function parseFechaSegura(strFecha) {
+      if (!strFecha) return new Date(0);
+      const d = new Date(strFecha);
+      if (!isNaN(d.getTime())) return d;
+      // Intento con formato DD/MM/YYYY o DD-MM-YYYY
+      const parts = strFecha.split(/[\/\-,\s:]+/);
+      if (parts.length >= 3) {
+        const dia = parseInt(parts[0], 10);
+        const mes = parseInt(parts[1], 10) - 1;
+        const anio = parseInt(parts[2], 10);
+        return new Date(anio, mes, dia);
+      }
+      return new Date(0);
+    }
+
+    function aplicarFiltroFecha(periodo, boton) {
+      filtroFechaActivo = periodo;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      if (boton) boton.classList.add('active');
+      renderizarTablaYTotales();
+    }
+
+    function cargarYRenderizarReportes() {
+      ventasCargadas = JSON.parse(localStorage.getItem('gas_ventas')) || [];
+      renderizarTablaYTotales();
+    }
+
+    function renderizarTablaYTotales() {
+      const ahora = new Date();
+      const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+      
+      const diaSemana = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1; // Lunes inicio
+      const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diaSemana);
+      
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+
+      ventasFiltradas = ventasCargadas.filter(v => {
+        if (filtroFechaActivo === 'todos') return true;
+        const f = parseFechaSegura(v.fecha);
+        if (filtroFechaActivo === 'hoy') return f >= inicioHoy;
+        if (filtroFechaActivo === 'semana') return f >= inicioSemana;
+        if (filtroFechaActivo === 'mes') return f >= inicioMes;
+        return true;
+      });
+
       const tbody = document.getElementById('tablaVentasBody');
       tbody.innerHTML = '';
 
-      if (ventas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:12px; color:#94a3b8;">No hay ventas registradas aún.</td></tr>';
+      let sumaTotal = 0;
+
+      if (ventasFiltradas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:12px; color:#94a3b8;">No hay ventas registradas para este periodo.</td></tr>';
+      } else {
+        ventasFiltradas.forEach(v => {
+          const tot = parseFloat(v.total) || 0;
+          sumaTotal += tot;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${v.fecha || '--'}</td>
+            <td>${v.cliente || 'Particular'}</td>
+            <td>${v.productos || '--'}</td>
+            <td><strong>S/ ${tot.toFixed(2)}</strong></td>
+            <td>${v.pago || 'Efectivo'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('resumenCantPedidos').innerText = `${ventasFiltradas.length}`;
+      document.getElementById('resumenTotalSoles').innerText = `S/ ${sumaTotal.toFixed(2)}`;
+    }
+
+    // EXPORTACIÓN A EXCEL / CSV CON UN CLIC
+    function exportarVentasExcelCSV() {
+      if (ventasFiltradas.length === 0) {
+        alert("No hay ventas en la lista actual para exportar.");
         return;
       }
 
-      ventas.forEach(v => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${v.fecha}</td>
-          <td>${v.cliente || 'Particular'}</td>
-          <td>${v.productos}</td>
-          <td><strong>S/ ${v.total.toFixed(2)}</strong></td>
-          <td>${v.pago}</td>
-        `;
-        tbody.appendChild(tr);
+      let csvContenido = "\uFEFF"; // BOM UTF-8 para que Excel reconozca tildes y símbolos (S/)
+      csvContenido += "Fecha y Hora;Cliente;Detalle de Productos;Total (S/);Forma de Pago\r\n";
+
+      ventasFiltradas.forEach(v => {
+        const fecha = (v.fecha || '').replace(/;/g, ',');
+        const cliente = (v.cliente || 'Particular').replace(/;/g, ',');
+        const prods = (v.productos || '').replace(/;/g, ',').replace(/\n/g, ' ');
+        const total = (parseFloat(v.total) || 0).toFixed(2);
+        const pago = (v.pago || 'Efectivo').replace(/;/g, ',');
+
+        csvContenido += `"${fecha}";"${cliente}";"${prods}";"${total}";"${pago}"\r\n`;
       });
+
+      const blob = new Blob([csvContenido], { type: 'text/csv;charset=utf-8;' });
+      const enlace = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      const nombreArchivo = `Reporte_Ventas_LeoGas_${filtroFechaActivo}_${new Date().toISOString().slice(0,10)}.csv`;
+
+      enlace.setAttribute("href", url);
+      enlace.setAttribute("download", nombreArchivo);
+      document.body.appendChild(enlace);
+      enlace.click();
+      document.body.removeChild(enlace);
+    }
+
+    // MONITOR DE PEDIDOS CON NOTIFICACIÓN SONORA EN TIEMPO REAL
+    function iniciarVigilanciaVentas() {
+      const inicial = JSON.parse(localStorage.getItem('gas_ventas')) || [];
+      conteoPrevioVentas = inicial.length;
+
+      // Sondeo en segundo plano cada 12 segundos
+      setInterval(async () => {
+        try {
+          const res = await fetch(`productos.json?_t=${Date.now()}`);
+          if (res.ok) {
+            const data = await res.json();
+            const ventasActuales = Array.isArray(data.ventas) ? data.ventas : (JSON.parse(localStorage.getItem('gas_ventas')) || []);
+
+            if (ventasActuales.length > conteoPrevioVentas) {
+              // ¡Se registró una nueva venta!
+              emitirCampanadaAlerta();
+              conteoPrevioVentas = ventasActuales.length;
+              localStorage.setItem('gas_ventas', JSON.stringify(ventasActuales));
+              cargarYRenderizarReportes();
+            }
+          }
+        } catch (e) {
+          // Ignorar fallas temporales de red en background
+        }
+      }, 12000);
     }
 
     // VERIFICAR SESIÓN ACTIVA AL INICIAR
