@@ -30,8 +30,8 @@
       "id": "rep-1",
       "nombre": "Edwin",
       "online": true,
-      "lat": -13.5380374,
-      "lng": -71.9802983,
+      "lat": -13.5380361,
+      "lng": -71.9802942,
       "etapaSecuencia": 3,
       "ultimaActualizacionSecuencia": "10:34:39 a.m."
     },
@@ -53,10 +53,20 @@
       "cliente": "rosa",
       "direccion": "rosa",
       "gpsUrl": "https://maps.app.goo.gl/oDnZPP3pnUXyiutq6?g_st=ac",
-      "etapa": 2,
-      "estado": "activo",
+      "etapa": 3,
+      "estado": "completado",
       "horaAsignacion": "11:00:26",
-      "horaActualizacion": "11:03:20 a.m."
+      "horaActualizacion": "11:04:35 a.m."
+    }
+  ],
+  "ventas": [
+    {
+      "fecha": "21/10/2026, 11:04:35 a.m.",
+      "cliente": "rosa",
+      "productos": "Balón Gas Premium 10kg",
+      "total": 50,
+      "pago": "Yape",
+      "repartidorId": "rep-1"
     }
   ]
 }
