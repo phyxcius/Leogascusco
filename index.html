@@ -1433,6 +1433,67 @@
     let flotaActual = [];
     let modoMapaAmpliado = false;
 
+    // SISTEMA DE NOTIFICACIONES Y RASTREO PARA EL CLIENTE
+    async function pedirPermisoNotificacionesCliente() {
+      if ("Notification" in window) {
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+          await Notification.requestPermission();
+        }
+      }
+    }
+
+    function lanzarNotificacionCliente(titulo, mensaje) {
+      if ("vibrate" in navigator) {
+        navigator.vibrate([300, 150, 300]);
+      }
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        const notif = new Notification(titulo, {
+          body: mensaje,
+          icon: "CHUSPITA-circulo.png",
+          badge: "CHUSPITA-circulo.png",
+          vibrate: [300, 150, 300],
+          tag: "leogas-cliente-alerta"
+        });
+
+        notif.onclick = function() {
+          window.focus();
+          notif.close();
+        };
+      }
+    }
+
+    let estadoPedidoPrevioCliente = null;
+
+    function verificarEstadoPedidoCliente(comandas) {
+      const miCliente = localStorage.getItem('leogas_mi_pedido_cliente');
+      if (!miCliente || !Array.isArray(comandas)) return;
+
+      const miOrden = comandas.find(c => 
+        c.cliente && c.cliente.toLowerCase().includes(miCliente.toLowerCase()) && c.estado !== 'completado'
+      );
+
+      if (miOrden) {
+        if (miOrden.etapa === 1 && estadoPedidoPrevioCliente !== 1) {
+          lanzarNotificacionCliente(
+            "🔥 LeoGas Cusco: ¡Balón en camino!",
+            `Tu repartidor ya salió de la base con tu pedido (${miOrden.tipoBalon}). Puedes ver su ubicación en el mapa.`
+          );
+          estadoPedidoPrevioCliente = 1;
+        } 
+        else if (miOrden.etapa === 2 && estadoPedidoPrevioCliente !== 2) {
+          lanzarNotificacionCliente(
+            "🦁 LeoGas Cusco: ¡Repartidor en tu puerta!",
+            "Tu balón de gas ha llegado a tu dirección. Por favor sal a recibirlo."
+          );
+          estadoPedidoPrevioCliente = 2;
+        }
+      } else if (estadoPedidoPrevioCliente === 2) {
+        localStorage.removeItem('leogas_mi_pedido_cliente');
+        estadoPedidoPrevioCliente = null;
+      }
+    }
+
     // CÁLCULO DE DISTANCIA HARVESINE (KM)
     function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
       const R = 6371;
@@ -1937,6 +1998,12 @@
 
       mensaje += `\n¿Me confirman tiempo estimado de entrega?`;
 
+      // Guarda el nombre del cliente y solicita permiso de alerta en su teléfono
+      if (nombreCliente) {
+        localStorage.setItem('leogas_mi_pedido_cliente', nombreCliente);
+      }
+      pedirPermisoNotificacionesCliente();
+
       const numDestino = (telefonos.whatsapp || whatsappNumero).replace(/\D/g,'');
       window.open(`https://wa.me/${numDestino}?text=${encodeURIComponent(mensaje)}`, '_blank');
     }
@@ -2008,6 +2075,9 @@
             if (datos.repartidores) {
               actualizarVisualizadorGPS(datos.repartidores);
             }
+            if (datos.comandas) {
+              verificarEstadoPedidoCliente(datos.comandas);
+            }
           }
           sincronizarEstructuraPedido();
           renderizarMenu();
@@ -2025,7 +2095,7 @@
       iniciarMapaCusco();
       actualizarVistaPopup();
       cargarCatalogoDesdeGitHub();
-      setInterval(cargarCatalogoDesdeGitHub, 20000);
+      setInterval(cargarCatalogoDesdeGitHub, 12000);
     });
   </script>
 </body>
