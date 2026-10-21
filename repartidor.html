@@ -11,17 +11,17 @@
     .driver-card {
       background: #ffffff;
       width: 100%;
-      max-width: 460px;
+      max-width: 480px;
       border-radius: 20px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
       border: 1px solid #e2e8f0;
-      padding: 26px 20px;
+      padding: 24px 20px;
       text-align: center;
     }
 
     .brand-icon { font-size: 44px; margin-bottom: 2px; }
     h1 { font-size: 22px; font-weight: 900; color: #6b21a8; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 14px; }
+    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 12px; }
 
     /* BADGE LA CHUSPA TECH */
     .chuspa-badge-container { display: flex; justify-content: center; margin-bottom: 16px; }
@@ -57,36 +57,70 @@
 
     /* ESTADO GPS */
     .status-panel {
-      padding: 12px;
-      border-radius: 12px;
+      padding: 10px;
+      border-radius: 10px;
       background: #f1f5f9;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       border: 1px solid #e2e8f0;
-      transition: all 0.3s;
+      font-size: 12px;
     }
-    .status-panel.online { background: #f0fdf4; border-color: #86efac; }
-    .status-title { font-size: 13.5px; font-weight: 800; color: #475569; }
-    .status-panel.online .status-title { color: #15803d; }
-    .status-coords { font-size: 11px; color: #64748b; margin-top: 4px; font-family: monospace; }
+    .status-panel.online { background: #f0fdf4; border-color: #86efac; color: #15803d; font-weight: 800; }
 
-    /* SECUENCIA DE ENTREGA ESTILO MINISTERIO DE CULTURA */
+    /* TARJETA DE LA ORDEN ASIGNADA */
+    .order-box {
+      background: #faf5ff;
+      border: 2px solid #c084fc;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .order-box.empty {
+      background: #f8fafc;
+      border: 1.5px dashed #cbd5e1;
+      text-align: center;
+      color: #64748b;
+      padding: 20px;
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .order-type-badge {
+      background: #7e22ce;
+      color: #fff;
+      font-weight: 900;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+    .order-row { font-size: 13px; margin-bottom: 4px; }
+    .btn-maps {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #2563eb;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 12px;
+      margin-top: 8px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* BARRA SECUENCIA */
     .secuencia-container {
       background: #f8fafc;
       border: 1.5px solid #e2e8f0;
       border-radius: 12px;
       padding: 14px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       text-align: left;
-    }
-    .secuencia-title {
-      font-size: 11px;
-      font-weight: 900;
-      color: #475569;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
     .cultura-bar {
       display: flex;
@@ -95,52 +129,37 @@
       border: 2px solid #cbd5e1;
       background: #e2e8f0;
       gap: 3px;
+      margin-top: 8px;
     }
     .cultura-step {
       flex: 1;
-      padding: 12px 6px;
+      padding: 12px 4px;
       border: none;
       cursor: pointer;
       color: #ffffff;
       font-weight: 900;
       font-size: 11px;
       text-align: center;
-      transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      opacity: 0.35;
+      gap: 2px;
+      opacity: 0.3;
+      transition: all 0.2s;
     }
-    /* Colores exactos de la franja institucional */
     .step-rojo { background-color: #e52329; }
     .step-gris-osc { background-color: #555557; }
     .step-gris-claro { background-color: #8b8e91; }
+    .cultura-step.activo { opacity: 1 !important; transform: scale(1.02); }
+    .cultura-step:disabled { cursor: not-allowed; }
 
-    .cultura-step.activo {
-      opacity: 1 !important;
-      transform: scale(1.02);
-      box-shadow: inset 0 0 0 2px #ffffff;
-    }
-    .cultura-step:disabled {
-      cursor: not-allowed;
-    }
-
-    .secuencia-indicator {
-      font-size: 11.5px;
-      font-weight: 800;
-      color: #1e1b4b;
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    /* BOTONES */
+    /* BOTONES ACCIÓN */
     .btn-action {
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 15px;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 800;
       border: none;
       cursor: pointer;
@@ -148,25 +167,34 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      margin-bottom: 8px;
     }
-    .btn-connect { background: #16a34a; color: #ffffff; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35); }
+    .btn-connect { background: #16a34a; color: #ffffff; }
     .btn-disconnect { background: #dc2626; color: #ffffff; display: none; }
+    .btn-history-print { background: #334155; color: #ffffff; font-size: 12px; padding: 10px; }
 
-    .warning-token-box {
-      background: #fee2e2;
-      border: 1px solid #fca5a5;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 11px;
-      color: #991b1b;
-      margin-bottom: 14px;
-      display: none;
+    /* HISTORIAL MODAL DE ENTREGAS */
+    .history-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 14px;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #areaLiquidacionChofer, #areaLiquidacionChofer * { visibility: visible; }
+      #areaLiquidacionChofer { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <div class="driver-card">
+  <div class="driver-card no-print">
     <div class="brand-icon">🦁</div>
     <h1>LeoGas Cusco</h1>
     <p class="subtitle">Panel de Navegación y Secuencia de Entrega</p>
@@ -181,57 +209,89 @@
       </a>
     </div>
 
-    <div class="warning-token-box" id="warningToken">
-      ⚠️ Este celular aún no cuenta con la llave de acceso. Pide el enlace con el token al administrador.
-    </div>
-
     <div class="box-selector">
       <label for="selectChofer">Selecciona tu Unidad / Repartidor:</label>
       <select id="selectChofer" onchange="cambioDeRepartidorSeleccionado()">
-        <option value="">Cargando lista de repartidores...</option>
+        <option value="">Cargando repartidores...</option>
       </select>
     </div>
 
-    <!-- PANEL GPS -->
+    <!-- ESTADO GPS -->
     <div class="status-panel" id="panelEstado">
-      <div class="status-title" id="textoEstado">Offline 💤 (Desconectado)</div>
-      <div class="status-coords" id="textoCoords">Ubicación GPS no sincronizada</div>
+      <span id="textoEstado">Offline 💤 (Desconectado)</span>
     </div>
 
-    <!-- SECUENCIA DE ENTREGA TIPO MINISTERIO DE CULTURA -->
+    <!-- ORDEN ENCOMENDADA DESDE EL ADMIN -->
+    <div id="cajaOrdenAsignada" class="order-box empty">
+      Esperando nueva comanda asignada por caja...
+    </div>
+
+    <!-- SECUENCIA DE PASOS -->
     <div class="secuencia-container">
-      <div class="secuencia-title">
-        <span>Secuencia de Entrega del Pedido</span>
-        <span id="estadoActualTag" style="color:#6b21a8;">Paso 1</span>
+      <div style="font-size:11px; font-weight:800; color:#475569; display:flex; justify-content:space-between;">
+        <span>Secuencia de Entrega</span>
+        <span id="estadoActualTag" style="color:#6b21a8;">En espera</span>
       </div>
 
       <div class="cultura-bar">
-        <button type="button" id="btnPaso1" class="cultura-step step-rojo" onclick="avanzarSecuencia(1)">
+        <button type="button" id="btnPaso1" class="cultura-step step-rojo" onclick="avanzarSecuencia(1)" disabled>
           <span>🟥 PASO 1</span>
           <span>En Camino</span>
         </button>
-        <button type="button" id="btnPaso2" class="cultura-step step-gris-osc" onclick="avanzarSecuencia(2)">
+        <button type="button" id="btnPaso2" class="cultura-step step-gris-osc" onclick="avanzarSecuencia(2)" disabled>
           <span>⬛ PASO 2</span>
           <span>Entregado</span>
         </button>
-        <button type="button" id="btnPaso3" class="cultura-step step-gris-claro" onclick="avanzarSecuencia(3)">
+        <button type="button" id="btnPaso3" class="cultura-step step-gris-claro" onclick="avanzarSecuencia(3)" disabled>
           <span>⬜ PASO 3</span>
           <span>Completado</span>
         </button>
       </div>
-
-      <div class="secuencia-indicator" id="textoGuiaSecuencia">
-        👉 Toca <strong>[En Camino]</strong> al salir de base con el balón.
+      <div id="textoGuiaSecuencia" style="font-size:11px; color:#64748b; margin-top:8px; text-align:center;">
+        Asigna o acepta una comanda para desbloquear la secuencia.
       </div>
     </div>
 
+    <!-- BOTONES PRINCIPALES -->
     <button id="btnConectar" class="btn-action btn-connect" onclick="iniciarTransmisionGPS()">
-      <span>▶️ INICIAR RUTA (Conectar GPS)</span>
+      <span>▶️ CONECTAR GPS EN RUTA</span>
+    </button>
+    <button id="btnDesconectar" class="btn-action btn-disconnect" onclick="detenerTransmisionGPS()">
+      <span>⏹️ TERMINAR TURNO (Desconectar)</span>
     </button>
 
-    <button id="btnDesconectar" class="btn-action btn-disconnect" onclick="detenerTransmisionGPS()">
-      <span>⏹️ TERMINAR RUTA (Desconectar)</span>
+    <button type="button" class="btn-action btn-history-print" onclick="prepararImpresionLiquidacion()">
+      <span>🖨️ Imprimir Mi Liquidación de Entregas</span>
     </button>
+  </div>
+
+  <!-- COMPROBANTE DE LIQUIDACIÓN PARA IMPRIMIR -->
+  <div id="areaLiquidacionChofer" style="display:none; padding:20px; font-family:sans-serif;">
+    <div style="text-align:center; border-bottom:2px dashed #000; padding-bottom:10px; margin-bottom:10px;">
+      <h2 style="margin:0;">🦁 LeoGas Cusco</h2>
+      <p style="margin:2px 0; font-size:12px;">Comprobante de Liquidación por Repartidor</p>
+      <p style="margin:2px 0; font-size:11px; font-weight:bold;">Tecnología: La Chuspa Tech Cusco</p>
+      <p style="margin:2px 0; font-size:12px;"><strong>Repartidor:</strong> <span id="liqNombreChofer"></span></p>
+      <p style="margin:2px 0; font-size:11px;">Fecha: <span id="liqFecha"></span></p>
+    </div>
+    <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+      <thead>
+        <tr style="border-bottom:1px solid #000;">
+          <th>Hora</th>
+          <th>Cliente</th>
+          <th>Balón</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="liqTablaCuerpo"></tbody>
+    </table>
+    <div style="text-align:right; margin-top:12px; font-size:14px; font-weight:bold; border-top:1px solid #000; padding-top:6px;">
+      Total Recaudado: <span id="liqMontoTotal">S/ 0.00</span>
+    </div>
+    <div style="text-align:center; margin-top:30px; font-size:11px;">
+      ___________________________<br>
+      Firma del Repartidor
+    </div>
   </div>
 
   <script>
@@ -240,40 +300,27 @@
     const ARCHIVO = "productos.json";
     const STORAGE_KEY_SECRETA = "leogas_vault_secret_token";
 
-    let datosCompletos = { productos: [], telefonos: {}, repartidores: [] };
+    let datosCompletos = { productos: [], telefonos: {}, repartidores: [], comandas: [] };
     let watchIdGPS = null;
-    let repartidorIdActivo = null;
-
-    function gestionarTokenSeguro() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenURL = urlParams.get('set_token') || urlParams.get('token');
-      if (tokenURL) {
-        localStorage.setItem(STORAGE_KEY_SECRETA, tokenURL.trim());
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-      document.getElementById('warningToken').style.display = localStorage.getItem(STORAGE_KEY_SECRETA) ? 'none' : 'block';
-    }
+    let ordenActiva = null;
 
     function obtenerTokenSecreto() {
       return localStorage.getItem(STORAGE_KEY_SECRETA) || "";
     }
 
-    async function cargarRepartidores() {
+    async function cargarDatosServidor() {
       const token = obtenerTokenSecreto();
       const headers = token ? { "Authorization": `token ${token}` } : {};
 
       try {
-        const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, {
-          headers: headers
-        });
-
+        const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, { headers });
         if (res.ok) {
-          const data = await res.json();
-          datosCompletos = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+          const d = await res.json();
+          datosCompletos = JSON.parse(decodeURIComponent(escape(atob(d.content))));
           renderizarSelectChoferes();
         }
       } catch (e) {
-        console.error("Error al cargar repartidores:", e);
+        console.error(e);
       }
     }
 
@@ -281,216 +328,254 @@
       const sel = document.getElementById('selectChofer');
       sel.innerHTML = '';
       const lista = datosCompletos.repartidores || [];
-      if (lista.length === 0) {
-        sel.innerHTML = '<option value="">No hay repartidores registrados</option>';
-        return;
-      }
 
       lista.forEach(rep => {
         const opt = document.createElement('option');
         opt.value = rep.id;
-        opt.innerText = `${rep.nombre} ${rep.online ? '🟢 (En ruta)' : '💤'}`;
+        opt.innerText = `${rep.nombre} ${rep.online ? '🟢' : '💤'}`;
         sel.appendChild(opt);
       });
 
-      const choferGuardado = localStorage.getItem('leogas_chofer_asignado');
-      if (choferGuardado && lista.some(r => r.id === choferGuardado)) {
-        sel.value = choferGuardado;
+      const guardado = localStorage.getItem('leogas_chofer_asignado');
+      if (guardado && lista.some(r => r.id === guardado)) {
+        sel.value = guardado;
       }
-      actualizarInterfazSegunRepartidor();
+      actualizarVistaChofer();
     }
 
     function cambioDeRepartidorSeleccionado() {
       const sel = document.getElementById('selectChofer');
       localStorage.setItem('leogas_chofer_asignado', sel.value);
-      actualizarInterfazSegunRepartidor();
+      actualizarVistaChofer();
     }
 
-    function actualizarInterfazSegunRepartidor() {
+    function actualizarVistaChofer() {
       const sel = document.getElementById('selectChofer');
-      const rep = (datosCompletos.repartidores || []).find(r => r.id === sel.value);
+      const repId = sel.value;
+      const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
       if (!rep) return;
 
-      const panel = document.getElementById('panelEstado');
-      const txt = document.getElementById('textoEstado');
-      const btnCon = document.getElementById('btnConectar');
-      const btnDes = document.getElementById('btnDesconectar');
+      // Buscar si el cajero le encomendó una comanda activa
+      const comandas = datosCompletos.comandas || [];
+      ordenActiva = comandas.find(c => c.repartidorId === repId && c.estado !== 'completado');
 
-      if (rep.online && watchIdGPS !== null) {
-        panel.classList.add('online');
-        txt.innerText = "Online 🔥 (En Ruta Activo)";
-        btnCon.style.display = "none";
-        btnDes.style.display = "flex";
-      } else {
-        panel.classList.remove('online');
-        txt.innerText = "Offline 💤 (Desconectado)";
-        btnCon.style.display = "flex";
-        btnDes.style.display = "none";
+      const caja = document.getElementById('cajaOrdenAsignada');
+      const b1 = document.getElementById('btnPaso1');
+      const b2 = document.getElementById('btnPaso2');
+      const b3 = document.getElementById('btnPaso3');
+
+      if (!ordenActiva) {
+        caja.className = "order-box empty";
+        caja.innerHTML = "💤 No tienes comandas pendientes. Espera a que el cajero te asigne un balón.";
+        b1.disabled = true;
+        b2.disabled = true;
+        b3.disabled = true;
+        b1.classList.remove('activo');
+        b2.classList.remove('activo');
+        b3.classList.remove('activo');
+        document.getElementById('estadoActualTag').innerText = "Sin orden";
+        document.getElementById('textoGuiaSecuencia').innerText = "Secuencia inactiva hasta recibir orden.";
+        return;
       }
 
-      // Secuencia actual del chofer (1 = Rojo, 2 = Gris Oscuro, 3 = Gris Claro)
-      reflejarEstadoSecuenciaEnBotones(rep.etapaSecuencia || 1);
+      // Renderizar orden activa
+      caja.className = "order-box";
+      caja.innerHTML = `
+        <div class="order-header">
+          <span class="order-type-badge">${ordenActiva.tipoBalon}</span>
+          <strong style="color:#15803d; font-size:15px;">Cobrar: S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)}</strong>
+        </div>
+        <div class="order-row">👤 <strong>Cliente:</strong> ${ordenActiva.cliente}</div>
+        <div class="order-row">📍 <strong>Dirección/Ref:</strong> ${ordenActiva.direccion}</div>
+        <div class="order-row">💵 <strong>Pago:</strong> ${ordenActiva.metodoPago}</div>
+        ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" class="btn-maps">🗺️ Abrir Ruta en Google Maps</a>` : ''}
+      `;
+
+      reflejarSecuencia(ordenActiva.etapa || 1);
     }
 
-    function reflejarEstadoSecuenciaEnBotones(etapa) {
+    function reflejarSecuencia(etapa) {
       const b1 = document.getElementById('btnPaso1');
       const b2 = document.getElementById('btnPaso2');
       const b3 = document.getElementById('btnPaso3');
       const tag = document.getElementById('estadoActualTag');
       const guia = document.getElementById('textoGuiaSecuencia');
 
-      b1.classList.remove('activo');
-      b2.classList.remove('activo');
-      b3.classList.remove('activo');
+      b1.classList.toggle('activo', etapa === 1);
+      b2.classList.toggle('activo', etapa === 2);
+      b3.classList.toggle('activo', etapa === 3);
 
-      // Reglas estrictas de secuencia:
       if (etapa === 1) {
-        b1.classList.add('activo');
         b1.disabled = false;
-        b2.disabled = false; // Puede pasar a 2
-        b3.disabled = true;  // Bloqueado hasta pasar por 2
-        tag.innerText = "Paso 1: En Camino";
-        guia.innerHTML = "🟥 <strong>En camino al domicilio del cliente.</strong> Presiona [Entregado] al llegar.";
-      } else if (etapa === 2) {
-        b2.classList.add('activo');
-        b1.disabled = true;  // Ya pasó
         b2.disabled = false;
-        b3.disabled = false; // Ahora sí puede completar
+        b3.disabled = true; // Bloquea saltar al paso 3
+        tag.innerText = "Paso 1: En Camino";
+        guia.innerHTML = "🟥 Sal con el balón y presiona <strong>[Entregado]</strong> al llegar.";
+      } else if (etapa === 2) {
+        b1.disabled = true;
+        b2.disabled = false;
+        b3.disabled = false;
         tag.innerText = "Paso 2: Entregado";
-        guia.innerHTML = "⬛ <strong>Balón entregado.</strong> Presiona [Completado] para cerrar la entrega.";
+        guia.innerHTML = "⬛ Balón entregado y cobrado. Presiona <strong>[Completado]</strong> para cerrar.";
       } else if (etapa === 3) {
-        b3.classList.add('activo');
-        b1.disabled = false; // Listo para reiniciar otro pedido
+        b1.disabled = true;
         b2.disabled = true;
         b3.disabled = false;
         tag.innerText = "Paso 3: Completado";
-        guia.innerHTML = "⬜ <strong>Entrega completada con éxito.</strong> Toca [En Camino] para un nuevo pedido.";
+        guia.innerHTML = "⬜ Orden finalizada. Esperando próxima comanda.";
       }
     }
 
     async function avanzarSecuencia(pasoDestino) {
-      const token = obtenerTokenSecreto();
-      if (!token) return alert("Llave no configurada.");
+      if (!ordenActiva) return;
+      const etapaActual = ordenActiva.etapa || 1;
 
+      // Validación obligatoria
+      if (etapaActual === 1 && pasoDestino === 3) {
+        alert("⛔ Secuencia bloqueada: Debes marcar primero 'Paso 2: Entregado' antes de completar.");
+        return;
+      }
+
+      ordenActiva.etapa = pasoDestino;
+      ordenActiva.horaActualizacion = new Date().toLocaleTimeString();
+
+      if (pasoDestino === 3) {
+        ordenActiva.estado = 'completado';
+        // Guardar en ventas / liquidaciones del repartidor
+        if (!datosCompletos.ventas) datosCompletos.ventas = [];
+        datosCompletos.ventas.push({
+          fecha: new Date().toLocaleString(),
+          cliente: ordenActiva.cliente,
+          productos: ordenActiva.tipoBalon,
+          total: parseFloat(ordenActiva.montoCobro),
+          pago: ordenActiva.metodoPago,
+          repartidorId: ordenActiva.repartidorId
+        });
+      }
+
+      reflejarSecuencia(pasoDestino);
+      await sincronizarConGitHub(`Secuencia ${pasoDestino} - ${ordenActiva.cliente}`);
+
+      if (pasoDestino === 3) {
+        alert("✔ ¡Entrega completada! Notificación enviada al cajero.");
+        actualizarVistaChofer();
+      }
+    }
+
+    function iniciarTransmisionGPS() {
+      const sel = document.getElementById('selectChofer');
+      const repId = sel.value;
+      if (!navigator.geolocation) return alert("GPS no disponible.");
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          actualizarGPS(repId, true, pos.coords.latitude, pos.coords.longitude);
+          document.getElementById('btnConectar').style.display = "none";
+          document.getElementById('btnDesconectar').style.display = "flex";
+          document.getElementById('panelEstado').className = "status-panel online";
+          document.getElementById('textoEstado').innerText = "Online 🔥 (En Ruta Activo)";
+
+          if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
+          watchIdGPS = navigator.geolocation.watchPosition(p => {
+            actualizarGPS(repId, true, p.coords.latitude, p.coords.longitude);
+          }, null, { enableHighAccuracy: true });
+
+          await sincronizarConGitHub("GPS Online");
+        },
+        (err) => alert("Activa el GPS de tu celular: " + err.message)
+      );
+    }
+
+    async function detenerTransmisionGPS() {
+      if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
+      const sel = document.getElementById('selectChofer');
+      actualizarGPS(sel.value, false, null, null);
+      document.getElementById('btnConectar').style.display = "flex";
+      document.getElementById('btnDesconectar').style.display = "none";
+      document.getElementById('panelEstado').className = "status-panel";
+      document.getElementById('textoEstado').innerText = "Offline 💤 (Desconectado)";
+      await sincronizarConGitHub("GPS Offline");
+    }
+
+    function actualizarGPS(repId, online, lat, lng) {
+      const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
+      if (rep) {
+        rep.online = online;
+        if (lat && lng) { rep.lat = lat; rep.lng = lng; }
+      }
+    }
+
+    async function sincronizarConGitHub(msg) {
+      const token = obtenerTokenSecreto();
+      if (!token) return;
+
+      let sha = "";
+      try {
+        const c = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
+          headers: { "Authorization": `token ${token}` }
+        });
+        if (c.ok) sha = (await c.json()).sha;
+      } catch (e) {}
+
+      const payload = {
+        message: msg,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(datosCompletos, null, 2)))),
+        branch: "main"
+      };
+      if (sha) payload.sha = sha;
+
+      await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}`, {
+        method: "PUT",
+        headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    // IMPRESIÓN DE LIQUIDACIÓN FORMAL
+    function prepararImpresionLiquidacion() {
       const sel = document.getElementById('selectChofer');
       const repId = sel.value;
       const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
       if (!rep) return;
 
-      const etapaActual = rep.etapaSecuencia || 1;
+      const misVentas = (datosCompletos.ventas || []).filter(v => v.repartidorId === repId);
+      if (misVentas.length === 0) return alert("Aún no tienes pedidos completados para liquidar en este turno.");
 
-      // Validación estricta: NO PERMITIR SALTAR DE 1 A 3
-      if (etapaActual === 1 && pasoDestino === 3) {
-        alert("⛔ Secuencia bloqueada: Debes marcar primero 'Paso 2: Entregado' antes de finalizar.");
-        return;
-      }
+      document.getElementById('liqNombreChofer').innerText = rep.nombre;
+      document.getElementById('liqFecha').innerText = new Date().toLocaleString();
 
-      rep.etapaSecuencia = pasoDestino;
-      rep.ultimaActualizacionSecuencia = new Date().toLocaleTimeString();
+      const tbody = document.getElementById('liqTablaCuerpo');
+      tbody.innerHTML = '';
+      let total = 0;
 
-      reflejarEstadoSecuenciaEnBotones(pasoDestino);
+      misVentas.forEach(v => {
+        total += parseFloat(v.total || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${(v.fecha || '').slice(-8)}</td>
+          <td>${v.cliente}</td>
+          <td>${v.productos}</td>
+          <td>S/ ${parseFloat(v.total).toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
 
-      // Guardar en GitHub
-      await sincronizarDatosCompletosEnGitHub(`Actualización secuencia ${pasoDestino} - ${rep.nombre}`);
-    }
-
-    function iniciarTransmisionGPS() {
-      const token = obtenerTokenSecreto();
-      if (!token) return alert("Pide al administrador el enlace con el token.");
-
-      const sel = document.getElementById('selectChofer');
-      const repId = sel.value;
-      if (!repId) return alert("Selecciona tu nombre primero.");
-
-      repartidorIdActivo = repId;
-      if (!navigator.geolocation) return alert("GPS no soportado.");
-
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          actualizarGPSLocal(repId, true, pos.coords.latitude, pos.coords.longitude);
-          actualizarInterfazSegunRepartidor();
-
-          if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
-          watchIdGPS = navigator.geolocation.watchPosition(
-            async (p) => {
-              actualizarGPSLocal(repId, true, p.coords.latitude, p.coords.longitude);
-              await sincronizarDatosCompletosEnGitHub(`GPS Ruta - ${repId}`);
-            },
-            null,
-            { enableHighAccuracy: true, maximumAge: 10000 }
-          );
-
-          await sincronizarDatosCompletosEnGitHub(`GPS Online - ${repId}`);
-        },
-        (err) => alert("Error al encender GPS: " + err.message),
-        { enableHighAccuracy: true }
-      );
-    }
-
-    async function detenerTransmisionGPS() {
-      if (watchIdGPS) {
-        navigator.geolocation.clearWatch(watchIdGPS);
-        watchIdGPS = null;
-      }
-      const sel = document.getElementById('selectChofer');
-      actualizarGPSLocal(sel.value, false, null, null);
-      actualizarInterfazSegunRepartidor();
-      await sincronizarDatosCompletosEnGitHub(`GPS Offline - ${sel.value}`);
-      alert("Has finalizado tu ruta.");
-    }
-
-    function actualizarGPSLocal(repId, online, lat, lng) {
-      const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
-      if (rep) {
-        rep.online = online;
-        if (lat && lng) {
-          rep.lat = lat;
-          rep.lng = lng;
-          document.getElementById('textoCoords').innerText = `Lat: ${lat.toFixed(5)} | Lng: ${lng.toFixed(5)}`;
-        }
-      }
-    }
-
-    async function sincronizarDatosCompletosEnGitHub(mensajeCommit) {
-      const token = obtenerTokenSecreto();
-      if (!token) return;
-
-      let shaActual = "";
-      try {
-        const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
-          headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" }
-        });
-        if (check.ok) {
-          const d = await check.json();
-          shaActual = d.sha;
-          const datosNube = JSON.parse(decodeURIComponent(escape(atob(d.content))));
-          // Preservar productos y teléfonos
-          datosCompletos.productos = datosNube.productos || datosCompletos.productos;
-          datosCompletos.telefonos = datosNube.telefonos || datosCompletos.telefonos;
-        }
-      } catch (e) {}
-
-      const payload = {
-        message: mensajeCommit,
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(datosCompletos, null, 2)))),
-        branch: "main"
-      };
-      if (shaActual) payload.sha = shaActual;
-
-      try {
-        await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}`, {
-          method: "PUT",
-          headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-      } catch (err) {
-        console.error("Error sincronizando:", err);
-      }
+      document.getElementById('liqMontoTotal').innerText = `S/ ${total.toFixed(2)}`;
+      document.getElementById('areaLiquidacionChofer').style.display = "block";
+      window.print();
+      document.getElementById('areaLiquidacionChofer').style.display = "none";
     }
 
     window.onload = () => {
-      gestionarTokenSeguro();
-      cargarRepartidores();
+      const urlParams = new URLSearchParams(window.location.search);
+      const t = urlParams.get('set_token') || urlParams.get('token');
+      if (t) {
+        localStorage.setItem(STORAGE_KEY_SECRETA, t.trim());
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      cargarDatosServidor();
+      // Sondeo periódico para recibir la orden enviada por el cajero
+      setInterval(cargarDatosServidor, 12000);
     };
   </script>
 </body>
