@@ -43,8 +43,7 @@
     <div style="text-align:left;">
       <label style="font-size:11px; font-weight:800; color:#64748b;">SELECCIONA TU IDENTIFICADOR:</label>
       <select id="selectChofer" onchange="cambioDeChofer()">
-        <option value="rep-1">Edwin</option>
-        <option value="rep-2">Moto 2</option>
+        <option value="">Cargando repartidores desde Firebase...</option>
       </select>
     </div>
 
@@ -105,6 +104,7 @@
     let ordenActiva = null;
     let watchIdGPS = null;
     let idUltimaOrdenVista = null;
+    let repartidoresMap = {};
 
     function lanzarAlertaChofer(titulo, mensaje) {
       if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
@@ -112,6 +112,36 @@
         const notif = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
         notif.onclick = () => { window.focus(); notif.close(); };
       }
+    }
+
+    // CARGAR DINÁMICAMENTE LOS REPARTIDORES DESDE FIREBASE
+    function escucharRepartidoresFirebase() {
+      db.ref('repartidores').on('value', snap => {
+        const data = snap.val();
+        if (!data) return;
+
+        repartidoresMap = data;
+        const select = document.getElementById('selectChofer');
+        const valorGuardado = localStorage.getItem("leogas_chofer_id") || select.value;
+
+        select.innerHTML = '';
+        Object.values(data).forEach(rep => {
+          const opt = document.createElement('option');
+          opt.value = rep.id;
+          opt.innerText = `${rep.nombre} ${rep.online ? '🟢' : '💤'}`;
+          select.appendChild(opt);
+        });
+
+        // Restaurar selección previa si existe
+        if (valorGuardado && data[valorGuardado]) {
+          select.value = valorGuardado;
+        } else if (select.options.length > 0) {
+          select.selectedIndex = 0;
+          localStorage.setItem("leogas_chofer_id", select.value);
+        }
+
+        escucharComandasEnTiempoReal();
+      });
     }
 
     function cambioDeChofer() {
@@ -122,6 +152,7 @@
 
     function escucharComandasEnTiempoReal() {
       const repId = document.getElementById('selectChofer').value;
+      if (!repId) return;
 
       db.ref('pedidos').on('value', snap => {
         const pedidos = snap.val();
@@ -131,7 +162,7 @@
           ordenActiva = Object.values(pedidos).find(p => p.repartidorId === repId && p.estado !== 'completado');
         }
 
-        // Si recibe una orden nueva
+        // Alerta nativa + vibración al asignarse comanda
         if (ordenActiva && ordenActiva.id !== idUltimaOrdenVista) {
           if (idUltimaOrdenVista !== null) {
             lanzarAlertaChofer(
@@ -208,6 +239,7 @@
 
     function iniciarGPS() {
       const repId = document.getElementById('selectChofer').value;
+      if (!repId) return alert("Selecciona un repartidor primero.");
       if (!navigator.geolocation) return alert("GPS no disponible.");
 
       if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
@@ -230,7 +262,7 @@
     function detenerGPS() {
       if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
       const repId = document.getElementById('selectChofer').value;
-      actualizarCoordenadas(repId, false, null, null);
+      if (repId) actualizarCoordenadas(repId, false, null, null);
       document.getElementById('btnConectar').style.display = "block";
       document.getElementById('btnDesconectar').style.display = "none";
       document.getElementById('panelEstado').className = "status-panel";
@@ -244,9 +276,7 @@
     }
 
     window.onload = () => {
-      const choferGuardado = localStorage.getItem("leogas_chofer_id");
-      if (choferGuardado) document.getElementById('selectChofer').value = choferGuardado;
-      escucharComandasEnTiempoReal();
+      escucharRepartidoresFirebase();
     };
   </script>
 </body>
