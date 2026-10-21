@@ -221,8 +221,53 @@
       <button class="tab-btn" id="tabBtnReportes" onclick="cambiarTab('reportes')">📊 Reporte Contable & Ventas</button>
     </div>
 
-    <!-- NUEVA PESTAÑA: PEDIDOS Y FLOTA EN VIVO -->
+    <!-- PESTAÑA: PEDIDOS Y FLOTA EN VIVO -->
     <div id="seccionPedidos">
+
+      <!-- FORMULARIO DE ENCOMIENDA PARA EL CAJERO / ADMINISTRADOR -->
+      <div class="card" style="border: 1.5px solid #a855f7; background: #faf5ff; margin-bottom: 16px;">
+        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:10px;">🛵 Encomendar Pedido a Repartidor</h3>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div>
+            <label>Asignar a Repartidor:</label>
+            <select id="cmdRepartidorSelect"></select>
+          </div>
+          <div>
+            <label>Tipo de Balón:</label>
+            <select id="cmdTipoBalon">
+              <option value="Balón LeoGas 10kg Normal">Balón Regular 10kg (Normal)</option>
+              <option value="Balón Gas Premium 10kg">Balón Gas Premium 10kg</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div>
+            <label>Monto a Cobrar (S/):</label>
+            <input type="number" id="cmdMonto" placeholder="Ej. 50.00" value="50.00" step="0.5">
+          </div>
+          <div>
+            <label>Método de Pago:</label>
+            <select id="cmdPago">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Yape">Yape</option>
+              <option value="Plin">Plin</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Nombre del Cliente y Referencia:</label>
+        <input type="text" id="cmdCliente" placeholder="Ej: Sra. Rosa - Frente al colegio San Gabriel">
+
+        <label>Enlace de Ubicación GPS (Google Maps):</label>
+        <input type="text" id="cmdGpsUrl" placeholder="https://maps.google.com/?q=-13.51,-71.97">
+
+        <button type="button" class="btn btn-save" style="margin-top:12px; background:#16a34a;" onclick="encomendarPedidoAlChofer()">
+          📤 Asignar Orden al Repartidor
+        </button>
+      </div>
+
       <div class="card">
         <h3 style="color:#6b21a8; font-size:15px; margin-bottom:6px;">📦 Control de Entregas y Secuencia en Tiempo Real</h3>
         <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Monitorea la secuencia de cada repartidor (Iniciado, Entregado y Completado) y su posición en Cusco.</p>
@@ -319,6 +364,7 @@
     let productos = [];
     let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
     let repartidores = [];
+    let comandas = [];
 
     let mapAdmin = null;
     let marcadoresAdminFlota = {};
@@ -473,17 +519,107 @@
           productos = datos.productos || [];
           telefonos = datos.telefonos || telefonos;
           repartidores = datos.repartidores || [];
+          comandas = datos.comandas || [];
           if (Array.isArray(datos.ventas)) localStorage.setItem('gas_ventas', JSON.stringify(datos.ventas));
         }
       } catch (e) {
         console.error(e);
       }
 
+      renderizarSelectRepartidoresParaComanda();
       renderizarPedidosSecuencia();
       renderizarProductos();
       cargarValoresTelefonosEnFormulario();
       renderizarRepartidores();
       actualizarMapaAdmin();
+    }
+
+    // RENDERIZAR REPARTIDORES EN EL SELECT DE DESPACHO
+    function renderizarSelectRepartidoresParaComanda() {
+      const sel = document.getElementById('cmdRepartidorSelect');
+      if (!sel) return;
+      sel.innerHTML = '';
+      if (repartidores.length === 0) {
+        sel.innerHTML = '<option value="">No hay repartidores registrados</option>';
+        return;
+      }
+      repartidores.forEach(rep => {
+        const opt = document.createElement('option');
+        opt.value = rep.id;
+        opt.innerText = `${rep.nombre} ${rep.online ? '🟢' : '💤'}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    // ENVIAR COMANDA AL REPARTIDOR SELECCIONADO
+    async function encomendarPedidoAlChofer() {
+      const repId = document.getElementById('cmdRepartidorSelect').value;
+      const tipoBalon = document.getElementById('cmdTipoBalon').value;
+      const montoCobro = document.getElementById('cmdMonto').value;
+      const metodoPago = document.getElementById('cmdPago').value;
+      const cliente = document.getElementById('cmdCliente').value.trim();
+      const gpsUrl = document.getElementById('cmdGpsUrl').value.trim();
+
+      if (!repId || !cliente) {
+        alert("Por favor selecciona un repartidor y escribe el nombre del cliente.");
+        return;
+      }
+
+      const nuevaComanda = {
+        id: "cmd-" + Date.now(),
+        repartidorId: repId,
+        tipoBalon: tipoBalon,
+        montoCobro: montoCobro,
+        metodoPago: metodoPago,
+        cliente: cliente,
+        direccion: cliente,
+        gpsUrl: gpsUrl,
+        etapa: 1,
+        estado: "activo",
+        horaAsignacion: new Date().toLocaleTimeString()
+      };
+
+      const token = obtenerTokenSecreto();
+      if (!token) {
+        alert("Configura tu Token de GitHub para despachar comandas.");
+        return;
+      }
+
+      try {
+        const check = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
+          headers: { "Authorization": `token ${token}` }
+        });
+
+        if (check.ok) {
+          const data = await check.json();
+          const objeto = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+          
+          if (!objeto.comandas) objeto.comandas = [];
+          objeto.comandas.push(nuevaComanda);
+
+          const payload = {
+            message: `Asignación de comanda para repartidor ${repId}`,
+            content: btoa(unescape(encodeURIComponent(JSON.stringify(objeto, null, 2)))),
+            sha: data.sha,
+            branch: "main"
+          };
+
+          const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}`, {
+            method: "PUT",
+            headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) throw new Error("Error en GitHub al guardar la comanda.");
+
+          alert("✔ ¡Orden enviada! Aparecerá de inmediato en el celular del repartidor.");
+          document.getElementById('cmdCliente').value = '';
+          document.getElementById('cmdGpsUrl').value = '';
+          cargarDesdeGitHub();
+        }
+      } catch (err) {
+        alert("Error al despachar orden: " + err.message);
+      }
     }
 
     function renderizarPedidosSecuencia() {
@@ -496,7 +632,8 @@
       }
 
       repartidores.forEach(rep => {
-        const etapa = rep.etapaSecuencia || 1;
+        const comandaRep = comandas.find(c => c.repartidorId === rep.id && c.estado !== 'completado');
+        const etapa = comandaRep ? (comandaRep.etapa || 1) : (rep.etapaSecuencia || 1);
         const online = rep.online === true;
 
         const card = document.createElement('div');
@@ -507,8 +644,12 @@
             <span class="badge-status ${online ? 'online' : ''}">${online ? 'Online (En Ruta)' : 'Offline (Inactivo)'}</span>
           </div>
 
+          <div style="font-size:12px; margin-top:2px;">
+            ${comandaRep ? `🛢️ <strong>${comandaRep.tipoBalon}</strong> para <em>${comandaRep.cliente}</em> (S/ ${parseFloat(comandaRep.montoCobro).toFixed(2)})` : '<span style="color:#64748b;">Sin orden activa</span>'}
+          </div>
+
           <div style="font-size:11px; color:#64748b;">
-            Última acción: <strong>${rep.ultimaActualizacionSecuencia || 'Sin registro'}</strong>
+            Última acción: <strong>${comandaRep ? (comandaRep.horaActualizacion || comandaRep.horaAsignacion) : (rep.ultimaActualizacionSecuencia || 'Sin registro')}</strong>
           </div>
 
           <!-- Barra de secuencia estilo Cultura -->
@@ -534,7 +675,9 @@
           iconAnchor: [17, 17]
         });
 
-        const texto = `<b>${rep.nombre}</b><br>Estado: ${estaOnline ? 'Online 🔥' : 'Offline 💤'}<br>Secuencia: Paso ${rep.etapaSecuencia || 1}`;
+        const comandaRep = comandas.find(c => c.repartidorId === rep.id && c.estado !== 'completado');
+        const etapa = comandaRep ? comandaRep.etapa : (rep.etapaSecuencia || 1);
+        const texto = `<b>${rep.nombre}</b><br>Estado: ${estaOnline ? 'Online 🔥' : 'Offline 💤'}<br>Secuencia: Paso ${etapa}${comandaRep ? `<br>Balón: ${comandaRep.tipoBalon}` : ''}`;
 
         if (!marcadoresAdminFlota[rep.id]) {
           marcadoresAdminFlota[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(mapAdmin).bindPopup(texto);
@@ -553,10 +696,12 @@
           if (res.ok) {
             const data = await res.json();
             const nuevaFlota = data.repartidores || [];
+            comandas = data.comandas || [];
 
             nuevaFlota.forEach(rep => {
+              const comandaRep = comandas.find(c => c.repartidorId === rep.id);
+              const etapaNueva = comandaRep ? comandaRep.etapa : (rep.etapaSecuencia || 1);
               const etapaAnterior = estadosPreviosSecuencia[rep.id] || 1;
-              const etapaNueva = rep.etapaSecuencia || 1;
 
               // Detectar si el repartidor completó la entrega (Paso 3)
               if (etapaAnterior !== 3 && etapaNueva === 3) {
@@ -621,6 +766,7 @@
         `;
         cont.appendChild(div);
       });
+      renderizarSelectRepartidoresParaComanda();
     }
 
     function agregarNuevoRepartidor() {
@@ -646,7 +792,13 @@
       telefonos.tel2 = document.getElementById('telFijo2').value.trim();
       telefonos.tel3 = document.getElementById('telFijo3').value.trim();
 
-      const objetoCompleto = { productos, telefonos, repartidores, ventas: JSON.parse(localStorage.getItem('gas_ventas')) || [] };
+      const objetoCompleto = { 
+        productos, 
+        telefonos, 
+        repartidores, 
+        comandas,
+        ventas: JSON.parse(localStorage.getItem('gas_ventas')) || [] 
+      };
 
       let shaActual = "";
       try {
