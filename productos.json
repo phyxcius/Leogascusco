@@ -57,6 +57,19 @@
       "estado": "completado",
       "horaAsignacion": "11:00:26",
       "horaActualizacion": "11:04:35 a.m."
+    },
+    {
+      "id": "cmd-1792599166780",
+      "repartidorId": "rep-2",
+      "tipoBalon": "Balón LeoGas 10kg Normal",
+      "montoCobro": "50.00",
+      "metodoPago": "Efectivo",
+      "cliente": "carmen",
+      "direccion": "carmen",
+      "gpsUrl": "https://www.google.com/maps?q=-13.5380849,-71.9803639",
+      "etapa": 1,
+      "estado": "activo",
+      "horaAsignacion": "11:12:46"
     }
   ],
   "ventas": [
