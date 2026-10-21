@@ -39,8 +39,8 @@
       "id": "rep-2",
       "nombre": "carlos",
       "online": true,
-      "lat": -13.5380963,
-      "lng": -71.9805558
+      "lat": -13.5380688,
+      "lng": -71.9804056
     }
   ],
   "comandas": [
@@ -67,10 +67,10 @@
       "cliente": "carmen",
       "direccion": "carmen",
       "gpsUrl": "https://www.google.com/maps?q=-13.5380849,-71.9803639",
-      "etapa": 1,
+      "etapa": 2,
       "estado": "activo",
       "horaAsignacion": "11:12:46",
-      "horaActualizacion": "11:33:56 a.m."
+      "horaActualizacion": "11:35:07 a.m."
     }
   ],
   "ventas": [
