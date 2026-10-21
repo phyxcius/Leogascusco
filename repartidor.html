@@ -8,215 +8,55 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f8fafc; color: #1e1b4b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 18px; }
 
-    .driver-card {
-      background: #ffffff;
-      width: 100%;
-      max-width: 480px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      padding: 24px 20px;
-      text-align: center;
-    }
-
-    .brand-icon { font-size: 44px; margin-bottom: 2px; }
+    .driver-card { background: #ffffff; width: 100%; max-width: 460px; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0; padding: 24px 20px; text-align: center; }
     h1 { font-size: 22px; font-weight: 900; color: #6b21a8; margin-bottom: 4px; }
     .subtitle { font-size: 13px; color: #64748b; margin-bottom: 12px; }
 
-    /* BADGE LA CHUSPA TECH */
-    .chuspa-badge-container { display: flex; justify-content: center; margin-bottom: 16px; }
-    .chuspa-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #fefce8;
-      border: 1.5px solid #eab308;
-      padding: 4px 12px 4px 6px;
-      border-radius: 22px;
-      text-decoration: none;
-      box-shadow: 0 2px 6px rgba(234, 179, 8, 0.2);
-    }
-    .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid #ca8a04; background: #fff; }
-    .chuspa-text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
-    .chuspa-title { font-size: 11px; font-weight: 900; color: #6b21a8; }
-    .chuspa-sub { font-size: 8.5px; font-weight: 700; color: #b45309; }
+    select { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 15px; font-weight: 700; color: #1e1b4b; background: #f8fafc; margin-bottom: 14px; }
 
-    .box-selector { text-align: left; margin-bottom: 16px; }
-    label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
-    select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1.5px solid #cbd5e1;
-      font-size: 15px;
-      font-weight: 700;
-      color: #1e1b4b;
-      background: #f8fafc;
-      outline: none;
-    }
+    .status-panel { padding: 10px; border-radius: 10px; background: #f1f5f9; margin-bottom: 16px; font-size: 12px; }
+    .status-panel.online { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; font-weight: 800; }
 
-    /* ESTADO GPS */
-    .status-panel {
-      padding: 10px;
-      border-radius: 10px;
-      background: #f1f5f9;
-      margin-bottom: 16px;
-      border: 1px solid #e2e8f0;
-      font-size: 12px;
-    }
-    .status-panel.online { background: #f0fdf4; border-color: #86efac; color: #15803d; font-weight: 800; }
+    .order-box { background: #faf5ff; border: 2px solid #c084fc; border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: left; }
+    .order-box.empty { background: #f8fafc; border: 1.5px dashed #cbd5e1; text-align: center; color: #64748b; }
 
-    /* TARJETA DE LA ORDEN ASIGNADA */
-    .order-box {
-      background: #faf5ff;
-      border: 2px solid #c084fc;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 16px;
-      text-align: left;
-    }
-    .order-box.empty {
-      background: #f8fafc;
-      border: 1.5px dashed #cbd5e1;
-      text-align: center;
-      color: #64748b;
-      padding: 20px;
-    }
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .order-type-badge {
-      background: #7e22ce;
-      color: #fff;
-      font-weight: 900;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 8px;
-    }
-    .order-row { font-size: 13px; margin-bottom: 4px; }
-    .btn-maps {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #2563eb;
-      color: #fff;
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: 800;
-      font-size: 12px;
-      margin-top: 8px;
-      width: 100%;
-      justify-content: center;
-    }
-
-    /* BARRA SECUENCIA */
-    .secuencia-container {
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 16px;
-      text-align: left;
-    }
-    .cultura-bar {
-      display: flex;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid #cbd5e1;
-      background: #e2e8f0;
-      gap: 3px;
-      margin-top: 8px;
-    }
-    .cultura-step {
-      flex: 1;
-      padding: 12px 4px;
-      border: none;
-      cursor: pointer;
-      color: #ffffff;
-      font-weight: 900;
-      font-size: 11px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      opacity: 0.3;
-      transition: all 0.2s;
-    }
+    .cultura-bar { display: flex; border-radius: 8px; overflow: hidden; border: 2px solid #cbd5e1; background: #e2e8f0; gap: 3px; margin-top: 8px; }
+    .cultura-step { flex: 1; padding: 12px 4px; border: none; cursor: pointer; color: #ffffff; font-weight: 900; font-size: 11px; text-align: center; opacity: 0.3; }
     .step-rojo { background-color: #e52329; }
     .step-gris-osc { background-color: #555557; }
     .step-gris-claro { background-color: #8b8e91; }
-    .cultura-step.activo { opacity: 1 !important; transform: scale(1.02); }
+    .cultura-step.activo { opacity: 1 !important; }
     .cultura-step:disabled { cursor: not-allowed; }
 
-    /* BOTONES ACCIÓN */
-    .btn-action {
-      width: 100%;
-      padding: 13px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 800;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
+    .btn-action { width: 100%; padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; margin-bottom: 8px; }
     .btn-connect { background: #16a34a; color: #ffffff; }
     .btn-disconnect { background: #dc2626; color: #ffffff; display: none; }
-    .btn-history-print { background: #334155; color: #ffffff; font-size: 12px; padding: 10px; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #areaLiquidacionChofer, #areaLiquidacionChofer * { visibility: visible; }
-      #areaLiquidacionChofer { position: absolute; left: 0; top: 0; width: 100%; }
-      .no-print { display: none !important; }
-    }
   </style>
 </head>
 <body>
 
-  <div class="driver-card no-print">
-    <div class="brand-icon">🦁</div>
+  <div class="driver-card">
+    <div style="font-size:44px;">🦁</div>
     <h1>LeoGas Cusco</h1>
     <p class="subtitle">Panel de Navegación y Secuencia de Entrega</p>
 
-    <div class="chuspa-badge-container">
-      <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
-        <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
-        <div class="chuspa-text">
-          <span class="chuspa-title">La Chuspa Tech</span>
-          <span class="chuspa-sub">by La Chuspa Anuncios</span>
-        </div>
-      </a>
-    </div>
-
-    <div class="box-selector">
-      <label for="selectChofer">Selecciona tu Unidad / Repartidor:</label>
-      <select id="selectChofer" onchange="cambioDeRepartidorSeleccionado()">
-        <option value="">Cargando repartidores...</option>
+    <div style="text-align:left;">
+      <label style="font-size:11px; font-weight:800; color:#64748b;">SELECCIONA TU IDENTIFICADOR:</label>
+      <select id="selectChofer" onchange="cambioDeChofer()">
+        <option value="rep-1">Edwin</option>
+        <option value="rep-2">Moto 2</option>
       </select>
     </div>
 
-    <!-- ESTADO GPS -->
     <div class="status-panel" id="panelEstado">
       <span id="textoEstado">Offline 💤 (Desconectado)</span>
     </div>
 
-    <!-- ORDEN ENCOMENDADA DESDE EL ADMIN -->
     <div id="cajaOrdenAsignada" class="order-box empty">
-      Esperando nueva comanda asignada por caja...
+      Esperando comanda asignada desde caja...
     </div>
 
-    <!-- SECUENCIA DE PASOS -->
-    <div class="secuencia-container">
+    <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px;">
       <div style="font-size:11px; font-weight:800; color:#475569; display:flex; justify-content:space-between;">
         <span>Secuencia de Entrega</span>
         <span id="estadoActualTag" style="color:#6b21a8;">En espera</span>
@@ -224,174 +64,75 @@
 
       <div class="cultura-bar">
         <button type="button" id="btnPaso1" class="cultura-step step-rojo" onclick="avanzarSecuencia(1)" disabled>
-          <span>🟥 PASO 1</span>
-          <span>En Camino</span>
+          <span>🟥 PASO 1</span><br>En Camino
         </button>
         <button type="button" id="btnPaso2" class="cultura-step step-gris-osc" onclick="avanzarSecuencia(2)" disabled>
-          <span>⬛ PASO 2</span>
-          <span>Entregado</span>
+          <span>⬛ PASO 2</span><br>Entregado
         </button>
         <button type="button" id="btnPaso3" class="cultura-step step-gris-claro" onclick="avanzarSecuencia(3)" disabled>
-          <span>⬜ PASO 3</span>
-          <span>Completado</span>
+          <span>⬜ PASO 3</span><br>Completado
         </button>
       </div>
-      <div id="textoGuiaSecuencia" style="font-size:11px; color:#64748b; margin-top:8px; text-align:center;">
-        Asigna o acepta una comanda para desbloquear la secuencia.
-      </div>
     </div>
 
-    <!-- BOTONES PRINCIPALES -->
-    <button id="btnConectar" class="btn-action btn-connect" onclick="iniciarTransmisionGPS()">
-      <span>▶️ CONECTAR GPS EN RUTA</span>
+    <button id="btnConectar" class="btn-action btn-connect" onclick="iniciarGPS()">
+      ▶️ CONECTAR GPS EN RUTA
     </button>
-    <button id="btnDesconectar" class="btn-action btn-disconnect" onclick="detenerTransmisionGPS()">
-      <span>⏹️ TERMINAR TURNO (Desconectar)</span>
-    </button>
-
-    <button type="button" class="btn-action btn-history-print" onclick="prepararImpresionLiquidacion()">
-      <span>🖨️ Imprimir Mi Liquidación de Entregas</span>
+    <button id="btnDesconectar" class="btn-action btn-disconnect" onclick="detenerGPS()">
+      ⏹️ TERMINAR TURNO (Desconectar)
     </button>
   </div>
 
-  <!-- COMPROBANTE DE LIQUIDACIÓN PARA IMPRIMIR -->
-  <div id="areaLiquidacionChofer" style="display:none; padding:20px; font-family:sans-serif;">
-    <div style="text-align:center; border-bottom:2px dashed #000; padding-bottom:10px; margin-bottom:10px;">
-      <h2 style="margin:0;">🦁 LeoGas Cusco</h2>
-      <p style="margin:2px 0; font-size:12px;">Comprobante de Liquidación por Repartidor</p>
-      <p style="margin:2px 0; font-size:11px; font-weight:bold;">Tecnología: La Chuspa Tech Cusco</p>
-      <p style="margin:2px 0; font-size:12px;"><strong>Repartidor:</strong> <span id="liqNombreChofer"></span></p>
-      <p style="margin:2px 0; font-size:11px;">Fecha: <span id="liqFecha"></span></p>
-    </div>
-    <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
-      <thead>
-        <tr style="border-bottom:1px solid #000;">
-          <th>Hora</th>
-          <th>Cliente</th>
-          <th>Balón</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="liqTablaCuerpo"></tbody>
-    </table>
-    <div style="text-align:right; margin-top:12px; font-size:14px; font-weight:bold; border-top:1px solid #000; padding-top:6px;">
-      Total Recaudado: <span id="liqMontoTotal">S/ 0.00</span>
-    </div>
-    <div style="text-align:center; margin-top:30px; font-size:11px;">
-      ___________________________<br>
-      Firma del Repartidor
-    </div>
-  </div>
+  <!-- SDK DE FIREBASE (TIEMPO REAL) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    const USUARIO = "phyxcius";
-    const REPOSITORIO = "Leogascusco";
-    const ARCHIVO = "productos.json";
-    const STORAGE_KEY_SECRETA = "leogas_vault_secret_token";
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnYaUN-aZYzEip9z3wsuKnbwdfYscFZkY",
+      authDomain: "leogas-cusco.firebaseapp.com",
+      databaseURL: "https://leogas-cusco-default-rtdb.firebaseio.com",
+      projectId: "leogas-cusco",
+      storageBucket: "leogas-cusco.firebasestorage.app",
+      messagingSenderId: "1042930313066",
+      appId: "1:1042930313066:web:ce6c424afe606f63322713",
+      measurementId: "G-MBYC61L9BL"
+    };
 
-    let datosCompletos = { productos: [], telefonos: {}, repartidores: [], comandas: [] };
-    let watchIdGPS = null;
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     let ordenActiva = null;
-    let ultimaOrdenIdVista = null;
+    let watchIdGPS = null;
 
-    // MÉTODO 1: SOLICITAR PERMISO Y DISPARAR NOTIFICACIÓN CON VIBRACIÓN
-    async function solicitarPermisoNotificaciones() {
-      if ("Notification" in window) {
-        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-          await Notification.requestPermission();
-        }
-      }
-    }
-
-    function lanzarAlertaNativaCelular(titulo, mensaje) {
-      if ("vibrate" in navigator) {
-        navigator.vibrate([300, 150, 300]);
-      }
-
+    function lanzarAlertaChofer(titulo, mensaje) {
+      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
       if ("Notification" in window && Notification.permission === "granted") {
-        const notif = new Notification(titulo, {
-          body: mensaje,
-          icon: "CHUSPITA-circulo.png",
-          badge: "CHUSPITA-circulo.png",
-          vibrate: [300, 150, 300],
-          tag: "leogas-chofer-alerta"
-        });
-        notif.onclick = function() {
-          window.focus();
-          notif.close();
-        };
+        new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
       }
     }
 
-    function obtenerTokenSecreto() {
-      return localStorage.getItem(STORAGE_KEY_SECRETA) || "";
+    function cambioDeChofer() {
+      localStorage.setItem("leogas_chofer_id", document.getElementById('selectChofer').value);
+      escucharComandasEnTiempoReal();
     }
 
-    async function cargarDatosServidor() {
-      const token = obtenerTokenSecreto();
-      const headers = token ? { "Authorization": `token ${token}` } : {};
+    function escucharComandasEnTiempoReal() {
+      const repId = document.getElementById('selectChofer').value;
 
-      try {
-        const res = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_nocache=${Date.now()}`, { headers });
-        if (res.ok) {
-          const d = await res.json();
-          datosCompletos = JSON.parse(decodeURIComponent(escape(atob(d.content))));
-          renderizarSelectChoferes();
+      db.ref('pedidos').on('value', snap => {
+        const pedidos = snap.val();
+        ordenActiva = null;
+
+        if (pedidos) {
+          ordenActiva = Object.values(pedidos).find(p => p.repartidorId === repId && p.estado !== 'completado');
         }
-      } catch (e) {
-        console.error(e);
-      }
-    }
 
-    function renderizarSelectChoferes() {
-      const sel = document.getElementById('selectChofer');
-      sel.innerHTML = '';
-      const lista = datosCompletos.repartidores || [];
-
-      lista.forEach(rep => {
-        const opt = document.createElement('option');
-        opt.value = rep.id;
-        opt.innerText = `${rep.nombre} ${rep.online ? '🟢' : '💤'}`;
-        sel.appendChild(opt);
+        renderizarVistaOrden();
       });
-
-      const guardado = localStorage.getItem('leogas_chofer_asignado');
-      if (guardado && lista.some(r => r.id === guardado)) {
-        sel.value = guardado;
-      }
-      actualizarVistaChofer();
     }
 
-    function cambioDeRepartidorSeleccionado() {
-      const sel = document.getElementById('selectChofer');
-      localStorage.setItem('leogas_chofer_asignado', sel.value);
-      actualizarVistaChofer();
-    }
-
-    function actualizarVistaChofer() {
-      const sel = document.getElementById('selectChofer');
-      const repId = sel.value;
-      const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
-      if (!rep) return;
-
-      const comandas = datosCompletos.comandas || [];
-      const ordenEncontrada = comandas.find(c => c.repartidorId === repId && c.estado !== 'completado');
-
-      // DETECCIÓN DE NUEVA COMANDA ENTRANTE (DISPARA NOTIFICACIÓN)
-      if (ordenEncontrada && ordenEncontrada.id !== ultimaOrdenIdVista) {
-        if (ultimaOrdenIdVista !== null) {
-          lanzarAlertaNativaCelular(
-            "🛵 ¡Nueva orden asignada!",
-            `Llevar ${ordenEncontrada.tipoBalon} a ${ordenEncontrada.cliente} (Cobrar S/ ${parseFloat(ordenEncontrada.montoCobro).toFixed(2)})`
-          );
-        }
-        ultimaOrdenIdVista = ordenEncontrada.id;
-      } else if (!ordenEncontrada) {
-        ultimaOrdenIdVista = null;
-      }
-
-      ordenActiva = ordenEncontrada;
-
+    function renderizarVistaOrden() {
       const caja = document.getElementById('cajaOrdenAsignada');
       const b1 = document.getElementById('btnPaso1');
       const b2 = document.getElementById('btnPaso2');
@@ -399,214 +140,95 @@
 
       if (!ordenActiva) {
         caja.className = "order-box empty";
-        caja.innerHTML = "💤 No tienes comandas pendientes. Espera a que el cajero te asigne un balón.";
-        b1.disabled = true;
-        b2.disabled = true;
-        b3.disabled = true;
-        b1.classList.remove('activo');
-        b2.classList.remove('activo');
-        b3.classList.remove('activo');
+        caja.innerHTML = "💤 No tienes comandas pendientes. Espera a que caja te asigne un balón.";
+        b1.disabled = true; b2.disabled = true; b3.disabled = true;
+        b1.classList.remove('activo'); b2.classList.remove('activo'); b3.classList.remove('activo');
         document.getElementById('estadoActualTag').innerText = "Sin orden";
-        document.getElementById('textoGuiaSecuencia').innerText = "Secuencia inactiva hasta recibir orden.";
         return;
       }
 
       caja.className = "order-box";
       caja.innerHTML = `
-        <div class="order-header">
-          <span class="order-type-badge">${ordenActiva.tipoBalon}</span>
-          <strong style="color:#15803d; font-size:15px;">Cobrar: S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)}</strong>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+          <strong style="color:#7e22ce;">${ordenActiva.tipoBalon}</strong>
+          <span style="color:#15803d; font-weight:bold;">Cobrar: S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)}</span>
         </div>
-        <div class="order-row">👤 <strong>Cliente:</strong> ${ordenActiva.cliente}</div>
-        <div class="order-row">📍 <strong>Dirección/Ref:</strong> ${ordenActiva.direccion}</div>
-        <div class="order-row">💵 <strong>Pago:</strong> ${ordenActiva.metodoPago}</div>
-        ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" class="btn-maps">🗺️ Abrir Ruta en Google Maps</a>` : ''}
+        <div style="font-size:13px;">👤 <strong>Cliente:</strong> ${ordenActiva.cliente}</div>
+        <div style="font-size:13px;">💵 <strong>Pago:</strong> ${ordenActiva.metodoPago}</div>
+        ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" style="display:inline-block; background:#2563eb; color:#fff; text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:12px; margin-top:8px;">🗺️ Abrir Google Maps</a>` : ''}
       `;
 
-      reflejarSecuencia(ordenActiva.etapa || 1);
-    }
-
-    function reflejarSecuencia(etapa) {
-      const b1 = document.getElementById('btnPaso1');
-      const b2 = document.getElementById('btnPaso2');
-      const b3 = document.getElementById('btnPaso3');
-      const tag = document.getElementById('estadoActualTag');
-      const guia = document.getElementById('textoGuiaSecuencia');
-
+      const etapa = ordenActiva.etapa || 1;
       b1.classList.toggle('activo', etapa === 1);
       b2.classList.toggle('activo', etapa === 2);
       b3.classList.toggle('activo', etapa === 3);
 
       if (etapa === 1) {
-        b1.disabled = false;
-        b2.disabled = false;
-        b3.disabled = true;
-        tag.innerText = "Paso 1: En Camino";
-        guia.innerHTML = "🟥 Sal con el balón y presiona <strong>[Entregado]</strong> al llegar.";
+        b1.disabled = false; b2.disabled = false; b3.disabled = true;
+        document.getElementById('estadoActualTag').innerText = "Paso 1: En Camino";
       } else if (etapa === 2) {
-        b1.disabled = true;
-        b2.disabled = false;
-        b3.disabled = false;
-        tag.innerText = "Paso 2: Entregado";
-        guia.innerHTML = "⬛ Balón entregado y cobrado. Presiona <strong>[Completado]</strong> para cerrar.";
+        b1.disabled = true; b2.disabled = false; b3.disabled = false;
+        document.getElementById('estadoActualTag').innerText = "Paso 2: Entregado";
       } else if (etapa === 3) {
-        b1.disabled = true;
-        b2.disabled = true;
-        b3.disabled = false;
-        tag.innerText = "Paso 3: Completado";
-        guia.innerHTML = "⬜ Orden finalizada. Esperando próxima comanda.";
+        b1.disabled = true; b2.disabled = true; b3.disabled = false;
+        document.getElementById('estadoActualTag').innerText = "Paso 3: Completado";
       }
     }
 
-    async function avanzarSecuencia(pasoDestino) {
+    async function avanzarSecuencia(paso) {
       if (!ordenActiva) return;
       const etapaActual = ordenActiva.etapa || 1;
 
-      if (etapaActual === 1 && pasoDestino === 3) {
-        alert("⛔ Secuencia bloqueada: Debes marcar primero 'Paso 2: Entregado' antes de completar.");
-        return;
+      if (etapaActual === 1 && paso === 3) {
+        return alert("⛔ Debes marcar primero 'Paso 2: Entregado' antes de completar.");
       }
 
-      ordenActiva.etapa = pasoDestino;
-      ordenActiva.horaActualizacion = new Date().toLocaleTimeString();
+      const updates = { etapa: paso };
+      if (paso === 3) updates.estado = "completado";
 
-      if (pasoDestino === 3) {
-        ordenActiva.estado = 'completado';
-        if (!datosCompletos.ventas) datosCompletos.ventas = [];
-        datosCompletos.ventas.push({
-          fecha: new Date().toLocaleString(),
-          cliente: ordenActiva.cliente,
-          productos: ordenActiva.tipoBalon,
-          total: parseFloat(ordenActiva.montoCobro),
-          pago: ordenActiva.metodoPago,
-          repartidorId: ordenActiva.repartidorId
-        });
-      }
-
-      reflejarSecuencia(pasoDestino);
-      await sincronizarConGitHub(`Secuencia ${pasoDestino} - ${ordenActiva.cliente}`);
-
-      if (pasoDestino === 3) {
-        alert("✔ ¡Entrega completada! Notificación enviada al cajero.");
-        actualizarVistaChofer();
-      }
+      await db.ref(`pedidos/${ordenActiva.id}`).update(updates);
+      if (paso === 3) alert("✔ ¡Entrega finalizada con éxito!");
     }
 
-    function iniciarTransmisionGPS() {
-      const sel = document.getElementById('selectChofer');
-      const repId = sel.value;
+    function iniciarGPS() {
+      const repId = document.getElementById('selectChofer').value;
       if (!navigator.geolocation) return alert("GPS no disponible.");
 
-      solicitarPermisoNotificaciones();
+      if ("Notification" in window) Notification.requestPermission();
 
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          actualizarGPS(repId, true, pos.coords.latitude, pos.coords.longitude);
-          document.getElementById('btnConectar').style.display = "none";
-          document.getElementById('btnDesconectar').style.display = "flex";
-          document.getElementById('panelEstado').className = "status-panel online";
-          document.getElementById('textoEstado').innerText = "Online 🔥 (En Ruta Activo)";
+      navigator.geolocation.getCurrentPosition(pos => {
+        actualizarCoordenadas(repId, true, pos.coords.latitude, pos.coords.longitude);
+        document.getElementById('btnConectar').style.display = "none";
+        document.getElementById('btnDesconectar').style.display = "block";
+        document.getElementById('panelEstado').className = "status-panel online";
+        document.getElementById('textoEstado').innerText = "Online 🔥 (En Ruta Activo)";
 
-          if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
-          watchIdGPS = navigator.geolocation.watchPosition(p => {
-            actualizarGPS(repId, true, p.coords.latitude, p.coords.longitude);
-          }, null, { enableHighAccuracy: true });
-
-          await sincronizarConGitHub("GPS Online");
-        },
-        (err) => alert("Activa el GPS de tu celular: " + err.message)
-      );
+        watchIdGPS = navigator.geolocation.watchPosition(p => {
+          actualizarCoordenadas(repId, true, p.coords.latitude, p.coords.longitude);
+        }, null, { enableHighAccuracy: true });
+      });
     }
 
-    async function detenerTransmisionGPS() {
+    function detenerGPS() {
       if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
-      const sel = document.getElementById('selectChofer');
-      actualizarGPS(sel.value, false, null, null);
-      document.getElementById('btnConectar').style.display = "flex";
+      const repId = document.getElementById('selectChofer').value;
+      actualizarCoordenadas(repId, false, null, null);
+      document.getElementById('btnConectar').style.display = "block";
       document.getElementById('btnDesconectar').style.display = "none";
       document.getElementById('panelEstado').className = "status-panel";
       document.getElementById('textoEstado').innerText = "Offline 💤 (Desconectado)";
-      await sincronizarConGitHub("GPS Offline");
     }
 
-    function actualizarGPS(repId, online, lat, lng) {
-      const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
-      if (rep) {
-        rep.online = online;
-        if (lat && lng) { rep.lat = lat; rep.lng = lng; }
-      }
-    }
-
-    async function sincronizarConGitHub(msg) {
-      const token = obtenerTokenSecreto();
-      if (!token) return;
-
-      let sha = "";
-      try {
-        const c = await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}?ref=main&_t=${Date.now()}`, {
-          headers: { "Authorization": `token ${token}` }
-        });
-        if (c.ok) sha = (await c.json()).sha;
-      } catch (e) {}
-
-      const payload = {
-        message: msg,
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(datosCompletos, null, 2)))),
-        branch: "main"
-      };
-      if (sha) payload.sha = sha;
-
-      await fetch(`https://api.github.com/repos/${USUARIO}/${REPOSITORIO}/contents/${ARCHIVO}`, {
-        method: "PUT",
-        headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    }
-
-    function prepararImpresionLiquidacion() {
-      const sel = document.getElementById('selectChofer');
-      const repId = sel.value;
-      const rep = (datosCompletos.repartidores || []).find(r => r.id === repId);
-      if (!rep) return;
-
-      const misVentas = (datosCompletos.ventas || []).filter(v => v.repartidorId === repId);
-      if (misVentas.length === 0) return alert("Aún no tienes pedidos completados para liquidar en este turno.");
-
-      document.getElementById('liqNombreChofer').innerText = rep.nombre;
-      document.getElementById('liqFecha').innerText = new Date().toLocaleString();
-
-      const tbody = document.getElementById('liqTablaCuerpo');
-      tbody.innerHTML = '';
-      let total = 0;
-
-      misVentas.forEach(v => {
-        total += parseFloat(v.total || 0);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${(v.fecha || '').slice(-8)}</td>
-          <td>${v.cliente}</td>
-          <td>${v.productos}</td>
-          <td>S/ ${parseFloat(v.total).toFixed(2)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('liqMontoTotal').innerText = `S/ ${total.toFixed(2)}`;
-      document.getElementById('areaLiquidacionChofer').style.display = "block";
-      window.print();
-      document.getElementById('areaLiquidacionChofer').style.display = "none";
+    function actualizarCoordenadas(repId, online, lat, lng) {
+      const data = { online: online };
+      if (lat && lng) { data.lat = lat; data.lng = lng; }
+      db.ref(`repartidores/${repId}`).update(data);
     }
 
     window.onload = () => {
-      solicitarPermisoNotificaciones();
-      const urlParams = new URLSearchParams(window.location.search);
-      const t = urlParams.get('set_token') || urlParams.get('token');
-      if (t) {
-        localStorage.setItem(STORAGE_KEY_SECRETA, t.trim());
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-      cargarDatosServidor();
-      setInterval(cargarDatosServidor, 10000);
+      const choferGuardado = localStorage.getItem("leogas_chofer_id");
+      if (choferGuardado) document.getElementById('selectChofer').value = choferGuardado;
+      escucharComandasEnTiempoReal();
     };
   </script>
 </body>
