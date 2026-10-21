@@ -29,9 +29,9 @@
     {
       "id": "rep-1",
       "nombre": "Edwin",
-      "online": false,
-      "lat": -13.5381213,
-      "lng": -71.9803816
+      "online": true,
+      "lat": -13.5380219,
+      "lng": -71.980658
     },
     {
       "id": "rep-2",
