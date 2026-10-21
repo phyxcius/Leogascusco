@@ -104,15 +104,18 @@
 
     let ordenActiva = null;
     let watchIdGPS = null;
+    let idUltimaOrdenVista = null;
 
     function lanzarAlertaChofer(titulo, mensaje) {
       if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
+        const notif = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
+        notif.onclick = () => { window.focus(); notif.close(); };
       }
     }
 
     function cambioDeChofer() {
+      idUltimaOrdenVista = null;
       localStorage.setItem("leogas_chofer_id", document.getElementById('selectChofer').value);
       escucharComandasEnTiempoReal();
     }
@@ -126,6 +129,19 @@
 
         if (pedidos) {
           ordenActiva = Object.values(pedidos).find(p => p.repartidorId === repId && p.estado !== 'completado');
+        }
+
+        // Si recibe una orden nueva
+        if (ordenActiva && ordenActiva.id !== idUltimaOrdenVista) {
+          if (idUltimaOrdenVista !== null) {
+            lanzarAlertaChofer(
+              "🛵 ¡Nueva orden asignada!",
+              `Llevar ${ordenActiva.tipoBalon} a ${ordenActiva.cliente} (Cobrar: S/ ${ordenActiva.montoCobro})`
+            );
+          }
+          idUltimaOrdenVista = ordenActiva.id;
+        } else if (!ordenActiva) {
+          idUltimaOrdenVista = null;
         }
 
         renderizarVistaOrden();
@@ -194,7 +210,9 @@
       const repId = document.getElementById('selectChofer').value;
       if (!navigator.geolocation) return alert("GPS no disponible.");
 
-      if ("Notification" in window) Notification.requestPermission();
+      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+      }
 
       navigator.geolocation.getCurrentPosition(pos => {
         actualizarCoordenadas(repId, true, pos.coords.latitude, pos.coords.longitude);
