@@ -377,10 +377,56 @@
       font-size: 12px;
     }
 
+    /* MODO PANTALLA COMPLETA PARA EL MAPA */
     .map-wrapper {
       position: relative;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .map-wrapper.fullscreen-map {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 99999 !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+    }
+
+    .map-wrapper.fullscreen-map #cuscoMap {
+      height: 100vh !important;
+      border-radius: 0 !important;
+    }
+
+    /* BOTÓN DE AMPLIAR MAPA */
+    .btn-toggle-fullscreen {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+      border: 1.5px solid #6b21a8;
+      color: #6b21a8;
+      padding: 8px 14px;
+      border-radius: 24px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle-fullscreen:hover {
+      background: #6b21a8;
+      color: #fff;
+      transform: scale(1.04);
     }
 
     #cuscoMap {
@@ -983,7 +1029,7 @@
     </div>
   </section>
 
-  <!-- MAPA CUSCO CON LEYENDA DINÁMICA -->
+  <!-- MAPA CUSCO CON LEYENDA DINÁMICA Y BOTÓN DE AMPLIAR -->
   <section class="map-section">
     <div class="map-card">
       <div class="map-header">
@@ -1003,7 +1049,13 @@
         </div>
       </div>
 
-      <div class="map-wrapper">
+      <div class="map-wrapper" id="contenedorEnvolventeMapa">
+        <!-- BOTÓN PARA AMPLIAR / REDUCIR PANTALLA COMPLETA -->
+        <button type="button" class="btn-toggle-fullscreen" onclick="alternarPantallaCompletaMapa()">
+          <span id="iconoPantallaCompleta">⛶</span>
+          <span id="textoPantallaCompleta">Ampliar Mapa</span>
+        </button>
+
         <div id="cuscoMap"></div>
       </div>
     </div>
@@ -1146,6 +1198,33 @@
     // ALMACENAMIENTO DE MARCADORES MULTI-REPARTIDOR
     let marcadoresFlota = {};
 
+    // CONTROL DEL MODO PANTALLA COMPLETA DEL MAPA
+    let modoMapaAmpliado = false;
+
+    function alternarPantallaCompletaMapa() {
+      const contenedor = document.getElementById('contenedorEnvolventeMapa');
+      const icono = document.getElementById('iconoPantallaCompleta');
+      const texto = document.getElementById('textoPantallaCompleta');
+
+      modoMapaAmpliado = !modoMapaAmpliado;
+
+      if (modoMapaAmpliado) {
+        contenedor.classList.add('fullscreen-map');
+        icono.innerText = "✖";
+        texto.innerText = "Reducir Mapa";
+        document.body.style.overflow = "hidden";
+      } else {
+        contenedor.classList.remove('fullscreen-map');
+        icono.innerText = "⛶";
+        texto.innerText = "Ampliar Mapa";
+        document.body.style.overflow = "";
+      }
+
+      setTimeout(() => {
+        if (map) map.invalidateSize();
+      }, 250);
+    }
+
     function renderizarTelefonosFlyer() {
       const container = document.getElementById('contenedorTelefonosFlyer');
       const clean1 = telefonos.tel1.replace(/\D/g,'');
@@ -1169,7 +1248,6 @@
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
-      // Flota inicial temporal hasta que cargue productos.json
       actualizarVisualizadorGPS([
         { id: "rep-1", nombre: "Repartidor 1", online: false, lat: cuscoLat, lng: cuscoLng }
       ]);
@@ -1217,7 +1295,6 @@
         }
       });
 
-      // Leyenda superior activa Online si al menos uno está en ruta
       const legOnline = document.getElementById('legendOnline');
       const legOffline = document.getElementById('legendOffline');
       if (hayAlgunoOnline) {
@@ -1513,7 +1590,6 @@
               whatsappNumero = telefonos.whatsapp;
               renderizarTelefonosFlyer();
             }
-            // Sincroniza la flota de repartidores en tiempo real
             if (datos.repartidores) {
               actualizarVisualizadorGPS(datos.repartidores);
             }
@@ -1534,7 +1610,6 @@
       iniciarMapaCusco();
       actualizarVistaPopup();
       cargarCatalogoDesdeGitHub();
-      // Sondeo periódico cada 20 segundos para reflejar cambios de repartidores
       setInterval(cargarCatalogoDesdeGitHub, 20000);
     });
   </script>
