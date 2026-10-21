@@ -5,30 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LeoGas Cusco</title>
   
+  <!-- Leaflet CSS para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 900px; margin: auto; }
-    .header-admin { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 920px; margin: auto; }
+    
+    .header-admin {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     h2 { color: #6b21a8; margin: 0; font-size: 20px; }
 
-    .chuspa-badge { display: inline-flex; align-items: center; gap: 8px; background: #fefce8; border: 1.5px solid #eab308; padding: 4px 10px; border-radius: 20px; text-decoration: none; }
-    .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+    /* LOGO LA CHUSPA TECH */
+    .chuspa-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fefce8;
+      border: 1.5px solid #eab308;
+      padding: 4px 10px 4px 6px;
+      border-radius: 20px;
+      text-decoration: none;
+      box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2);
+    }
+    .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid #ca8a04; background: #fff; }
+    .chuspa-text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
+    .chuspa-title { font-size: 11px; font-weight: 900; color: #6b21a8; }
+    .chuspa-sub { font-size: 8.5px; font-weight: 700; color: #b45309; }
     
+    /* PESTAÑAS DE NAVEGACIÓN */
     .dashboard-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; overflow-x: auto; }
-    .tab-btn { background: none; border: none; font-weight: 800; font-size: 13px; padding: 8px 14px; color: #64748b; cursor: pointer; border-radius: 8px; }
+    .tab-btn { background: none; border: none; font-weight: 800; font-size: 13px; padding: 8px 14px; color: #64748b; cursor: pointer; border-radius: 8px; white-space: nowrap; }
     .tab-btn.active { background: #f3e8ff; color: #581c87; }
 
     .card { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
     label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; }
-    input, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+    input, textarea, select { width: 100%; padding: 9px; margin-top: 4px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
     
     .btn { padding: 10px 14px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; }
-    .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 14px; }
+    .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 15px; padding: 12px; margin-top: 10px; }
+    .btn-add { background: #16a34a; color: white; margin-bottom: 14px; width: 100%; font-size: 14px; }
+    .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; margin-top: 10px; font-size: 12px; }
     
+    .admin-img-preview-box { display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #faf5ff; padding: 10px; border-radius: 8px; border: 1px solid #e9d5ff; }
+    .admin-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; }
+
+    /* TARJETAS DE REPARTIDORES */
     .repartidor-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
     .repartidor-card.activo { border-color: #86efac; background: #f0fdf4; }
-    
+    .badge-status { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; background: #e2e8f0; color: #64748b; }
+    .badge-status.online { background: #dcfce7; color: #15803d; }
+
+    /* BARRA SECUENCIA */
     .secuencia-mini-bar { display: flex; border-radius: 6px; overflow: hidden; height: 24px; margin-top: 6px; background: #e2e8f0; gap: 2px; }
     .sec-block { flex: 1; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 800; opacity: 0.25; }
     .sec-block.activo { opacity: 1; font-weight: 900; }
@@ -38,15 +73,41 @@
 
     #adminMap { width: 100%; height: 320px; border-radius: 10px; border: 1px solid #cbd5e1; margin-top: 12px; }
 
+    /* FILTROS Y REPORTES */
+    .report-filters-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #fff; padding: 12px 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
+    .filter-pill-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; color: #475569; }
+    .filter-pill-btn.active { background: #6b21a8; color: #fff; border-color: #581c87; }
+    
+    .report-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .summary-card { background: #fff; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .summary-card-title { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+    .summary-card-val { font-size: 20px; font-weight: 900; color: #6b21a8; margin-top: 4px; }
+    
+    .custom-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; margin-top: 10px; }
+    .custom-table th, .custom-table td { border: 1px solid #e2e8f0; padding: 8px 10px; }
+    .custom-table th { background: #f1f5f9; color: #334155; }
+    .btn-export { background: #16a34a; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+    .btn-print { background: #2563eb; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+
+    /* NOTIFICACIÓN MODAL EN EL MEDIO DE LA PANTALLA */
     .delivery-modal-center { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); z-index: 99999; justify-content: center; align-items: center; padding: 16px; }
     .delivery-modal-box { background: #ffffff; max-width: 400px; width: 100%; border-radius: 20px; padding: 24px; text-align: center; border: 3px solid #16a34a; }
 
+    /* LOGIN */
     .login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
     .login-card { background: #fff; padding: 24px 28px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 380px; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #areaImpresion, #areaImpresion * { visibility: visible; }
+      #areaImpresion { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body>
 
+  <!-- PANTALLA LOGIN -->
   <div id="pantallaLogin" class="login-container">
     <div class="login-card">
       <div style="text-align:center; font-size:38px;">🦁</div>
@@ -63,79 +124,145 @@
     </div>
   </div>
 
+  <!-- PANEL PRINCIPAL -->
   <div id="panelAdminPrincipal" style="display: none;">
-    <div class="header-admin">
-      <div style="display:flex; align-items:center; gap:10px;">
+
+    <div class="header-admin no-print">
+      <div class="header-left-group">
         <h2>🦁 Panel de Control LeoGas</h2>
-        <a href="https://lachuspaanuncios.com/" target="_blank" class="chuspa-badge">
-          <img src="CHUSPITA-circulo.png" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
-          <span style="font-size:11px; font-weight:800; color:#6b21a8;">La Chuspa Tech</span>
+        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
+          <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+          <div class="chuspa-text">
+            <span class="chuspa-title">La Chuspa Tech</span>
+            <span class="chuspa-sub">by La Chuspa Anuncios</span>
+          </div>
         </a>
       </div>
-      <button class="btn" style="background:#fee2e2; color:#dc2626;" onclick="cerrarSesionAdmin()">🚪 Salir</button>
+      <button class="btn" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; font-size:12px;" onclick="cerrarSesionAdmin()">🚪 Salir</button>
     </div>
 
-    <div class="dashboard-tabs">
+    <!-- PESTAÑAS -->
+    <div class="dashboard-tabs no-print">
       <button class="tab-btn active" id="tabBtnPedidos" onclick="cambiarTab('pedidos')">📦 Pedidos y Flota en Vivo</button>
-      <button class="tab-btn" id="tabBtnPrecios" onclick="cambiarTab('precios')">📝 Precios y Stock</button>
-      <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos</button>
+      <button class="tab-btn" id="tabBtnProductos" onclick="cambiarTab('productos')">📝 Balones y Precios</button>
+      <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos y WhatsApp</button>
+      <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 Gestión Repartidores</button>
+      <button class="tab-btn" id="tabBtnReportes" onclick="cambiarTab('reportes')">📊 Reporte Contable & Ventas</button>
     </div>
 
-    <!-- PESTAÑA: PEDIDOS EN VIVO -->
+    <!-- PESTAÑA 1: PEDIDOS EN VIVO -->
     <div id="seccionPedidos">
       <!-- BANDEJA DE ENTRADA AUTOMÁTICA -->
-      <div class="card" style="border: 2px solid #eab308; background: #fefce8;">
+      <div class="card" style="border: 2px solid #eab308; background: #fefce8; margin-bottom: 16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Web Entrantes (Por Encomendar)</h3>
           <span id="badgeContadorEntrantes" style="background:#eab308; color:#fff; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">0 pendientes</span>
         </div>
+        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente cuando el cliente pide por WhatsApp. Solo selecciona el repartidor y asígnalo.</p>
         <div id="listaOrdenesEntrantes">
-          <p style="font-size:12px; color:#a16207;">Esperando pedidos automáticos...</p>
+          <p style="font-size:12px; color:#a16207;">Esperando nuevos pedidos en tiempo real...</p>
         </div>
       </div>
 
       <div class="card">
-        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:6px;">🛵 Secuencia de Flota y Entregas Activas</h3>
+        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:6px;">🛵 Secuencia de Flota y Entregas en Ruta</h3>
         <div id="contenedorSecuenciasRepartidores">Cargando flota...</div>
-        <h4 style="margin-top:16px; font-size:14px;">📍 Mapa en Tiempo Real (Firebase):</h4>
+        <h4 style="margin-top:16px; font-size:14px;">📍 Mapa en Tiempo Real de Cusco:</h4>
         <div id="adminMap"></div>
       </div>
     </div>
 
-    <!-- PESTAÑA: PRECIOS -->
-    <div id="seccionPrecios" style="display:none;">
+    <!-- PESTAÑA 2: PRODUCTOS Y PRECIOS -->
+    <div id="seccionProductos" style="display: none;">
+      <button class="btn btn-add no-print" onclick="agregarNuevoProducto()">➕ Agregar Nuevo Balón</button>
+      <div id="listaProductos">Cargando catálogo desde Firebase...</div>
+      <button class="btn btn-save no-print" onclick="guardarProductosFirebase()">💾 Guardar Precios y Stock en Firebase</button>
+      <div id="statusMsgProductos" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
+    </div>
+
+    <!-- PESTAÑA 3: TELÉFONOS -->
+    <div id="seccionTelefonos" style="display: none;">
       <div class="card">
-        <h3>Modificar Precios y Stock en Tiempo Real</h3>
-        <div id="listaProductosAdmin"></div>
+        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:12px;">📞 Edición de Teléfonos del Volante y Pedidos</h3>
+        <label>Número WhatsApp para Pedidos (con código de país, ej: 51969773064):</label>
+        <input type="text" id="telWhatsApp" placeholder="51969773064">
+
+        <label>Teléfono 1 (Llamada Rápida 1):</label>
+        <input type="text" id="telFijo1" placeholder="950 727 212">
+
+        <label>Teléfono 2 (Llamada Rápida 2):</label>
+        <input type="text" id="telFijo2" placeholder="984 285 500">
+
+        <label>Teléfono 3 (Fijo o Central Cusco):</label>
+        <input type="text" id="telFijo3" placeholder="(084) 501111">
+
+        <button class="btn btn-save" onclick="guardarTelefonosFirebase()" style="margin-top:16px;">💾 Guardar Teléfonos en Firebase</button>
       </div>
     </div>
 
-    <!-- PESTAÑA: TELÉFONOS -->
-    <div id="seccionTelefonos" style="display:none;">
-      <div class="card">
-        <h3>📞 Teléfonos de Pedidos</h3>
-        <label>WhatsApp:</label>
-        <input type="text" id="telWhatsApp">
-        <label>Teléfono 1:</label>
-        <input type="text" id="telFijo1">
-        <label>Teléfono 2:</label>
-        <input type="text" id="telFijo2">
-        <label>Teléfono 3:</label>
-        <input type="text" id="telFijo3">
-        <button class="btn btn-save" style="margin-top:12px;" onclick="guardarTelefonosFirebase()">💾 Guardar Teléfonos</button>
+    <!-- PESTAÑA 4: GESTIÓN DE REPARTIDORES -->
+    <div id="seccionGPS" style="display: none;">
+      <button class="btn btn-add" onclick="agregarNuevoRepartidor()">➕ Agregar Nuevo Repartidor a la Flota</button>
+      <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
+    </div>
+
+    <!-- PESTAÑA 5: REPORTES CONTABLES POR FECHAS -->
+    <div id="seccionReportes" style="display: none;">
+      <div class="report-filters-bar no-print">
+        <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtrar por:</span>
+        <button type="button" class="filter-pill-btn active" id="fltTodos" onclick="aplicarFiltroFecha('todos', this)">Todos</button>
+        <button type="button" class="filter-pill-btn" id="fltHoy" onclick="aplicarFiltroFecha('hoy', this)">📅 Hoy</button>
+        <button type="button" class="filter-pill-btn" id="fltSemana" onclick="aplicarFiltroFecha('semana', this)">📆 Esta Semana</button>
+        <button type="button" class="filter-pill-btn" id="fltMes" onclick="aplicarFiltroFecha('mes', this)">🗓️ Este Mes</button>
+
+        <div style="margin-left:auto; display:flex; gap:8px;">
+          <button type="button" class="btn-export" onclick="exportarVentasExcelCSV()">📥 Descargar Excel (CSV)</button>
+          <button type="button" class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
+        </div>
+      </div>
+
+      <div class="report-summary-cards no-print">
+        <div class="summary-card">
+          <div class="summary-card-title">Pedidos Completados</div>
+          <div class="summary-card-val" id="resumenCantPedidos">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-title">Total Recaudado (S/)</div>
+          <div class="summary-card-val" id="resumenTotalSoles" style="color:#15803d;">S/ 0.00</div>
+        </div>
+      </div>
+
+      <div id="areaImpresion">
+        <h3 style="margin-bottom:8px;">📋 Reporte Contable de Entregas Realizadas</h3>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Fecha y Hora</th>
+              <th>Cliente</th>
+              <th>Detalle Balón</th>
+              <th>Repartidor</th>
+              <th>Total</th>
+              <th>Pago</th>
+            </tr>
+          </thead>
+          <tbody id="tablaVentasBody"></tbody>
+        </table>
       </div>
     </div>
+
   </div>
 
+  <!-- MODAL DE NOTIFICACIÓN DE ENTREGA -->
   <div class="delivery-modal-center" id="modalNotificacionEntrega">
     <div class="delivery-modal-box">
       <div style="font-size:46px;">🎉</div>
-      <h3 style="color:#15803d; font-size:19px;">¡ENTREGA COMPLETADA!</h3>
+      <h3 style="color:#15803d; font-size:19px; margin:6px 0;">¡ENTREGA COMPLETADA!</h3>
       <p id="textoModalNotificacion" style="font-size:14px; color:#475569; margin:10px 0 16px;"></p>
-      <button type="button" class="btn btn-save" style="background:#15803d;" onclick="cerrarNotificacionCentro()">Entendido ✔️</button>
+      <button type="button" class="btn btn-save" style="background:#15803d; margin:0;" onclick="cerrarNotificacionCentro()">Entendido ✔️</button>
     </div>
   </div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- SDK DE FIREBASE (TIEMPO REAL) -->
@@ -157,11 +284,15 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    let productos = [];
+    let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
+    let repartidoresLocales = {};
     let pedidosLocales = {};
-    let repartidoresLocales = {
-      "rep-1": { id: "rep-1", nombre: "Edwin", online: false, lat: -13.5167, lng: -71.9788, etapa: 1 },
-      "rep-2": { id: "rep-2", nombre: "Moto 2", online: false, lat: -13.5200, lng: -71.9700, etapa: 1 }
-    };
+    let ventasLocales = [];
+    let ventasFiltradas = [];
+    let filtroFechaActivo = "todos";
+    let estadosPrevios = {};
+
     let mapAdmin = null;
     let marcadoresAdmin = {};
 
@@ -208,48 +339,88 @@
     function cambiarTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('seccionPedidos').style.display = 'none';
-      document.getElementById('seccionPrecios').style.display = 'none';
+      document.getElementById('seccionProductos').style.display = 'none';
       document.getElementById('seccionTelefonos').style.display = 'none';
+      document.getElementById('seccionGPS').style.display = 'none';
+      document.getElementById('seccionReportes').style.display = 'none';
 
       if (tab === 'pedidos') {
         document.getElementById('tabBtnPedidos').classList.add('active');
         document.getElementById('seccionPedidos').style.display = 'block';
         setTimeout(() => { if (mapAdmin) mapAdmin.invalidateSize(); }, 200);
-      } else if (tab === 'precios') {
-        document.getElementById('tabBtnPrecios').classList.add('active');
-        document.getElementById('seccionPrecios').style.display = 'block';
+      } else if (tab === 'productos') {
+        document.getElementById('tabBtnProductos').classList.add('active');
+        document.getElementById('seccionProductos').style.display = 'block';
       } else if (tab === 'telefonos') {
         document.getElementById('tabBtnTelefonos').classList.add('active');
         document.getElementById('seccionTelefonos').style.display = 'block';
+      } else if (tab === 'gps') {
+        document.getElementById('tabBtnGPS').classList.add('active');
+        document.getElementById('seccionGPS').style.display = 'block';
+      } else if (tab === 'reportes') {
+        document.getElementById('tabBtnReportes').classList.add('active');
+        document.getElementById('seccionReportes').style.display = 'block';
+        renderizarReportesContables();
       }
     }
 
     function iniciarMapaAdmin() {
       if (mapAdmin) return;
       mapAdmin = L.map('adminMap').setView([-13.5167, -71.9788], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapAdmin);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapAdmin);
     }
 
+    // CONEXIÓN EN TIEMPO REAL CON FIREBASE
     function iniciarEscuchaFirebase() {
-      // 1. Escuchar pedidos entrantes en tiempo real
+      // 1. Escuchar pedidos
       db.ref('pedidos').on('value', snap => {
         pedidosLocales = snap.val() || {};
+        procesarVentasParaReportes();
         renderizarOrdenesEntrantes();
         renderizarFlotaActiva();
+        renderizarReportesContables();
       });
 
-      // 2. Escuchar repartidores y coordenadas GPS
+      // 2. Escuchar repartidores y GPS
       db.ref('repartidores').on('value', snap => {
         const data = snap.val();
-        if (data) repartidoresLocales = data;
+        if (data) {
+          repartidoresLocales = data;
+        } else {
+          // Inicializar por defecto si la base está vacía
+          repartidoresLocales = {
+            "rep-1": { id: "rep-1", nombre: "Edwin", online: false, lat: -13.5167, lng: -71.9788 },
+            "rep-2": { id: "rep-2", nombre: "Moto 2", online: false, lat: -13.5200, lng: -71.9700 }
+          };
+          db.ref('repartidores').set(repartidoresLocales);
+        }
+        renderizarGestionRepartidores();
         actualizarMapaAdmin();
         renderizarFlotaActiva();
+        renderizarOrdenesEntrantes();
       });
 
-      // 3. Teléfonos
-      db.ref('telefonos').once('value', snap => {
+      // 3. Escuchar catálogo de productos
+      db.ref('productos').on('value', snap => {
+        const p = snap.val();
+        if (p) {
+          productos = Array.isArray(p) ? p : Object.values(p);
+        } else {
+          // Productos base
+          productos = [
+            { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad.", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" },
+            { id: "gas-2", nombre: "Balón Gas Premium 10kg", tag: "Máximo Rendimiento", descripcion: "GLP de alta pureza con válvula anti-fugas.", precio: 55.00, disponible: true, imagen: "1791513590376.jpg" }
+          ];
+          db.ref('productos').set(productos);
+        }
+        renderizarProductosEditor();
+      });
+
+      // 4. Escuchar teléfonos
+      db.ref('telefonos').on('value', snap => {
         const t = snap.val();
         if (t) {
+          telefonos = t;
           document.getElementById('telWhatsApp').value = t.whatsapp || "";
           document.getElementById('telFijo1').value = t.tel1 || "";
           document.getElementById('telFijo2').value = t.tel2 || "";
@@ -258,6 +429,7 @@
       });
     }
 
+    // ---------------- PEDIDOS Y FLOTA ----------------
     function renderizarOrdenesEntrantes() {
       const contenedor = document.getElementById('listaOrdenesEntrantes');
       const badge = document.getElementById('badgeContadorEntrantes');
@@ -265,7 +437,7 @@
       badge.innerText = `${lista.length} pendientes`;
 
       if (lista.length === 0) {
-        contenedor.innerHTML = '<p style="font-size:12px; color:#a16207;">No hay pedidos pendientes de asignación.</p>';
+        contenedor.innerHTML = '<p style="font-size:12px; color:#a16207;">No hay pedidos pendientes de asignación en este momento.</p>';
         return;
       }
 
@@ -274,7 +446,7 @@
         const div = document.createElement('div');
         div.style.cssText = "background:#fff; border:1px solid #fde047; border-radius:10px; padding:12px; margin-bottom:8px;";
 
-        let opciones = '<option value="">-- Asignar Repartidor --</option>';
+        let opciones = '<option value="">-- Seleccionar Repartidor --</option>';
         Object.values(repartidoresLocales).forEach(r => {
           opciones += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
         });
@@ -285,10 +457,10 @@
             <span style="color:#15803d; font-weight:900;">S/ ${parseFloat(ord.montoCobro).toFixed(2)}</span>
           </div>
           <div style="font-size:12px; color:#475569;">🛢️ ${ord.tipoBalon} | 💵 ${ord.metodoPago}</div>
-          <div style="font-size:11px; color:#64748b; margin-bottom:6px;">🕒 ${ord.hora} ${ord.gpsUrl ? `| <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb;">📍 Mapa</a>` : ''}</div>
+          <div style="font-size:11px; color:#64748b; margin-bottom:6px;">🕒 ${ord.hora} ${ord.gpsUrl ? `| <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb; font-weight:bold;">📍 Ver Mapa</a>` : ''}</div>
           <div style="display:flex; gap:8px;">
             <select id="selRep_${ord.id}" style="flex:1; margin:0; padding:6px;">${opciones}</select>
-            <button class="btn btn-save" style="background:#16a34a; width:auto; padding:6px 14px;" onclick="asignarOrden('${ord.id}')">Asignar 🛵</button>
+            <button class="btn btn-save" style="background:#16a34a; width:auto; padding:6px 14px; margin:0;" onclick="asignarOrden('${ord.id}')">Asignar 🛵</button>
           </div>
         `;
         contenedor.appendChild(div);
@@ -317,15 +489,21 @@
         const ordenActiva = Object.values(pedidosLocales).find(p => p.repartidorId === rep.id && p.estado !== 'completado');
         const etapa = ordenActiva ? ordenActiva.etapa : 1;
 
+        // Notificación al completar entrega (Paso 3)
+        if (estadosPrevios[rep.id] && estadosPrevios[rep.id] !== 3 && etapa === 3) {
+          mostrarNotificacionCentro(rep.nombre);
+        }
+        estadosPrevios[rep.id] = etapa;
+
         const card = document.createElement('div');
         card.className = `repartidor-card ${rep.online ? 'activo' : ''}`;
         card.innerHTML = `
           <div style="display:flex; justify-content:space-between;">
             <strong>🦁 ${rep.nombre}</strong>
-            <span style="font-size:11px; font-weight:800;">${rep.online ? 'Online 🟢' : 'Offline 💤'}</span>
+            <span class="badge-status ${rep.online ? 'online' : ''}">${rep.online ? 'Online 🟢' : 'Offline 💤'}</span>
           </div>
           <div style="font-size:12px; margin-top:2px;">
-            ${ordenActiva ? `🛢️ <strong>${ordenActiva.tipoBalon}</strong> para <em>${ordenActiva.cliente}</em>` : '<span style="color:#64748b;">Sin orden</span>'}
+            ${ordenActiva ? `🛢️ <strong>${ordenActiva.tipoBalon}</strong> para <em>${ordenActiva.cliente}</em> (S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)})` : '<span style="color:#64748b;">Sin orden activa</span>'}
           </div>
           <div class="secuencia-mini-bar">
             <div class="sec-block sec-rojo ${etapa === 1 && ordenActiva ? 'activo' : ''}">1. EN CAMINO</div>
@@ -348,7 +526,7 @@
         });
 
         if (!marcadoresAdmin[rep.id]) {
-          marcadoresAdmin[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(mapAdmin).bindPopup(`<b>${rep.nombre}</b>`);
+          marcadoresAdmin[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(mapAdmin).bindPopup(`<b>${rep.nombre}</b><br>${online ? 'En Ruta 🔥' : 'Offline 💤'}`);
         } else {
           marcadoresAdmin[rep.id].setIcon(icono);
           marcadoresAdmin[rep.id].setLatLng([rep.lat, rep.lng]);
@@ -356,8 +534,150 @@
       });
     }
 
-    function cerrarNotificacionCentro() { document.getElementById('modalNotificacionEntrega').style.display = 'none'; }
+    function mostrarNotificacionCentro(nombreRepartidor) {
+      document.getElementById('textoModalNotificacion').innerHTML = `El repartidor <strong>${nombreRepartidor}</strong> acaba de completar su entrega.`;
+      document.getElementById('modalNotificacionEntrega').style.display = 'flex';
+      emitirCampanada();
+    }
 
+    function cerrarNotificacionCentro() {
+      document.getElementById('modalNotificacionEntrega').style.display = 'none';
+    }
+
+    // ---------------- GESTIÓN DE PRODUCTOS Y PRECIOS ----------------
+    function renderizarProductosEditor() {
+      const cont = document.getElementById('listaProductos');
+      cont.innerHTML = '';
+
+      productos.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <label>Nombre:</label>
+          <input type="text" value="${p.nombre}" onchange="productos[${i}].nombre = this.value">
+
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+              <label>Precio (S/):</label>
+              <input type="number" step="0.5" value="${p.precio}" onchange="productos[${i}].precio = parseFloat(this.value) || 0">
+            </div>
+            <div style="flex:1;">
+              <label>Disponibilidad / Stock:</label>
+              <select onchange="productos[${i}].disponible = (this.value === 'true')">
+                <option value="true" ${p.disponible !== false ? 'selected' : ''}>🟢 Disponible</option>
+                <option value="false" ${p.disponible === false ? 'selected' : ''}>🔴 Agotado</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Descripción:</label>
+          <input type="text" value="${p.descripcion || ''}" onchange="productos[${i}].descripcion = this.value">
+
+          <label>Imagen del Balón:</label>
+          <div class="admin-img-preview-box">
+            <img id="prev-${i}" class="admin-thumb" src="${p.imagen}" onerror="this.src='1791513590376.jpg'">
+            <div style="flex:1;">
+              <input type="file" accept="image/*" onchange="subirImagen(event, ${i})" style="font-size:12px;">
+              <input type="text" value="${p.imagen}" placeholder="o escribe nombre de archivo" onchange="productos[${i}].imagen = this.value; document.getElementById('prev-${i}').src = this.value;" style="margin-top:4px;">
+            </div>
+          </div>
+
+          <button class="btn btn-del" onclick="eliminarProducto(${i})">🗑️ Eliminar Producto</button>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    function subirImagen(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        productos[index].imagen = e.target.result;
+        document.getElementById(`prev-${index}`).src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function agregarNuevoProducto() {
+      productos.push({
+        id: "gas-" + Date.now(),
+        nombre: "Nuevo Balón de Gas",
+        tag: "Sellado",
+        descripcion: "Balón con precinto de garantía y peso exacto.",
+        precio: 50.00,
+        disponible: true,
+        imagen: "1791513590376.jpg"
+      });
+      renderizarProductosEditor();
+    }
+
+    function eliminarProducto(i) {
+      if (confirm(`¿Eliminar "${productos[i].nombre}"?`)) {
+        productos.splice(i, 1);
+        renderizarProductosEditor();
+      }
+    }
+
+    async function guardarProductosFirebase() {
+      const msg = document.getElementById('statusMsgProductos');
+      msg.style.color = "#6b21a8";
+      msg.innerText = "⏳ Guardando en Firebase...";
+      await db.ref('productos').set(productos);
+      msg.style.color = "#15803d";
+      msg.innerText = "✔ ¡Precios y productos actualizados en tiempo real!";
+      setTimeout(() => { msg.innerText = ""; }, 4000);
+    }
+
+    // ---------------- GESTIÓN DE REPARTIDORES ----------------
+    function renderizarGestionRepartidores() {
+      const cont = document.getElementById('listaRepartidoresConfig');
+      cont.innerHTML = '';
+      const lista = Object.values(repartidoresLocales);
+
+      if (lista.length === 0) {
+        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados.</p>';
+        return;
+      }
+
+      lista.forEach(rep => {
+        const div = document.createElement('div');
+        div.className = 'repartidor-card';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <input type="text" value="${rep.nombre}" onchange="renombrarRepartidor('${rep.id}', this.value)" style="font-weight:bold; max-width:280px;">
+            <button class="btn btn-del" style="margin-top:0;" onclick="eliminarRepartidor('${rep.id}')">🗑️ Eliminar</button>
+          </div>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    async function agregarNuevoRepartidor() {
+      const nombre = prompt("Nombre del nuevo repartidor (ej. Moto 3 - Carlos):");
+      if (!nombre) return;
+      const nuevoId = "rep-" + Date.now();
+      await db.ref(`repartidores/${nuevoId}`).set({
+        id: nuevoId,
+        nombre: nombre.trim(),
+        online: false,
+        lat: -13.5167,
+        lng: -71.9788
+      });
+      alert("✔ Repartidor agregado a la flota.");
+    }
+
+    async function renombrarRepartidor(id, nuevoNombre) {
+      await db.ref(`repartidores/${id}/nombre`).set(nuevoNombre.trim());
+    }
+
+    async function eliminarRepartidor(id) {
+      if (confirm("¿Deseas eliminar este repartidor de la flota?")) {
+        await db.ref(`repartidores/${id}`).remove();
+      }
+    }
+
+    // ---------------- TELÉFONOS ----------------
     async function guardarTelefonosFirebase() {
       await db.ref('telefonos').set({
         whatsapp: document.getElementById('telWhatsApp').value.trim(),
@@ -365,7 +685,82 @@
         tel2: document.getElementById('telFijo2').value.trim(),
         tel3: document.getElementById('telFijo3').value.trim()
       });
-      alert("Teléfonos guardados al instante en Firebase.");
+      alert("✔ Teléfonos guardados al instante en Firebase.");
+    }
+
+    // ---------------- REPORTES CONTABLES POR FECHAS ----------------
+    function procesarVentasParaReportes() {
+      ventasLocales = Object.values(pedidosLocales).filter(p => p.estado === 'completado');
+    }
+
+    function parseFechaSegura(p) {
+      if (p.timestamp) return new Date(p.timestamp);
+      return new Date();
+    }
+
+    function aplicarFiltroFecha(periodo, boton) {
+      filtroFechaActivo = periodo;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      if (boton) boton.classList.add('active');
+      renderizarReportesContables();
+    }
+
+    function renderizarReportesContables() {
+      const ahora = new Date();
+      const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+      const diaSemana = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1;
+      const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diaSemana);
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+
+      ventasFiltradas = ventasLocales.filter(v => {
+        if (filtroFechaActivo === 'todos') return true;
+        const f = parseFechaSegura(v);
+        if (filtroFechaActivo === 'hoy') return f >= inicioHoy;
+        if (filtroFechaActivo === 'semana') return f >= inicioSemana;
+        if (filtroFechaActivo === 'mes') return f >= inicioMes;
+        return true;
+      });
+
+      const tbody = document.getElementById('tablaVentasBody');
+      tbody.innerHTML = '';
+      let sumaTotal = 0;
+
+      if (ventasFiltradas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:12px; color:#94a3b8;">No hay ventas completadas en este periodo.</td></tr>';
+      } else {
+        ventasFiltradas.forEach(v => {
+          const tot = parseFloat(v.montoCobro) || 0;
+          sumaTotal += tot;
+          const chofer = repartidoresLocales[v.repartidorId]?.nombre || v.repartidorId || "General";
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${v.hora || '--'}</td>
+            <td>${v.cliente || 'Particular'}</td>
+            <td>${v.tipoBalon || '--'}</td>
+            <td><strong>${chofer}</strong></td>
+            <td><strong>S/ ${tot.toFixed(2)}</strong></td>
+            <td>${v.metodoPago || 'Efectivo'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('resumenCantPedidos').innerText = `${ventasFiltradas.length}`;
+      document.getElementById('resumenTotalSoles').innerText = `S/ ${sumaTotal.toFixed(2)}`;
+    }
+
+    function exportarVentasExcelCSV() {
+      if (ventasFiltradas.length === 0) return alert("No hay ventas en la lista actual para exportar.");
+      let csv = "\uFEFFHora;Cliente;Detalle Balon;Repartidor;Total (S/);Pago\r\n";
+      ventasFiltradas.forEach(v => {
+        const chofer = repartidoresLocales[v.repartidorId]?.nombre || v.repartidorId || "General";
+        csv += `"${v.hora || ''}";"${v.cliente || ''}";"${v.tipoBalon || ''}";"${chofer}";"${parseFloat(v.montoCobro || 0).toFixed(2)}";"${v.metodoPago || ''}"\r\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `Reporte_LeoGas_${filtroFechaActivo}_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
     }
 
     window.onload = () => {
