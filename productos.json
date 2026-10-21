@@ -39,8 +39,8 @@
       "id": "rep-2",
       "nombre": "carlos",
       "online": true,
-      "lat": -13.5380724,
-      "lng": -71.9804011
+      "lat": -13.5380827,
+      "lng": -71.9803549
     }
   ],
   "comandas": [
@@ -67,10 +67,10 @@
       "cliente": "carmen",
       "direccion": "carmen",
       "gpsUrl": "https://www.google.com/maps?q=-13.5380849,-71.9803639",
-      "etapa": 2,
-      "estado": "activo",
+      "etapa": 3,
+      "estado": "completado",
       "horaAsignacion": "11:12:46",
-      "horaActualizacion": "11:35:09 a.m."
+      "horaActualizacion": "11:36:00 a.m."
     },
     {
       "id": "cmd-1792600533663",
@@ -94,6 +94,14 @@
       "total": 50,
       "pago": "Yape",
       "repartidorId": "rep-1"
+    },
+    {
+      "fecha": "21/10/2026, 11:36:00 a.m.",
+      "cliente": "carmen",
+      "productos": "Balón LeoGas 10kg Normal",
+      "total": 50,
+      "pago": "Efectivo",
+      "repartidorId": "rep-2"
     }
   ]
 }
