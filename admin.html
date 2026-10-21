@@ -295,6 +295,13 @@
 
     let mapAdmin = null;
     let marcadoresAdmin = {};
+    let cantidadPedidosEntrantesPrevia = 0;
+
+    function pedirPermisoNotificacionesAdmin() {
+      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+      }
+    }
 
     function emitirCampanada() {
       try {
@@ -327,6 +334,7 @@
     function mostrarPanel() {
       document.getElementById('pantallaLogin').style.display = 'none';
       document.getElementById('panelAdminPrincipal').style.display = 'block';
+      pedirPermisoNotificacionesAdmin();
       iniciarMapaAdmin();
       iniciarEscuchaFirebase();
     }
@@ -376,6 +384,23 @@
       db.ref('pedidos').on('value', snap => {
         pedidosLocales = snap.val() || {};
         procesarVentasParaReportes();
+        
+        const entrantesActuales = Object.values(pedidosLocales).filter(p => p.estado === 'pendiente_asignacion');
+        
+        // Si entra un nuevo pedido web desde index.html
+        if (entrantesActuales.length > cantidadPedidosEntrantesPrevia) {
+          emitirCampanada();
+          if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+          if ("Notification" in window && Notification.permission === "granted") {
+            const ultimo = entrantesActuales[entrantesActuales.length - 1];
+            new Notification("🔔 ¡Nuevo Pedido Entrante!", {
+              body: `Cliente: ${ultimo.cliente || 'Particular'} (Total: S/ ${ultimo.montoCobro})`,
+              icon: "CHUSPITA-circulo.png"
+            });
+          }
+        }
+        cantidadPedidosEntrantesPrevia = entrantesActuales.length;
+
         renderizarOrdenesEntrantes();
         renderizarFlotaActiva();
         renderizarReportesContables();
@@ -387,7 +412,6 @@
         if (data) {
           repartidoresLocales = data;
         } else {
-          // Inicializar por defecto si la base está vacía
           repartidoresLocales = {
             "rep-1": { id: "rep-1", nombre: "Edwin", online: false, lat: -13.5167, lng: -71.9788 },
             "rep-2": { id: "rep-2", nombre: "Moto 2", online: false, lat: -13.5200, lng: -71.9700 }
@@ -400,13 +424,12 @@
         renderizarOrdenesEntrantes();
       });
 
-      // 3. Escuchar catálogo de productos
+      // 3. Catálogo de productos
       db.ref('productos').on('value', snap => {
         const p = snap.val();
         if (p) {
           productos = Array.isArray(p) ? p : Object.values(p);
         } else {
-          // Productos base
           productos = [
             { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad.", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" },
             { id: "gas-2", nombre: "Balón Gas Premium 10kg", tag: "Máximo Rendimiento", descripcion: "GLP de alta pureza con válvula anti-fugas.", precio: 55.00, disponible: true, imagen: "1791513590376.jpg" }
@@ -416,7 +439,7 @@
         renderizarProductosEditor();
       });
 
-      // 4. Escuchar teléfonos
+      // 4. Teléfonos
       db.ref('telefonos').on('value', snap => {
         const t = snap.val();
         if (t) {
@@ -538,6 +561,7 @@
       document.getElementById('textoModalNotificacion').innerHTML = `El repartidor <strong>${nombreRepartidor}</strong> acaba de completar su entrega.`;
       document.getElementById('modalNotificacionEntrega').style.display = 'flex';
       emitirCampanada();
+      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
     }
 
     function cerrarNotificacionCentro() {
