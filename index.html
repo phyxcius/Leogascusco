@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LeoGas Cusco | Balones de Gas a Domicilio</title>
   
-  <!-- Leaflet CSS para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <style>
@@ -21,1112 +20,103 @@
       --radius: 14px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-
-    body {
-      background-color: #fafaf9;
-      color: var(--text);
-      line-height: 1.6;
-      padding-bottom: 100px;
-    }
-
-    /* HEADER */
-    header {
-      background: var(--white);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 10px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .brand-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--dark);
-    }
-
-    .brand-icon {
-      background: var(--primary);
-      color: var(--accent);
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 22px;
-      box-shadow: 0 3px 6px rgba(107, 33, 168, 0.25);
-    }
-
-    .brand-text h1 {
-      font-size: 19px;
-      font-weight: 900;
-      line-height: 1.1;
-      color: var(--primary);
-      letter-spacing: 0.5px;
-    }
-
-    .brand-text span {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--dark);
-      font-weight: 700;
-    }
-
-    /* LOGO LA CHUSPA EN LA CABECERA */
-    .chuspa-nav-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #fefce8;
-      border: 1.5px solid #eab308;
-      padding: 5px 12px 5px 6px;
-      border-radius: 26px;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(234, 179, 8, 0.2);
-    }
-
-    .chuspa-nav-badge:hover {
-      transform: scale(1.04);
-      background: #ffffff;
-      box-shadow: 0 4px 10px rgba(107, 33, 168, 0.25);
-    }
-
-    .chuspa-nav-img {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid #ca8a04;
-      background: #fff;
-    }
-
-    .chuspa-nav-info {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.15;
-    }
-
-    .chuspa-nav-title {
-      font-size: 12px;
-      font-weight: 900;
-      color: var(--primary);
-    }
-
-    .chuspa-nav-sub {
-      font-size: 9.5px;
-      font-weight: 700;
-      color: #b45309;
-    }
-
-    .nav-cta {
-      background: var(--primary);
-      color: var(--white);
-      padding: 8px 18px;
-      border-radius: 30px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 14px;
-      transition: background 0.2s;
-    }
-
-    .nav-cta:hover {
-      background: var(--primary-dark);
-    }
-
-    /* HERO */
-    .hero {
-      background: linear-gradient(135deg, #fef08a 0%, #fde047 50%, #facc15 100%);
-      padding: 38px 20px 44px;
-      text-align: center;
-      border-bottom: 2px solid #eab308;
-    }
-
-    .hero-container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .badge-hero {
-      display: inline-block;
-      background: var(--primary);
-      color: #fff;
-      font-weight: 800;
-      font-size: 12px;
-      padding: 5px 14px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .hero h2 {
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--dark);
-      line-height: 1.2;
-      margin-bottom: 12px;
-    }
-
-    .hero p {
-      font-size: 16px;
-      color: #475569;
-      margin-bottom: 18px;
-      font-weight: 600;
-    }
-
-    .hero-features {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .feature-pill {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--white);
-      padding: 7px 16px;
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--dark);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    /* VOLANTE */
-    .flyer-section {
-      max-width: 1200px;
-      margin: 26px auto;
-      padding: 0 20px;
-    }
-
-    .flyer-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 22px;
-      box-shadow: var(--shadow);
-      border: 2px solid #fde047;
-      display: flex;
-      gap: 26px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .flyer-img-container {
-      flex: 1;
-      min-width: 250px;
-      max-width: 360px;
-      margin: 0 auto;
-      cursor: pointer;
-    }
-
-    .flyer-img-container img {
-      width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-      transition: transform 0.25s ease;
-      display: block;
-    }
-
-    .flyer-info {
-      flex: 2;
-      min-width: 280px;
-    }
-
-    .flyer-info h3 {
-      font-size: 23px;
-      font-weight: 900;
-      color: var(--primary);
-      margin-bottom: 6px;
-    }
-
-    .flyer-slogan {
-      font-size: 15px;
-      font-weight: 700;
-      color: #c2410c;
-      margin-bottom: 12px;
-    }
-
-    .flyer-contact-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .contact-button {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      text-decoration: none;
-      color: var(--dark);
-      font-weight: 800;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-
-    .contact-button:hover {
-      background: #eef2ff;
-      border-color: #818cf8;
-    }
-
-    /* MAPA Y LEYENDA */
-    .map-section {
-      max-width: 1200px;
-      margin: 20px auto 36px;
-      padding: 0 20px;
-    }
-
-    .map-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
-      border: 1px solid #e2e8f0;
-    }
-
-    .map-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .map-header h3 {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--dark);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* LEYENDA ONLINE / OFFLINE DINÁMICA */
-    .gps-legend-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      padding: 6px 14px;
-      border-radius: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 12px;
-      font-weight: 800;
-      opacity: 0.35;
-      transition: all 0.3s ease;
-    }
-
-    .legend-item.activo {
-      opacity: 1;
-      transform: scale(1.05);
-    }
-
-    .legend-item.online.activo {
-      color: #15803d;
-    }
-
-    .legend-item.offline.activo {
-      color: #dc2626;
-    }
-
-    .legend-divider {
-      color: #cbd5e1;
-      font-size: 12px;
-    }
-
-    /* MODO PANTALLA COMPLETA PARA EL MAPA */
-    .map-wrapper {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .map-wrapper.fullscreen-map {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      z-index: 99999 !important;
-      border-radius: 0 !important;
-      margin: 0 !important;
-    }
-
-    .map-wrapper.fullscreen-map #cuscoMap {
-      height: 100vh !important;
-      border-radius: 0 !important;
-    }
-
-    /* BOTONES FLOTANTES SOBRE EL MAPA */
-    .btn-toggle-fullscreen {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(4px);
-      border: 1.5px solid #6b21a8;
-      color: #6b21a8;
-      padding: 8px 14px;
-      border-radius: 24px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-toggle-fullscreen:hover {
-      background: #6b21a8;
-      color: #fff;
-      transform: scale(1.04);
-    }
-
-    .btn-center-map {
-      position: absolute;
-      top: 60px;
-      right: 14px;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(4px);
-      border: 1.5px solid #2563eb;
-      color: #2563eb;
-      padding: 8px 14px;
-      border-radius: 24px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-center-map:hover {
-      background: #2563eb;
-      color: #fff;
-      transform: scale(1.04);
-    }
-
-    /* RECUADRO FLOTANTE DE DISTANCIA / TIEMPO */
-    .distance-eta-badge {
-      position: absolute;
-      bottom: 14px;
-      left: 14px;
-      z-index: 1000;
-      background: rgba(30, 27, 75, 0.95);
-      backdrop-filter: blur(4px);
-      color: #facc15;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 800;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      border: 1px solid #ca8a04;
-      display: none;
-    }
-
-    #cuscoMap {
-      width: 100%;
-      height: 380px;
-      border-radius: 10px;
-      z-index: 10;
-    }
-
-    /* MARCADORES GPS DEL REPARTIDOR */
-    .custom-gps-marker {
-      position: relative;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .gps-radar-pulse {
-      position: absolute;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: rgba(107, 33, 168, 0.28);
-      animation: radarPulse 2s ease-out infinite;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    @keyframes radarPulse {
-      0% { transform: scale(0.6); opacity: 0.9; }
-      70% { transform: scale(1.6); opacity: 0.15; }
-      100% { transform: scale(1.9); opacity: 0; }
-    }
-
-    .lion-badge-circle {
-      position: relative;
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, #7e22ce 0%, #4c1d95 100%);
-      border: 2.5px solid #ffffff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 23px;
-      box-shadow: 0 4px 12px rgba(107, 33, 168, 0.55);
-      z-index: 2;
-      transition: all 0.3s ease;
-    }
-
-    .custom-gps-marker.offline .lion-badge-circle {
-      background: #64748b;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      filter: grayscale(0.7);
-    }
-
-    .custom-gps-marker.offline .gps-radar-pulse,
-    .custom-gps-marker.offline .fire-flame-emitter {
-      display: none;
-    }
-
-    .fire-flame-emitter {
-      position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 17px;
-      z-index: 3;
-      filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.95)) drop-shadow(0 0 10px rgba(239, 68, 68, 0.8));
-      animation: flameFlicker 0.75s ease-in-out infinite alternate;
-      pointer-events: none;
-    }
-
-    @keyframes flameFlicker {
-      0% { transform: translateX(-50%) translateY(0) scale(0.9) rotate(-3deg); filter: drop-shadow(0 0 4px #f59e0b) drop-shadow(0 0 7px #ea580c); }
-      50% { transform: translateX(-48%) translateY(-2.5px) scale(1.15) rotate(2deg); filter: drop-shadow(0 0 8px #facc15) drop-shadow(0 0 12px #dc2626); }
-      100% { transform: translateX(-52%) translateY(-4px) scale(1.05) rotate(-2deg); filter: drop-shadow(0 0 6px #f59e0b) drop-shadow(0 0 10px #b91c1c); }
-    }
-
-    /* PRODUCTOS */
-    .section-menu {
-      max-width: 1200px;
-      margin: 20px auto 40px;
-      padding: 0 20px;
-    }
-
-    .menu-header {
-      background: var(--white);
-      padding: 16px 20px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-    }
-
-    .menu-header h3 {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--dark);
-    }
-
-    .grid-empanadas {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 22px;
-    }
-
-    .card {
-      background: var(--white);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #f1f5f9;
-      transition: transform 0.2s;
-      position: relative;
-    }
-
-    .card:hover { transform: translateY(-4px); }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #fafaf9; color: var(--text); line-height: 1.6; padding-bottom: 100px; }
+
+    header { background: var(--white); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    .nav-container { max-width: 1200px; margin: 0 auto; padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .brand-section { display: flex; align-items: center; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--dark); }
+    .brand-icon { background: var(--primary); color: var(--accent); width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; box-shadow: 0 3px 6px rgba(107, 33, 168, 0.25); }
+    .brand-text h1 { font-size: 19px; font-weight: 900; line-height: 1.1; color: var(--primary); letter-spacing: 0.5px; }
+    .brand-text span { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--dark); font-weight: 700; }
+
+    .chuspa-nav-badge { display: flex; align-items: center; gap: 8px; background: #fefce8; border: 1.5px solid #eab308; padding: 5px 12px 5px 6px; border-radius: 26px; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(234, 179, 8, 0.2); }
+    .chuspa-nav-badge:hover { transform: scale(1.04); background: #ffffff; box-shadow: 0 4px 10px rgba(107, 33, 168, 0.25); }
+    .chuspa-nav-img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #ca8a04; background: #fff; }
+    .chuspa-nav-info { display: flex; flex-direction: column; line-height: 1.15; }
+    .chuspa-nav-title { font-size: 12px; font-weight: 900; color: var(--primary); }
+    .chuspa-nav-sub { font-size: 9.5px; font-weight: 700; color: #b45309; }
+
+    .nav-cta { background: var(--primary); color: var(--white); padding: 8px 18px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px; }
+
+    .hero { background: linear-gradient(135deg, #fef08a 0%, #fde047 50%, #facc15 100%); padding: 38px 20px 44px; text-align: center; border-bottom: 2px solid #eab308; }
+    .hero-container { max-width: 800px; margin: 0 auto; }
+    .badge-hero { display: inline-block; background: var(--primary); color: #fff; font-weight: 800; font-size: 12px; padding: 5px 14px; border-radius: 20px; margin-bottom: 12px; text-transform: uppercase; }
+    .hero h2 { font-size: 32px; font-weight: 900; color: var(--dark); line-height: 1.2; margin-bottom: 12px; }
+    .hero p { font-size: 16px; color: #475569; margin-bottom: 18px; font-weight: 600; }
+    .hero-features { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .feature-pill { display: flex; align-items: center; gap: 6px; background: var(--white); padding: 7px 16px; border-radius: 30px; font-size: 13px; font-weight: 700; color: var(--dark); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+    .flyer-section { max-width: 1200px; margin: 26px auto; padding: 0 20px; }
+    .flyer-card { background: var(--white); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); border: 2px solid #fde047; display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
+    .flyer-img-container { flex: 1; min-width: 250px; max-width: 360px; margin: 0 auto; cursor: pointer; }
+    .flyer-img-container img { width: 100%; height: auto; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); display: block; }
+    .flyer-info { flex: 2; min-width: 280px; }
+    .flyer-info h3 { font-size: 23px; font-weight: 900; color: var(--primary); margin-bottom: 6px; }
+    .flyer-slogan { font-size: 15px; font-weight: 700; color: #c2410c; margin-bottom: 12px; }
+    .flyer-contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .contact-button { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; text-decoration: none; color: var(--dark); font-weight: 800; font-size: 14px; }
+
+    .map-section { max-width: 1200px; margin: 20px auto 36px; padding: 0 20px; }
+    .map-card { background: var(--white); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border: 1px solid #e2e8f0; }
+    .map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px; }
+    .map-header h3 { font-size: 18px; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+    .gps-legend-box { display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 800; opacity: 0.35; }
+    .legend-item.activo { opacity: 1; transform: scale(1.05); }
+    .legend-item.online.activo { color: #15803d; }
+    .legend-item.offline.activo { color: #dc2626; }
+    .map-wrapper { position: relative; border-radius: 12px; overflow: hidden; }
+    #cuscoMap { width: 100%; height: 380px; border-radius: 10px; z-index: 10; }
+
+    .custom-gps-marker { position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+    .gps-radar-pulse { position: absolute; width: 58px; height: 58px; border-radius: 50%; background: rgba(107, 33, 168, 0.28); animation: radarPulse 2s ease-out infinite; pointer-events: none; }
+    @keyframes radarPulse { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+    .lion-badge-circle { position: relative; width: 42px; height: 42px; background: linear-gradient(135deg, #7e22ce 0%, #4c1d95 100%); border: 2.5px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 23px; box-shadow: 0 4px 12px rgba(107, 33, 168, 0.55); z-index: 2; }
+    .custom-gps-marker.offline .lion-badge-circle { background: #64748b; }
+    .custom-gps-marker.offline .gps-radar-pulse, .custom-gps-marker.offline .fire-flame-emitter { display: none; }
+    .fire-flame-emitter { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 17px; z-index: 3; }
+
+    .section-menu { max-width: 1200px; margin: 20px auto 40px; padding: 0 20px; }
+    .menu-header { background: var(--white); padding: 16px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
+    .grid-empanadas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; }
+    .card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; border: 1px solid #f1f5f9; }
     .card.agotado { opacity: 0.65; }
+    .card-img-wrapper { position: relative; height: 200px; background: #e2e8f0; overflow: hidden; }
+    .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    .card-tag { position: absolute; top: 10px; left: 10px; background: rgba(107, 33, 168, 0.9); color: var(--white); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 16px; }
+    .card-body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
+    .card-title { font-size: 17px; font-weight: 800; color: var(--dark); margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: #64748b; margin-bottom: 14px; flex: 1; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid #f3f4f6; }
+    .price { font-size: 19px; font-weight: 900; color: var(--primary); }
+    .btn-add { background: var(--primary); color: var(--white); border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-    .card-img-wrapper {
-      position: relative;
-      height: 200px;
-      background: #e2e8f0;
-      overflow: hidden;
-    }
+    .chat-bubble-container { position: fixed; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 10px; z-index: 1500; cursor: pointer; }
+    .chat-bubble-label { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); color: var(--primary-dark); font-weight: 900; font-size: 14px; padding: 8px 14px; border-radius: 20px; box-shadow: 0 4px 14px rgba(107, 33, 168, 0.25); border: 2px solid var(--primary); }
+    .chat-bubble-btn { position: relative; width: 62px; height: 62px; background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); border-radius: 50%; box-shadow: 0 6px 20px rgba(107, 33, 168, 0.45); display: flex; align-items: center; justify-content: center; border: 2px solid #facc15; }
+    .chat-badge { position: absolute; top: -3px; right: -3px; background-color: #ef4444; color: var(--white); border: 2px solid var(--white); font-size: 11px; font-weight: 800; min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-    .card-img-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .card-tag {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(107, 33, 168, 0.9);
-      backdrop-filter: blur(4px);
-      color: var(--white);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 16px;
-    }
-
-    .card-body {
-      padding: 18px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--dark);
-      margin-bottom: 6px;
-    }
-
-    .card-desc {
-      font-size: 13px;
-      color: #64748b;
-      margin-bottom: 14px;
-      flex: 1;
-    }
-
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto;
-      padding-top: 12px;
-      border-top: 1px solid #f3f4f6;
-    }
-
-    .price {
-      font-size: 19px;
-      font-weight: 900;
-      color: var(--primary);
-    }
-
-    .btn-add {
-      background: var(--primary);
-      color: var(--white);
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .btn-add:hover { background: var(--primary-dark); }
-    .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
-
-    /* BOTÓN FLOTANTE */
-    .chat-bubble-container {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 1500;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .chat-bubble-label {
-      background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-      color: var(--primary-dark);
-      font-weight: 900;
-      font-size: 14px;
-      padding: 8px 14px;
-      border-radius: 20px;
-      box-shadow: 0 4px 14px rgba(107, 33, 168, 0.25);
-      border: 2px solid var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      animation: pulseLabel 2.5s infinite;
-    }
-
-    @keyframes pulseLabel {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.04); }
-    }
-
-    .chat-bubble-btn {
-      position: relative;
-      width: 62px;
-      height: 62px;
-      background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%);
-      border-radius: 50%;
-      box-shadow: 0 6px 20px rgba(107, 33, 168, 0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #facc15;
-    }
-
-    .chat-bubble-lion-icon { font-size: 32px; line-height: 1; }
-
-    .chat-badge {
-      position: absolute;
-      top: -3px;
-      right: -3px;
-      background-color: #ef4444;
-      color: var(--white);
-      border: 2px solid var(--white);
-      font-size: 11px;
-      font-weight: 800;
-      min-width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    /* CARRITO */
-    .cart-modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(4px);
-      z-index: 2000;
-      justify-content: center;
-      align-items: flex-end;
-    }
-
-    .cart-modal-card {
-      background: var(--white);
-      width: 100%;
-      max-width: 520px;
-      border-radius: 20px 20px 0 0;
-      max-height: 92vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
-      animation: slideUp 0.25s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .cart-modal-header {
-      padding: 16px 20px;
-      background: var(--primary);
-      color: var(--white);
-      border-radius: 20px 20px 0 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    .cart-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); z-index: 2000; justify-content: center; align-items: flex-end; }
+    .cart-modal-card { background: var(--white); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; max-height: 92vh; display: flex; flex-direction: column; }
+    .cart-modal-header { padding: 16px 20px; background: var(--primary); color: var(--white); border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
     .btn-close-cart { background: none; border: none; color: var(--white); font-size: 24px; cursor: pointer; }
-
-    .cart-modal-body {
-      padding: 16px 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .cart-header-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .btn-vaciar-cart {
-      background: none;
-      border: none;
-      color: #dc2626;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .cart-items-box {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 180px;
-      overflow-y: auto;
-    }
-
-    .cart-item-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f8fafc;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .cart-item-row.item-activo { background: #faf5ff; border-color: #d8b4fe; }
-    .cart-item-row.item-bloqueado { background: #fef2f2; border-color: #fecaca; opacity: 0.75; }
-
-    .cart-item-info { flex: 1; }
-    .cart-item-title { font-size: 13px; font-weight: 700; color: var(--dark); }
-    .cart-item-sub { font-size: 11px; color: #64748b; }
-
-    .cart-controls { display: flex; align-items: center; gap: 6px; }
-
-    .btn-qty {
-      background: #e2e8f0;
-      border: none;
-      width: 24px;
-      height: 24px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .btn-qty:disabled { background: #f1f5f9; color: #cbd5e1; cursor: not-allowed; }
-
-    .cart-item-price-wrapper { display: flex; align-items: center; gap: 8px; margin-left: 10px; }
-    .cart-item-price { font-size: 13px; font-weight: 800; color: var(--primary); min-width: 55px; text-align: right; }
-    .btn-trash-item { background: none; border: none; cursor: pointer; font-size: 15px; color: #94a3b8; }
-
-    .popup-section-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: 800;
-      color: #64748b;
-      letter-spacing: 0.5px;
-    }
-
+    .cart-modal-body { padding: 16px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .cart-item-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .btn-qty { background: #e2e8f0; border: none; width: 24px; height: 24px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    .popup-section-label { font-size: 11px; text-transform: uppercase; font-weight: 800; color: #64748b; }
     .grid-payments { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-
-    .btn-pay-option {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      color: var(--dark);
-      padding: 7px 4px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .btn-pay-option.active { background: var(--primary); border-color: var(--primary-dark); color: var(--white); }
-
-    .cash-box-drawer {
-      display: block;
-      background: #fdf4ff;
-      border: 2px dashed #d8b4fe;
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-top: 8px;
-    }
-
-    .cash-input-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-
-    .cash-input {
-      flex: 1;
-      padding: 8px 12px;
-      font-size: 16px;
-      font-weight: 800;
-      border: 1px solid #c084fc;
-      border-radius: 8px;
-      color: var(--primary-dark);
-      background: #fff;
-    }
-
-    .cash-quick-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-
-    .btn-quick-cash {
-      background: #fff;
-      border: 1px solid #d8b4fe;
-      color: var(--primary-dark);
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .vuelto-badge-box {
-      margin-top: 10px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 800;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #86efac;
-    }
-
-    .vuelto-badge-box.alerta { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
-
-    .geo-box {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      background: #faf5ff;
-      border: 1px solid #e9d5ff;
-      padding: 10px 12px;
-      border-radius: 8px;
-    }
-
-    .btn-geo {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .geo-status { font-size: 11px; color: #64748b; text-align: center; }
-    .geo-status.ready { color: #15803d; font-weight: bold; }
-
-    .client-name-box { display: flex; flex-direction: column; gap: 4px; }
+    .btn-pay-option { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 7px 4px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; }
+    .btn-pay-option.active { background: var(--primary); color: var(--white); }
+    .btn-geo { background: var(--primary); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
     .client-name-input { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
-
-    /* NUEVO: SELECTOR DE HORARIO DE ENTREGA */
-    .delivery-time-box {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      padding: 10px 12px;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .grid-delivery-opts {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .btn-del-opt {
-      background: #fff;
-      border: 1.5px solid #cbd5e1;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      color: var(--dark);
-      text-align: center;
-    }
-
-    .btn-del-opt.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary-dark);
-    }
-
-    /* NUEVO: TIPO DE COMPROBANTE */
-    .comprobante-box {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      padding: 10px 12px;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .cart-modal-footer {
-      padding: 14px 20px;
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .cart-total-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 15px;
-      font-weight: 900;
-    }
-
-    .cart-total-amount { color: var(--primary); font-size: 19px; }
-
-    .btn-order-wsp {
-      background: #25d366;
-      color: var(--white);
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 14px;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn-ticket-modal {
-      background: #3b82f6;
-      color: #fff;
-      padding: 10px;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 13px;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    /* MODAL DE TICKET DIGITAL */
-    .ticket-modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 3500;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-
-    .ticket-box {
-      background: #fff;
-      width: 100%;
-      max-width: 380px;
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      font-size: 13px;
-      color: #1e1b4b;
-      position: relative;
-    }
-
-    .ticket-header {
-      text-align: center;
-      border-bottom: 2px dashed #cbd5e1;
-      padding-bottom: 12px;
-      margin-bottom: 12px;
-    }
-
-    .ticket-items-list {
-      border-bottom: 2px dashed #cbd5e1;
-      padding-bottom: 10px;
-      margin-bottom: 10px;
-    }
-
-    .ticket-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-
-    .ticket-footer {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .lightbox-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 3000;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-
-    .lightbox-overlay img { max-width: 95%; max-height: 90vh; border-radius: 12px; }
-
-    @media (max-width: 650px) {
-      .nav-container { justify-content: center; }
-      .brand-section { flex-wrap: wrap; justify-content: center; }
-      .map-header { flex-direction: column; align-items: flex-start; }
-    }
-
-    @media print {
-      body * { visibility: hidden; }
-      #ticketImprimible, #ticketImprimible * { visibility: visible; }
-      #ticketImprimible { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; }
-      .no-print { display: none !important; }
-    }
+    .cart-modal-footer { padding: 14px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 10px; }
+    .btn-order-wsp { background: #25d366; color: var(--white); padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header>
     <div class="nav-container">
       <div class="brand-section">
@@ -1138,8 +128,7 @@
           </div>
         </a>
 
-        <!-- LOGO LA CHUSPA TECH AL COSTADO -->
-        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-nav-badge" title="Visitar La Chuspa Anuncios">
+        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-nav-badge">
           <img src="CHUSPITA-circulo.png" alt="La Chuspa Anuncios" class="chuspa-nav-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
           <div class="chuspa-nav-info">
             <span class="chuspa-nav-title">La Chuspa Tech</span>
@@ -1154,84 +143,50 @@
     </div>
   </header>
 
-  <!-- HERO -->
   <section class="hero">
     <div class="hero-container">
       <span class="badge-hero">Mayor seguridad con LeoGas tu distribuidora de confianza</span>
       <h2>¡Solo la seguridad hace la diferencia!</h2>
-      <p>Pide tu balón de gas en Cusco al instante. Escanea el código o llámanos directamente.</p>
+      <p>Pide tu balón de gas en Cusco al instante con seguimiento en tiempo real.</p>
       
       <div class="hero-features">
         <div class="feature-pill">📍 Rastreo en Vivo</div>
         <div class="feature-pill">⚖️ Balón Sellado 10kg</div>
-        <div class="feature-pill">💵 Yape, Plin y Efectivo con Vuelto</div>
+        <div class="feature-pill">💵 Yape, Plin y Efectivo</div>
       </div>
     </div>
   </section>
 
-  <!-- VOLANTE -->
   <section class="flyer-section">
     <div class="flyer-card">
-      <div class="flyer-img-container" onclick="abrirLightboxFlyer()">
+      <div class="flyer-img-container">
         <img id="imgFlyerOficial" src="1791513590376.jpg" alt="Volante Oficial LeoGas Cusco" onerror="this.src='1791513590376.jpg'">
-        <div class="flyer-hint">🔍 Toca para ampliar el volante</div>
       </div>
       <div class="flyer-info">
         <span class="badge-hero" style="background:#f59e0b; color:#1e1b4b; margin-bottom:8px;">Distribuidor Oficial</span>
         <h3>LeoGas Cusco — Llamagas</h3>
         <p class="flyer-slogan">"Ordena tu Pedido aquí y te lo traemos en minutos"</p>
-        <p style="font-size:14px; color:#64748b; margin-bottom:16px;">
-          Tu balón moradito de 10 kg con regulador inteligente, válvula garantizada y entrega express en todo Cusco.
-        </p>
-
         <div class="popup-section-label" style="margin-bottom:8px;">Teléfonos de Pedido Inmediato:</div>
         <div class="flyer-contact-grid" id="contenedorTelefonosFlyer"></div>
       </div>
     </div>
   </section>
 
-  <!-- MAPA CUSCO CON COBERTURAS, BOTONES FLOTANTES Y MEDIDOR -->
   <section class="map-section">
     <div class="map-card">
       <div class="map-header">
-        <h3>📍 Repartidor en Ruta LeoGas - Cusco</h3>
-        
+        <h3>📍 Repartidores en Ruta LeoGas - Cusco</h3>
         <div class="gps-legend-box" id="legendBoxGPS">
-          <div class="legend-item online" id="legendOnline">
-            <span style="font-size:15px;">🦁🔥</span>
-            <span>Online</span>
-          </div>
-          <span class="legend-divider">|</span>
-          <div class="legend-item offline activo" id="legendOffline">
-            <span style="font-size:15px;">🦁💤</span>
-            <span>Offline</span>
-          </div>
+          <div class="legend-item online" id="legendOnline"><span>🦁🔥</span> <span>Online</span></div>
+          <div class="legend-item offline activo" id="legendOffline"><span>🦁💤</span> <span>Offline</span></div>
         </div>
       </div>
-
-      <div class="map-wrapper" id="contenedorEnvolventeMapa">
-        <!-- BOTÓN AMPLIAR PANTALLA COMPLETA -->
-        <button type="button" class="btn-toggle-fullscreen" onclick="alternarPantallaCompletaMapa()">
-          <span id="iconoPantallaCompleta">⛶</span>
-          <span id="textoPantallaCompleta">Ampliar Mapa</span>
-        </button>
-
-        <!-- BOTÓN CENTRAR EN MI UBICACIÓN -->
-        <button type="button" class="btn-center-map" onclick="centrarEnMiUbicacionCliente()">
-          <span>🎯 Centrar en mi casa</span>
-        </button>
-
-        <!-- RECUADRO FLOTANTE DISTANCIA Y TIEMPO ESTIMADO -->
-        <div id="badgeDistanciaTiempo" class="distance-eta-badge">
-          🛵 Repartidor más cercano a <span id="distanciaKmTexto">--</span> (~<span id="tiempoMinTexto">--</span> min)
-        </div>
-
+      <div class="map-wrapper">
         <div id="cuscoMap"></div>
       </div>
     </div>
   </section>
 
-  <!-- PRODUCTOS -->
   <section class="section-menu" id="menu">
     <div class="menu-header">
       <h3>Elige tu Balón de Gas</h3>
@@ -1240,483 +195,196 @@
     <div class="grid-empanadas" id="contenedorEmpanadas"></div>
   </section>
 
-  <!-- LIGHTBOX -->
-  <div class="lightbox-overlay" id="lightboxModal" onclick="cerrarLightboxFlyer()">
-    <img src="1791513590376.jpg" alt="Volante Completo LeoGas">
-  </div>
-
-  <!-- BOTÓN FLOTANTE PEDIDOS -->
   <div class="chat-bubble-container" id="btnFlotanteContenedor" onclick="abrirModalCarrito()">
-    <div class="chat-bubble-label">
-      <span>🔥 Pedidos</span>
-    </div>
-    <div class="chat-bubble-btn" id="btnGlobitoChat">
-      <span class="chat-bubble-lion-icon">🦁</span>
+    <div class="chat-bubble-label"><span>🔥 Pedidos</span></div>
+    <div class="chat-bubble-btn">
+      <span style="font-size:32px;">🦁</span>
       <div class="chat-badge" id="badgeContador">0</div>
     </div>
   </div>
 
-  <!-- MODAL CHECKOUT -->
   <div class="cart-modal-overlay" id="cartModalOverlay" onclick="cerrarSiClickAfuera(event)">
     <div class="cart-modal-card">
       <div class="cart-modal-header">
         <h3>🦁 Pedido LeoGas Cusco</h3>
         <button class="btn-close-cart" onclick="cerrarModalCarrito()">&times;</button>
       </div>
-
       <div class="cart-modal-body">
-        <div>
-          <div class="cart-header-actions">
-            <span class="popup-section-label">Balones seleccionados:</span>
-            <button type="button" class="btn-vaciar-cart" onclick="vaciarPedidoConConfirmacion()">🗑️ Vaciar pedido</button>
-          </div>
-          <div class="cart-items-box" id="popupItemsList"></div>
-        </div>
-
+        <div class="cart-items-box" id="popupItemsList"></div>
         <div>
           <div class="popup-section-label" style="margin-bottom:6px;">Forma de Pago:</div>
           <div class="grid-payments">
-            <button type="button" class="btn-pay-option active" id="btnPayEfectivo" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
+            <button type="button" class="btn-pay-option active" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Yape', this)">🟣 Yape</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Plin', this)">🔵 Plin</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Transferencia', this)">🏦 Transf.</button>
           </div>
-
-          <div class="cash-box-drawer" id="cajaEfectivoDesplegable">
-            <div style="font-size: 12px; font-weight: 800; color: var(--primary);">💵 ¿Con cuánto en efectivo pagarás?</div>
-            <div class="cash-input-row">
-              <span style="font-weight: 800; font-size: 14px; color: var(--primary);">S/</span>
-              <input type="number" id="montoEfectivoIngresado" class="cash-input" placeholder="Ej. 100" min="0" step="5" oninput="calcularVueltoEfectivo()"/>
-            </div>
-            <div class="cash-quick-btns">
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido('exacto')">Pagar Exacto</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(50)">S/ 50</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(100)">S/ 100</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(200)">S/ 200</button>
-            </div>
-            <div class="vuelto-badge-box" id="cajaRespuestaVuelto">
-              <span id="textoDetalleVuelto">Ingresa con cuánto pagarás para calcular el vuelto</span>
-              <span id="montoCalculadoVuelto" style="font-size: 15px;"></span>
-            </div>
-          </div>
         </div>
-
-        <!-- SELECTOR DE HORARIO DE ENTREGA -->
-        <div class="delivery-time-box">
-          <span class="popup-section-label">Horario de Entrega:</span>
-          <div class="grid-delivery-opts">
-            <button type="button" class="btn-del-opt active" id="btnDelInmediata" onclick="elegirHorarioEntrega('Inmediata', this)">🚀 Inmediata (Lo antes posible)</button>
-            <button type="button" class="btn-del-opt" id="btnDelProgramada" onclick="elegirHorarioEntrega('Programada', this)">🕒 Programar Horario</button>
-          </div>
-          <div id="cajaHoraProgramada" style="display:none; margin-top:6px;">
-            <input type="time" id="inputHoraProgramada" class="client-name-input" value="14:00" />
-          </div>
-        </div>
-
-        <!-- TIPO DE COMPROBANTE -->
-        <div class="comprobante-box">
-          <span class="popup-section-label">Tipo de Comprobante:</span>
-          <div style="display:flex; gap:16px; margin-top:4px;">
-            <label style="font-size:13px; font-weight:700; cursor:pointer;"><input type="radio" name="tipoComp" value="Boleta" checked onchange="alternarCamposComprobante(this.value)"> Boleta</label>
-            <label style="font-size:13px; font-weight:700; cursor:pointer;"><input type="radio" name="tipoComp" value="Factura" onchange="alternarCamposComprobante(this.value)"> Factura</label>
-          </div>
-          <div id="cajaDatosFactura" style="display:none; margin-top:6px; flex-direction:column; gap:6px;">
-            <input type="text" id="inputRucFactura" class="client-name-input" placeholder="Número de RUC (11 dígitos)" maxlength="11" />
-            <input type="text" id="inputRazonSocial" class="client-name-input" placeholder="Razón Social / Nombre Empresa" />
-          </div>
-        </div>
-
         <div>
           <div class="popup-section-label" style="margin-bottom:6px;">Dirección de Entrega:</div>
-          <div class="geo-box">
-            <button type="button" class="btn-geo" onclick="capturarGPSCliente()">📍 Activar mi ubicación exacta</button>
-            <span class="geo-status" id="geoStatus">Envía tus coordenadas para llevar el balón hasta tu casa</span>
-          </div>
+          <button type="button" class="btn-geo" onclick="capturarGPSCliente()">📍 Activar mi ubicación exacta</button>
+          <span id="geoStatus" style="font-size:11px; color:#64748b; display:block; margin-top:4px;">Sin coordenadas GPS</span>
         </div>
-
-        <div class="client-name-box">
-          <label class="popup-section-label" for="nombreClienteInput">¿Por quién preguntamos? (Nombre o referencia):</label>
-          <input type="text" id="nombreClienteInput" class="client-name-input" placeholder="Ej: Sra. Carmen / Familia Quispe"/>
+        <div>
+          <label class="popup-section-label" for="nombreClienteInput">¿Por quién preguntamos? (Nombre / Referencia):</label>
+          <input type="text" id="nombreClienteInput" class="client-name-input" placeholder="Ej: Sra. Carmen / Av. de la Cultura"/>
         </div>
       </div>
-
       <div class="cart-modal-footer">
-        <div class="cart-total-row">
-          <span id="cartLabelTotalConCantidad">Total a pagar (0 balones):</span>
-          <span class="cart-total-amount" id="cartTotalMonto">S/ 0.00</span>
+        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px;">
+          <span>Total:</span>
+          <span style="color:var(--primary);" id="cartTotalMonto">S/ 0.00</span>
         </div>
         <button class="btn-order-wsp" onclick="enviarPedidoWhatsApp()">
           <span>Pedir a LeoGas por WhatsApp</span> 💬
         </button>
-        <button type="button" class="btn-ticket-modal" onclick="generarComprobanteModal()">
-          <span>🧾 Ver e Imprimir Comprobante Digital</span>
-        </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE COMPROBANTE / TICKET DIGITAL -->
-  <div class="ticket-modal-overlay" id="ticketModalOverlay">
-    <div class="ticket-box" id="ticketImprimible">
-      <div class="ticket-header">
-        <div style="font-size:24px;">🦁</div>
-        <h2 style="font-size:16px; color:#6b21a8; margin:2px 0;">LeoGas Cusco</h2>
-        <div style="font-size:11px; color:#64748b;">Llamagas • El Moradito Rendidor</div>
-        <div style="font-size:10px; color:#ca8a04; font-weight:bold; margin-top:4px;">Tecnología La Chuspa Tech</div>
-      </div>
-
-      <div style="margin-bottom:10px;">
-        <div><strong>Fecha:</strong> <span id="tickFecha"></span></div>
-        <div><strong>Cliente:</strong> <span id="tickCliente"></span></div>
-        <div><strong>Comprobante:</strong> <span id="tickTipoComp"></span></div>
-        <div id="tickDetalleFactura" style="display:none;"></div>
-        <div><strong>Horario:</strong> <span id="tickHorario"></span></div>
-        <div><strong>Pago:</strong> <span id="tickPago"></span></div>
-      </div>
-
-      <div class="ticket-items-list" id="tickListaProductos"></div>
-
-      <div class="ticket-row" style="font-size:15px; font-weight:900; color:#6b21a8; margin-top:8px;">
-        <span>TOTAL A PAGAR:</span>
-        <span id="tickTotal">S/ 0.00</span>
-      </div>
-
-      <div class="ticket-footer no-print">
-        <button type="button" class="btn-add" style="flex:1;" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
-        <button type="button" class="btn-del" style="margin-top:0;" onclick="cerrarModalTicket()">Cerrar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- SDK DE FIREBASE (TIEMPO REAL) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
   <script>
-    let whatsappNumero = "51969773064";
-    let telefonos = {
-      whatsapp: "51969773064",
-      tel1: "950 727 212",
-      tel2: "984 285 500",
-      tel3: "(084) 501111"
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnYaUN-aZYzEip9z3wsuKnbwdfYscFZkY",
+      authDomain: "leogas-cusco.firebaseapp.com",
+      databaseURL: "https://leogas-cusco-default-rtdb.firebaseio.com",
+      projectId: "leogas-cusco",
+      storageBucket: "leogas-cusco.firebasestorage.app",
+      messagingSenderId: "1042930313066",
+      appId: "1:1042930313066:web:ce6c424afe606f63322713",
+      measurementId: "G-MBYC61L9BL"
     };
 
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
     let catalogo = [
-      { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad.", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" },
+      { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado de 10kg con precinto de seguridad.", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" },
       { id: "gas-2", nombre: "Balón Gas Premium 10kg", tag: "Máximo Rendimiento", descripcion: "GLP de alta pureza con válvula anti-fugas.", precio: 55.00, disponible: true, imagen: "1791513590376.jpg" }
     ];
 
     const pedido = {};
-
-    function sincronizarEstructuraPedido() {
-      catalogo.forEach(item => {
-        const estaDisponible = (item.disponible !== false);
-        if (!pedido[item.id]) {
-          pedido[item.id] = { id: item.id, nombre: item.nombre, precio: item.precio, cantidad: 0, disponible: estaDisponible };
-        } else {
-          pedido[item.id].nombre = item.nombre;
-          pedido[item.id].precio = item.precio;
-          pedido[item.id].disponible = estaDisponible;
-          if (!estaDisponible) pedido[item.id].cantidad = 0;
-        }
-      });
-    }
-
     let metodoPago = "Efectivo";
-    let horarioEntrega = "Inmediata";
-    let tipoComprobante = "Boleta";
     let ubicacionClienteCoords = null;
-    let ultimoTotalPagar = 0;
     let map = null;
-    let clienteMarker = null;
-
     let marcadoresFlota = {};
-    let flotaActual = [];
-    let modoMapaAmpliado = false;
 
-    // SISTEMA DE NOTIFICACIONES Y RASTREO PARA EL CLIENTE
-    async function pedirPermisoNotificacionesCliente() {
-      if ("Notification" in window) {
-        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-          await Notification.requestPermission();
-        }
+    function pedirPermisoNotificacionesCliente() {
+      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
       }
     }
 
     function lanzarNotificacionCliente(titulo, mensaje) {
-      if ("vibrate" in navigator) {
-        navigator.vibrate([300, 150, 300]);
-      }
-
+      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
       if ("Notification" in window && Notification.permission === "granted") {
-        const notif = new Notification(titulo, {
-          body: mensaje,
-          icon: "CHUSPITA-circulo.png",
-          badge: "CHUSPITA-circulo.png",
-          vibrate: [300, 150, 300],
-          tag: "leogas-cliente-alerta"
-        });
-
-        notif.onclick = function() {
-          window.focus();
-          notif.close();
-        };
+        new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png", badge: "CHUSPITA-circulo.png" });
       }
     }
 
-    let estadoPedidoPrevioCliente = null;
-
-    function verificarEstadoPedidoCliente(comandas) {
-      const miCliente = localStorage.getItem('leogas_mi_pedido_cliente');
-      if (!miCliente || !Array.isArray(comandas)) return;
-
-      const miOrden = comandas.find(c => 
-        c.cliente && c.cliente.toLowerCase().includes(miCliente.toLowerCase()) && c.estado !== 'completado'
-      );
-
-      if (miOrden) {
-        if (miOrden.etapa === 1 && estadoPedidoPrevioCliente !== 1) {
-          lanzarNotificacionCliente(
-            "🔥 LeoGas Cusco: ¡Balón en camino!",
-            `Tu repartidor ya salió de la base con tu pedido (${miOrden.tipoBalon}). Puedes ver su ubicación en el mapa.`
-          );
-          estadoPedidoPrevioCliente = 1;
-        } 
-        else if (miOrden.etapa === 2 && estadoPedidoPrevioCliente !== 2) {
-          lanzarNotificacionCliente(
-            "🦁 LeoGas Cusco: ¡Repartidor en tu puerta!",
-            "Tu balón de gas ha llegado a tu dirección. Por favor sal a recibirlo."
-          );
-          estadoPedidoPrevioCliente = 2;
+    function iniciarEscuchaFirebase() {
+      // 1. Escuchar repartidores GPS en vivo
+      db.ref('repartidores').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          const lista = Object.values(data);
+          actualizarVisualizadorGPS(lista);
         }
-      } else if (estadoPedidoPrevioCliente === 2) {
-        localStorage.removeItem('leogas_mi_pedido_cliente');
-        estadoPedidoPrevioCliente = null;
-      }
-    }
-
-    // CÁLCULO DE DISTANCIA HARVESINE (KM)
-    function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    }
-
-    function actualizarDistanciaEstimada() {
-      if (!ubicacionClienteCoords || flotaActual.length === 0) return;
-      const onlineReps = flotaActual.filter(r => r.online && r.lat && r.lng);
-      const badge = document.getElementById('badgeDistanciaTiempo');
-
-      if (onlineReps.length === 0) {
-        badge.style.display = "none";
-        return;
-      }
-
-      let minDist = Infinity;
-      onlineReps.forEach(rep => {
-        const d = calcularDistanciaKm(ubicacionClienteCoords.lat, ubicacionClienteCoords.lng, rep.lat, rep.lng);
-        if (d < minDist) minDist = d;
       });
 
-      if (minDist !== Infinity) {
-        badge.style.display = "block";
-        document.getElementById('distanciaKmTexto').innerText = minDist.toFixed(1) + " km";
-        const tiempoMin = Math.max(5, Math.round(minDist * 4));
-        document.getElementById('tiempoMinTexto').innerText = tiempoMin;
-      }
-    }
+      // 2. Escuchar productos
+      db.ref('productos').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          catalogo = Object.values(data);
+          renderizarMenu();
+        }
+      });
 
-    function alternarPantallaCompletaMapa() {
-      const contenedor = document.getElementById('contenedorEnvolventeMapa');
-      const icono = document.getElementById('iconoPantallaCompleta');
-      const texto = document.getElementById('textoPantallaCompleta');
+      // 3. Escuchar teléfonos
+      db.ref('telefonos').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          telefonos = data;
+          renderizarTelefonos();
+        }
+      });
 
-      modoMapaAmpliado = !modoMapaAmpliado;
-
-      if (modoMapaAmpliado) {
-        contenedor.classList.add('fullscreen-map');
-        icono.innerText = "✖";
-        texto.innerText = "Reducir Mapa";
-        document.body.style.overflow = "hidden";
-      } else {
-        contenedor.classList.remove('fullscreen-map');
-        icono.innerText = "⛶";
-        texto.innerText = "Ampliar Mapa";
-        document.body.style.overflow = "";
-      }
-
-      setTimeout(() => {
-        if (map) map.invalidateSize();
-      }, 250);
-    }
-
-    function centrarEnMiUbicacionCliente() {
-      if (!navigator.geolocation) return alert("Geolocalización no soportada.");
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          ubicacionClienteCoords = { lat, lng };
-
-          if (!clienteMarker) {
-            const iconoCasa = L.divIcon({
-              className: 'custom-home-icon',
-              html: "<div style='background:#2563eb; color:white; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:19px; border:2px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.4);'>🏠</div>",
-              iconSize: [36, 36],
-              iconAnchor: [18, 18]
-            });
-            clienteMarker = L.marker([lat, lng], { icon: iconoCasa }).addTo(map).bindPopup("<b>Tu ubicación (Casa)</b>").openPopup();
-          } else {
-            clienteMarker.setLatLng([lat, lng]).openPopup();
+      // 4. Monitorear mi pedido en tiempo real
+      const miCliente = localStorage.getItem('leogas_mi_pedido_cliente');
+      if (miCliente) {
+        db.ref('pedidos').on('value', snap => {
+          const pedidos = snap.val();
+          if (pedidos) {
+            const miOrden = Object.values(pedidos).find(p => p.cliente && p.cliente.toLowerCase() === miCliente.toLowerCase() && p.estado !== 'completado');
+            if (miOrden) {
+              if (miOrden.etapa === 1 && miOrden.notificado !== 1) {
+                lanzarNotificacionCliente("🔥 LeoGas Cusco: ¡Balón en camino!", `Tu repartidor ya salió de la base con tu ${miOrden.tipoBalon}.`);
+                miOrden.notificado = 1;
+              } else if (miOrden.etapa === 2 && miOrden.notificado !== 2) {
+                lanzarNotificacionCliente("🦁 LeoGas Cusco: ¡Repartidor en tu puerta!", "Tu balón de gas ha llegado a tu dirección.");
+                miOrden.notificado = 2;
+              }
+            }
           }
-
-          map.setView([lat, lng], 15);
-          actualizarDistanciaEstimada();
-        },
-        () => alert("Activa tu GPS para ubicar tu casa en el mapa.")
-      );
+        });
+      }
     }
 
-    function trazarZonasCoberturaCusco() {
-      const estiloZonas = (color) => ({
-        color: color,
-        weight: 1.5,
-        opacity: 0.8,
-        fillColor: color,
-        fillOpacity: 0.16
-      });
-
-      const zonaCentro = [
-        [-13.5110, -71.9860], [-13.5135, -71.9720],
-        [-13.5220, -71.9750], [-13.5200, -71.9880]
-      ];
-      L.polygon(zonaCentro, estiloZonas('#8b5cf6')).addTo(map).bindPopup("<b>Zona Centro Histórico</b><br>Cobertura LeoGas Express");
-
-      const zonaWanchaq = [
-        [-13.5200, -71.9750], [-13.5210, -71.9560],
-        [-13.5350, -71.9580], [-13.5330, -71.9740]
-      ];
-      L.polygon(zonaWanchaq, estiloZonas('#f59e0b')).addTo(map).bindPopup("<b>Zona Wanchaq</b><br>Cobertura LeoGas");
-
-      const zonaSanSebastian = [
-        [-13.5210, -71.9560], [-13.5250, -71.9280],
-        [-13.5450, -71.9320], [-13.5350, -71.9580]
-      ];
-      L.polygon(zonaSanSebastian, estiloZonas('#10b981')).addTo(map).bindPopup("<b>Zona San Sebastián</b><br>Cobertura LeoGas");
-
-      const zonaSantiago = [
-        [-13.5220, -71.9880], [-13.5250, -71.9760],
-        [-13.5390, -71.9820], [-13.5360, -71.9950]
-      ];
-      L.polygon(zonaSantiago, estiloZonas('#ef4444')).addTo(map).bindPopup("<b>Zona Santiago</b><br>Cobertura LeoGas");
-
-      const zonaSanJeronimo = [
-        [-13.5250, -71.9280], [-13.5330, -71.8950],
-        [-13.5550, -71.9020], [-13.5450, -71.9320]
-      ];
-      L.polygon(zonaSanJeronimo, estiloZonas('#3b82f6')).addTo(map).bindPopup("<b>Zona San Jerónimo</b><br>Cobertura LeoGas");
-    }
-
-    function renderizarTelefonosFlyer() {
+    function renderizarTelefonos() {
       const container = document.getElementById('contenedorTelefonosFlyer');
-      const clean1 = telefonos.tel1.replace(/\D/g,'');
-      const clean2 = telefonos.tel2.replace(/\D/g,'');
-      const clean3 = telefonos.tel3.replace(/\D/g,'');
-
       container.innerHTML = `
-        <a href="tel:${clean1}" class="contact-button"><span>📞</span> ${telefonos.tel1}</a>
-        <a href="tel:${clean2}" class="contact-button"><span>📞</span> ${telefonos.tel2}</a>
-        <a href="tel:${clean3}" class="contact-button"><span>☎️</span> ${telefonos.tel3}</a>
+        <a href="tel:${telefonos.tel1.replace(/\D/g,'')}" class="contact-button"><span>📞</span> ${telefonos.tel1}</a>
+        <a href="tel:${telefonos.tel2.replace(/\D/g,'')}" class="contact-button"><span>📞</span> ${telefonos.tel2}</a>
+        <a href="tel:${telefonos.tel3.replace(/\D/g,'')}" class="contact-button"><span>☎️</span> ${telefonos.tel3}</a>
       `;
     }
 
     function iniciarMapaCusco() {
-      const cuscoLat = -13.5167;
-      const cuscoLng = -71.9788;
-      map = L.map('cuscoMap').setView([cuscoLat, cuscoLng], 13);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
-
-      trazarZonasCoberturaCusco();
-
-      actualizarVisualizadorGPS([
-        { id: "rep-1", nombre: "Repartidor 1", online: false, lat: cuscoLat, lng: cuscoLng }
-      ]);
+      map = L.map('cuscoMap').setView([-13.5167, -71.9788], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
     }
 
-    function actualizarVisualizadorGPS(flotaRepartidores) {
-      if (!Array.isArray(flotaRepartidores)) return;
-      flotaActual = flotaRepartidores;
-      let hayAlgunoOnline = false;
-
-      flotaRepartidores.forEach(rep => {
-        const estaOnline = (rep.online === true);
-        if (estaOnline) hayAlgunoOnline = true;
-
-        const iconoHTML = estaOnline ? `
-          <div class="custom-gps-marker">
-            <div class="gps-radar-pulse"></div>
-            <div class="fire-flame-emitter">🔥</div>
-            <div class="lion-badge-circle">🦁</div>
-          </div>
-        ` : `
-          <div class="custom-gps-marker offline">
-            <div class="lion-badge-circle">🦁</div>
-          </div>
-        `;
+    function actualizarVisualizadorGPS(flota) {
+      let hayOnline = false;
+      flota.forEach(rep => {
+        const online = rep.online === true;
+        if (online) hayOnline = true;
 
         const icono = L.divIcon({
           className: 'custom-gps-container',
-          html: iconoHTML,
+          html: `<div class="custom-gps-marker ${online ? '' : 'offline'}"><div class="gps-radar-pulse"></div><div class="fire-flame-emitter">🔥</div><div class="lion-badge-circle">🦁</div></div>`,
           iconSize: [48, 48],
           iconAnchor: [24, 24]
         });
 
-        const popupTexto = `<b>🦁 ${rep.nombre}</b><br>${estaOnline ? 'En Ruta Activo 🔥 (Online)' : 'Fuera de Ruta 💤 (Offline)'}`;
-
         if (!marcadoresFlota[rep.id]) {
-          marcadoresFlota[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono })
-            .addTo(map)
-            .bindPopup(popupTexto);
+          marcadoresFlota[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(map).bindPopup(`<b>🦁 ${rep.nombre}</b><br>${online ? 'En Ruta 🔥' : 'Offline 💤'}`);
         } else {
           marcadoresFlota[rep.id].setIcon(icono);
           marcadoresFlota[rep.id].setLatLng([rep.lat, rep.lng]);
-          marcadoresFlota[rep.id].setPopupContent(popupTexto);
         }
       });
 
-      const legOnline = document.getElementById('legendOnline');
-      const legOffline = document.getElementById('legendOffline');
-      if (hayAlgunoOnline) {
-        legOnline.classList.add('activo');
-        legOffline.classList.remove('activo');
-      } else {
-        legOnline.classList.remove('activo');
-        legOffline.classList.add('activo');
-      }
-
-      actualizarDistanciaEstimada();
+      document.getElementById('legendOnline').classList.toggle('activo', hayOnline);
+      document.getElementById('legendOffline').classList.toggle('activo', !hayOnline);
     }
 
     function renderizarMenu() {
       const contenedor = document.getElementById('contenedorEmpanadas');
       contenedor.innerHTML = '';
-
       catalogo.forEach(item => {
-        const estaDisponible = (item.disponible !== false);
         const card = document.createElement('article');
-        card.className = `card ${estaDisponible ? '' : 'agotado'}`;
+        card.className = `card ${item.disponible !== false ? '' : 'agotado'}`;
         card.innerHTML = `
           <div class="card-img-wrapper">
-            <span class="card-tag" style="background:${estaDisponible ? 'rgba(107, 33, 168, 0.9)' : '#dc2626'}">
-              ${estaDisponible ? (item.tag || 'Sellado') : 'Agotado'}
-            </span>
+            <span class="card-tag">${item.tag || 'Sellado'}</span>
             <img src="${item.imagen}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
           </div>
           <div class="card-body">
@@ -1724,9 +392,7 @@
             <p class="card-desc">${item.descripcion}</p>
             <div class="card-footer">
               <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
-              <button class="btn-add" ${estaDisponible ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}')">
-                ${estaDisponible ? '+ Pedir Balón' : 'Agotado'}
-              </button>
+              <button class="btn-add" onclick="agregarAlPedido('${item.id}')">+ Pedir Balón</button>
             </div>
           </div>
         `;
@@ -1735,65 +401,13 @@
     }
 
     function agregarAlPedido(id) {
-      sincronizarEstructuraPedido();
-      const itemCatalogo = catalogo.find(c => c.id === id);
-      if (itemCatalogo && itemCatalogo.disponible === false) {
-        alert("Este producto se encuentra agotado temporalmente.");
-        return;
+      if (!pedido[id]) {
+        const it = catalogo.find(c => c.id === id);
+        pedido[id] = { id: it.id, nombre: it.nombre, precio: it.precio, cantidad: 1 };
+      } else {
+        pedido[id].cantidad++;
       }
-      if (pedido[id]) {
-        pedido[id].cantidad += 1;
-        actualizarVistaPopup();
-      }
-    }
-
-    function cambiarCantidad(id, delta) {
-      if (pedido[id]) {
-        const itemCatalogo = catalogo.find(c => c.id === id);
-        if (delta > 0 && itemCatalogo && itemCatalogo.disponible === false) {
-          alert("Este producto no tiene stock disponible.");
-          return;
-        }
-        pedido[id].cantidad += delta;
-        if (pedido[id].cantidad < 0) pedido[id].cantidad = 0;
-        actualizarVistaPopup();
-      }
-    }
-
-    function anularProducto(id) {
-      if (pedido[id]) {
-        pedido[id].cantidad = 0;
-        actualizarVistaPopup();
-      }
-    }
-
-    function vaciarPedidoConConfirmacion() {
-      if (confirm("¿Deseas reiniciar tu pedido?")) {
-        for (const k in pedido) pedido[k].cantidad = 0;
-        actualizarVistaPopup();
-      }
-    }
-
-    function abrirModalCarrito() {
-      sincronizarEstructuraPedido();
       actualizarVistaPopup();
-      document.getElementById('cartModalOverlay').style.display = 'flex';
-    }
-
-    function cerrarModalCarrito() {
-      document.getElementById('cartModalOverlay').style.display = 'none';
-    }
-
-    function cerrarSiClickAfuera(e) {
-      if (e.target.id === 'cartModalOverlay') cerrarModalCarrito();
-    }
-
-    function abrirLightboxFlyer() {
-      document.getElementById('lightboxModal').style.display = 'flex';
-    }
-
-    function cerrarLightboxFlyer() {
-      document.getElementById('lightboxModal').style.display = 'none';
     }
 
     function actualizarVistaPopup() {
@@ -1802,300 +416,97 @@
       const listContainer = document.getElementById('popupItemsList');
       listContainer.innerHTML = '';
 
-      catalogo.forEach(catItem => {
-        const item = pedido[catItem.id] || { 
-          id: catItem.id, 
-          nombre: catItem.nombre, 
-          precio: catItem.precio, 
-          cantidad: 0, 
-          disponible: catItem.disponible !== false 
-        };
-
-        const estaDisponible = (catItem.disponible !== false);
-        if (!estaDisponible) item.cantidad = 0;
-
-        const subtotal = item.cantidad * item.precio;
+      Object.values(pedido).forEach(item => {
+        if (item.cantidad <= 0) return;
+        const sub = item.cantidad * item.precio;
         totalUnidades += item.cantidad;
-        totalMonto += subtotal;
+        totalMonto += sub;
 
         const row = document.createElement('div');
-        row.className = `cart-item-row ${!estaDisponible ? 'item-bloqueado' : (item.cantidad > 0 ? 'item-activo' : '')}`;
+        row.className = 'cart-item-row';
         row.innerHTML = `
-          <div class="cart-item-info">
-            <div class="cart-item-title">
-              ${item.nombre} 
-              ${!estaDisponible ? '<span style="color:#dc2626; font-size:11px; font-weight:800;">(Agotado)</span>' : ''}
-            </div>
-            <div class="cart-item-sub">S/ ${item.precio.toFixed(2)} c/u</div>
-          </div>
-          <div class="cart-controls">
-            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', -1)" ${(!estaDisponible || item.cantidad === 0) ? 'disabled' : ''}>-</button>
-            <span style="font-weight:bold; font-size:13px; min-width:18px; text-align:center;">${item.cantidad}</span>
-            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', 1)" ${!estaDisponible ? 'disabled' : ''}>+</button>
-          </div>
-          <div class="cart-item-price-wrapper">
-            <div class="cart-item-price">S/ ${subtotal.toFixed(2)}</div>
-            <button type="button" class="btn-trash-item" title="Eliminar" onclick="anularProducto('${item.id}')">🗑️</button>
-          </div>
+          <div><strong>${item.nombre}</strong><br><small>S/ ${item.precio.toFixed(2)} c/u</small></div>
+          <div>Cant: <strong>${item.cantidad}</strong></div>
+          <div><strong>S/ ${sub.toFixed(2)}</strong></div>
         `;
         listContainer.appendChild(row);
       });
 
-      ultimoTotalPagar = totalMonto;
-      document.getElementById('badgeContador').innerText = `${totalUnidades}`;
-      const textoCantidad = `${totalUnidades} ${totalUnidades === 1 ? 'balón seleccionado' : 'balones seleccionados'}`;
-      document.getElementById('cartLabelTotalConCantidad').innerText = `Total a pagar (${textoCantidad}):`;
+      document.getElementById('badgeContador').innerText = totalUnidades;
       document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
-
-      if (metodoPago === 'Efectivo') calcularVueltoEfectivo();
     }
 
-    function elegirPago(metodo, boton) {
-      metodoPago = metodo;
-      document.querySelectorAll('.btn-pay-option').forEach(btn => btn.classList.remove('active'));
-      boton.classList.add('active');
-      document.getElementById('cajaEfectivoDesplegable').style.display = (metodo === 'Efectivo') ? 'block' : 'none';
-      if (metodo === 'Efectivo') calcularVueltoEfectivo();
-    }
-
-    function elegirHorarioEntrega(tipo, boton) {
-      horarioEntrega = tipo;
-      document.querySelectorAll('.btn-del-opt').forEach(b => b.classList.remove('active'));
-      boton.classList.add('active');
-      document.getElementById('cajaHoraProgramada').style.display = (tipo === 'Programada') ? 'block' : 'none';
-    }
-
-    function alternarCamposComprobante(tipo) {
-      tipoComprobante = tipo;
-      document.getElementById('cajaDatosFactura').style.display = (tipo === 'Factura') ? 'flex' : 'none';
-    }
-
-    function setMontoEfectivoRapido(monto) {
-      const input = document.getElementById('montoEfectivoIngresado');
-      input.value = (monto === 'exacto') ? (ultimoTotalPagar > 0 ? ultimoTotalPagar : '') : monto;
-      calcularVueltoEfectivo();
-    }
-
-    function calcularVueltoEfectivo() {
-      const input = document.getElementById('montoEfectivoIngresado');
-      const box = document.getElementById('cajaRespuestaVuelto');
-      const txt = document.getElementById('textoDetalleVuelto');
-      const montoTxt = document.getElementById('montoCalculadoVuelto');
-      const pagaCon = parseFloat(input.value);
-
-      if (isNaN(pagaCon) || pagaCon <= 0) {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "Ingresa con cuánto pagarás para calcular el vuelto";
-        montoTxt.innerText = "";
-        return;
-      }
-
-      if (ultimoTotalPagar <= 0) {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "Selecciona al menos un balón disponible con stock";
-        montoTxt.innerText = "";
-        return;
-      }
-
-      const vuelto = pagaCon - ultimoTotalPagar;
-      if (vuelto < 0) {
-        box.className = "vuelto-badge-box alerta";
-        txt.innerText = `⚠️ Falta dinero (Faltan S/ ${Math.abs(vuelto).toFixed(2)})`;
-        montoTxt.innerText = "";
-      } else if (vuelto === 0) {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "✔ Pago exacto";
-        montoTxt.innerText = "S/ 0.00";
-      } else {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "💵 Vuelto a entregar:";
-        montoTxt.innerText = `S/ ${vuelto.toFixed(2)}`;
-      }
+    function elegirPago(p, btn) {
+      metodoPago = p;
+      document.querySelectorAll('.btn-pay-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
     }
 
     function capturarGPSCliente() {
-      const status = document.getElementById('geoStatus');
-      if (!navigator.geolocation) return status.innerText = "GPS no disponible.";
-      status.innerText = "Obteniendo ubicación...";
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          ubicacionClienteCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          status.innerText = "✔ Ubicación registrada para entrega";
-          status.classList.add('ready');
-
-          if (!clienteMarker) {
-            const iconoCasa = L.divIcon({
-              className: 'custom-home-icon',
-              html: "<div style='background:#2563eb; color:white; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:19px; border:2px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.4);'>🏠</div>",
-              iconSize: [36, 36],
-              iconAnchor: [18, 18]
-            });
-            clienteMarker = L.marker([pos.coords.latitude, pos.coords.longitude], { icon: iconoCasa }).addTo(map).bindPopup("<b>Tu ubicación (Casa)</b>");
-          } else {
-            clienteMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
-          }
-
-          actualizarDistanciaEstimada();
-        },
-        () => { status.innerText = "No se pudo obtener GPS."; },
-        { enableHighAccuracy: true }
-      );
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos => {
+        ubicacionClienteCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        document.getElementById('geoStatus').innerText = "✔ Ubicación lista";
+      });
     }
 
-    function enviarPedidoWhatsApp() {
-      sincronizarEstructuraPedido();
-      const productosSeleccionados = Object.values(pedido).filter(item => item.cantidad > 0 && item.disponible !== false);
+    function abrirModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'flex'; }
+    function cerrarModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'none'; }
+    function cerrarSiClickAfuera(e) { if (e.target.id === 'cartModalOverlay') cerrarModalCarrito(); }
 
-      if (productosSeleccionados.length === 0) {
-        alert("Por favor selecciona al menos un balón disponible para realizar tu pedido.");
-        return;
-      }
+    // ENVIAR A FIREBASE Y ABRIR WHATSAPP
+    async function enviarPedidoWhatsApp() {
+      const items = Object.values(pedido).filter(p => p.cantidad > 0);
+      if (items.length === 0) return alert("Selecciona al menos un balón.");
 
-      const nombreCliente = document.getElementById('nombreClienteInput').value.trim();
+      const nombre = document.getElementById('nombreClienteInput').value.trim() || "Particular";
       let total = 0;
-      let detalleTexto = "";
-
-      productosSeleccionados.forEach(item => {
-        const sub = item.cantidad * item.precio;
-        detalleTexto += `• ${item.cantidad}x ${item.nombre} (S/ ${sub.toFixed(2)})\n`;
-        total += sub;
+      let nombres = [];
+      items.forEach(i => {
+        total += i.cantidad * i.precio;
+        nombres.push(`${i.cantidad}x ${i.nombre}`);
       });
 
-      let pagoDetalle = metodoPago;
-      if (metodoPago === 'Efectivo') {
-        const inputEfectivo = parseFloat(document.getElementById('montoEfectivoIngresado').value);
-        if (!isNaN(inputEfectivo) && inputEfectivo > 0) {
-          const vuelto = inputEfectivo - total;
-          pagoDetalle = vuelto > 0 
-            ? `Efectivo (Paga con S/ ${inputEfectivo.toFixed(2)} | Vuelto: S/ ${vuelto.toFixed(2)})`
-            : `Efectivo (Exacto S/ ${inputEfectivo.toFixed(2)})`;
-        }
-      }
+      const detalle = nombres.join(", ");
+      const gpsUrl = ubicacionClienteCoords ? `https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}` : "";
 
-      let horarioTexto = (horarioEntrega === 'Inmediata') 
-        ? "Inmediata (Lo antes posible)" 
-        : `Programada (${document.getElementById('inputHoraProgramada').value})`;
+      // 1. Guardar en Firebase Realtime Database instantáneamente
+      const nuevoPedidoRef = db.ref('pedidos').push();
+      await nuevoPedidoRef.set({
+        id: nuevoPedidoRef.key,
+        cliente: nombre,
+        tipoBalon: detalle,
+        montoCobro: total.toFixed(2),
+        metodoPago: metodoPago,
+        gpsUrl: gpsUrl,
+        repartidorId: "",
+        estado: "pendiente_asignacion",
+        etapa: 1,
+        timestamp: Date.now(),
+        hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
+      });
 
-      let comprobanteTexto = tipoComprobante;
-      if (tipoComprobante === 'Factura') {
-        const ruc = document.getElementById('inputRucFactura').value.trim();
-        const rz = document.getElementById('inputRazonSocial').value.trim();
-        comprobanteTexto = `Factura (RUC: ${ruc || 'Sin RUC'} - Razón Social: ${rz || 'Sin Razón Social'})`;
-      }
-
-      let mensaje = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
-      if (nombreCliente) mensaje += `*👤 Cliente:* ${nombreCliente}\n`;
-      mensaje += `*Detalle:*\n${detalleTexto}\n`;
-      mensaje += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
-      mensaje += `*Paga con:* ${pagoDetalle}\n`;
-      mensaje += `*Horario de entrega:* ${horarioTexto}\n`;
-      mensaje += `*Comprobante solicitado:* ${comprobanteTexto}\n`;
-
-      if (ubicacionClienteCoords) {
-        mensaje += `*Ubicación GPS:* https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}\n`;
-      }
-
-      mensaje += `\n¿Me confirman tiempo estimado de entrega?`;
-
-      // Guarda el nombre del cliente y solicita permiso de alerta en su teléfono
-      if (nombreCliente) {
-        localStorage.setItem('leogas_mi_pedido_cliente', nombreCliente);
-      }
+      localStorage.setItem('leogas_mi_pedido_cliente', nombre);
       pedirPermisoNotificacionesCliente();
 
-      const numDestino = (telefonos.whatsapp || whatsappNumero).replace(/\D/g,'');
-      window.open(`https://wa.me/${numDestino}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    }
+      // 2. Abrir WhatsApp con el formato preparado
+      let msg = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
+      msg += `*👤 Cliente:* ${nombre}\n`;
+      msg += `*Detalle:* ${detalle}\n`;
+      msg += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
+      msg += `*Paga con:* ${metodoPago}\n`;
+      if (gpsUrl) msg += `*Ubicación GPS:* ${gpsUrl}\n`;
+      msg += `\n¿Me confirman tiempo de entrega?`;
 
-    // GENERAR TICKET / COMPROBANTE DIGITAL
-    function generarComprobanteModal() {
-      sincronizarEstructuraPedido();
-      const seleccionados = Object.values(pedido).filter(item => item.cantidad > 0 && item.disponible !== false);
-
-      if (seleccionados.length === 0) {
-        alert("Selecciona al menos un balón para generar el comprobante.");
-        return;
-      }
-
-      const nombre = document.getElementById('nombreClienteInput').value.trim() || 'Particular';
-      document.getElementById('tickCliente').innerText = nombre;
-      document.getElementById('tickFecha').innerText = new Date().toLocaleString();
-      document.getElementById('tickTipoComp').innerText = tipoComprobante;
-
-      const cajaFactura = document.getElementById('tickDetalleFactura');
-      if (tipoComprobante === 'Factura') {
-        cajaFactura.style.display = "block";
-        cajaFactura.innerHTML = `<strong>RUC:</strong> ${document.getElementById('inputRucFactura').value || '--'} | <strong>Razón Social:</strong> ${document.getElementById('inputRazonSocial').value || '--'}`;
-      } else {
-        cajaFactura.style.display = "none";
-      }
-
-      const horario = (horarioEntrega === 'Inmediata') 
-        ? "Inmediata" 
-        : `Programada (${document.getElementById('inputHoraProgramada').value})`;
-      document.getElementById('tickHorario').innerText = horario;
-      document.getElementById('tickPago').innerText = metodoPago;
-
-      const contItems = document.getElementById('tickListaProductos');
-      contItems.innerHTML = '';
-      let total = 0;
-
-      seleccionados.forEach(item => {
-        const sub = item.cantidad * item.precio;
-        total += sub;
-        const row = document.createElement('div');
-        row.className = 'ticket-row';
-        row.innerHTML = `<span>${item.cantidad}x ${item.nombre}</span><span>S/ ${sub.toFixed(2)}</span>`;
-        contItems.appendChild(row);
-      });
-
-      document.getElementById('tickTotal').innerText = `S/ ${total.toFixed(2)}`;
-      document.getElementById('ticketModalOverlay').style.display = 'flex';
-    }
-
-    function cerrarModalTicket() {
-      document.getElementById('ticketModalOverlay').style.display = 'none';
-    }
-
-    async function cargarCatalogoDesdeGitHub() {
-      try {
-        const res = await fetch('productos.json?v=' + Date.now());
-        if (res.ok) {
-          const datos = await res.json();
-          if (Array.isArray(datos)) {
-            catalogo = datos;
-          } else {
-            catalogo = datos.productos || catalogo;
-            if (datos.telefonos) {
-              telefonos = datos.telefonos;
-              whatsappNumero = telefonos.whatsapp;
-              renderizarTelefonosFlyer();
-            }
-            if (datos.repartidores) {
-              actualizarVisualizadorGPS(datos.repartidores);
-            }
-            if (datos.comandas) {
-              verificarEstadoPedidoCliente(datos.comandas);
-            }
-          }
-          sincronizarEstructuraPedido();
-          renderizarMenu();
-          actualizarVistaPopup();
-        }
-      } catch (err) {
-        console.log("Error al cargar productos.json:", err);
-      }
+      window.open(`https://wa.me/${telefonos.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+      cerrarModalCarrito();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      renderizarTelefonosFlyer();
-      sincronizarEstructuraPedido();
+      renderizarTelefonos();
       renderizarMenu();
       iniciarMapaCusco();
-      actualizarVistaPopup();
-      cargarCatalogoDesdeGitHub();
-      setInterval(cargarCatalogoDesdeGitHub, 12000);
+      iniciarEscuchaFirebase();
     });
   </script>
 </body>
