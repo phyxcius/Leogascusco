@@ -42,5 +42,20 @@
       "lat": -13.525,
       "lng": -71.95
     }
+  ],
+  "comandas": [
+    {
+      "id": "cmd-1792598426294",
+      "repartidorId": "rep-1",
+      "tipoBalon": "Balón Gas Premium 10kg",
+      "montoCobro": "50",
+      "metodoPago": "Yape",
+      "cliente": "rosa",
+      "direccion": "rosa",
+      "gpsUrl": "https://maps.app.goo.gl/oDnZPP3pnUXyiutq6?g_st=ac",
+      "etapa": 1,
+      "estado": "activo",
+      "horaAsignacion": "11:00:26"
+    }
   ]
 }
