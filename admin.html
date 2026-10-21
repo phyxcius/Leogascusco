@@ -811,14 +811,15 @@
       const repId = document.getElementById(`selRep_${id}`).value;
       if (!repId) return alert("Selecciona un repartidor.");
 
+      // Se asigna al chofer pero se mantiene en etapa 0 hasta que el chofer toque 'Paso 1: En Camino'
       await db.ref(`pedidos/${id}`).update({
         repartidorId: repId,
         estado: "activo",
-        etapa: 1
+        etapa: 0
       });
 
       emitirCampanada();
-      alert("✔ Pedido encomendado en tiempo real.");
+      alert("✔ Pedido encomendado. Ya aparece en la pantalla del repartidor.");
     }
 
     function renderizarFlotaActiva() {
