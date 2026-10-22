@@ -696,8 +696,8 @@
           accesorios = Array.isArray(acc) ? acc : Object.values(acc);
         } else {
           accesorios = [
-            { id: "acc-1", nombre: "Regulador Premium Doble Válvula con Manómetro", tag: "Seguridad Total", precio: 45.00, disponible: true, stock: 15, descripcion: "Regulador anti-fugas con indicador de presión." },
-            { id: "acc-2", nombre: "Manguera Flexible Reforzada (2 metros) + Abrazaderas", tag: "Alta Presión", precio: 25.00, disponible: true, stock: 20, descripcion: "Manguera reforzada para gas con 2 abrazaderas inoxidables." }
+            { id: "acc-1", nombre: "Regulador Premium Doble Válvula con Manómetro", tag: "Seguridad Total", precio: 45.00, disponible: true, stock: 15, descripcion: "Regulador anti-fugas con indicador de presión.", imagen: "1791513590376.jpg" },
+            { id: "acc-2", nombre: "Manguera Flexible Reforzada (2 metros) + Abrazaderas", tag: "Alta Presión", precio: 25.00, disponible: true, stock: 20, descripcion: "Manguera reforzada para gas con 2 abrazaderas inoxidables.", imagen: "1791513590376.jpg" }
           ];
           db.ref('accesorios').set(accesorios);
         }
@@ -811,7 +811,6 @@
       const repId = document.getElementById(`selRep_${id}`).value;
       if (!repId) return alert("Selecciona un repartidor.");
 
-      // Se asigna al chofer pero se mantiene en etapa 0 hasta que el chofer toque 'Paso 1: En Camino'
       await db.ref(`pedidos/${id}`).update({
         repartidorId: repId,
         estado: "activo",
@@ -1003,7 +1002,7 @@
       renderizarTablaClientes(filtrados);
     }
 
-    // ---------------- 3. VÁLVULAS Y ACCESORIOS ----------------
+    // ---------------- 3. VÁLVULAS Y ACCESORIOS CON CARGA DE IMÁGENES ----------------
     function renderizarAccesoriosEditor() {
       const cont = document.getElementById('listaAccesorios');
       if (!cont) return;
@@ -1037,10 +1036,30 @@
           <label>Descripción / Garantía:</label>
           <input type="text" value="${acc.descripcion || ''}" onchange="accesorios[${i}].descripcion = this.value">
 
+          <label>Foto Real del Accesorio:</label>
+          <div class="admin-img-preview-box">
+            <img id="prev-acc-${i}" class="admin-thumb" src="${acc.imagen || '1791513590376.jpg'}" onerror="this.src='1791513590376.jpg'">
+            <div style="flex:1;">
+              <input type="file" accept="image/*" onchange="subirImagenAccesorio(event, ${i})" style="font-size:12px;">
+              <input type="text" value="${acc.imagen || ''}" placeholder="o URL / nombre del archivo" onchange="accesorios[${i}].imagen = this.value; document.getElementById('prev-acc-${i}').src = this.value;" style="margin-top:4px;">
+            </div>
+          </div>
+
           <button class="btn btn-del" style="margin-top:10px;" onclick="eliminarAccesorio(${i})">🗑️ Eliminar Accesorio</button>
         `;
         cont.appendChild(div);
       });
+    }
+
+    function subirImagenAccesorio(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        accesorios[index].imagen = e.target.result;
+        document.getElementById(`prev-acc-${index}`).src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
 
     function agregarNuevoAccesorio() {
@@ -1051,7 +1070,8 @@
         precio: 30.00,
         stock: 10,
         disponible: true,
-        descripcion: "Accesorio certificado para instalaciones domésticas de GLP."
+        descripcion: "Accesorio certificado para instalaciones domésticas de GLP.",
+        imagen: "1791513590376.jpg"
       });
       renderizarAccesoriosEditor();
     }
