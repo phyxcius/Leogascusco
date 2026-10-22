@@ -120,6 +120,7 @@
 
     .section-menu { max-width: 1200px; margin: 20px auto 40px; padding: 0 20px; }
     .menu-header { background: var(--white); padding: 16px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
+    .menu-header h3 { font-size: 20px; font-weight: 800; color: var(--dark); }
     .grid-empanadas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; }
     .card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; border: 1px solid #f1f5f9; }
     .card.agotado { opacity: 0.65; }
@@ -514,12 +515,12 @@
       <div class="alert-icon-circle alert-icon-door">🚪🦁</div>
       <h3 style="color:#15803d;">¡Repartidor en tu Puerta!</h3>
       <p>
-        El repartidor de <strong>LeoGas Cusco</strong> ha llegado a tu dirección.<br><br>
-        Por favor sal a recibir tu balón de gas con tu método de pago listo.
+        El repartidor de <strong>LeoGas Cusco</strong> ya está afuera con tu balón de gas.<br><br>
+        Toca el botón para avisarle que ya estás saliendo a recibirlo.
       </p>
       <div class="alert-btn-group">
-        <button type="button" class="btn-alert-action btn-alert-success" onclick="cerrarAlertaEnPuerta()">
-          Voy a salir ✔️
+        <button type="button" class="btn-alert-action btn-alert-success" onclick="confirmarSalidaCliente()">
+          ¡Ya salgo! 🏃‍♂️✔️
         </button>
       </div>
     </div>
@@ -722,11 +723,9 @@
 
         let miOrden = null;
 
-        // Intentar recuperar por ID exacto
         if (miPedidoId && pedidos[miPedidoId]) {
           miOrden = pedidos[miPedidoId];
         } 
-        // Si no está el ID pero sí el nombre, vincular automáticamente la orden activa
         else if (miClienteNombre) {
           miOrden = Object.values(pedidos).find(p => 
             p.cliente && p.cliente.toLowerCase() === miClienteNombre.toLowerCase() && p.estado !== 'completado'
@@ -740,20 +739,20 @@
           actualizarBarraSeguimiento(miOrden);
           const etapaActual = miOrden.etapa || 0;
 
-          // DETECTAR CAMBIO A PASO 1 (EN CAMINO)
+          // PASO 1 (EN CAMINO)
           if (etapaActual === 1 && etapaAnteriorVista !== 1) {
             etapaAnteriorVista = 1;
             lanzarNotificacionCliente("🔥 LeoGas Cusco: ¡Repartidor en camino!", "Tu repartidor ya salió de la base con tu balón de gas hacia tu dirección.");
             mostrarAlertaEnCamino(miOrden.cliente || 'Estimado cliente');
           }
-          // DETECTAR CAMBIO A PASO 2 (EN PUERTA)
+          // PASO 2 (EN PUERTA)
           else if (etapaActual === 2 && etapaAnteriorVista !== 2) {
             etapaAnteriorVista = 2;
             lanzarNotificacionCliente("🦁 LeoGas Cusco: ¡Repartidor en tu puerta!", "Tu balón ha llegado a tu dirección. Por favor sal a recibirlo.");
             mostrarAlertaEnPuerta();
           }
         } else if (miOrden && miOrden.estado === 'completado') {
-          // DETECTAR FINALIZACIÓN (PASO 3)
+          // PASO 3 (FINALIZACIÓN)
           if (etapaAnteriorVista !== 3) {
             etapaAnteriorVista = 3;
             lanzarNotificacionCliente("🎉 ¡Entrega finalizada!", "Muchas gracias por tu compra en LeoGas Cusco.");
@@ -1140,7 +1139,15 @@
       document.getElementById('modalAlertaEnPuerta').style.display = 'flex';
       emitirCampanadaCliente();
     }
-    function cerrarAlertaEnPuerta() { document.getElementById('modalAlertaEnPuerta').style.display = 'none'; }
+
+    // FUNCIÓN DE CONFIRMACIÓN DE SALIDA DEL CLIENTE
+    function confirmarSalidaCliente() {
+      document.getElementById('modalAlertaEnPuerta').style.display = 'none';
+      const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
+      if (miPedidoId) {
+        db.ref(`pedidos/${miPedidoId}`).update({ clienteConfirmado: true });
+      }
+    }
 
     function mostrarAlertaAgradecimiento(nombreCliente) {
       document.getElementById('textoAlertaGracias').innerHTML = `
