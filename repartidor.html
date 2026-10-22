@@ -31,6 +31,50 @@
     .btn-action { width: 100%; padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; margin-bottom: 8px; }
     .btn-connect { background: #16a34a; color: #ffffff; }
     .btn-disconnect { background: #dc2626; color: #ffffff; display: none; }
+
+    /* MODAL CENTRADO EN LA PANTALLA */
+    .driver-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(5px);
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .driver-modal-box {
+      background: #ffffff;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      border: 3px solid #16a34a;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+      animation: popIn 0.25s ease-out;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .driver-modal-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .btn-modal-ok {
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 14px;
+    }
   </style>
 </head>
 <body>
@@ -82,6 +126,18 @@
     </button>
   </div>
 
+  <!-- MODAL CENTRADO: EL CLIENTE CONFIRMÓ QUE YA SALE -->
+  <div class="driver-modal-overlay" id="modalClienteSale">
+    <div class="driver-modal-box">
+      <div class="driver-modal-icon">🚪🏃‍♂️</div>
+      <h3 style="color:#15803d; font-size:20px; font-weight:900;">¡EL CLIENTE YA SALE!</h3>
+      <p id="textoClienteSale" style="font-size:14px; color:#334155; margin-top:8px; line-height:1.4;">
+        El cliente confirmó que está saliendo a la puerta. Ten listo el balón y el vuelto.
+      </p>
+      <button type="button" class="btn-modal-ok" onclick="cerrarModalClienteSale()">¡Entendido! 👍</button>
+    </div>
+  </div>
+
   <!-- SDK DE FIREBASE (TIEMPO REAL) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -104,17 +160,36 @@
     let ordenActiva = null;
     let watchIdGPS = null;
     let idUltimaOrdenVista = null;
+    let avisoSalidaMostrado = false;
     let repartidoresMap = {};
 
+    function emitirTimbreChofer() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.9);
+      } catch(e) {}
+    }
+
     function lanzarAlertaChofer(titulo, mensaje) {
-      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+      emitirTimbreChofer();
+      if ("vibrate" in navigator) navigator.vibrate([400, 150, 400]);
       if ("Notification" in window && Notification.permission === "granted") {
-        const notif = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
-        notif.onclick = () => { window.focus(); notif.close(); };
+        try {
+          const notif = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
+          notif.onclick = () => { window.focus(); notif.close(); };
+        } catch(e) {}
       }
     }
 
-    // CARGAR DINÁMICAMENTE LOS REPARTIDORES DESDE FIREBASE
     function escucharRepartidoresFirebase() {
       db.ref('repartidores').on('value', snap => {
         const data = snap.val();
@@ -132,7 +207,6 @@
           select.appendChild(opt);
         });
 
-        // Restaurar selección previa si existe
         if (valorGuardado && data[valorGuardado]) {
           select.value = valorGuardado;
         } else if (select.options.length > 0) {
@@ -146,6 +220,7 @@
 
     function cambioDeChofer() {
       idUltimaOrdenVista = null;
+      avisoSalidaMostrado = false;
       localStorage.setItem("leogas_chofer_id", document.getElementById('selectChofer').value);
       escucharComandasEnTiempoReal();
     }
@@ -162,7 +237,7 @@
           ordenActiva = Object.values(pedidos).find(p => p.repartidorId === repId && p.estado !== 'completado');
         }
 
-        // Alerta nativa + vibración al asignarse comanda
+        // Nueva comanda asignada
         if (ordenActiva && ordenActiva.id !== idUltimaOrdenVista) {
           if (idUltimaOrdenVista !== null) {
             lanzarAlertaChofer(
@@ -171,12 +246,33 @@
             );
           }
           idUltimaOrdenVista = ordenActiva.id;
+          avisoSalidaMostrado = false;
         } else if (!ordenActiva) {
           idUltimaOrdenVista = null;
+          avisoSalidaMostrado = false;
+        }
+
+        // DETECCIÓN: EL CLIENTE PULSÓ "YA SALGO" EN INDEX.HTML
+        if (ordenActiva && ordenActiva.clienteConfirmado === true && !avisoSalidaMostrado) {
+          avisoSalidaMostrado = true;
+          lanzarAlertaChofer("🚪 ¡El cliente ya sale!", `${ordenActiva.cliente} confirmó que está saliendo a la puerta.`);
+          mostrarModalClienteSale(ordenActiva.cliente);
         }
 
         renderizarVistaOrden();
       });
+    }
+
+    function mostrarModalClienteSale(nombreCliente) {
+      document.getElementById('textoClienteSale').innerHTML = `
+        <strong>${nombreCliente || 'El cliente'}</strong> acaba de confirmar: <br>
+        <span style="display:inline-block; margin-top:6px; font-size:16px; font-weight:800; color:#15803d;">"¡Ya salgo a recibir el gas!"</span>
+      `;
+      document.getElementById('modalClienteSale').style.display = 'flex';
+    }
+
+    function cerrarModalClienteSale() {
+      document.getElementById('modalClienteSale').style.display = 'none';
     }
 
     function renderizarVistaOrden() {
@@ -202,6 +298,7 @@
         </div>
         <div style="font-size:13px;">👤 <strong>Cliente:</strong> ${ordenActiva.cliente}</div>
         <div style="font-size:13px;">💵 <strong>Pago:</strong> ${ordenActiva.metodoPago}</div>
+        ${ordenActiva.clienteConfirmado ? '<div style="margin-top:6px; font-size:12px; font-weight:800; color:#15803d;">✔️ Cliente avisó que ya está saliendo</div>' : ''}
         ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" style="display:inline-block; background:#2563eb; color:#fff; text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:12px; margin-top:8px;">🗺️ Abrir Google Maps</a>` : ''}
       `;
 
@@ -211,15 +308,12 @@
       b3.classList.toggle('activo', etapa === 3);
 
       if (etapa === 0) {
-        // La orden acaba de llegar al chofer: debe pulsar Paso 1 para salir
         b1.disabled = false; b2.disabled = true; b3.disabled = true;
         document.getElementById('estadoActualTag').innerText = "Orden Asignada (Pulsa Paso 1 al salir)";
       } else if (etapa === 1) {
-        // Ya salió a ruta: siguiente paso es llegar a la puerta
         b1.disabled = true; b2.disabled = false; b3.disabled = true;
         document.getElementById('estadoActualTag').innerText = "Paso 1: En Camino 🔥";
       } else if (etapa === 2) {
-        // Ya está en la puerta: siguiente paso es finalizar
         b1.disabled = true; b2.disabled = true; b3.disabled = false;
         document.getElementById('estadoActualTag').innerText = "Paso 2: En Puerta 🚪";
       } else if (etapa === 3) {
