@@ -958,7 +958,7 @@
       });
     }
 
-    // 2. RENDERIZAR ACCESORIOS Y VÁLVULAS
+    // 2. RENDERIZAR ACCESORIOS Y VÁLVULAS CON IMAGEN REAL O RESPALDO
     function renderizarMenuAccesorios() {
       const contenedor = document.getElementById('contenedorAccesorios');
       contenedor.innerHTML = '';
@@ -973,9 +973,9 @@
         const card = document.createElement('article');
         card.className = `card ${!agotado ? '' : 'agotado'}`;
         card.innerHTML = `
-          <div class="card-img-wrapper" style="background:#faf5ff;">
+          <div class="card-img-wrapper">
             <span class="card-tag" style="background:#2563eb;">${item.tag || 'Accesorio'}</span>
-            <div style="font-size:54px;">🔧</div>
+            <img src="${item.imagen || '1791513590376.jpg'}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
           </div>
           <div class="card-body">
             <h4 class="card-title">${item.nombre}</h4>
@@ -1167,7 +1167,6 @@
       document.getElementById('textoAlertaExito').innerHTML = `
         Hola <strong>${nombreCliente}</strong>, tu pedido de <strong>${detalle}</strong> ha sido enviado a la central de LeoGas Cusco y transferido a WhatsApp.<br><br>
         Mantén esta pantalla abierta o revisa tus alertas para saber cuando el repartidor salga hacia tu casa.
-      </p>
       `;
       document.getElementById('modalAlertaExito').style.display = 'flex';
       emitirCampanadaCliente();
