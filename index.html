@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -22,7 +21,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #fafaf9; color: var(--text); line-height: 1.6; padding-bottom: 110px; }
+    body { background-color: #fafaf9; color: var(--text); line-height: 1.6; padding-bottom: 120px; }
 
     header { background: var(--white); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
     .nav-container { max-width: 1200px; margin: 0 auto; padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -40,6 +39,38 @@
     .chuspa-nav-sub { font-size: 9.5px; font-weight: 700; color: #b45309; }
 
     .nav-cta { background: var(--primary); color: var(--white); padding: 8px 18px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px; }
+
+    /* BARRA FLOTANTE DE SEGUIMIENTO EN VIVO */
+    .tracking-status-bar {
+      display: none;
+      position: sticky;
+      top: 64px;
+      z-index: 999;
+      background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+      border-bottom: 2px solid #eab308;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 10px 16px;
+    }
+    .tracking-status-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .tracking-tag-pill {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
     .hero { background: linear-gradient(135deg, #fef08a 0%, #fde047 50%, #facc15 100%); padding: 38px 20px 44px; text-align: center; border-bottom: 2px solid #eab308; }
     .hero-container { max-width: 800px; margin: 0 auto; }
@@ -104,13 +135,13 @@
     .btn-add { background: var(--primary); color: var(--white); border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
 
-    /* BOTÓN FLOTANTE CARRITO (DERECHA) */
+    /* BOTÓN FLOTANTE CARRITO */
     .chat-bubble-container { position: fixed; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 10px; z-index: 1500; cursor: pointer; user-select: none; }
     .chat-bubble-label { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); color: var(--primary-dark); font-weight: 900; font-size: 14px; padding: 8px 14px; border-radius: 20px; box-shadow: 0 4px 14px rgba(107, 33, 168, 0.25); border: 2px solid var(--primary); }
     .chat-bubble-btn { position: relative; width: 62px; height: 62px; background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); border-radius: 50%; box-shadow: 0 6px 20px rgba(107, 33, 168, 0.45); display: flex; align-items: center; justify-content: center; border: 2px solid #facc15; }
     .chat-badge { position: absolute; top: -3px; right: -3px; background-color: #ef4444; color: var(--white); border: 2px solid var(--white); font-size: 11px; font-weight: 800; min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-    /* BOTÓN FLOTANTE ACTIVAR NOTIFICACIONES (IZQUIERDA) */
+    /* BOTÓN FLOTANTE ACTIVAR NOTIFICACIONES */
     .floating-notif-btn {
       position: fixed;
       bottom: 24px;
@@ -131,17 +162,8 @@
       transition: all 0.25s ease;
       user-select: none;
     }
-    .floating-notif-btn:hover {
-      background: #6b21a8;
-      color: #ffffff;
-      transform: translateY(-2px);
-    }
-    .floating-notif-btn.activada {
-      background: #dcfce7;
-      color: #15803d;
-      border-color: #22c55e;
-      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
-    }
+    .floating-notif-btn:hover { background: #6b21a8; color: #ffffff; transform: translateY(-2px); }
+    .floating-notif-btn.activada { background: #dcfce7; color: #15803d; border-color: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25); }
 
     /* CARRITO MODAL */
     .cart-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: flex-end; }
@@ -247,6 +269,23 @@
       </div>
     </div>
   </header>
+
+  <!-- BARRA DE SEGUIMIENTO EN VIVO SI HAY ORDEN ACTIVA -->
+  <div class="tracking-status-bar" id="barraSeguimientoActivo">
+    <div class="tracking-status-inner">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:20px;">🛵</span>
+        <div>
+          <strong id="trackTituloCliente" style="color:#6b21a8; font-size:13px;">Tu pedido de gas está activo</strong>
+          <div id="trackDetalleEstado" style="font-size:11.5px; color:#475569;">En proceso de entrega...</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="tracking-tag-pill" id="trackPillEtapa">1. En Camino</span>
+        <button type="button" class="btn-ticket-modal" style="padding:6px 12px; font-size:11.5px;" onclick="generarComprobanteModal()">🧾 Comprobante</button>
+      </div>
+    </div>
+  </div>
 
   <!-- SECCIÓN HERO -->
   <section class="hero">
@@ -440,7 +479,8 @@
       <div class="alert-icon-circle alert-icon-success">🎉</div>
       <h3>¡Tu Pedido fue Registrado!</h3>
       <p id="textoAlertaExito">
-        Tu pedido ha sido enviado con éxito a la central de <strong>LeoGas Cusco</strong> y despachado por WhatsApp.
+        Tu pedido ha sido enviado a la central de <strong>LeoGas Cusco</strong> y transferido a WhatsApp.<br><br>
+        Mantén activadas tus notificaciones para saber cuando la moto salga hacia tu casa.
       </p>
       <div class="alert-btn-group">
         <button type="button" class="btn-alert-action btn-alert-success" onclick="cerrarAlertaExito()">
@@ -661,35 +701,86 @@
         }
       });
 
-      // 4. Monitoreo por ID de orden del cliente
-      const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
-      if (miPedidoId) {
-        db.ref(`pedidos/${miPedidoId}`).on('value', snap => {
-          const miOrden = snap.val();
-          if (miOrden) {
-            pedidoYaRealizado = miOrden.estado !== 'completado';
+      // 4. Monitoreo resiliente de la orden activa del cliente
+      const miPedidoIdGuardado = localStorage.getItem('leogas_mi_pedido_id');
+      const miClienteGuardado = localStorage.getItem('leogas_mi_pedido_cliente');
 
-            // PASO 1: EN CAMINO (Chofer inició la ruta)
-            if (miOrden.etapa === 1 && miOrden.notificadoCliente !== 1 && miOrden.repartidorId) {
-              lanzarNotificacionCliente("🔥 LeoGas Cusco: ¡Repartidor en camino!", "Tu repartidor ya salió de la base con tu balón de gas hacia tu dirección.");
-              db.ref(`pedidos/${miPedidoId}`).update({ notificadoCliente: 1 });
-            }
-            // PASO 2: EN PUERTA
-            else if (miOrden.etapa === 2 && miOrden.notificadoCliente !== 2) {
-              lanzarNotificacionCliente("🦁 LeoGas Cusco: ¡Repartidor en tu puerta!", "Tu balón ha llegado a tu dirección. Por favor sal a recibirlo.");
-              db.ref(`pedidos/${miPedidoId}`).update({ notificadoCliente: 2 });
-            }
-            // PASO 3: FINALIZADO / COMPLETADO
-            else if (miOrden.estado === 'completado' && miOrden.notificadoCliente !== 3) {
-              lanzarNotificacionCliente("🎉 ¡Entrega finalizada!", "Muchas gracias por tu compra en LeoGas Cusco. ¡Seguridad y peso exacto!");
-              mostrarAlertaAgradecimiento(miOrden.cliente || 'Estimado cliente');
-              db.ref(`pedidos/${miPedidoId}`).update({ notificadoCliente: 3 });
-              localStorage.removeItem('leogas_mi_pedido_id'); // Libera para futuros pedidos
-              pedidoYaRealizado = false;
-            }
+      db.ref('pedidos').on('value', snap => {
+        const pedidos = snap.val();
+        if (!pedidos) {
+          ocultarBarraSeguimiento();
+          return;
+        }
+
+        // Buscar primero por ID; si no existe, buscar por el Nombre del cliente que no esté completado
+        let miOrden = null;
+        if (miPedidoIdGuardado && pedidos[miPedidoIdGuardado]) {
+          miOrden = pedidos[miPedidoIdGuardado];
+        } else if (miClienteGuardado) {
+          miOrden = Object.values(pedidos).find(p => p.cliente && p.cliente.toLowerCase() === miClienteGuardado.toLowerCase() && p.estado !== 'completado');
+          if (miOrden) {
+            localStorage.setItem('leogas_mi_pedido_id', miOrden.id);
           }
-        });
+        }
+
+        if (miOrden) {
+          actualizarBarraSeguimiento(miOrden);
+          pedidoYaRealizado = (miOrden.estado !== 'completado');
+
+          // PASO 1: EN CAMINO (Chofer salió de la base)
+          if (miOrden.etapa === 1 && miOrden.notificadoCliente !== 1 && miOrden.repartidorId) {
+            lanzarNotificacionCliente("🔥 LeoGas Cusco: ¡Repartidor en camino!", "Tu repartidor ya salió con tu balón hacia tu dirección.");
+            db.ref(`pedidos/${miOrden.id}`).update({ notificadoCliente: 1 });
+          }
+          // PASO 2: EN PUERTA
+          else if (miOrden.etapa === 2 && miOrden.notificadoCliente !== 2) {
+            lanzarNotificacionCliente("🦁 LeoGas Cusco: ¡Repartidor en tu puerta!", "Tu balón ha llegado a tu dirección. Por favor sal a recibirlo.");
+            db.ref(`pedidos/${miOrden.id}`).update({ notificadoCliente: 2 });
+          }
+          // PASO 3: FINALIZADO / COMPLETADO
+          else if (miOrden.estado === 'completado' && miOrden.notificadoCliente !== 3) {
+            lanzarNotificacionCliente("🎉 ¡Entrega finalizada!", "Muchas gracias por tu compra en LeoGas Cusco. ¡Seguridad y peso exacto!");
+            mostrarAlertaAgradecimiento(miOrden.cliente || 'Estimado cliente');
+            db.ref(`pedidos/${miOrden.id}`).update({ notificadoCliente: 3 });
+            localStorage.removeItem('leogas_mi_pedido_id');
+            pedidoYaRealizado = false;
+            ocultarBarraSeguimiento();
+          }
+        } else {
+          ocultarBarraSeguimiento();
+          pedidoYaRealizado = false;
+        }
+      });
+    }
+
+    function actualizarBarraSeguimiento(orden) {
+      const barra = document.getElementById('barraSeguimientoActivo');
+      const tit = document.getElementById('trackTituloCliente');
+      const det = document.getElementById('trackDetalleEstado');
+      const pill = document.getElementById('trackPillEtapa');
+
+      barra.style.display = 'block';
+      tit.innerText = `Pedido de ${orden.cliente}: ${orden.tipoBalon}`;
+
+      const etapa = orden.etapa || 0;
+      if (etapa === 0) {
+        det.innerText = "Orden recibida en central. Asignando repartidor...";
+        pill.innerText = "⏳ En espera";
+        pill.style.background = "#6b21a8";
+      } else if (etapa === 1) {
+        det.innerText = "El repartidor ya salió de la base hacia tu casa 🔥";
+        pill.innerText = "🛵 1. En Camino";
+        pill.style.background = "#e52329";
+      } else if (etapa === 2) {
+        det.innerText = "¡El repartidor está en tu puerta! Sal a recibir tu gas 🚪";
+        pill.innerText = "🏠 2. En Puerta";
+        pill.style.background = "#15803d";
       }
+    }
+
+    function ocultarBarraSeguimiento() {
+      const barra = document.getElementById('barraSeguimientoActivo');
+      if (barra) barra.style.display = 'none';
     }
 
     function renderizarTelefonos() {
@@ -967,10 +1058,9 @@
 
     // GENERAR COMPROBANTE DIGITAL
     function generarComprobanteModal() {
-      const items = Object.values(pedido).filter(p => p.cantidad > 0);
-      if (items.length === 0) return alert("Selecciona al menos un balón para generar el comprobante.");
+      const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
+      const nombre = document.getElementById('nombreClienteInput').value.trim() || localStorage.getItem('leogas_mi_pedido_cliente') || 'Particular';
 
-      const nombre = document.getElementById('nombreClienteInput').value.trim() || 'Particular';
       document.getElementById('tickCliente').innerText = nombre;
       document.getElementById('tickFecha').innerText = new Date().toLocaleString();
       document.getElementById('tickTipoComp').innerText = tipoComprobante;
@@ -991,14 +1081,20 @@
       contItems.innerHTML = '';
       let total = 0;
 
-      items.forEach(item => {
-        const sub = item.cantidad * item.precio;
-        total += sub;
-        const row = document.createElement('div');
-        row.className = 'ticket-row';
-        row.innerHTML = `<span>${item.cantidad}x ${item.nombre}</span><span>S/ ${sub.toFixed(2)}</span>`;
-        contItems.appendChild(row);
-      });
+      const items = Object.values(pedido).filter(p => p.cantidad > 0);
+      if (items.length > 0) {
+        items.forEach(item => {
+          const sub = item.cantidad * item.precio;
+          total += sub;
+          const row = document.createElement('div');
+          row.className = 'ticket-row';
+          row.innerHTML = `<span>${item.cantidad}x ${item.nombre}</span><span>S/ ${sub.toFixed(2)}</span>`;
+          contItems.appendChild(row);
+        });
+      } else {
+        contItems.innerHTML = `<div class="ticket-row"><span>1x Balón LeoGas 10kg</span><span>S/ 50.00</span></div>`;
+        total = 50.00;
+      }
 
       document.getElementById('tickTotal').innerText = `S/ ${total.toFixed(2)}`;
       document.getElementById('ticketModalOverlay').style.display = 'flex';
@@ -1008,7 +1104,6 @@
       document.getElementById('ticketModalOverlay').style.display = 'none';
     }
 
-    // MODALES Y ALERTAS
     function mostrarAlertaExito(nombreCliente, detalle) {
       document.getElementById('textoAlertaExito').innerHTML = `
         Hola <strong>${nombreCliente}</strong>, tu pedido de <strong>${detalle}</strong> ha sido enviado a la central de LeoGas Cusco y transferido a WhatsApp.<br><br>
@@ -1083,7 +1178,6 @@
         comprobanteTexto = `Factura (RUC: ${ruc || 'Sin RUC'} - Razón Social: ${rz || 'Sin Razón Social'})`;
       }
 
-      // 1. Guardar en Firebase con clave única
       const nuevoPedidoRef = db.ref('pedidos').push();
       const pedidoId = nuevoPedidoRef.key;
 
@@ -1104,15 +1198,12 @@
         hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
       });
 
-      // 2. Guardar ID único en localStorage para vincular alertas
       localStorage.setItem('leogas_mi_pedido_id', pedidoId);
       localStorage.setItem('leogas_mi_pedido_cliente', nombre);
       pedidoYaRealizado = true;
 
-      // 3. Activar alertas si aún no las aceptó
       pedirPermisoNotificacionesCliente();
 
-      // 4. Abrir WhatsApp
       let msg = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
       msg += `*👤 Cliente:* ${nombre}\n`;
       msg += `*Detalle:* ${detalle}\n`;
@@ -1139,4 +1230,3 @@
   </script>
 </body>
 </html>
-
