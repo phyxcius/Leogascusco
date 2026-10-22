@@ -124,7 +124,7 @@
     .grid-empanadas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; }
     .card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; border: 1px solid #f1f5f9; }
     .card.agotado { opacity: 0.65; }
-    .card-img-wrapper { position: relative; height: 200px; background: #e2e8f0; overflow: hidden; }
+    .card-img-wrapper { position: relative; height: 180px; background: #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
     .card-tag { position: absolute; top: 10px; left: 10px; background: rgba(107, 33, 168, 0.9); color: var(--white); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 16px; }
     .card-body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
@@ -351,13 +351,22 @@
     </div>
   </section>
 
-  <!-- CATÁLOGO -->
+  <!-- CATÁLOGO 1: BALONES DE GAS -->
   <section class="section-menu" id="menu">
     <div class="menu-header">
       <h3>Elige tu Balón de Gas</h3>
-      <p style="font-size: 13px; color: #64748b;">Selecciona tu balón de 10 kg e indícanos tu dirección exacta.</p>
+      <p style="font-size: 13px; color: #64748b;">Selecciona tu balón de 10 kg con precinto de seguridad y peso exacto.</p>
     </div>
     <div class="grid-empanadas" id="contenedorEmpanadas"></div>
+  </section>
+
+  <!-- CATÁLOGO 2: VÁLVULAS, REGULADORES Y ACCESORIOS -->
+  <section class="section-menu" id="seccionAccesoriosCliente">
+    <div class="menu-header" style="border-left: 4px solid var(--accent);">
+      <h3>🔧 Válvulas, Reguladores y Accesorios de Gas</h3>
+      <p style="font-size: 13px; color: #64748b;">Repuestos originales certificados para máxima seguridad en tu cocina.</p>
+    </div>
+    <div class="grid-empanadas" id="contenedorAccesorios"></div>
   </section>
 
   <!-- BOTÓN FLOTANTE ACTIVAR NOTIFICACIONES -->
@@ -386,7 +395,7 @@
       <div class="cart-modal-body">
         <div>
           <div class="cart-header-actions">
-            <span class="popup-section-label">Balones seleccionados:</span>
+            <span class="popup-section-label">Productos seleccionados:</span>
             <button type="button" class="btn-vaciar-cart" onclick="vaciarPedidoConConfirmacion()">🗑️ Vaciar pedido</button>
           </div>
           <div class="cart-items-box" id="popupItemsList"></div>
@@ -498,7 +507,7 @@
       <div class="alert-icon-circle alert-icon-road">🛵🔥</div>
       <h3 style="color:#b91c1c;">¡Tu Balón está en Camino!</h3>
       <p id="textoAlertaEnCamino">
-        El repartidor ya salió de la base con tu pedido de gas hacia tu dirección.<br><br>
+        El repartidor ya salió de la base con tu pedido hacia tu dirección.<br><br>
         Puedes seguir su ubicación GPS en tiempo real en el mapa.
       </p>
       <div class="alert-btn-group">
@@ -598,10 +607,8 @@
     const db = firebase.database();
 
     let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
-    let catalogo = [
-      { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado de 10kg con precinto de seguridad.", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" },
-      { id: "gas-2", nombre: "Balón Gas Premium 10kg", tag: "Máximo Rendimiento", descripcion: "GLP de alta pureza con válvula anti-fugas.", precio: 55.00, disponible: true, imagen: "1791513590376.jpg" }
-    ];
+    let catalogoBalones = [];
+    let catalogoAccesorios = [];
 
     const pedido = {};
     let metodoPago = "Efectivo";
@@ -692,16 +699,25 @@
         }
       });
 
-      // 2. Productos
+      // 2. Balones de Gas
       db.ref('productos').on('value', snap => {
         const data = snap.val();
         if (data) {
-          catalogo = Array.isArray(data) ? data : Object.values(data);
-          renderizarMenu();
+          catalogoBalones = Array.isArray(data) ? data : Object.values(data);
+          renderizarMenuBalones();
         }
       });
 
-      // 3. Teléfonos
+      // 3. Válvulas y Accesorios
+      db.ref('accesorios').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          catalogoAccesorios = Array.isArray(data) ? data : Object.values(data);
+          renderizarMenuAccesorios();
+        }
+      });
+
+      // 4. Teléfonos
       db.ref('telefonos').on('value', snap => {
         const data = snap.val();
         if (data) {
@@ -710,7 +726,7 @@
         }
       });
 
-      // 4. MONITOREO PERSISTENTE DEL PEDIDO
+      // 5. MONITOREO DEL PEDIDO
       db.ref('pedidos').on('value', snap => {
         const pedidos = snap.val();
         if (!pedidos) {
@@ -725,8 +741,7 @@
 
         if (miPedidoId && pedidos[miPedidoId]) {
           miOrden = pedidos[miPedidoId];
-        } 
-        else if (miClienteNombre) {
+        } else if (miClienteNombre) {
           miOrden = Object.values(pedidos).find(p => 
             p.cliente && p.cliente.toLowerCase() === miClienteNombre.toLowerCase() && p.estado !== 'completado'
           );
@@ -916,24 +931,24 @@
       actualizarDistanciaEstimada();
     }
 
-    // CATÁLOGO
-    function renderizarMenu() {
+    // 1. RENDERIZAR BALONES
+    function renderizarMenuBalones() {
       const contenedor = document.getElementById('contenedorEmpanadas');
       contenedor.innerHTML = '';
-      catalogo.forEach(item => {
+      catalogoBalones.forEach(item => {
         const card = document.createElement('article');
         card.className = `card ${item.disponible !== false ? '' : 'agotado'}`;
         card.innerHTML = `
           <div class="card-img-wrapper">
             <span class="card-tag">${item.tag || 'Sellado'}</span>
-            <img src="${item.imagen}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
+            <img src="${item.imagen || '1791513590376.jpg'}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
           </div>
           <div class="card-body">
             <h4 class="card-title">${item.nombre}</h4>
-            <p class="card-desc">${item.descripcion}</p>
+            <p class="card-desc">${item.descripcion || ''}</p>
             <div class="card-footer">
               <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
-              <button class="btn-add" ${item.disponible !== false ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}')">
+              <button class="btn-add" ${item.disponible !== false ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">
                 ${item.disponible !== false ? '+ Pedir Balón' : 'Agotado'}
               </button>
             </div>
@@ -943,10 +958,43 @@
       });
     }
 
-    function agregarAlPedido(id) {
+    // 2. RENDERIZAR ACCESORIOS Y VÁLVULAS
+    function renderizarMenuAccesorios() {
+      const contenedor = document.getElementById('contenedorAccesorios');
+      contenedor.innerHTML = '';
+      if (catalogoAccesorios.length === 0) {
+        document.getElementById('seccionAccesoriosCliente').style.display = 'none';
+        return;
+      }
+      document.getElementById('seccionAccesoriosCliente').style.display = 'block';
+
+      catalogoAccesorios.forEach(item => {
+        const agotado = (item.disponible === false || item.stock <= 0);
+        const card = document.createElement('article');
+        card.className = `card ${!agotado ? '' : 'agotado'}`;
+        card.innerHTML = `
+          <div class="card-img-wrapper" style="background:#faf5ff;">
+            <span class="card-tag" style="background:#2563eb;">${item.tag || 'Accesorio'}</span>
+            <div style="font-size:54px;">🔧</div>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">${item.nombre}</h4>
+            <p class="card-desc">${item.descripcion || 'Accesorio garantizado para balón de gas.'}</p>
+            <div class="card-footer">
+              <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
+              <button class="btn-add" style="background:#2563eb;" ${!agotado ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">
+                ${!agotado ? '+ Agregar' : 'Agotado'}
+              </button>
+            </div>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    function agregarAlPedido(id, nombre, precio) {
       if (!pedido[id]) {
-        const it = catalogo.find(c => c.id === id);
-        pedido[id] = { id: it.id, nombre: it.nombre, precio: it.precio, cantidad: 1 };
+        pedido[id] = { id: id, nombre: nombre, precio: parseFloat(precio), cantidad: 1 };
       } else {
         pedido[id].cantidad++;
       }
@@ -995,7 +1043,7 @@
 
       ultimoTotalPagar = totalMonto;
       document.getElementById('badgeContador').innerText = totalUnidades;
-      document.getElementById('cartLabelTotalConCantidad').innerText = `Total (${totalUnidades} balones):`;
+      document.getElementById('cartLabelTotalConCantidad').innerText = `Total (${totalUnidades} productos):`;
       document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
       if (metodoPago === 'Efectivo') calcularVueltoEfectivo();
     }
@@ -1119,6 +1167,7 @@
       document.getElementById('textoAlertaExito').innerHTML = `
         Hola <strong>${nombreCliente}</strong>, tu pedido de <strong>${detalle}</strong> ha sido enviado a la central de LeoGas Cusco y transferido a WhatsApp.<br><br>
         Mantén esta pantalla abierta o revisa tus alertas para saber cuando el repartidor salga hacia tu casa.
+      </p>
       `;
       document.getElementById('modalAlertaExito').style.display = 'flex';
       emitirCampanadaCliente();
@@ -1140,7 +1189,7 @@
       emitirCampanadaCliente();
     }
 
-    // FUNCIÓN DE CONFIRMACIÓN DE SALIDA DEL CLIENTE
+    // FUNCIÓN DE CONFIRMACIÓN DE SALIDA DEL CLIENTE (AVISA AL CHOFER)
     function confirmarSalidaCliente() {
       document.getElementById('modalAlertaEnPuerta').style.display = 'none';
       const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
@@ -1162,7 +1211,7 @@
     // REGISTRO DE PEDIDO
     async function enviarPedidoWhatsApp() {
       const items = Object.values(pedido).filter(p => p.cantidad > 0);
-      if (items.length === 0) return alert("Selecciona al menos un balón disponible.");
+      if (items.length === 0) return alert("Selecciona al menos un balón o accesorio disponible.");
 
       const nombre = document.getElementById('nombreClienteInput').value.trim() || "Particular";
       let total = 0;
@@ -1198,6 +1247,7 @@
         estado: "pendiente_asignacion",
         etapa: 0,
         notificadoCliente: 0,
+        clienteConfirmado: false,
         timestamp: Date.now(),
         hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
       });
@@ -1225,7 +1275,6 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       renderizarTelefonos();
-      renderizarMenu();
       iniciarMapaCusco();
       actualizarBotonNotificacionesCliente();
       iniciarEscuchaFirebase();
