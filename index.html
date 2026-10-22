@@ -40,7 +40,7 @@
 
     .nav-cta { background: var(--primary); color: var(--white); padding: 8px 18px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px; }
 
-    /* BARRA FLOTANTE DE SEGUIMIENTO EN VIVO */
+    /* BARRA DE SEGUIMIENTO EN VIVO */
     .tracking-status-bar {
       display: none;
       position: sticky;
@@ -120,7 +120,6 @@
 
     .section-menu { max-width: 1200px; margin: 20px auto 40px; padding: 0 20px; }
     .menu-header { background: var(--white); padding: 16px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
-    .menu-header h3 { font-size: 20px; font-weight: 800; color: var(--dark); }
     .grid-empanadas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; }
     .card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; border: 1px solid #f1f5f9; }
     .card.agotado { opacity: 0.65; }
@@ -214,6 +213,8 @@
     .alert-icon-circle { width: 70px; height: 70px; margin: 0 auto 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; }
     .alert-icon-success { background: #dcfce7; border: 2px solid #22c55e; }
     .alert-icon-warning { background: #fef9c3; border: 2px solid #eab308; }
+    .alert-icon-road { background: #fee2e2; border: 2px solid #ef4444; }
+    .alert-icon-door { background: #dcfce7; border: 2px solid #16a34a; }
     .alert-icon-finish { background: #f3e8ff; border: 2px solid #a855f7; }
 
     .center-alert-card h3 { font-size: 20px; font-weight: 900; color: #1e1b4b; margin-bottom: 8px; }
@@ -270,7 +271,7 @@
     </div>
   </header>
 
-  <!-- BARRA DE SEGUIMIENTO EN VIVO SI HAY ORDEN ACTIVA -->
+  <!-- BARRA DE SEGUIMIENTO EN VIVO -->
   <div class="tracking-status-bar" id="barraSeguimientoActivo">
     <div class="tracking-status-inner">
       <div style="display:flex; align-items:center; gap:8px;">
@@ -358,13 +359,13 @@
     <div class="grid-empanadas" id="contenedorEmpanadas"></div>
   </section>
 
-  <!-- BOTÓN FLOTANTE ACTIVAR NOTIFICACIONES (IZQUIERDA) -->
+  <!-- BOTÓN FLOTANTE ACTIVAR NOTIFICACIONES -->
   <div class="floating-notif-btn" id="btnFlotanteNotificaciones" onclick="solicitarPermisoNotificacionesManual(this)">
     <span id="iconoCampanaNotif">🔔</span>
     <span id="textoBtnNotif">Activar Alertas</span>
   </div>
 
-  <!-- BOTÓN FLOTANTE CARRITO (DERECHA) -->
+  <!-- BOTÓN FLOTANTE CARRITO -->
   <div class="chat-bubble-container" id="btnFlotanteContenedor" onclick="abrirModalCarrito()">
     <div class="chat-bubble-label"><span>🔥 Pedidos</span></div>
     <div class="chat-bubble-btn">
@@ -473,47 +474,58 @@
     </div>
   </div>
 
-  <!-- ALERTA 1: PEDIDO REALIZADO -->
+  <!-- MODAL: ALERTA 1: PEDIDO REALIZADO -->
   <div class="center-alert-overlay" id="modalAlertaExito">
     <div class="center-alert-card">
       <div class="alert-icon-circle alert-icon-success">🎉</div>
       <h3>¡Tu Pedido fue Registrado!</h3>
       <p id="textoAlertaExito">
         Tu pedido ha sido enviado a la central de <strong>LeoGas Cusco</strong> y transferido a WhatsApp.<br><br>
-        Mantén activadas tus notificaciones para saber cuando la moto salga hacia tu casa.
+        Mantén esta pantalla abierta o revisa tus alertas para saber cuando el repartidor salga hacia tu casa.
       </p>
       <div class="alert-btn-group">
         <button type="button" class="btn-alert-action btn-alert-success" onclick="cerrarAlertaExito()">
           Entendido ✔️ (Ver Repartidor en Mapa)
         </button>
-        <button type="button" class="btn-alert-action btn-alert-secondary" onclick="cerrarAlertaExito(); generarComprobanteModal();">
-          🧾 Ver Comprobante Digital
-        </button>
       </div>
     </div>
   </div>
 
-  <!-- ALERTA 2: ADVERTENCIA DE SEGUNDO PEDIDO -->
-  <div class="center-alert-overlay" id="modalAlertaSegundoPedido">
-    <div class="center-alert-card" style="border: 2px solid #eab308;">
-      <div class="alert-icon-circle alert-icon-warning">⚠️</div>
-      <h3 style="color:#b45309;">Pedido en Proceso</h3>
-      <p>
-        Ya realizaste un pedido recientemente que está en cola o en camino.<br><br>
-        <strong>¿Deseas tramitar un SEGUNDO pedido adicional de gas?</strong>
+  <!-- MODAL: ALERTA EN CAMINO (PASO 1) -->
+  <div class="center-alert-overlay" id="modalAlertaEnCamino">
+    <div class="center-alert-card" style="border: 2px solid #ef4444;">
+      <div class="alert-icon-circle alert-icon-road">🛵🔥</div>
+      <h3 style="color:#b91c1c;">¡Tu Balón está en Camino!</h3>
+      <p id="textoAlertaEnCamino">
+        El repartidor ya salió de la base con tu pedido de gas hacia tu dirección.<br><br>
+        Puedes seguir su ubicación GPS en tiempo real en el mapa.
       </p>
       <div class="alert-btn-group">
-        <button type="button" class="btn-alert-action btn-alert-primary" onclick="confirmarSegundoPedido()">
-          Sí, Continuar con Segundo Pedido ➕
-        </button>
-        <button type="button" class="btn-alert-action btn-alert-secondary" onclick="cerrarAlertaSegundoPedido()">
-          No, Esperar mi Pedido Actual ⏳
+        <button type="button" class="btn-alert-action btn-alert-primary" onclick="cerrarAlertaEnCamino()">
+          Ver Mapa en Vivo 🗺️
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ALERTA 3: AGRADECIMIENTO AL COMPLETAR ENTREGA (PASO 3) -->
+  <!-- MODAL: ALERTA EN PUERTA (PASO 2) -->
+  <div class="center-alert-overlay" id="modalAlertaEnPuerta">
+    <div class="center-alert-card" style="border: 2px solid #16a34a;">
+      <div class="alert-icon-circle alert-icon-door">🚪🦁</div>
+      <h3 style="color:#15803d;">¡Repartidor en tu Puerta!</h3>
+      <p>
+        El repartidor de <strong>LeoGas Cusco</strong> ha llegado a tu dirección.<br><br>
+        Por favor sal a recibir tu balón de gas con tu método de pago listo.
+      </p>
+      <div class="alert-btn-group">
+        <button type="button" class="btn-alert-action btn-alert-success" onclick="cerrarAlertaEnPuerta()">
+          Voy a salir ✔️
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ALERTA AGRADECIMIENTO (PASO 3) -->
   <div class="center-alert-overlay" id="modalAlertaGracias">
     <div class="center-alert-card" style="border: 2px solid #a855f7;">
       <div class="alert-icon-circle alert-icon-finish">🦁✨</div>
@@ -602,9 +614,9 @@
     let flotaActual = [];
     let modoMapaAmpliado = false;
 
-    let pedidoYaRealizado = false;
+    let etapaAnteriorVista = -1;
 
-    // SONIDO Y NOTIFICACIONES
+    // SONIDO Y VIBRACIÓN
     function emitirCampanadaCliente() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -612,12 +624,12 @@
         const gain = ctx.createGain();
         osc.frequency.setValueAtTime(659.25, ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.18);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.75);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.75);
+        osc.stop(ctx.currentTime + 0.8);
       } catch (e) {}
     }
 
@@ -639,18 +651,12 @@
     }
 
     function solicitarPermisoNotificacionesManual(btn) {
-      if (!("Notification" in window)) {
-        return alert("Este navegador no soporta notificaciones.");
-      }
-
+      if (!("Notification" in window)) return alert("Este navegador no soporta notificaciones.");
       emitirCampanadaCliente();
-
       Notification.requestPermission().then(perm => {
         actualizarBotonNotificacionesCliente();
         if (perm === "granted") {
-          lanzarNotificacionCliente("🦁 LeoGas Cusco", "¡Alertas activadas! Te avisaremos cuando tu repartidor esté en camino a tu casa.");
-        } else if (perm === "denied") {
-          alert("Las notificaciones fueron bloqueadas. Habilítalas en los permisos de tu navegador para seguir tu balón en vivo.");
+          lanzarNotificacionCliente("🦁 LeoGas Cusco", "¡Alertas activadas! Te avisaremos cuando el repartidor salga hacia tu casa.");
         }
       });
     }
@@ -665,16 +671,18 @@
 
     function lanzarNotificacionCliente(titulo, mensaje) {
       emitirCampanadaCliente();
-      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+      if ("vibrate" in navigator) navigator.vibrate([400, 200, 400]);
       if ("Notification" in window && Notification.permission === "granted") {
-        const n = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png", badge: "CHUSPITA-circulo.png" });
-        n.onclick = () => { window.focus(); n.close(); };
+        try {
+          const n = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
+          n.onclick = () => { window.focus(); n.close(); };
+        } catch(e) {}
       }
     }
 
     // CONEXIÓN EN TIEMPO REAL CON FIREBASE
     function iniciarEscuchaFirebase() {
-      // 1. Repartidores y GPS
+      // 1. Repartidores
       db.ref('repartidores').on('value', snap => {
         const data = snap.val();
         if (data) {
@@ -683,7 +691,7 @@
         }
       });
 
-      // 2. Catálogo de productos
+      // 2. Productos
       db.ref('productos').on('value', snap => {
         const data = snap.val();
         if (data) {
@@ -701,10 +709,7 @@
         }
       });
 
-      // 4. Monitoreo resiliente de la orden activa del cliente
-      const miPedidoIdGuardado = localStorage.getItem('leogas_mi_pedido_id');
-      const miClienteGuardado = localStorage.getItem('leogas_mi_pedido_cliente');
-
+      // 4. MONITOREO PERSISTENTE DEL PEDIDO
       db.ref('pedidos').on('value', snap => {
         const pedidos = snap.val();
         if (!pedidos) {
@@ -712,43 +717,52 @@
           return;
         }
 
-        // Buscar primero por ID; si no existe, buscar por el Nombre del cliente que no esté completado
+        const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
+        const miClienteNombre = localStorage.getItem('leogas_mi_pedido_cliente');
+
         let miOrden = null;
-        if (miPedidoIdGuardado && pedidos[miPedidoIdGuardado]) {
-          miOrden = pedidos[miPedidoIdGuardado];
-        } else if (miClienteGuardado) {
-          miOrden = Object.values(pedidos).find(p => p.cliente && p.cliente.toLowerCase() === miClienteGuardado.toLowerCase() && p.estado !== 'completado');
+
+        // Intentar recuperar por ID exacto
+        if (miPedidoId && pedidos[miPedidoId]) {
+          miOrden = pedidos[miPedidoId];
+        } 
+        // Si no está el ID pero sí el nombre, vincular automáticamente la orden activa
+        else if (miClienteNombre) {
+          miOrden = Object.values(pedidos).find(p => 
+            p.cliente && p.cliente.toLowerCase() === miClienteNombre.toLowerCase() && p.estado !== 'completado'
+          );
           if (miOrden) {
             localStorage.setItem('leogas_mi_pedido_id', miOrden.id);
           }
         }
 
-        if (miOrden) {
+        if (miOrden && miOrden.estado !== 'completado') {
           actualizarBarraSeguimiento(miOrden);
-          pedidoYaRealizado = (miOrden.estado !== 'completado');
+          const etapaActual = miOrden.etapa || 0;
 
-          // PASO 1: EN CAMINO (Chofer salió de la base)
-          if (miOrden.etapa === 1 && miOrden.notificadoCliente !== 1 && miOrden.repartidorId) {
-            lanzarNotificacionCliente("🔥 LeoGas Cusco: ¡Repartidor en camino!", "Tu repartidor ya salió con tu balón hacia tu dirección.");
-            db.ref(`pedidos/${miOrden.id}`).update({ notificadoCliente: 1 });
+          // DETECTAR CAMBIO A PASO 1 (EN CAMINO)
+          if (etapaActual === 1 && etapaAnteriorVista !== 1) {
+            etapaAnteriorVista = 1;
+            lanzarNotificacionCliente("🔥 LeoGas Cusco: ¡Repartidor en camino!", "Tu repartidor ya salió de la base con tu balón de gas hacia tu dirección.");
+            mostrarAlertaEnCamino(miOrden.cliente || 'Estimado cliente');
           }
-          // PASO 2: EN PUERTA
-          else if (miOrden.etapa === 2 && miOrden.notificadoCliente !== 2) {
+          // DETECTAR CAMBIO A PASO 2 (EN PUERTA)
+          else if (etapaActual === 2 && etapaAnteriorVista !== 2) {
+            etapaAnteriorVista = 2;
             lanzarNotificacionCliente("🦁 LeoGas Cusco: ¡Repartidor en tu puerta!", "Tu balón ha llegado a tu dirección. Por favor sal a recibirlo.");
-            db.ref(`pedidos/${miOrden.id}`).update({ notificadoCliente: 2 });
+            mostrarAlertaEnPuerta();
           }
-          // PASO 3: FINALIZADO / COMPLETADO
-          else if (miOrden.estado === 'completado' && miOrden.notificadoCliente !== 3) {
-            lanzarNotificacionCliente("🎉 ¡Entrega finalizada!", "Muchas gracias por tu compra en LeoGas Cusco. ¡Seguridad y peso exacto!");
+        } else if (miOrden && miOrden.estado === 'completado') {
+          // DETECTAR FINALIZACIÓN (PASO 3)
+          if (etapaAnteriorVista !== 3) {
+            etapaAnteriorVista = 3;
+            lanzarNotificacionCliente("🎉 ¡Entrega finalizada!", "Muchas gracias por tu compra en LeoGas Cusco.");
             mostrarAlertaAgradecimiento(miOrden.cliente || 'Estimado cliente');
-            db.ref(`pedidos/${miOrden.id}`).update({ notificadoCliente: 3 });
             localStorage.removeItem('leogas_mi_pedido_id');
-            pedidoYaRealizado = false;
             ocultarBarraSeguimiento();
           }
         } else {
           ocultarBarraSeguimiento();
-          pedidoYaRealizado = false;
         }
       });
     }
@@ -792,7 +806,7 @@
       `;
     }
 
-    // MAPA LEAFLET Y CONTROLES
+    // MAPA LEAFLET
     function iniciarMapaCusco() {
       map = L.map('cuscoMap').setView([-13.5167, -71.9788], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
@@ -903,7 +917,7 @@
       actualizarDistanciaEstimada();
     }
 
-    // CATÁLOGO Y PEDIDOS
+    // CATÁLOGO
     function renderizarMenu() {
       const contenedor = document.getElementById('contenedorEmpanadas');
       contenedor.innerHTML = '';
@@ -1056,11 +1070,8 @@
     function cerrarModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'none'; }
     function cerrarSiClickAfuera(e) { if (e.target.id === 'cartModalOverlay') cerrarModalCarrito(); }
 
-    // GENERAR COMPROBANTE DIGITAL
     function generarComprobanteModal() {
-      const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
       const nombre = document.getElementById('nombreClienteInput').value.trim() || localStorage.getItem('leogas_mi_pedido_cliente') || 'Particular';
-
       document.getElementById('tickCliente').innerText = nombre;
       document.getElementById('tickFecha').innerText = new Date().toLocaleString();
       document.getElementById('tickTipoComp').innerText = tipoComprobante;
@@ -1104,33 +1115,32 @@
       document.getElementById('ticketModalOverlay').style.display = 'none';
     }
 
+    // MODALES Y ALERTAS
     function mostrarAlertaExito(nombreCliente, detalle) {
       document.getElementById('textoAlertaExito').innerHTML = `
         Hola <strong>${nombreCliente}</strong>, tu pedido de <strong>${detalle}</strong> ha sido enviado a la central de LeoGas Cusco y transferido a WhatsApp.<br><br>
-        Mantén activadas tus notificaciones para saber cuando la moto salga hacia tu casa.
+        Mantén esta pantalla abierta o revisa tus alertas para saber cuando el repartidor salga hacia tu casa.
       `;
       document.getElementById('modalAlertaExito').style.display = 'flex';
       emitirCampanadaCliente();
     }
+    function cerrarAlertaExito() { document.getElementById('modalAlertaExito').style.display = 'none'; }
 
-    function cerrarAlertaExito() {
-      document.getElementById('modalAlertaExito').style.display = 'none';
+    function mostrarAlertaEnCamino(nombreCliente) {
+      document.getElementById('textoAlertaEnCamino').innerHTML = `
+        Hola <strong>${nombreCliente}</strong>, ¡tu balón de gas ya está en camino a tu casa!<br><br>
+        El repartidor ya arrancó desde la base. Puedes ver su avance en vivo en el mapa.
+      `;
+      document.getElementById('modalAlertaEnCamino').style.display = 'flex';
+      emitirCampanadaCliente();
     }
+    function cerrarAlertaEnCamino() { document.getElementById('modalAlertaEnCamino').style.display = 'none'; }
 
-    function mostrarAlertaSegundoPedido() {
-      document.getElementById('modalAlertaSegundoPedido').style.display = 'flex';
-      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
+    function mostrarAlertaEnPuerta() {
+      document.getElementById('modalAlertaEnPuerta').style.display = 'flex';
+      emitirCampanadaCliente();
     }
-
-    function cerrarAlertaSegundoPedido() {
-      document.getElementById('modalAlertaSegundoPedido').style.display = 'none';
-    }
-
-    function confirmarSegundoPedido() {
-      cerrarAlertaSegundoPedido();
-      pedidoYaRealizado = false;
-      ejecutarEnvioPedidoReal();
-    }
+    function cerrarAlertaEnPuerta() { document.getElementById('modalAlertaEnPuerta').style.display = 'none'; }
 
     function mostrarAlertaAgradecimiento(nombreCliente) {
       document.getElementById('textoAlertaGracias').innerHTML = `
@@ -1140,26 +1150,13 @@
       document.getElementById('modalAlertaGracias').style.display = 'flex';
       emitirCampanadaCliente();
     }
-
-    function cerrarAlertaGracias() {
-      document.getElementById('modalAlertaGracias').style.display = 'none';
-    }
+    function cerrarAlertaGracias() { document.getElementById('modalAlertaGracias').style.display = 'none'; }
 
     // REGISTRO DE PEDIDO
     async function enviarPedidoWhatsApp() {
       const items = Object.values(pedido).filter(p => p.cantidad > 0);
       if (items.length === 0) return alert("Selecciona al menos un balón disponible.");
 
-      if (pedidoYaRealizado) {
-        mostrarAlertaSegundoPedido();
-        return;
-      }
-
-      await ejecutarEnvioPedidoReal();
-    }
-
-    async function ejecutarEnvioPedidoReal() {
-      const items = Object.values(pedido).filter(p => p.cantidad > 0);
       const nombre = document.getElementById('nombreClienteInput').value.trim() || "Particular";
       let total = 0;
       let nombres = [];
@@ -1200,7 +1197,6 @@
 
       localStorage.setItem('leogas_mi_pedido_id', pedidoId);
       localStorage.setItem('leogas_mi_pedido_cliente', nombre);
-      pedidoYaRealizado = true;
 
       pedirPermisoNotificacionesCliente();
 
