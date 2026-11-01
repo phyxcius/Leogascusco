@@ -142,7 +142,7 @@
     /* ENCABEZADOS DE IMPRESIÓN */
     #printHeaderReport, #printHeaderLiquidacion { display: none; }
 
-    /* REGLAS EXACTAS DE IMPRESIÓN CORREGIDAS */
+    /* REGLAS EXACTAS DE IMPRESIÓN */
     @media print {
       body { background: #fff !important; padding: 0 !important; color: #000 !important; }
       body * { visibility: hidden !important; }
@@ -247,12 +247,17 @@
 
     <!-- PESTAÑA 1: PEDIDOS EN VIVO -->
     <div id="seccionPedidos">
+      <!-- BOTÓN REGISTRAR LLAMADA TELEFÓNICA -->
+      <button type="button" class="btn btn-add no-print" style="background:#2563eb; margin-bottom:12px;" onclick="abrirModalPedidoTelefonico()">
+        📞 Registrar Pedido por Llamada Telefónica
+      </button>
+
       <div class="card" style="border: 2px solid #eab308; background: #fefce8; margin-bottom: 16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Web Entrantes (Por Encomendar)</h3>
+          <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Entrantes (Web y Teléfono)</h3>
           <span id="badgeContadorEntrantes" style="background:#eab308; color:#fff; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">0 pendientes</span>
         </div>
-        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente cuando el cliente pide por WhatsApp. Puedes asignarlas, editarlas o anularlas.</p>
+        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente por WhatsApp o por llamada registrada. Puedes asignarlas, editarlas o anularlas.</p>
         <div id="listaOrdenesEntrantes">
           <p style="font-size:12px; color:#a16207;">Esperando nuevos pedidos en tiempo real...</p>
         </div>
@@ -542,6 +547,48 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- MODAL: REGISTRAR PEDIDO TELEFÓNICO -->
+  <div class="edit-modal-overlay" id="modalPedidoTelefonico">
+    <div class="edit-modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:16px; color:#1e1b4b;">📞 Nuevo Pedido por Llamada</h3>
+        <button type="button" style="background:none; border:none; font-size:20px; cursor:pointer;" onclick="cerrarModalPedidoTelefonico()">&times;</button>
+      </div>
+
+      <label>Nombre del Cliente:</label>
+      <input type="text" id="telPedCliente" placeholder="Ej: Don Teófilo Quispe">
+
+      <label>Dirección / Referencia de Casa:</label>
+      <input type="text" id="telPedDireccion" placeholder="Ej: Av. de la Cultura 820 frente a la UNSAAC">
+
+      <label>Producto solicitado:</label>
+      <select id="telPedProducto">
+        <option value="1x Balón LeoGas 10kg Normal|50">Balón LeoGas 10kg Normal - S/ 50.00</option>
+        <option value="1x Balón Gas Premium 10kg|55">Balón Gas Premium 10kg - S/ 55.00</option>
+        <option value="1x Regulador Premium + Válvula|45">Regulador Premium Doble Válvula - S/ 45.00</option>
+      </select>
+
+      <label>Método de Pago:</label>
+      <select id="telPedPago">
+        <option value="Efectivo (Exacto)">💵 Efectivo (Monto exacto)</option>
+        <option value="Efectivo (Llevar vuelto)">💵 Efectivo (Requiere vuelto)</option>
+        <option value="Yape / Plin">🟣 Yape / Plin</option>
+      </select>
+
+      <label>Asignar de una vez a Repartidor:</label>
+      <select id="telPedRepartidor">
+        <option value="">-- Dejar en bandeja pendiente --</option>
+      </select>
+
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="button" class="btn btn-save" style="margin:0; flex:1; background:#16a34a;" onclick="guardarPedidoTelefonicoFirebase()">
+          ✔ Crear y Despachar Pedido
+        </button>
+        <button type="button" class="btn btn-del" style="margin:0;" onclick="cerrarModalPedidoTelefonico()">Cancelar</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: EDITAR ORDEN ENTRANTE -->
@@ -867,6 +914,7 @@
             <span style="color:#15803d; font-weight:900; font-size:15px;">S/ ${parseFloat(ord.montoCobro).toFixed(2)}</span>
           </div>
           <div style="font-size:12px; color:#475569; margin:2px 0;">🛢️ <strong>${ord.tipoBalon}</strong> | 💵 Pago: <strong>${ord.metodoPago}</strong></div>
+          ${ord.direccionTexto ? `<div style="font-size:12px; color:#b45309; margin-bottom:2px;">🏠 <strong>Dirección:</strong> ${ord.direccionTexto}</div>` : ''}
           <div style="font-size:11px; color:#64748b; margin-bottom:4px;">
             🕒 ${ord.hora || '--'} 
             ${ord.tipoComprobante ? `| 🧾 <strong>${ord.tipoComprobante}</strong>` : ''} 
@@ -927,6 +975,65 @@
 
       cerrarModalEditarOrden();
       alert("✔ Orden actualizada con éxito.");
+    }
+
+    // FUNCIONES DEL PEDIDO TELEFÓNICO
+    function abrirModalPedidoTelefonico() {
+      const sel = document.getElementById('telPedRepartidor');
+      sel.innerHTML = '<option value="">-- Dejar en bandeja pendiente --</option>';
+      Object.values(repartidoresLocales).forEach(r => {
+        sel.innerHTML += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
+      });
+      document.getElementById('modalPedidoTelefonico').style.display = 'flex';
+    }
+
+    function cerrarModalPedidoTelefonico() {
+      document.getElementById('modalPedidoTelefonico').style.display = 'none';
+    }
+
+    async function guardarPedidoTelefonicoFirebase() {
+      const cliente = document.getElementById('telPedCliente').value.trim() || 'Cliente Telefónico';
+      const direccion = document.getElementById('telPedDireccion').value.trim();
+      const prodVal = document.getElementById('telPedProducto').value.split('|');
+      const tipoBalon = prodVal[0];
+      const montoCobro = parseFloat(prodVal[1]).toFixed(2);
+      const metodoPago = document.getElementById('telPedPago').value;
+      const repId = document.getElementById('telPedRepartidor').value;
+
+      if (!direccion) {
+        return alert("Por favor ingresa la dirección o referencia dada por el cliente.");
+      }
+
+      const direccionBusqueda = encodeURIComponent(`${direccion}, Cusco`);
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${direccionBusqueda}`;
+
+      const nuevoPedidoRef = db.ref('pedidos').push();
+      const nuevoId = nuevoPedidoRef.key;
+
+      await nuevoPedidoRef.set({
+        id: nuevoId,
+        cliente: `${cliente} (Llamada)`,
+        direccionTexto: direccion,
+        tipoBalon: tipoBalon,
+        montoCobro: montoCobro,
+        metodoPago: metodoPago,
+        tipoComprobante: "Boleta",
+        horarioEntrega: "Inmediata (Llamada)",
+        gpsUrl: mapsUrl,
+        origen: "telefono",
+        repartidorId: repId || "",
+        estado: repId ? "activo" : "pendiente_asignacion",
+        etapa: 0,
+        timestamp: Date.now(),
+        hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
+      });
+
+      cerrarModalPedidoTelefonico();
+      document.getElementById('telPedCliente').value = '';
+      document.getElementById('telPedDireccion').value = '';
+
+      emitirCampanada();
+      alert("✔ Pedido telefónico registrado con éxito.");
     }
 
     async function asignarOrden(id) {
@@ -1046,7 +1153,6 @@
           granTotalEfectivo += efectivoChofer;
           granTotalDigital += digitalChofer;
 
-          // Tarjeta interactiva en pantalla
           const card = document.createElement('div');
           card.className = 'liqui-card';
           card.innerHTML = `
@@ -1069,7 +1175,6 @@
           `;
           cont.appendChild(card);
 
-          // Fila para tabla formal de impresión
           if (tbodyPrint) {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -1089,7 +1194,6 @@
       document.getElementById('liqTotalDigital').innerText = `S/ ${granTotalDigital.toFixed(2)}`;
       document.getElementById('liqTotalGlobal').innerText = `S/ ${totalGlobal.toFixed(2)}`;
 
-      // Totales para pie de tabla de impresión
       if (document.getElementById('lblTotalPrintEfectivo')) document.getElementById('lblTotalPrintEfectivo').innerText = `S/ ${granTotalEfectivo.toFixed(2)}`;
       if (document.getElementById('lblTotalPrintDigital')) document.getElementById('lblTotalPrintDigital').innerText = `S/ ${granTotalDigital.toFixed(2)}`;
       if (document.getElementById('lblTotalPrintGlobal')) document.getElementById('lblTotalPrintGlobal').innerText = `S/ ${totalGlobal.toFixed(2)}`;
@@ -1099,7 +1203,6 @@
       if (document.getElementById('lblEmisionCierreCaja')) document.getElementById('lblEmisionCierreCaja').innerText = new Date().toLocaleTimeString();
     }
 
-    // DISPARADORES SEPARADOS DE IMPRESIÓN
     function imprimirCierreCaja() {
       renderizarLiquidacionDiaria();
       document.body.classList.remove('modo-imprimir-reporte');
@@ -1483,7 +1586,6 @@
       renderizarReportesContables();
     }
 
-    // FILTRO 1: POR DÍA EXACTO
     function filtrarPorDiaCalendario(fechaStr) {
       if (!fechaStr) return;
       document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
@@ -1501,7 +1603,6 @@
       renderizarTablaYTotalesReporte(`Día exacto: ${fechaStr}`);
     }
 
-    // FILTRO 2: POR MES EXACTO
     function filtrarPorMesCalendario(mesStr) {
       if (!mesStr) return;
       document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
@@ -1519,7 +1620,6 @@
       renderizarTablaYTotalesReporte(`Mes: ${mesStr}`);
     }
 
-    // FILTRO 3: POR AÑO EXACTO
     function filtrarPorAnioCalendario(anioNum) {
       const anio = parseInt(anioNum);
       if (isNaN(anio) || anio < 2020) return;
@@ -1537,7 +1637,6 @@
       renderizarTablaYTotalesReporte(`Año: ${anio}`);
     }
 
-    // FILTRO 4: POR RANGO LIBRE
     function filtrarPorRangoCalendario() {
       const desdeStr = document.getElementById('calRangoDesde').value;
       const hastaStr = document.getElementById('calRangoHasta').value;
