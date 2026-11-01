@@ -12,6 +12,24 @@
     h1 { font-size: 22px; font-weight: 900; color: #6b21a8; margin-bottom: 4px; }
     .subtitle { font-size: 13px; color: #64748b; margin-bottom: 12px; }
 
+    /* BADGE LA CHUSPA TECH */
+    .chuspa-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fefce8;
+      border: 1.5px solid #eab308;
+      padding: 4px 10px 4px 6px;
+      border-radius: 20px;
+      text-decoration: none;
+      box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2);
+      margin-bottom: 14px;
+    }
+    .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid #ca8a04; background: #fff; }
+    .chuspa-text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
+    .chuspa-title { font-size: 11px; font-weight: 900; color: #6b21a8; }
+    .chuspa-sub { font-size: 8.5px; font-weight: 700; color: #b45309; }
+
     label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; text-align: left; }
     input { width: 100%; padding: 12px; margin-top: 4px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box; }
 
@@ -86,6 +104,17 @@
     <div style="font-size:48px;">🦁</div>
     <h1>Acceso Repartidor</h1>
     <p class="subtitle">LeoGas Cusco • Sistema de Flota</p>
+
+    <!-- LOGO LA CHUSPA TECH EN LOGIN -->
+    <div style="display:flex; justify-content:center;">
+      <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
+        <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+        <div class="chuspa-text">
+          <span class="chuspa-title">La Chuspa Tech</span>
+          <span class="chuspa-sub">by La Chuspa Anuncios</span>
+        </div>
+      </a>
+    </div>
 
     <form onsubmit="verificarLoginChofer(event)">
       <label>Usuario del Repartidor</label>
@@ -177,7 +206,7 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let choferActual = null; // Objeto del chofer logueado
+    let choferActual = null;
     let ordenActiva = null;
     let watchIdGPS = null;
     let idUltimaOrdenVista = null;
@@ -216,7 +245,6 @@
       db.ref('repartidores').on('value', snap => {
         listaRepartidoresFirebase = snap.val() || {};
         
-        // Si ya había una sesión guardada, verificarla
         const choferGuardadoId = localStorage.getItem("leogas_chofer_autenticado_id");
         if (choferGuardadoId && listaRepartidoresFirebase[choferGuardadoId]) {
           choferActual = listaRepartidoresFirebase[choferGuardadoId];
