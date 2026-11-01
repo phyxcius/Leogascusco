@@ -12,7 +12,8 @@
     h1 { font-size: 22px; font-weight: 900; color: #6b21a8; margin-bottom: 4px; }
     .subtitle { font-size: 13px; color: #64748b; margin-bottom: 12px; }
 
-    select { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 15px; font-weight: 700; color: #1e1b4b; background: #f8fafc; margin-bottom: 14px; }
+    label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; text-align: left; }
+    input { width: 100%; padding: 12px; margin-top: 4px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box; }
 
     .status-panel { padding: 10px; border-radius: 10px; background: #f1f5f9; margin-bottom: 16px; font-size: 12px; }
     .status-panel.online { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; font-weight: 800; }
@@ -31,6 +32,7 @@
     .btn-action { width: 100%; padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; margin-bottom: 8px; }
     .btn-connect { background: #16a34a; color: #ffffff; }
     .btn-disconnect { background: #dc2626; color: #ffffff; display: none; }
+    .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 15px; padding: 12px; margin-top: 14px; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; }
 
     /* MODAL CENTRADO EN LA PANTALLA */
     .driver-modal-overlay {
@@ -79,17 +81,35 @@
 </head>
 <body>
 
-  <div class="driver-card">
-    <div style="font-size:44px;">🦁</div>
-    <h1>LeoGas Cusco</h1>
-    <p class="subtitle">Panel de Navegación y Secuencia de Entrega</p>
+  <!-- PANTALLA 1: LOGIN DEL REPARTIDOR -->
+  <div class="driver-card" id="pantallaLoginChofer">
+    <div style="font-size:48px;">🦁</div>
+    <h1>Acceso Repartidor</h1>
+    <p class="subtitle">LeoGas Cusco • Sistema de Flota</p>
 
-    <div style="text-align:left;">
-      <label style="font-size:11px; font-weight:800; color:#64748b;">SELECCIONA TU IDENTIFICADOR:</label>
-      <select id="selectChofer" onchange="cambioDeChofer()">
-        <option value="">Cargando repartidores desde Firebase...</option>
-      </select>
+    <form onsubmit="verificarLoginChofer(event)">
+      <label>Usuario del Repartidor</label>
+      <input type="text" id="loginChoferUser" placeholder="ej: jorge" required autofocus>
+
+      <label>Contraseña</label>
+      <input type="password" id="loginChoferPass" placeholder="••••••••" required>
+
+      <button type="submit" class="btn-save">Ingresar al Turno 🛵</button>
+    </form>
+    <div id="errorLoginMsg" style="color:#dc2626; font-size:12px; font-weight:800; margin-top:10px;"></div>
+  </div>
+
+  <!-- PANTALLA 2: PANEL ACTIVO DEL REPARTIDOR -->
+  <div class="driver-card" id="panelChoferActivo" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="font-size:26px;">🦁</span>
+        <strong style="color:#6b21a8; font-size:16px;" id="lblNombreChoferConectado">Chofer</strong>
+      </div>
+      <button onclick="cerrarSesionChofer()" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; font-size:11px; font-weight:bold; padding:4px 10px; border-radius:6px; cursor:pointer;">🚪 Salir</button>
     </div>
+    
+    <p class="subtitle" style="text-align:left;">Panel de Navegación y Secuencia de Entrega</p>
 
     <div class="status-panel" id="panelEstado">
       <span id="textoEstado">Offline 💤 (Desconectado)</span>
@@ -157,11 +177,12 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    let choferActual = null; // Objeto del chofer logueado
     let ordenActiva = null;
     let watchIdGPS = null;
     let idUltimaOrdenVista = null;
     let avisoSalidaMostrado = false;
-    let repartidoresMap = {};
+    let listaRepartidoresFirebase = {};
 
     function emitirTimbreChofer() {
       try {
@@ -190,51 +211,63 @@
       }
     }
 
-    function escucharRepartidoresFirebase() {
+    // CARGAR Y ESCUCHAR REPARTIDORES DE FIREBASE
+    function escucharRepartidoresParaLogin() {
       db.ref('repartidores').on('value', snap => {
-        const data = snap.val();
-        if (!data) return;
-
-        repartidoresMap = data;
-        const select = document.getElementById('selectChofer');
-        const valorGuardado = localStorage.getItem("leogas_chofer_id") || select.value;
-
-        select.innerHTML = '';
-        Object.values(data).forEach(rep => {
-          const opt = document.createElement('option');
-          opt.value = rep.id;
-          opt.innerText = `${rep.nombre} ${rep.online ? '🟢' : '💤'}`;
-          select.appendChild(opt);
-        });
-
-        if (valorGuardado && data[valorGuardado]) {
-          select.value = valorGuardado;
-        } else if (select.options.length > 0) {
-          select.selectedIndex = 0;
-          localStorage.setItem("leogas_chofer_id", select.value);
+        listaRepartidoresFirebase = snap.val() || {};
+        
+        // Si ya había una sesión guardada, verificarla
+        const choferGuardadoId = localStorage.getItem("leogas_chofer_autenticado_id");
+        if (choferGuardadoId && listaRepartidoresFirebase[choferGuardadoId]) {
+          choferActual = listaRepartidoresFirebase[choferGuardadoId];
+          mostrarPanelRepartidor();
         }
-
-        escucharComandasEnTiempoReal();
       });
     }
 
-    function cambioDeChofer() {
-      idUltimaOrdenVista = null;
-      avisoSalidaMostrado = false;
-      localStorage.setItem("leogas_chofer_id", document.getElementById('selectChofer').value);
+    // VERIFICAR LOGIN CON USUARIO Y CONTRASEÑA
+    function verificarLoginChofer(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginChoferUser').value.trim().toLowerCase();
+      const p = document.getElementById('loginChoferPass').value.trim();
+      const errorMsg = document.getElementById('errorLoginMsg');
+
+      const encontrado = Object.values(listaRepartidoresFirebase).find(r => 
+        (r.usuario && r.usuario.toLowerCase() === u) && (r.password && r.password.toString() === p)
+      );
+
+      if (encontrado) {
+        choferActual = encontrado;
+        localStorage.setItem("leogas_chofer_autenticado_id", encontrado.id);
+        errorMsg.innerText = "";
+        mostrarPanelRepartidor();
+      } else {
+        errorMsg.innerText = "Usuario o contraseña incorrectos. Consulta con el Administrador.";
+      }
+    }
+
+    function mostrarPanelRepartidor() {
+      document.getElementById('pantallaLoginChofer').style.display = 'none';
+      document.getElementById('panelChoferActivo').style.display = 'block';
+      document.getElementById('lblNombreChoferConectado').innerText = choferActual.nombre;
       escucharComandasEnTiempoReal();
     }
 
+    function cerrarSesionChofer() {
+      if (watchIdGPS) detenerGPS();
+      localStorage.removeItem("leogas_chofer_autenticado_id");
+      location.reload();
+    }
+
     function escucharComandasEnTiempoReal() {
-      const repId = document.getElementById('selectChofer').value;
-      if (!repId) return;
+      if (!choferActual) return;
 
       db.ref('pedidos').on('value', snap => {
         const pedidos = snap.val();
         ordenActiva = null;
 
         if (pedidos) {
-          ordenActiva = Object.values(pedidos).find(p => p.repartidorId === repId && p.estado !== 'completado');
+          ordenActiva = Object.values(pedidos).find(p => p.repartidorId === choferActual.id && p.estado !== 'completado');
         }
 
         // Nueva comanda asignada
@@ -341,8 +374,7 @@
     }
 
     function iniciarGPS() {
-      const repId = document.getElementById('selectChofer').value;
-      if (!repId) return alert("Selecciona un repartidor primero.");
+      if (!choferActual) return alert("Inicia sesión primero.");
       if (!navigator.geolocation) return alert("GPS no disponible.");
 
       if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
@@ -350,22 +382,21 @@
       }
 
       navigator.geolocation.getCurrentPosition(pos => {
-        actualizarCoordenadas(repId, true, pos.coords.latitude, pos.coords.longitude);
+        actualizarCoordenadas(choferActual.id, true, pos.coords.latitude, pos.coords.longitude);
         document.getElementById('btnConectar').style.display = "none";
         document.getElementById('btnDesconectar').style.display = "block";
         document.getElementById('panelEstado').className = "status-panel online";
         document.getElementById('textoEstado').innerText = "Online 🔥 (En Ruta Activo)";
 
         watchIdGPS = navigator.geolocation.watchPosition(p => {
-          actualizarCoordenadas(repId, true, p.coords.latitude, p.coords.longitude);
+          actualizarCoordenadas(choferActual.id, true, p.coords.latitude, p.coords.longitude);
         }, null, { enableHighAccuracy: true });
       });
     }
 
     function detenerGPS() {
       if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
-      const repId = document.getElementById('selectChofer').value;
-      if (repId) actualizarCoordenadas(repId, false, null, null);
+      if (choferActual) actualizarCoordenadas(choferActual.id, false, null, null);
       document.getElementById('btnConectar').style.display = "block";
       document.getElementById('btnDesconectar').style.display = "none";
       document.getElementById('panelEstado').className = "status-panel";
@@ -379,7 +410,7 @@
     }
 
     window.onload = () => {
-      escucharRepartidoresFirebase();
+      escucharRepartidoresParaLogin();
     };
   </script>
 </body>
