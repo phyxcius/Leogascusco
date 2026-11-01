@@ -105,6 +105,11 @@
     .filter-pill-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; color: #475569; }
     .filter-pill-btn.active { background: #6b21a8; color: #fff; border-color: #581c87; }
     
+    /* SELECTOR PERSONALIZADO DE FECHAS (CALENDARIO) */
+    .calendar-picker-box { display: flex; align-items: center; gap: 6px; background: #faf5ff; border: 1.5px solid #d8b4fe; padding: 6px 12px; border-radius: 10px; flex-wrap: wrap; width: 100%; margin-top: 4px; }
+    .calendar-input-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #6b21a8; }
+    .calendar-input-item input { margin: 0; padding: 5px 8px; font-size: 12px; width: auto; }
+    
     .report-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 14px; }
     .summary-card { background: #fff; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; }
     .summary-card-title { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
@@ -359,18 +364,45 @@
       <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
     </div>
 
-    <!-- PESTAÑA 8: REPORTES CONTABLES -->
+    <!-- PESTAÑA 8: REPORTES CONTABLES CON CALENDARIO (DÍAS, MES, AÑO) -->
     <div id="seccionReportes" style="display: none;">
       <div class="report-filters-bar no-print">
-        <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtrar por:</span>
+        <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtros rápidos:</span>
         <button type="button" class="filter-pill-btn active" id="fltTodos" onclick="aplicarFiltroFecha('todos', this)">Todos</button>
         <button type="button" class="filter-pill-btn" id="fltHoy" onclick="aplicarFiltroFecha('hoy', this)">📅 Hoy</button>
         <button type="button" class="filter-pill-btn" id="fltSemana" onclick="aplicarFiltroFecha('semana', this)">📆 Esta Semana</button>
         <button type="button" class="filter-pill-btn" id="fltMes" onclick="aplicarFiltroFecha('mes', this)">🗓️ Este Mes</button>
+        <button type="button" class="filter-pill-btn" id="fltAnio" onclick="aplicarFiltroFecha('anio', this)">📅 Este Año</button>
 
         <div style="margin-left:auto; display:flex; gap:8px;">
           <button type="button" class="btn btn-export" onclick="exportarVentasExcelCSV()">📥 Descargar Excel (CSV)</button>
           <button type="button" class="btn btn-print" onclick="window.print()">🖨️ Imprimir Reporte</button>
+        </div>
+
+        <!-- MÓDULO CALENDARIO PARA ESCOGER POR DÍA ESPECÍFICO, MES, AÑO O RANGO -->
+        <div class="calendar-picker-box">
+          <div class="calendar-input-item">
+            <span>🗓️ Día exacto:</span>
+            <input type="date" id="calFechaDia" onchange="filtrarPorDiaCalendario(this.value)">
+          </div>
+
+          <div class="calendar-input-item">
+            <span>📅 Mes exacto:</span>
+            <input type="month" id="calFechaMes" onchange="filtrarPorMesCalendario(this.value)">
+          </div>
+
+          <div class="calendar-input-item">
+            <span>🏛️ Año:</span>
+            <input type="number" id="calFechaAnio" min="2024" max="2035" placeholder="2026" style="width:75px;" onchange="filtrarPorAnioCalendario(this.value)">
+          </div>
+
+          <div class="calendar-input-item" style="gap:4px;">
+            <span>Desde:</span>
+            <input type="date" id="calRangoDesde">
+            <span>Hasta:</span>
+            <input type="date" id="calRangoHasta">
+            <button type="button" class="btn btn-edit" style="padding:5px 9px; font-size:11px;" onclick="filtrarPorRangoCalendario()">Filtrar Rango</button>
+          </div>
         </div>
       </div>
 
@@ -628,6 +660,7 @@
       } else if (tab === 'gps') {
         document.getElementById('tabBtnGPS').classList.add('active');
         document.getElementById('seccionGPS').style.display = 'block';
+        renderizarGestionRepartidores();
       } else if (tab === 'reportes') {
         document.getElementById('tabBtnReportes').classList.add('active');
         document.getElementById('seccionReportes').style.display = 'block';
@@ -670,7 +703,7 @@
         procesarClientesVIP();
       });
 
-      // 2. Repartidores (incluye usuario y contraseña)
+      // 2. Repartidores con usuario y contraseña
       db.ref('repartidores').on('value', snap => {
         const data = snap.val();
         if (data) {
@@ -1243,7 +1276,6 @@
         return alert("Por favor completa el nombre, usuario y contraseña del repartidor.");
       }
 
-      // Validar que el usuario no exista
       const repetido = Object.values(repartidoresLocales).find(r => r.usuario && r.usuario.toLowerCase() === usuario);
       if (repetido) {
         return alert(`El usuario "${usuario}" ya está asignado a otro chofer.`);
@@ -1305,7 +1337,7 @@
       alert("✔ Teléfonos guardados al instante en Firebase.");
     }
 
-    // ---------------- REPORTES CONTABLES POR FECHAS ----------------
+    // ---------------- REPORTES CONTABLES POR FECHAS Y CALENDARIO ----------------
     function procesarVentasParaReportes() {
       ventasLocales = Object.values(pedidosLocales).filter(p => p.estado === 'completado');
     }
@@ -1319,15 +1351,105 @@
       filtroFechaActivo = periodo;
       document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
       if (boton) boton.classList.add('active');
+      
+      // Limpiar inputs de calendario para no crear confusión visual
+      document.getElementById('calFechaDia').value = '';
+      document.getElementById('calFechaMes').value = '';
+      document.getElementById('calFechaAnio').value = '';
+      document.getElementById('calRangoDesde').value = '';
+      document.getElementById('calRangoHasta').value = '';
+
       renderizarReportesContables();
+    }
+
+    // FILTRO 1: POR DÍA EXACTO (input type="date")
+    function filtrarPorDiaCalendario(fechaStr) {
+      if (!fechaStr) return;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      filtroFechaActivo = "dia_especifico";
+      
+      // fechaStr formato YYYY-MM-DD
+      const [y, m, d] = fechaStr.split('-').map(Number);
+      const inicioDia = new Date(y, m - 1, d, 0, 0, 0);
+      const finDia = new Date(y, m - 1, d, 23, 59, 59);
+
+      ventasFiltradas = ventasLocales.filter(v => {
+        const f = parseFechaSegura(v);
+        return f >= inicioDia && f <= finDia;
+      });
+
+      renderizarTablaYTotalesReporte(`Día exacto: ${fechaStr}`);
+    }
+
+    // FILTRO 2: POR MES EXACTO (input type="month")
+    function filtrarPorMesCalendario(mesStr) {
+      if (!mesStr) return;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      filtroFechaActivo = "mes_especifico";
+
+      // mesStr formato YYYY-MM
+      const [y, m] = mesStr.split('-').map(Number);
+      const inicioMes = new Date(y, m - 1, 1, 0, 0, 0);
+      const finMes = new Date(y, m, 0, 23, 59, 59);
+
+      ventasFiltradas = ventasLocales.filter(v => {
+        const f = parseFechaSegura(v);
+        return f >= inicioMes && f <= finMes;
+      });
+
+      renderizarTablaYTotalesReporte(`Mes: ${mesStr}`);
+    }
+
+    // FILTRO 3: POR AÑO EXACTO (input type="number")
+    function filtrarPorAnioCalendario(anioNum) {
+      const anio = parseInt(anioNum);
+      if (isNaN(anio) || anio < 2020) return;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      filtroFechaActivo = "anio_especifico";
+
+      const inicioAnio = new Date(anio, 0, 1, 0, 0, 0);
+      const finAnio = new Date(anio, 11, 31, 23, 59, 59);
+
+      ventasFiltradas = ventasLocales.filter(v => {
+        const f = parseFechaSegura(v);
+        return f >= inicioAnio && f <= finAnio;
+      });
+
+      renderizarTablaYTotalesReporte(`Año: ${anio}`);
+    }
+
+    // FILTRO 4: POR RANGO LIBRE (DESDE - HASTA)
+    function filtrarPorRangoCalendario() {
+      const desdeStr = document.getElementById('calRangoDesde').value;
+      const hastaStr = document.getElementById('calRangoHasta').value;
+
+      if (!desdeStr || !hastaStr) {
+        return alert("Por favor selecciona ambas fechas (Desde y Hasta).");
+      }
+
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      filtroFechaActivo = "rango_especifico";
+
+      const [y1, m1, d1] = desdeStr.split('-').map(Number);
+      const [y2, m2, d2] = hastaStr.split('-').map(Number);
+      const fechaDesde = new Date(y1, m1 - 1, d1, 0, 0, 0);
+      const fechaHasta = new Date(y2, m2 - 1, d2, 23, 59, 59);
+
+      ventasFiltradas = ventasLocales.filter(v => {
+        const f = parseFechaSegura(v);
+        return f >= fechaDesde && f <= fechaHasta;
+      });
+
+      renderizarTablaYTotalesReporte(`Rango: ${desdeStr} al ${hastaStr}`);
     }
 
     function renderizarReportesContables() {
       const ahora = new Date();
-      const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+      const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0);
       const diaSemana = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1;
-      const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diaSemana);
-      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - diaSemana, 0, 0, 0);
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1, 0, 0, 0);
+      const inicioAnio = new Date(ahora.getFullYear(), 0, 1, 0, 0, 0);
 
       ventasFiltradas = ventasLocales.filter(v => {
         if (filtroFechaActivo === 'todos') return true;
@@ -1335,15 +1457,28 @@
         if (filtroFechaActivo === 'hoy') return f >= inicioHoy;
         if (filtroFechaActivo === 'semana') return f >= inicioSemana;
         if (filtroFechaActivo === 'mes') return f >= inicioMes;
+        if (filtroFechaActivo === 'anio') return f >= inicioAnio;
         return true;
       });
 
+      const filtroMap = {
+        'todos': 'Todos los registros',
+        'hoy': 'Hoy',
+        'semana': 'Esta Semana',
+        'mes': 'Este Mes',
+        'anio': `Este Año (${ahora.getFullYear()})`
+      };
+      
+      renderizarTablaYTotalesReporte(filtroMap[filtroFechaActivo] || 'Filtro Personalizado');
+    }
+
+    function renderizarTablaYTotalesReporte(nombreFiltroTexto) {
       const tbody = document.getElementById('tablaVentasBody');
       tbody.innerHTML = '';
       let sumaTotal = 0;
 
       if (ventasFiltradas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:12px; color:#94a3b8;">No hay ventas completadas en este periodo.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:12px; color:#94a3b8;">No hay ventas completadas en el periodo seleccionado.</td></tr>';
       } else {
         ventasFiltradas.forEach(v => {
           const tot = parseFloat(v.montoCobro) || 0;
@@ -1365,8 +1500,7 @@
       document.getElementById('resumenCantPedidos').innerText = `${ventasFiltradas.length}`;
       document.getElementById('resumenTotalSoles').innerText = `S/ ${sumaTotal.toFixed(2)}`;
       
-      const filtroMap = { 'todos': 'Todos los registros', 'hoy': 'Hoy', 'semana': 'Esta Semana', 'mes': 'Este Mes' };
-      document.getElementById('lblFiltroImpreso').innerText = filtroMap[filtroFechaActivo] || 'Todos';
+      document.getElementById('lblFiltroImpreso').innerText = nombreFiltroTexto;
       document.getElementById('lblFechaEmision').innerText = new Date().toLocaleString();
       document.getElementById('lblTotalFinalImpreso').innerText = `S/ ${sumaTotal.toFixed(2)}`;
     }
