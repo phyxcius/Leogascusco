@@ -139,16 +139,39 @@
     .login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
     .login-card { background: #fff; padding: 24px 28px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 380px; }
 
-    /* ENCABEZADO FORMAL PARA IMPRESIÓN */
-    #printHeaderReport { display: none; }
+    /* ENCABEZADOS DE IMPRESIÓN */
+    #printHeaderReport, #printHeaderLiquidacion { display: none; }
 
+    /* REGLAS EXACTAS DE IMPRESIÓN CORREGIDAS */
     @media print {
-      body { background: #fff; padding: 0; color: #000; }
-      body * { visibility: hidden; }
-      #areaImpresion, #areaImpresion * { visibility: visible; }
-      #areaImpresion { position: absolute; left: 0; top: 0; width: 100%; }
+      body { background: #fff !important; padding: 0 !important; color: #000 !important; }
+      body * { visibility: hidden !important; }
       .no-print { display: none !important; }
-      #printHeaderReport { display: block !important; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 12px; }
+
+      /* Imprimir Reportes Contables */
+      body.modo-imprimir-reporte #areaImpresion, 
+      body.modo-imprimir-reporte #areaImpresion * { 
+        visibility: visible !important; 
+      }
+      body.modo-imprimir-reporte #areaImpresion { 
+        position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; 
+      }
+      body.modo-imprimir-reporte #printHeaderReport { 
+        display: block !important; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 12px; 
+      }
+
+      /* Imprimir Liquidación / Cierre de Caja */
+      body.modo-imprimir-liquidacion #areaImpresionLiquidacion, 
+      body.modo-imprimir-liquidacion #areaImpresionLiquidacion * { 
+        visibility: visible !important; 
+      }
+      body.modo-imprimir-liquidacion #areaImpresionLiquidacion { 
+        position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; 
+      }
+      body.modo-imprimir-liquidacion #printHeaderLiquidacion { 
+        display: block !important; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 12px; 
+      }
+
       .custom-table th { background: #eee !important; color: #000 !important; }
       .custom-table th, .custom-table td { border: 1px solid #999 !important; }
     }
@@ -243,18 +266,18 @@
       </div>
     </div>
 
-    <!-- PESTAÑA 2: CIERRE DE CAJA -->
+    <!-- PESTAÑA 2: CIERRE DE CAJA / LIQUIDACIÓN (IMPRIMIBLE) -->
     <div id="seccionLiquidacion" style="display: none;">
       <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;" class="no-print">
           <div>
             <h3 style="color:#6b21a8; margin:0;">💵 Cierre de Caja y Liquidación Diaria</h3>
             <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Dinero exacto que debe rendir cada repartidor al finalizar su turno hoy.</p>
           </div>
-          <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir Liquidación</button>
+          <button class="btn btn-print" onclick="imprimirCierreCaja()">🖨️ Imprimir Liquidación de Hoy</button>
         </div>
 
-        <div class="report-summary-cards">
+        <div class="report-summary-cards no-print">
           <div class="summary-card">
             <div class="summary-card-title">Efectivo Total a Entregar</div>
             <div class="summary-card-val" id="liqTotalEfectivo" style="color:#15803d;">S/ 0.00</div>
@@ -269,8 +292,59 @@
           </div>
         </div>
 
-        <div id="contenedorTarjetasLiquidacion" class="liqui-grid">
-          Cargando liquidaciones por chofer...
+        <!-- ÁREA IMPRIMIBLE EXCLUSIVA DE CIERRE DE CAJA -->
+        <div id="areaImpresionLiquidacion">
+          <div id="printHeaderLiquidacion">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-size:38px;">🦁</div>
+                <div>
+                  <h1 style="font-size:22px; margin:0; color:#6b21a8;">LeoGas Cusco</h1>
+                  <div style="font-size:12px; color:#555;">Distribuidor Oficial Llamagas • El Moradito Rendidor</div>
+                  <div style="font-size:11px; color:#777;">Cusco, Perú</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; border:1px solid #ccc; padding:6px 12px; border-radius:12px;">
+                <img src="CHUSPITA-circulo.png" style="width:34px; height:34px; border-radius:50%;" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+                <div style="text-align:right;">
+                  <div style="font-size:11px; font-weight:bold; color:#6b21a8;">La Chuspa Tech</div>
+                  <div style="font-size:9px; color:#b45309;">by La Chuspa Anuncios</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1;">
+              <span><strong>Reporte:</strong> Rendición de Cuentas y Cierre de Caja</span>
+              <span><strong>Fecha del Cierre:</strong> <span id="lblFechaCierreCaja"></span></span>
+              <span><strong>Emisión:</strong> <span id="lblEmisionCierreCaja"></span></span>
+            </div>
+          </div>
+
+          <div id="contenedorTarjetasLiquidacion" class="liqui-grid">
+            Cargando liquidaciones por chofer...
+          </div>
+
+          <!-- RESUMEN EN TABLA PARA IMPRESIÓN FORMAL -->
+          <table class="custom-table" id="tablaImpresionLiquidacion" style="margin-top:16px;">
+            <thead>
+              <tr>
+                <th>Repartidor / Chofer</th>
+                <th>Pedidos Hoy</th>
+                <th>Efectivo Físico (S/)</th>
+                <th>Digital Yape/Plin (S/)</th>
+                <th>Total Rendido (S/)</th>
+              </tr>
+            </thead>
+            <tbody id="tablaBodyImpresionLiquidacion"></tbody>
+            <tfoot>
+              <tr style="font-weight:900; background:#f1f5f9;">
+                <td colspan="2" style="text-align:right;">TOTALES GENERALES DE CAJA HOY:</td>
+                <td id="lblTotalPrintEfectivo" style="color:#15803d;">S/ 0.00</td>
+                <td id="lblTotalPrintDigital" style="color:#2563eb;">S/ 0.00</td>
+                <td id="lblTotalPrintGlobal" style="color:#6b21a8;">S/ 0.00</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </div>
     </div>
@@ -314,7 +388,7 @@
 
     <!-- PESTAÑA 5: PRODUCTOS Y BALONES -->
     <div id="seccionProductos" style="display: none;">
-      <button class="btn btn-add no-print" onclick="agregarNuevoProducto()">➕ Agregar Nuevo Balón</button>
+      <button class="btn btn-add no-print" onclick="agregarNuevoBalonProducto()">➕ Agregar Nuevo Balón</button>
       <div id="listaProductos">Cargando catálogo desde Firebase...</div>
       <button class="btn btn-save no-print" onclick="guardarProductosFirebase()">💾 Guardar Precios y Stock en Firebase</button>
       <div id="statusMsgProductos" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
@@ -376,10 +450,10 @@
 
         <div style="margin-left:auto; display:flex; gap:8px;">
           <button type="button" class="btn btn-export" onclick="exportarVentasExcelCSV()">📥 Descargar Excel (CSV)</button>
-          <button type="button" class="btn btn-print" onclick="window.print()">🖨️ Imprimir Reporte</button>
+          <button type="button" class="btn btn-print" onclick="imprimirReporteContable()">🖨️ Imprimir Reporte</button>
         </div>
 
-        <!-- MÓDULO CALENDARIO PARA ESCOGER POR DÍA ESPECÍFICO, MES, AÑO O RANGO -->
+        <!-- MÓDULO CALENDARIO -->
         <div class="calendar-picker-box">
           <div class="calendar-input-item">
             <span>🗓️ Día exacto:</span>
@@ -417,7 +491,7 @@
         </div>
       </div>
 
-      <!-- ÁREA DE IMPRESIÓN -->
+      <!-- ÁREA DE IMPRESIÓN EXCLUSIVA DE REPORTES CONTABLES -->
       <div id="areaImpresion">
         <div id="printHeaderReport">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -439,7 +513,7 @@
             </div>
           </div>
 
-          <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px;">
+          <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1;">
             <span><strong>Reporte:</strong> Ventas de Balones de Gas</span>
             <span><strong>Filtro:</strong> <span id="lblFiltroImpreso">Todos</span></span>
             <span><strong>Emisión:</strong> <span id="lblFechaEmision"></span></span>
@@ -932,9 +1006,10 @@
       document.getElementById('modalNotificacionEntrega').style.display = 'none';
     }
 
-    // ---------------- 1. LIQUIDACIÓN DIARIA POR REPARTIDOR ----------------
+    // ---------------- 1. LIQUIDACIÓN DIARIA POR REPARTIDOR (CIERRE DE CAJA) ----------------
     function renderizarLiquidacionDiaria() {
       const cont = document.getElementById('contenedorTarjetasLiquidacion');
+      const tbodyPrint = document.getElementById('tablaBodyImpresionLiquidacion');
       if (!cont) return;
 
       const hoyInicio = new Date();
@@ -945,50 +1020,97 @@
       let granTotalEfectivo = 0;
       let granTotalDigital = 0;
       cont.innerHTML = '';
+      if (tbodyPrint) tbodyPrint.innerHTML = '';
 
-      Object.values(repartidoresLocales).forEach(rep => {
-        const ordenesChofer = ventasHoy.filter(p => p.repartidorId === rep.id);
-        let efectivoChofer = 0;
-        let digitalChofer = 0;
+      const listaChoferes = Object.values(repartidoresLocales);
 
-        ordenesChofer.forEach(o => {
-          const m = parseFloat(o.montoCobro) || 0;
-          if ((o.metodoPago || '').toLowerCase().includes('efectivo')) {
-            efectivoChofer += m;
-          } else {
-            digitalChofer += m;
+      if (listaChoferes.length === 0) {
+        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados.</p>';
+        if (tbodyPrint) tbodyPrint.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay repartidores en la flota.</td></tr>';
+      } else {
+        listaChoferes.forEach(rep => {
+          const ordenesChofer = ventasHoy.filter(p => p.repartidorId === rep.id);
+          let efectivoChofer = 0;
+          let digitalChofer = 0;
+
+          ordenesChofer.forEach(o => {
+            const m = parseFloat(o.montoCobro) || 0;
+            if ((o.metodoPago || '').toLowerCase().includes('efectivo')) {
+              efectivoChofer += m;
+            } else {
+              digitalChofer += m;
+            }
+          });
+
+          const totalChofer = efectivoChofer + digitalChofer;
+          granTotalEfectivo += efectivoChofer;
+          granTotalDigital += digitalChofer;
+
+          // Tarjeta interactiva en pantalla
+          const card = document.createElement('div');
+          card.className = 'liqui-card';
+          card.innerHTML = `
+            <div class="liqui-header">
+              <strong style="color:#6b21a8; font-size:15px;">🦁 ${rep.nombre}</strong>
+              <span class="badge-status ${ordenesChofer.length > 0 ? 'online' : ''}">${ordenesChofer.length} pedidos hoy</span>
+            </div>
+            <div class="liqui-stat-row">
+              <span>💵 Efectivo Físico a Rendir:</span>
+              <strong style="color:#15803d; font-size:14px;">S/ ${efectivoChofer.toFixed(2)}</strong>
+            </div>
+            <div class="liqui-stat-row">
+              <span>🟣 Digital (Yape / Plin / Transf):</span>
+              <strong style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</strong>
+            </div>
+            <div class="liqui-stat-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:6px; font-weight:900;">
+              <span>Total Recaudado por Chofer:</span>
+              <span>S/ ${totalChofer.toFixed(2)}</span>
+            </div>
+          `;
+          cont.appendChild(card);
+
+          // Fila para tabla formal de impresión
+          if (tbodyPrint) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><strong>${rep.nombre}</strong></td>
+              <td>${ordenesChofer.length} entrega(s)</td>
+              <td style="color:#15803d; font-weight:bold;">S/ ${efectivoChofer.toFixed(2)}</td>
+              <td style="color:#2563eb; font-weight:bold;">S/ ${digitalChofer.toFixed(2)}</td>
+              <td><strong>S/ ${totalChofer.toFixed(2)}</strong></td>
+            `;
+            tbodyPrint.appendChild(tr);
           }
         });
+      }
 
-        granTotalEfectivo += efectivoChofer;
-        granTotalDigital += digitalChofer;
-
-        const card = document.createElement('div');
-        card.className = 'liqui-card';
-        card.innerHTML = `
-          <div class="liqui-header">
-            <strong style="color:#6b21a8; font-size:15px;">🦁 ${rep.nombre}</strong>
-            <span class="badge-status ${ordenesChofer.length > 0 ? 'online' : ''}">${ordenesChofer.length} pedidos hoy</span>
-          </div>
-          <div class="liqui-stat-row">
-            <span>💵 Efectivo Físico a Rendir:</span>
-            <strong style="color:#15803d; font-size:14px;">S/ ${efectivoChofer.toFixed(2)}</strong>
-          </div>
-          <div class="liqui-stat-row">
-            <span>🟣 Digital (Yape / Plin / Transf):</span>
-            <strong style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</strong>
-          </div>
-          <div class="liqui-stat-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:6px; font-weight:900;">
-            <span>Total Recaudado por Chofer:</span>
-            <span>S/ ${(efectivoChofer + digitalChofer).toFixed(2)}</span>
-          </div>
-        `;
-        cont.appendChild(card);
-      });
-
+      const totalGlobal = granTotalEfectivo + granTotalDigital;
       document.getElementById('liqTotalEfectivo').innerText = `S/ ${granTotalEfectivo.toFixed(2)}`;
       document.getElementById('liqTotalDigital').innerText = `S/ ${granTotalDigital.toFixed(2)}`;
-      document.getElementById('liqTotalGlobal').innerText = `S/ ${(granTotalEfectivo + granTotalDigital).toFixed(2)}`;
+      document.getElementById('liqTotalGlobal').innerText = `S/ ${totalGlobal.toFixed(2)}`;
+
+      // Totales para pie de tabla de impresión
+      if (document.getElementById('lblTotalPrintEfectivo')) document.getElementById('lblTotalPrintEfectivo').innerText = `S/ ${granTotalEfectivo.toFixed(2)}`;
+      if (document.getElementById('lblTotalPrintDigital')) document.getElementById('lblTotalPrintDigital').innerText = `S/ ${granTotalDigital.toFixed(2)}`;
+      if (document.getElementById('lblTotalPrintGlobal')) document.getElementById('lblTotalPrintGlobal').innerText = `S/ ${totalGlobal.toFixed(2)}`;
+
+      const hoyStr = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      if (document.getElementById('lblFechaCierreCaja')) document.getElementById('lblFechaCierreCaja').innerText = hoyStr;
+      if (document.getElementById('lblEmisionCierreCaja')) document.getElementById('lblEmisionCierreCaja').innerText = new Date().toLocaleTimeString();
+    }
+
+    // DISPARADORES SEPARADOS DE IMPRESIÓN
+    function imprimirCierreCaja() {
+      renderizarLiquidacionDiaria();
+      document.body.classList.remove('modo-imprimir-reporte');
+      document.body.classList.add('modo-imprimir-liquidacion');
+      window.print();
+    }
+
+    function imprimirReporteContable() {
+      document.body.classList.remove('modo-imprimir-liquidacion');
+      document.body.classList.add('modo-imprimir-reporte');
+      window.print();
     }
 
     // ---------------- 2. HISTORIAL DE CLIENTES VIP ----------------
@@ -1196,7 +1318,7 @@
       reader.readAsDataURL(file);
     }
 
-    function agregarNuevoProducto() {
+    function agregarNuevoBalonProducto() {
       productos.push({
         id: "gas-" + Date.now(),
         nombre: "Nuevo Balón de Gas",
@@ -1352,7 +1474,6 @@
       document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
       if (boton) boton.classList.add('active');
       
-      // Limpiar inputs de calendario para no crear confusión visual
       document.getElementById('calFechaDia').value = '';
       document.getElementById('calFechaMes').value = '';
       document.getElementById('calFechaAnio').value = '';
@@ -1362,13 +1483,12 @@
       renderizarReportesContables();
     }
 
-    // FILTRO 1: POR DÍA EXACTO (input type="date")
+    // FILTRO 1: POR DÍA EXACTO
     function filtrarPorDiaCalendario(fechaStr) {
       if (!fechaStr) return;
       document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
       filtroFechaActivo = "dia_especifico";
       
-      // fechaStr formato YYYY-MM-DD
       const [y, m, d] = fechaStr.split('-').map(Number);
       const inicioDia = new Date(y, m - 1, d, 0, 0, 0);
       const finDia = new Date(y, m - 1, d, 23, 59, 59);
@@ -1381,13 +1501,12 @@
       renderizarTablaYTotalesReporte(`Día exacto: ${fechaStr}`);
     }
 
-    // FILTRO 2: POR MES EXACTO (input type="month")
+    // FILTRO 2: POR MES EXACTO
     function filtrarPorMesCalendario(mesStr) {
       if (!mesStr) return;
       document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
       filtroFechaActivo = "mes_especifico";
 
-      // mesStr formato YYYY-MM
       const [y, m] = mesStr.split('-').map(Number);
       const inicioMes = new Date(y, m - 1, 1, 0, 0, 0);
       const finMes = new Date(y, m, 0, 23, 59, 59);
@@ -1400,7 +1519,7 @@
       renderizarTablaYTotalesReporte(`Mes: ${mesStr}`);
     }
 
-    // FILTRO 3: POR AÑO EXACTO (input type="number")
+    // FILTRO 3: POR AÑO EXACTO
     function filtrarPorAnioCalendario(anioNum) {
       const anio = parseInt(anioNum);
       if (isNaN(anio) || anio < 2020) return;
@@ -1418,7 +1537,7 @@
       renderizarTablaYTotalesReporte(`Año: ${anio}`);
     }
 
-    // FILTRO 4: POR RANGO LIBRE (DESDE - HASTA)
+    // FILTRO 4: POR RANGO LIBRE
     function filtrarPorRangoCalendario() {
       const desdeStr = document.getElementById('calRangoDesde').value;
       const hastaStr = document.getElementById('calRangoHasta').value;
