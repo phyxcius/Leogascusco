@@ -298,7 +298,6 @@
           ordenActiva = Object.values(pedidos).find(p => p.repartidorId === choferActual.id && p.estado !== 'completado');
         }
 
-        // Nueva comanda asignada
         if (ordenActiva && ordenActiva.id !== idUltimaOrdenVista) {
           if (idUltimaOrdenVista !== null) {
             lanzarAlertaChofer(
@@ -313,7 +312,6 @@
           avisoSalidaMostrado = false;
         }
 
-        // DETECCIÓN: EL CLIENTE PULSÓ "YA SALGO" EN INDEX.HTML
         if (ordenActiva && ordenActiva.clienteConfirmado === true && !avisoSalidaMostrado) {
           avisoSalidaMostrado = true;
           lanzarAlertaChofer("🚪 ¡El cliente ya sale!", `${ordenActiva.cliente} confirmó que está saliendo a la puerta.`);
@@ -358,9 +356,10 @@
           <span style="color:#15803d; font-weight:bold;">Cobrar: S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)}</span>
         </div>
         <div style="font-size:13px;">👤 <strong>Cliente:</strong> ${ordenActiva.cliente}</div>
+        ${ordenActiva.direccionTexto ? `<div style="font-size:13px; color:#b45309; margin:2px 0;">🏠 <strong>Dirección:</strong> ${ordenActiva.direccionTexto}</div>` : ''}
         <div style="font-size:13px;">💵 <strong>Pago:</strong> ${ordenActiva.metodoPago}</div>
         ${ordenActiva.clienteConfirmado ? '<div style="margin-top:6px; font-size:12px; font-weight:800; color:#15803d;">✔️ Cliente avisó que ya está saliendo</div>' : ''}
-        ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" style="display:inline-block; background:#2563eb; color:#fff; text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:12px; margin-top:8px;">🗺️ Abrir Google Maps</a>` : ''}
+        ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" style="display:inline-block; background:#2563eb; color:#fff; text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:12px; margin-top:8px;">🗺️ Abrir Dirección en Mapa</a>` : ''}
       `;
 
       const etapa = ordenActiva.etapa || 0;
