@@ -151,14 +151,13 @@
 </head>
 <body>
 
-  <!-- PANTALLA LOGIN -->
+  <!-- PANTALLA LOGIN ADMIN -->
   <div id="pantallaLogin" class="login-container">
     <div class="login-card">
       <div style="text-align:center; font-size:38px;">🦁</div>
       <h3 style="color:#6b21a8; text-align:center; margin-bottom:4px;">Acceso Administrador</h3>
       <p style="font-size:12px; color:#64748b; text-align:center; margin-bottom:12px;">LeoGas Cusco • Sistema Firebase</p>
       
-      <!-- LOGO LA CHUSPA TECH EN LOGIN -->
       <div style="display:flex; justify-content:center; margin-bottom:14px;">
         <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
           <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
@@ -169,7 +168,6 @@
         </a>
       </div>
 
-      <!-- BOTÓN ACTIVAR NOTIFICACIONES PREVIO -->
       <div style="text-align:center; margin-bottom:14px;">
         <button type="button" id="btnNotifLogin" class="btn-notif-header" onclick="solicitarPermisoNotificacionesManual(this)">
           🔔 Activar Notificaciones y Sonido
@@ -200,7 +198,6 @@
           </div>
         </a>
 
-        <!-- BOTÓN ACTIVAR NOTIFICACIONES EN CABECERA -->
         <button type="button" id="btnNotifHeader" class="btn-notif-header" onclick="solicitarPermisoNotificacionesManual(this)">
           🔔 Activar Notificaciones
         </button>
@@ -208,7 +205,7 @@
       <button class="btn" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; font-size:12px;" onclick="cerrarSesionAdmin()">🚪 Salir</button>
     </div>
 
-    <!-- PESTAÑAS AMPLIADAS -->
+    <!-- PESTAÑAS -->
     <div class="dashboard-tabs no-print">
       <button class="tab-btn active" id="tabBtnPedidos" onclick="cambiarTab('pedidos')">📦 Pedidos y Flota en Vivo</button>
       <button class="tab-btn" id="tabBtnLiquidacion" onclick="cambiarTab('liquidacion')">💵 Cierre de Caja</button>
@@ -241,7 +238,7 @@
       </div>
     </div>
 
-    <!-- PESTAÑA NUEVA: LIQUIDACIÓN DIARIA POR REPARTIDOR (CIERRE DE CAJA) -->
+    <!-- PESTAÑA 2: CIERRE DE CAJA -->
     <div id="seccionLiquidacion" style="display: none;">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
@@ -273,7 +270,7 @@
       </div>
     </div>
 
-    <!-- PESTAÑA NUEVA: HISTORIAL DE CLIENTES FRECUENTES / VIP -->
+    <!-- PESTAÑA 3: CLIENTES VIP -->
     <div id="seccionClientes" style="display: none;">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
@@ -302,7 +299,7 @@
       </div>
     </div>
 
-    <!-- PESTAÑA NUEVA: VÁLVULAS Y ACCESORIOS (CATÁLOGO Y STOCK) -->
+    <!-- PESTAÑA 4: ACCESORIOS -->
     <div id="seccionAccesorios" style="display: none;">
       <button class="btn btn-add no-print" onclick="agregarNuevoAccesorio()">➕ Agregar Nuevo Accesorio (Válvula, Manguera, Regulador)</button>
       <div id="listaAccesorios">Cargando catálogo de accesorios...</div>
@@ -310,7 +307,7 @@
       <div id="statusMsgAccesorios" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
     </div>
 
-    <!-- PESTAÑA 2: PRODUCTOS Y PRECIOS (BALONES) -->
+    <!-- PESTAÑA 5: PRODUCTOS Y BALONES -->
     <div id="seccionProductos" style="display: none;">
       <button class="btn btn-add no-print" onclick="agregarNuevoProducto()">➕ Agregar Nuevo Balón</button>
       <div id="listaProductos">Cargando catálogo desde Firebase...</div>
@@ -318,7 +315,7 @@
       <div id="statusMsgProductos" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
     </div>
 
-    <!-- PESTAÑA 3: TELÉFONOS -->
+    <!-- PESTAÑA 6: TELÉFONOS -->
     <div id="seccionTelefonos" style="display: none;">
       <div class="card">
         <h3 style="color:#6b21a8; font-size:15px; margin-bottom:12px;">📞 Edición de Teléfonos del Volante y Pedidos</h3>
@@ -338,13 +335,31 @@
       </div>
     </div>
 
-    <!-- PESTAÑA 4: GESTIÓN DE REPARTIDORES -->
+    <!-- PESTAÑA 7: GESTIÓN DE REPARTIDORES CON USUARIO Y CONTRASEÑA -->
     <div id="seccionGPS" style="display: none;">
-      <button class="btn btn-add" onclick="agregarNuevoRepartidor()">➕ Agregar Nuevo Repartidor a la Flota</button>
+      <div class="card" style="border:1.5px solid #c084fc; background:#faf5ff; margin-bottom:16px;">
+        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:10px;">➕ Registrar Nuevo Repartidor en Flota</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+          <div>
+            <label>Nombre del Chofer / Móvil:</label>
+            <input type="text" id="nuevoRepNombre" placeholder="Ej: Jorge / Edwin / Moto 3">
+          </div>
+          <div>
+            <label>Usuario de Acceso:</label>
+            <input type="text" id="nuevoRepUsuario" placeholder="Ej: jorge">
+          </div>
+          <div>
+            <label>Contraseña de Acceso:</label>
+            <input type="password" id="nuevoRepPassword" placeholder="Ej: jorge123">
+          </div>
+        </div>
+        <button class="btn btn-add" style="margin-top:12px; margin-bottom:0;" onclick="agregarNuevoRepartidor()">Guardar y Habilitar Repartidor 🛵</button>
+      </div>
+
       <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
     </div>
 
-    <!-- PESTAÑA 5: REPORTES CONTABLES POR FECHAS -->
+    <!-- PESTAÑA 8: REPORTES CONTABLES -->
     <div id="seccionReportes" style="display: none;">
       <div class="report-filters-bar no-print">
         <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtrar por:</span>
@@ -370,7 +385,7 @@
         </div>
       </div>
 
-      <!-- ÁREA DE IMPRESIÓN (MEMBRETADA) -->
+      <!-- ÁREA DE IMPRESIÓN -->
       <div id="areaImpresion">
         <div id="printHeaderReport">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -655,15 +670,15 @@
         procesarClientesVIP();
       });
 
-      // 2. Repartidores
+      // 2. Repartidores (incluye usuario y contraseña)
       db.ref('repartidores').on('value', snap => {
         const data = snap.val();
         if (data) {
           repartidoresLocales = data;
         } else {
           repartidoresLocales = {
-            "rep-1": { id: "rep-1", nombre: "Edwin", online: false, lat: -13.5167, lng: -71.9788 },
-            "rep-2": { id: "rep-2", nombre: "Moto 2", online: false, lat: -13.5200, lng: -71.9700 }
+            "rep-1": { id: "rep-1", nombre: "Edwin", usuario: "edwin", password: "123", online: false, lat: -13.5167, lng: -71.9788 },
+            "rep-2": { id: "rep-2", nombre: "Moto 2", usuario: "moto2", password: "123", online: false, lat: -13.5200, lng: -71.9700 }
           };
           db.ref('repartidores').set(repartidoresLocales);
         }
@@ -827,7 +842,7 @@
 
       Object.values(repartidoresLocales).forEach(rep => {
         const ordenActiva = Object.values(pedidosLocales).find(p => p.repartidorId === rep.id && p.estado !== 'completado');
-        const etapa = ordenActiva ? ordenActiva.etapa : 1;
+        const etapa = ordenActiva ? ordenActiva.etapa : 0;
 
         if (estadosPrevios[rep.id] && estadosPrevios[rep.id] !== 3 && etapa === 3) {
           mostrarNotificacionCentro(rep.nombre);
@@ -1178,14 +1193,14 @@
       setTimeout(() => { msg.innerText = ""; }, 4000);
     }
 
-    // ---------------- GESTIÓN DE REPARTIDORES ----------------
+    // ---------------- GESTIÓN DE REPARTIDORES CON USUARIO Y CONTRASEÑA ----------------
     function renderizarGestionRepartidores() {
       const cont = document.getElementById('listaRepartidoresConfig');
       cont.innerHTML = '';
       const lista = Object.values(repartidoresLocales);
 
       if (lista.length === 0) {
-        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados.</p>';
+        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados en el sistema.</p>';
         return;
       }
 
@@ -1193,14 +1208,26 @@
         const div = document.createElement('div');
         div.className = 'repartidor-card';
         div.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-            <div style="flex:1; min-width:220px;">
-              <input type="text" id="inpRepName_${rep.id}" value="${rep.nombre}" style="font-weight:bold; font-size:15px; margin:0;">
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end;">
+            <div>
+              <label>Nombre Chofer / Unidad:</label>
+              <input type="text" id="inpRepName_${rep.id}" value="${rep.nombre || ''}" style="font-weight:bold;">
+            </div>
+            <div>
+              <label>Usuario Login:</label>
+              <input type="text" id="inpRepUser_${rep.id}" value="${rep.usuario || ''}">
+            </div>
+            <div>
+              <label>Contraseña:</label>
+              <input type="text" id="inpRepPass_${rep.id}" value="${rep.password || ''}">
             </div>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-edit" onclick="guardarNombreRepartidorManual('${rep.id}')">💾 Guardar Nombre</button>
-              <button class="btn btn-del" onclick="eliminarRepartidor('${rep.id}')">🗑️ Eliminar</button>
+              <button class="btn btn-edit" style="flex:1;" onclick="guardarDatosRepartidorManual('${rep.id}')">💾 Guardar</button>
+              <button class="btn btn-del" onclick="eliminarRepartidor('${rep.id}')">🗑️</button>
             </div>
+          </div>
+          <div style="font-size:11px; color:#64748b; margin-top:6px;">
+            Estado GPS: <strong>${rep.online ? '🟢 Conectado' : '💤 Desconectado'}</strong> | ID Interno: <code>${rep.id}</code>
           </div>
         `;
         cont.appendChild(div);
@@ -1208,27 +1235,54 @@
     }
 
     async function agregarNuevoRepartidor() {
-      const nombre = prompt("Nombre del nuevo repartidor (ej. Jorge / Edwin / Moto 3):");
-      if (!nombre || !nombre.trim()) return;
+      const nombre = document.getElementById('nuevoRepNombre').value.trim();
+      const usuario = document.getElementById('nuevoRepUsuario').value.trim().toLowerCase();
+      const pass = document.getElementById('nuevoRepPassword').value.trim();
+
+      if (!nombre || !usuario || !pass) {
+        return alert("Por favor completa el nombre, usuario y contraseña del repartidor.");
+      }
+
+      // Validar que el usuario no exista
+      const repetido = Object.values(repartidoresLocales).find(r => r.usuario && r.usuario.toLowerCase() === usuario);
+      if (repetido) {
+        return alert(`El usuario "${usuario}" ya está asignado a otro chofer.`);
+      }
+
       const nuevoId = "rep-" + Date.now();
       await db.ref(`repartidores/${nuevoId}`).set({
         id: nuevoId,
-        nombre: nombre.trim(),
+        nombre: nombre,
+        usuario: usuario,
+        password: pass,
         online: false,
         lat: -13.5167,
         lng: -71.9788
       });
-      alert(`✔ Repartidor "${nombre}" agregado a la flota.`);
+
+      document.getElementById('nuevoRepNombre').value = '';
+      document.getElementById('nuevoRepUsuario').value = '';
+      document.getElementById('nuevoRepPassword').value = '';
+
+      alert(`✔ Repartidor "${nombre}" registrado con éxito. Podrá ingresar con su usuario y contraseña.`);
     }
 
-    async function guardarNombreRepartidorManual(id) {
-      const input = document.getElementById(`inpRepName_${id}`);
-      if (!input) return;
-      const nuevoNombre = input.value.trim();
-      if (!nuevoNombre) return alert("El nombre no puede estar vacío.");
+    async function guardarDatosRepartidorManual(id) {
+      const nuevoNombre = document.getElementById(`inpRepName_${id}`).value.trim();
+      const nuevoUser = document.getElementById(`inpRepUser_${id}`).value.trim().toLowerCase();
+      const nuevoPass = document.getElementById(`inpRepPass_${id}`).value.trim();
 
-      await db.ref(`repartidores/${id}/nombre`).set(nuevoNombre);
-      alert("✔ Nombre del repartidor actualizado.");
+      if (!nuevoNombre || !nuevoUser || !nuevoPass) {
+        return alert("El nombre, usuario y contraseña no pueden estar vacíos.");
+      }
+
+      await db.ref(`repartidores/${id}`).update({
+        nombre: nuevoNombre,
+        usuario: nuevoUser,
+        password: nuevoPass
+      });
+
+      alert("✔ Credenciales y nombre del chofer actualizados.");
     }
 
     async function eliminarRepartidor(id) {
