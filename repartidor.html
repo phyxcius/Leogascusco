@@ -12,18 +12,10 @@
     h1 { font-size: 22px; font-weight: 900; color: #6b21a8; margin-bottom: 4px; }
     .subtitle { font-size: 13px; color: #64748b; margin-bottom: 12px; }
 
-    /* BADGE LA CHUSPA TECH */
     .chuspa-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #fefce8;
-      border: 1.5px solid #eab308;
-      padding: 4px 10px 4px 6px;
-      border-radius: 20px;
-      text-decoration: none;
-      box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2);
-      margin-bottom: 14px;
+      display: inline-flex; align-items: center; gap: 8px; background: #fefce8;
+      border: 1.5px solid #eab308; padding: 4px 10px 4px 6px; border-radius: 20px;
+      text-decoration: none; box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2); margin-bottom: 14px;
     }
     .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid #ca8a04; background: #fff; }
     .chuspa-text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
@@ -52,60 +44,26 @@
     .btn-disconnect { background: #dc2626; color: #ffffff; display: none; }
     .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 15px; padding: 12px; margin-top: 14px; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; }
 
-    /* MODAL CENTRADO EN LA PANTALLA */
     .driver-modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.72);
-      backdrop-filter: blur(5px);
-      z-index: 99999;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(5px); z-index: 99999;
+      justify-content: center; align-items: center; padding: 16px;
     }
     .driver-modal-box {
-      background: #ffffff;
-      width: 100%;
-      max-width: 380px;
-      border-radius: 20px;
-      padding: 24px 20px;
-      text-align: center;
-      border: 3px solid #16a34a;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
-      animation: popIn 0.25s ease-out;
+      background: #ffffff; width: 100%; max-width: 380px; border-radius: 20px;
+      padding: 24px 20px; text-align: center; border: 3px solid #16a34a;
     }
-    @keyframes popIn {
-      from { transform: scale(0.85); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .driver-modal-icon {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-    .btn-modal-ok {
-      background: #16a34a;
-      color: #fff;
-      border: none;
-      padding: 12px;
-      width: 100%;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 900;
-      cursor: pointer;
-      margin-top: 14px;
-    }
+    .btn-modal-ok { background: #16a34a; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 10px; font-size: 15px; font-weight: 900; cursor: pointer; margin-top: 14px; }
   </style>
 </head>
 <body>
 
-  <!-- PANTALLA 1: LOGIN DEL REPARTIDOR -->
+  <!-- PANTALLA 1: LOGIN -->
   <div class="driver-card" id="pantallaLoginChofer">
     <div style="font-size:48px;">🦁</div>
     <h1>Acceso Repartidor</h1>
-    <p class="subtitle">LeoGas Cusco • Sistema de Flota</p>
+    <p class="subtitle">LeoGas Cusco • Flota y Distribución</p>
 
-    <!-- LOGO LA CHUSPA TECH EN LOGIN -->
     <div style="display:flex; justify-content:center;">
       <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
         <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
@@ -128,7 +86,7 @@
     <div id="errorLoginMsg" style="color:#dc2626; font-size:12px; font-weight:800; margin-top:10px;"></div>
   </div>
 
-  <!-- PANTALLA 2: PANEL ACTIVO DEL REPARTIDOR -->
+  <!-- PANTALLA 2: PANEL ACTIVO -->
   <div class="driver-card" id="panelChoferActivo" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <div style="display:flex; align-items:center; gap:6px;">
@@ -138,8 +96,6 @@
       <button onclick="cerrarSesionChofer()" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; font-size:11px; font-weight:bold; padding:4px 10px; border-radius:6px; cursor:pointer;">🚪 Salir</button>
     </div>
     
-    <p class="subtitle" style="text-align:left;">Panel de Navegación y Secuencia de Entrega</p>
-
     <div class="status-panel" id="panelEstado">
       <span id="textoEstado">Offline 💤 (Desconectado)</span>
     </div>
@@ -175,19 +131,16 @@
     </button>
   </div>
 
-  <!-- MODAL CENTRADO: EL CLIENTE CONFIRMÓ QUE YA SALE -->
+  <!-- MODAL: EL CLIENTE YA SALE -->
   <div class="driver-modal-overlay" id="modalClienteSale">
     <div class="driver-modal-box">
-      <div class="driver-modal-icon">🚪🏃‍♂️</div>
+      <div style="font-size:48px;">🚪🏃‍♂️</div>
       <h3 style="color:#15803d; font-size:20px; font-weight:900;">¡EL CLIENTE YA SALE!</h3>
-      <p id="textoClienteSale" style="font-size:14px; color:#334155; margin-top:8px; line-height:1.4;">
-        El cliente confirmó que está saliendo a la puerta. Ten listo el balón y el vuelto.
-      </p>
+      <p id="textoClienteSale" style="font-size:14px; color:#334155; margin-top:8px; line-height:1.4;"></p>
       <button type="button" class="btn-modal-ok" onclick="cerrarModalClienteSale()">¡Entendido! 👍</button>
     </div>
   </div>
 
-  <!-- SDK DE FIREBASE (TIEMPO REAL) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -240,11 +193,9 @@
       }
     }
 
-    // CARGAR Y ESCUCHAR REPARTIDORES DE FIREBASE
     function escucharRepartidoresParaLogin() {
       db.ref('repartidores').on('value', snap => {
         listaRepartidoresFirebase = snap.val() || {};
-        
         const choferGuardadoId = localStorage.getItem("leogas_chofer_autenticado_id");
         if (choferGuardadoId && listaRepartidoresFirebase[choferGuardadoId]) {
           choferActual = listaRepartidoresFirebase[choferGuardadoId];
@@ -253,7 +204,6 @@
       });
     }
 
-    // VERIFICAR LOGIN CON USUARIO Y CONTRASEÑA
     function verificarLoginChofer(e) {
       e.preventDefault();
       const u = document.getElementById('loginChoferUser').value.trim().toLowerCase();
@@ -270,7 +220,7 @@
         errorMsg.innerText = "";
         mostrarPanelRepartidor();
       } else {
-        errorMsg.innerText = "Usuario o contraseña incorrectos. Consulta con el Administrador.";
+        errorMsg.innerText = "Usuario o contraseña incorrectos.";
       }
     }
 
@@ -300,10 +250,7 @@
 
         if (ordenActiva && ordenActiva.id !== idUltimaOrdenVista) {
           if (idUltimaOrdenVista !== null) {
-            lanzarAlertaChofer(
-              "🛵 ¡Nueva orden asignada!",
-              `Llevar ${ordenActiva.tipoBalon} a ${ordenActiva.cliente} (Cobrar: S/ ${ordenActiva.montoCobro})`
-            );
+            lanzarAlertaChofer("🛵 ¡Nueva orden asignada!", `Llevar ${ordenActiva.tipoBalon} a ${ordenActiva.cliente}`);
           }
           idUltimaOrdenVista = ordenActiva.id;
           avisoSalidaMostrado = false;
@@ -315,19 +262,12 @@
         if (ordenActiva && ordenActiva.clienteConfirmado === true && !avisoSalidaMostrado) {
           avisoSalidaMostrado = true;
           lanzarAlertaChofer("🚪 ¡El cliente ya sale!", `${ordenActiva.cliente} confirmó que está saliendo a la puerta.`);
-          mostrarModalClienteSale(ordenActiva.cliente);
+          document.getElementById('textoClienteSale').innerText = `${ordenActiva.cliente} confirmó que ya sale a recibir el gas.`;
+          document.getElementById('modalClienteSale').style.display = 'flex';
         }
 
         renderizarVistaOrden();
       });
-    }
-
-    function mostrarModalClienteSale(nombreCliente) {
-      document.getElementById('textoClienteSale').innerHTML = `
-        <strong>${nombreCliente || 'El cliente'}</strong> acaba de confirmar: <br>
-        <span style="display:inline-block; margin-top:6px; font-size:16px; font-weight:800; color:#15803d;">"¡Ya salgo a recibir el gas!"</span>
-      `;
-      document.getElementById('modalClienteSale').style.display = 'flex';
     }
 
     function cerrarModalClienteSale() {
@@ -349,15 +289,35 @@
         return;
       }
 
+      const esCredito = (ordenActiva.metodoPago || '').toLowerCase().includes('crédito') || (ordenActiva.metodoPago || '').toLowerCase().includes('credito');
+
       caja.className = "order-box";
       caja.innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
           <strong style="color:#7e22ce;">${ordenActiva.tipoBalon}</strong>
-          <span style="color:#15803d; font-weight:bold;">Cobrar: S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)}</span>
+          <span style="color:${esCredito ? '#d97706' : '#15803d'}; font-weight:bold;">
+            ${esCredito ? 'A CRÉDITO: ' : 'Cobrar: '} S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)}
+          </span>
         </div>
         <div style="font-size:13px;">👤 <strong>Cliente:</strong> ${ordenActiva.cliente}</div>
         ${ordenActiva.direccionTexto ? `<div style="font-size:13px; color:#b45309; margin:2px 0;">🏠 <strong>Dirección:</strong> ${ordenActiva.direccionTexto}</div>` : ''}
         <div style="font-size:13px;">💵 <strong>Pago:</strong> ${ordenActiva.metodoPago}</div>
+
+        <!-- CUADRO DE CONTROL DE ENVASES EN PUERTA -->
+        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:8px 10px; margin-top:8px;">
+          <span style="font-size:11px; font-weight:800; color:#475569;">🔄 CONTROL DE ENVASES / CASCOS:</span>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <div style="flex:1;">
+              <span style="font-size:11px;">Llenos dejados:</span>
+              <input type="number" id="inpEnvasesDejados" value="${ordenActiva.envasesEntregados || 1}" min="0" style="padding:6px; font-weight:bold;">
+            </div>
+            <div style="flex:1;">
+              <span style="font-size:11px;">Vacíos recogidos:</span>
+              <input type="number" id="inpEnvasesRecogidos" value="${ordenActiva.envasesRecogidos || 0}" min="0" style="padding:6px; font-weight:bold;">
+            </div>
+          </div>
+        </div>
+
         ${ordenActiva.clienteConfirmado ? '<div style="margin-top:6px; font-size:12px; font-weight:800; color:#15803d;">✔️ Cliente avisó que ya está saliendo</div>' : ''}
         ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" style="display:inline-block; background:#2563eb; color:#fff; text-decoration:none; padding:6px 12px; border-radius:6px; font-weight:bold; font-size:12px; margin-top:8px;">🗺️ Abrir Dirección en Mapa</a>` : ''}
       `;
@@ -393,7 +353,15 @@
         return alert("⛔ Debes marcar primero 'Paso 2: Entregado' antes de completar.");
       }
 
-      const updates = { etapa: paso };
+      // Guardar el recuento de envases al pasar a etapa 2 o 3
+      const envDej = parseInt(document.getElementById('inpEnvasesDejados')?.value) || parseInt(ordenActiva.envasesEntregados || 1);
+      const envRec = parseInt(document.getElementById('inpEnvasesRecogidos')?.value) || 0;
+
+      const updates = { 
+        etapa: paso,
+        envasesEntregados: envDej,
+        envasesRecogidos: envRec
+      };
       if (paso === 3) updates.estado = "completado";
 
       await db.ref(`pedidos/${ordenActiva.id}`).update(updates);
