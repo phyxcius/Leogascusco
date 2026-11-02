@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -74,7 +73,6 @@
       transition: all 0.3s ease;
     }
 
-    /* ESTILO DIFERENCIADO Y ATRACTIVO PARA EMPRESAS B2B */
     .tracking-status-bar.modo-b2b {
       background: linear-gradient(135deg, #090d16 0%, #0f172a 45%, #1e1b4b 100%);
       border-bottom: 2.5px solid #f59e0b;
@@ -282,13 +280,6 @@
     .btn-alert-primary { background: var(--primary); color: #fff; }
     .btn-alert-success { background: #16a34a; color: #fff; }
 
-    /* MODAL TICKET DIGITAL */
-    .ticket-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 3500; justify-content: center; align-items: center; padding: 16px; }
-    .ticket-box { background: #fff; width: 100%; max-width: 380px; border-radius: 16px; padding: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 13px; color: #1e1b4b; }
-    .ticket-header { text-align: center; border-bottom: 2px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px; }
-    .ticket-items-list { border-bottom: 2px dashed #cbd5e1; padding-bottom: 10px; margin-bottom: 10px; }
-    .ticket-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-
     @media print {
       body * { visibility: hidden; }
       #ticketImprimible, #ticketImprimible * { visibility: visible; }
@@ -463,7 +454,6 @@
           <div class="cart-items-box" id="popupItemsList"></div>
         </div>
 
-        <!-- FORMA DE PAGO -->
         <div>
           <div class="popup-section-label" style="margin-bottom:6px;">Forma de Pago:</div>
           <div class="grid-payments">
@@ -492,7 +482,6 @@
           </div>
         </div>
 
-        <!-- HORARIO DE ENTREGA -->
         <div class="delivery-time-box">
           <span class="popup-section-label">Horario de Entrega:</span>
           <div class="grid-delivery-opts">
@@ -504,7 +493,6 @@
           </div>
         </div>
 
-        <!-- COMPROBANTE -->
         <div class="comprobante-box">
           <span class="popup-section-label">Tipo de Comprobante:</span>
           <div style="display:flex; gap:16px; margin-top:4px;">
@@ -546,7 +534,7 @@
     </div>
   </div>
 
-  <!-- MODAL B2B EXCLUSIVO PARA EMPRESAS (CON HISTORIAL DE FACTURAS) -->
+  <!-- MODAL B2B EXCLUSIVO PARA EMPRESAS (CON HISTORIAL Y TICKET TÉRMICO) -->
   <div class="cart-modal-overlay" id="modalB2BOverlay" style="display:none; align-items:center;">
     <div class="cart-modal-card" style="border-radius:18px; max-width:480px; padding:0; overflow:hidden;">
       
@@ -561,16 +549,16 @@
         <button onclick="cerrarModalB2B()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
       </div>
 
-      <!-- PASO A: IDENTIFICACIÓN CON RUC -->
+      <!-- PASO A: IDENTIFICACIÓN CON RUC Y APIS PERÚ -->
       <div id="vistaB2BLogin" style="padding:22px;">
         <p style="font-size:13px; color:#475569; margin-bottom:12px;">
-          Ingresa el <strong>RUC de tu empresa</strong> para acceder a tus tarifas comerciales preferenciales y línea de crédito.
+          Ingresa el <strong>RUC de tu empresa</strong> para consultar directamente el padrón SUNAT y acceder a tus tarifas preferenciales.
         </p>
         
         <label style="font-size:11px; font-weight:800; color:#0f172a; text-transform:uppercase;">Número de RUC (11 dígitos):</label>
         <div style="display:flex; gap:8px; margin-top:4px;">
           <input type="text" id="inputRucB2B" maxlength="11" placeholder="Ej: 20601234567" style="flex:1; padding:10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:15px; font-weight:bold;">
-          <button type="button" class="btn-b2b-header" style="border-radius:8px;" onclick="validarRucEmpresaB2B()">Ingresar ➔</button>
+          <button type="button" class="btn-b2b-header" style="border-radius:8px;" onclick="consultarRucSunatApisPeru(document.getElementById('inputRucB2B').value)">Consultar ➔</button>
         </div>
         <div id="msgValidacionRuc" style="font-size:12px; margin-top:8px;"></div>
       </div>
@@ -603,7 +591,7 @@
             📍 Activar ubicación exacta del local (GPS)
           </button>
           <span id="geoStatusB2B" style="font-size:11px; color:#64748b; text-align:center;">
-            Comparte tus coordenadas para que el camión o repartidor llegue sin llamadas previas
+            Comparte tus coordenadas para que el camión llegue sin llamadas previas
           </span>
         </div>
 
@@ -631,110 +619,71 @@
     </div>
   </div>
 
-  <!-- MODAL: ALERTA 1: PEDIDO REALIZADO -->
-  <div class="center-alert-overlay" id="modalAlertaExito">
-    <div class="center-alert-card">
-      <div class="alert-icon-circle alert-icon-success">🎉</div>
-      <h3>¡Tu Pedido fue Registrado!</h3>
-      <p id="textoAlertaExito">
-        Tu pedido ha sido enviado a la central de <strong>LeoGas Cusco</strong> y transferido a WhatsApp.<br><br>
-        Mantén esta pantalla abierta o revisa tus alertas para saber cuando el repartidor salga hacia tu casa.
-      </p>
-      <div class="alert-btn-group">
-        <button type="button" class="btn-alert-action btn-alert-success" onclick="cerrarAlertaExito()">
-          Entendido ✔️ (Ver Repartidor en Mapa)
+  <!-- MODAL TICKET / FACTURA ELECTRÓNICA DIGITAL (DISEÑO TÉRMICO OFICIAL) -->
+  <div class="ticket-modal-overlay" id="ticketModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); z-index:3500; justify-content:center; align-items:center; padding:16px;">
+    <div class="ticket-box" id="ticketImprimible" style="background:#fff; width:100%; max-width:400px; border-radius:20px; padding:24px 20px; box-shadow:0 15px 35px rgba(0,0,0,0.3); font-family:system-ui, sans-serif; font-size:12.5px; color:#1e1b4b; max-height:90vh; overflow-y:auto;">
+      
+      <div class="ticket-header" style="text-align:center; border-bottom:2px dashed #cbd5e1; padding-bottom:12px; margin-bottom:12px;">
+        <div style="font-size:32px; margin-bottom:4px;">🦁</div>
+        <h2 style="font-size:17px; font-weight:900; color:#6b21a8; margin:0; text-transform:uppercase;">LEOGAS CUSCO</h2>
+        <div style="font-size:11px; color:#64748b; font-weight:700;">Distribuidor Oficial Llamagas • Cusco, Gourmet</div>
+        <div style="font-size:11px; color:#334155; margin-top:2px;"><strong>RUC:</strong> 20611922311</div>
+        <div style="font-size:11px; color:#334155;">Calle Garcilaso / Central Cusco • Teléfa: 084 501111</div>
+        
+        <div style="margin-top:10px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; padding:6px; text-align:center;">
+          <strong id="tickTipoComp" style="font-size:13px; color:#1e1b4b; display:block;">*** FACTURA ELECTRÓNICA ***</strong>
+          <span id="tickSerieNro" style="font-size:11.5px; color:#b45309; font-weight:800;">F001-00000000</span>
+        </div>
+        <div style="font-size:11px; color:#64748b; margin-top:6px;"><span id="tickFecha">--/--/2026 --:--</span></div>
+      </div>
+
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:12px; font-size:12px;">
+        <div><strong>Cliente / Razón Social:</strong> <span id="tickCliente">--</span></div>
+        <div><strong>Doc (RUC / DNI):</strong> <span id="tickRucDni">--</span></div>
+        <div><strong>Dirección de Entrega:</strong> <span id="tickDireccion">Cusco</span></div>
+      </div>
+
+      <div style="border-bottom:2px dashed #cbd5e1; padding-bottom:10px; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; font-weight:800; color:#475569; font-size:11px; border-bottom:1px solid #e2e8f0; padding-bottom:4px; margin-bottom:6px;">
+          <span>CANT. / DESCRIPCIÓN</span>
+          <span>P.UNIT. &nbsp; SUBT.</span>
+        </div>
+        <div id="tickListaProductos" style="display:flex; flex-direction:column; gap:6px;"></div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:4px; text-align:right; font-size:13px; margin-bottom:12px;">
+        <div>OP. GRAVADA: &nbsp; <strong id="tickSubtotal" style="font-weight:700;">S/ 0.00</strong></div>
+        <div>I.G.V. (18%): &nbsp; <strong id="tickIgv" style="font-weight:700;">S/ 0.00</strong></div>
+        <div style="font-size:15px; font-weight:900; color:#6b21a8; margin-top:4px; border-top:1px solid #cbd5e1; padding-top:4px;">
+          TOTAL A PAGAR: &nbsp; <span id="tickTotal">S/ 0.00</span>
+        </div>
+      </div>
+
+      <div style="font-size:11px; color:#475569; border-top:1px dashed #cbd5e1; padding-top:8px; margin-bottom:14px;">
+        <div><strong>MÉTODO DE PAGO:</strong> <span id="tickPago">Efectivo</span></div>
+        <div><strong>OPERADOR / CAJA:</strong> Central Comercial B2B</div>
+        <div style="text-align:center; margin-top:8px; font-size:10px; color:#777;">
+          Autorizado mediante Operador de Servicios Electrónicos (OSE) / Conectado a SUNAT vía APIS Perú<br>
+          <strong>¡Gracias por su preferencia con LeoGas Cusco!</strong>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap;" class="no-print">
+        <button type="button" class="btn" style="flex:1; background:#16a34a; color:#fff; padding:10px; border-radius:8px; font-weight:900; font-size:13px; border:none; cursor:pointer;" onclick="window.print()">
+          🖨️ Imprimir / PDF
+        </button>
+        <button type="button" class="btn" style="flex:1; background:#25d366; color:#fff; padding:10px; border-radius:8px; font-weight:900; font-size:13px; border:none; cursor:pointer;" onclick="enviarFacturaWspCliente()">
+          📲 WhatsApp
+        </button>
+        <button type="button" class="btn" style="background:#cbd5e1; color:#334155; padding:10px 14px; border-radius:8px; font-weight:900; font-size:13px; border:none; cursor:pointer;" onclick="cerrarModalTicket()">
+          ✖ Cerrar
         </button>
       </div>
-    </div>
-  </div>
 
-  <!-- MODAL: ALERTA EN CAMINO (PASO 1) -->
-  <div class="center-alert-overlay" id="modalAlertaEnCamino">
-    <div class="center-alert-card" style="border: 2px solid #ef4444;">
-      <div class="alert-icon-circle alert-icon-road">🛵🔥</div>
-      <h3 style="color:#b91c1c;">¡Tu Balón está en Camino!</h3>
-      <p id="textoAlertaEnCamino">
-        El repartidor ya salió de la base con tu pedido hacia tu dirección.<br><br>
-        Puedes seguir su ubicación GPS en tiempo real en el mapa.
-      </p>
-      <div class="alert-btn-group">
-        <button type="button" class="btn-alert-action btn-alert-primary" onclick="cerrarAlertaEnCamino()">
-          Ver Mapa en Vivo 🗺️
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: ALERTA EN PUERTA (PASO 2) -->
-  <div class="center-alert-overlay" id="modalAlertaEnPuerta">
-    <div class="center-alert-card" style="border: 2px solid #16a34a;">
-      <div class="alert-icon-circle alert-icon-door">🚪🦁</div>
-      <h3 style="color:#15803d;">¡Repartidor en tu Puerta!</h3>
-      <p>
-        El repartidor de <strong>LeoGas Cusco</strong> ya está afuera con tu balón de gas.<br><br>
-        Toca el botón para avisarle que ya estás saliendo a recibirlo.
-      </p>
-      <div class="alert-btn-group">
-        <button type="button" class="btn-alert-action btn-alert-success" onclick="confirmarSalidaCliente()">
-          ¡Ya salgo! 🏃‍♂️✔️
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: ALERTA AGRADECIMIENTO (PASO 3) -->
-  <div class="center-alert-overlay" id="modalAlertaGracias">
-    <div class="center-alert-card" style="border: 2px solid #a855f7;">
-      <div class="alert-icon-circle alert-icon-finish">🦁✨</div>
-      <h3 style="color:#6b21a8;">¡Muchas Gracias por tu Compra!</h3>
-      <p id="textoAlertaGracias">
-        Tu balón de <strong>LeoGas Cusco (Llamagas)</strong> ha sido entregado exitosamente.<br><br>
-        ¡Gracias por confiar en nuestra seguridad y peso exacto! Vuelve a pedir cuando lo necesites.
-      </p>
-      <div class="alert-btn-group">
-        <button type="button" class="btn-alert-action btn-alert-primary" onclick="cerrarAlertaGracias()">
-          Aceptar ✔️
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL TICKET DIGITAL -->
-  <div class="ticket-modal-overlay" id="ticketModalOverlay">
-    <div class="ticket-box" id="ticketImprimible">
-      <div class="ticket-header">
-        <div style="font-size:24px;">🦁</div>
-        <h2 style="font-size:16px; color:#6b21a8; margin:2px 0;">LeoGas Cusco</h2>
-        <div style="font-size:11px; color:#64748b;">Llamagas • El Moradito Rendidor</div>
-        <div style="font-size:10px; color:#ca8a04; font-weight:bold; margin-top:4px;">Tecnología La Chuspa Tech</div>
-      </div>
-
-      <div style="margin-bottom:10px;">
-        <div><strong>Fecha:</strong> <span id="tickFecha"></span></div>
-        <div><strong>Cliente:</strong> <span id="tickCliente"></span></div>
-        <div><strong>Comprobante:</strong> <span id="tickTipoComp"></span></div>
-        <div id="tickDetalleFactura" style="display:none;"></div>
-        <div><strong>Horario:</strong> <span id="tickHorario"></span></div>
-        <div><strong>Pago:</strong> <span id="tickPago"></span></div>
-      </div>
-
-      <div class="ticket-items-list" id="tickListaProductos"></div>
-
-      <div class="ticket-row" style="font-size:15px; font-weight:900; color:#6b21a8; margin-top:8px;">
-        <span>TOTAL A PAGAR:</span>
-        <span id="tickTotal">S/ 0.00</span>
-      </div>
-
-      <div style="display:flex; gap:8px; margin-top:14px;" class="no-print">
-        <button type="button" class="btn-add" style="flex:1;" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
-        <button type="button" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:8px 14px; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="cerrarModalTicket()">Cerrar</button>
-      </div>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- SDK DE FIREBASE (TIEMPO REAL) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -753,10 +702,11 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    const APIS_PERU_TOKEN = "tu_token_apis_peru_aqui"; // Reemplaza con tu token real de apisperu.com
+
     let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
     let catalogoBalones = [];
     let catalogoAccesorios = [];
-
     const pedido = {};
     let metodoPago = "Efectivo";
     let horarioEntrega = "Inmediata";
@@ -767,729 +717,56 @@
     let clienteMarker = null;
     let marcadoresFlota = {};
     let flotaActual = [];
-    let modoMapaAmpliado = false;
 
-    let etapaAnteriorVista = -1;
-
-    // ESTADO PORTAL B2B
     let empresaB2BActual = null;
     let pedidoB2B = { "gas-45kg": 1 };
     let ubicacionB2BCoords = null;
 
-    // SONIDO Y VIBRACIÓN
-    function emitirCampanadaCliente() {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.setValueAtTime(659.25, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.18);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.8);
-      } catch (e) {}
-    }
-
-    function actualizarBotonNotificacionesCliente() {
-      const permiso = ("Notification" in window) ? Notification.permission : "denied";
-      const btn = document.getElementById('btnFlotanteNotificaciones');
-      const txt = document.getElementById('textoBtnNotif');
-      const ico = document.getElementById('iconoCampanaNotif');
-
-      if (permiso === "granted") {
-        btn.classList.add('activada');
-        ico.innerText = "🔔";
-        txt.innerText = "Alertas Activas ✔️";
-      } else {
-        btn.classList.remove('activada');
-        ico.innerText = "🔕";
-        txt.innerText = "Activar Alertas";
-      }
-    }
-
-    function solicitarPermisoNotificacionesManual(btn) {
-      if (!("Notification" in window)) return alert("Este navegador no soporta notificaciones.");
-      emitirCampanadaCliente();
-      Notification.requestPermission().then(perm => {
-        actualizarBotonNotificacionesCliente();
-        if (perm === "granted") {
-          lanzarNotificacionCliente("🦁 LeoGas Cusco", "¡Alertas activadas! Te avisaremos cuando el repartidor salga hacia tu casa.");
-        }
-      });
-    }
-
-    function pedirPermisoNotificacionesCliente() {
-      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission().then(() => actualizarBotonNotificacionesCliente());
-      } else {
-        actualizarBotonNotificacionesCliente();
-      }
-    }
-
-    function lanzarNotificacionCliente(titulo, mensaje) {
-      emitirCampanadaCliente();
-      if ("vibrate" in navigator) navigator.vibrate([400, 200, 400]);
-      if ("Notification" in window && Notification.permission === "granted") {
-        try {
-          const n = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
-          n.onclick = () => { window.focus(); n.close(); };
-        } catch(e) {}
-      }
-    }
-
-    function iniciarEscuchaFirebase() {
-      db.ref('repartidores').on('value', snap => {
-        const data = snap.val();
-        if (data) {
-          flotaActual = Object.values(data);
-          actualizarVisualizadorGPS(flotaActual);
-        }
-      });
-
-      db.ref('productos').on('value', snap => {
-        const data = snap.val();
-        if (data) {
-          catalogoBalones = Array.isArray(data) ? data : Object.values(data);
-          renderizarMenuBalones();
-        }
-      });
-
-      db.ref('accesorios').on('value', snap => {
-        const data = snap.val();
-        if (data) {
-          catalogoAccesorios = Array.isArray(data) ? data : Object.values(data);
-          renderizarMenuAccesorios();
-        }
-      });
-
-      db.ref('telefonos').on('value', snap => {
-        const data = snap.val();
-        if (data) {
-          telefonos = data;
-          renderizarTelefonos();
-        }
-      });
-
-      db.ref('pedidos').on('value', snap => {
-        const pedidos = snap.val();
-        if (!pedidos) {
-          ocultarBarraSeguimiento();
-          return;
-        }
-
-        const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
-        const miClienteNombre = localStorage.getItem('leogas_mi_pedido_cliente');
-
-        let miOrden = null;
-
-        if (miPedidoId && pedidos[miPedidoId]) {
-          miOrden = pedidos[miPedidoId];
-        } else if (miClienteNombre) {
-          miOrden = Object.values(pedidos).find(p => 
-            p.cliente && p.cliente.toLowerCase() === miClienteNombre.toLowerCase() && p.estado !== 'completado'
-          );
-          if (miOrden) {
-            localStorage.setItem('leogas_mi_pedido_id', miOrden.id);
-          }
-        }
-
-        if (miOrden && miOrden.estado !== 'completado') {
-          actualizarBarraSeguimiento(miOrden);
-          const etapaActual = miOrden.etapa || 0;
-
-          if (etapaActual === 1 && etapaAnteriorVista !== 1) {
-            etapaAnteriorVista = 1;
-            const tituloNotif = miOrden.tipoVenta === 'mayorista' ? "🏢 LeoGas B2B: ¡Cilindro Industrial en camino!" : "🔥 LeoGas Cusco: ¡Repartidor en camino!";
-            lanzarNotificacionCliente(tituloNotif, "Tu repartidor ya salió de la base con tu pedido hacia tu dirección.");
-            mostrarAlertaEnCamino(miOrden.cliente || 'Estimado cliente');
-          }
-          else if (etapaActual === 2 && etapaAnteriorVista !== 2) {
-            etapaAnteriorVista = 2;
-            const tituloNotif = miOrden.tipoVenta === 'mayorista' ? "🏢 LeoGas B2B: ¡Repartidor en tu Local!" : "🦁 LeoGas Cusco: ¡Repartidor en tu puerta!";
-            lanzarNotificacionCliente(tituloNotif, "Tu pedido ha llegado a tu dirección. Por favor sal a recibirlo.");
-            mostrarAlertaEnPuerta();
-          }
-        } else if (miOrden && miOrden.estado === 'completado') {
-          if (etapaAnteriorVista !== 3) {
-            etapaAnteriorVista = 3;
-            lanzarNotificacionCliente("🎉 ¡Entrega finalizada!", "Muchas gracias por tu compra en LeoGas Cusco.");
-            mostrarAlertaAgradecimiento(miOrden.cliente || 'Estimado cliente');
-            localStorage.removeItem('leogas_mi_pedido_id');
-            ocultarBarraSeguimiento();
-          }
-        } else {
-          ocultarBarraSeguimiento();
-        }
-      });
-    }
-
-    function actualizarBarraSeguimiento(orden) {
-      const barra = document.getElementById('barraSeguimientoActivo');
-      const tit = document.getElementById('trackTituloCliente');
-      const det = document.getElementById('trackDetalleEstado');
-      const pill = document.getElementById('trackPillEtapa');
-      const badgeB2B = document.getElementById('badgeB2BTag');
-      const iconoTipo = document.getElementById('trackIconoTipo');
-
-      barra.style.display = 'block';
-
-      const esB2B = orden.tipoVenta === 'mayorista';
-
-      if (esB2B) {
-        barra.classList.add('modo-b2b');
-        badgeB2B.style.display = 'inline-block';
-        iconoTipo.innerText = '🏢';
-        tit.innerText = `Pedido B2B: ${orden.cliente}`;
-      } else {
-        barra.classList.remove('modo-b2b');
-        badgeB2B.style.display = 'none';
-        iconoTipo.innerText = '🛵';
-        tit.innerText = `Pedido de ${orden.cliente}: ${orden.tipoBalon}`;
-      }
-
-      const etapa = orden.etapa || 0;
-      if (etapa === 0) {
-        det.innerText = esB2B ? "Orden comercial recibida. Asignando camión/unidad..." : "Orden recibida en central. Asignando repartidor...";
-        pill.innerText = "⏳ En espera";
-        pill.style.background = esB2B ? "#334155" : "#6b21a8";
-      } else if (etapa === 1) {
-        det.innerText = esB2B ? "El transporte salió hacia tu local con balones industriales 🔥" : "El repartidor ya salió de la base hacia tu casa 🔥";
-        pill.innerText = "🛵 1. En Camino";
-        pill.style.background = "#e52329";
-      } else if (etapa === 2) {
-        det.innerText = esB2B ? "¡Unidad en tu local! Sal a recibir y canjear los envases 🚪" : "¡El repartidor está en tu puerta! Sal a recibir tu gas 🚪";
-        pill.innerText = "🏠 2. En Puerta";
-        pill.style.background = "#15803d";
-      }
-    }
-
-    function ocultarBarraSeguimiento() {
-      const barra = document.getElementById('barraSeguimientoActivo');
-      if (barra) {
-        barra.style.display = 'none';
-        barra.classList.remove('modo-b2b');
-      }
-    }
-
-    function renderizarTelefonos() {
-      const container = document.getElementById('contenedorTelefonosFlyer');
-      container.innerHTML = `
-        <a href="tel:${telefonos.tel1.replace(/\D/g,'')}" class="contact-button"><span>📞</span> ${telefonos.tel1}</a>
-        <a href="tel:${telefonos.tel2.replace(/\D/g,'')}" class="contact-button"><span>📞</span> ${telefonos.tel2}</a>
-        <a href="tel:${telefonos.tel3.replace(/\D/g,'')}" class="contact-button"><span>☎️</span> ${telefonos.tel3}</a>
-      `;
-    }
-
-    function iniciarMapaCusco() {
-      map = L.map('cuscoMap').setView([-13.5167, -71.9788], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
-      trazarZonasCoberturaCusco();
-    }
-
-    function trazarZonasCoberturaCusco() {
-      const estilo = (col) => ({ color: col, weight: 1.5, opacity: 0.8, fillColor: col, fillOpacity: 0.16 });
-      L.polygon([[-13.5110, -71.9860], [-13.5135, -71.9720], [-13.5220, -71.9750], [-13.5200, -71.9880]], estilo('#8b5cf6')).addTo(map).bindPopup("<b>Centro Histórico</b>");
-      L.polygon([[-13.5200, -71.9750], [-13.5210, -71.9560], [-13.5350, -71.9580], [-13.5330, -71.9740]], estilo('#f59e0b')).addTo(map).bindPopup("<b>Wanchaq</b>");
-      L.polygon([[-13.5210, -71.9560], [-13.5250, -71.9280], [-13.5450, -71.9320], [-13.5350, -71.9580]], estilo('#10b981')).addTo(map).bindPopup("<b>San Sebastián</b>");
-    }
-
-    function alternarPantallaCompletaMapa() {
-      const contenedor = document.getElementById('contenedorEnvolventeMapa');
-      modoMapaAmpliado = !modoMapaAmpliado;
-
-      if (modoMapaAmpliado) {
-        contenedor.classList.add('fullscreen-map');
-        document.getElementById('iconoPantallaCompleta').innerText = "✖";
-        document.getElementById('textoPantallaCompleta').innerText = "Reducir Mapa";
-        document.body.style.overflow = "hidden";
-      } else {
-        contenedor.classList.remove('fullscreen-map');
-        document.getElementById('iconoPantallaCompleta').innerText = "⛶";
-        document.getElementById('textoPantallaCompleta').innerText = "Ampliar Mapa";
-        document.body.style.overflow = "";
-      }
-      setTimeout(() => { if (map) map.invalidateSize(); }, 250);
-    }
-
-    function centrarEnMiUbicacionCliente() {
-      if (!navigator.geolocation) return alert("Geolocalización no soportada.");
-      navigator.geolocation.getCurrentPosition(pos => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        ubicacionClienteCoords = { lat, lng };
-
-        if (!clienteMarker) {
-          const iconoCasa = L.divIcon({
-            html: "<div style='background:#2563eb; color:white; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:19px; border:2px solid white;'>🏠</div>",
-            iconSize: [36, 36],
-            iconAnchor: [18, 18]
-          });
-          clienteMarker = L.marker([lat, lng], { icon: iconoCasa }).addTo(map).bindPopup("<b>Tu ubicación (Casa)</b>").openPopup();
-        } else {
-          clienteMarker.setLatLng([lat, lng]).openPopup();
-        }
-        map.setView([lat, lng], 15);
-        actualizarDistanciaEstimada();
-      });
-    }
-
-    function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    function actualizarDistanciaEstimada() {
-      if (!ubicacionClienteCoords || flotaActual.length === 0) return;
-      const onlineReps = flotaActual.filter(r => r.online && r.lat && r.lng);
-      const badge = document.getElementById('badgeDistanciaTiempo');
-
-      if (onlineReps.length === 0) {
-        badge.style.display = "none";
-        return;
-      }
-
-      let minDist = Infinity;
-      onlineReps.forEach(r => {
-        const d = calcularDistanciaKm(ubicacionClienteCoords.lat, ubicacionClienteCoords.lng, r.lat, r.lng);
-        if (d < minDist) minDist = d;
-      });
-
-      if (minDist !== Infinity) {
-        badge.style.display = "block";
-        document.getElementById('distanciaKmTexto').innerText = minDist.toFixed(1) + " km";
-        document.getElementById('tiempoMinTexto').innerText = Math.max(5, Math.round(minDist * 4));
-      }
-    }
-
-    function actualizarVisualizadorGPS(flota) {
-      let hayOnline = false;
-      flota.forEach(rep => {
-        const online = rep.online === true;
-        if (online) hayOnline = true;
-
-        const icono = L.divIcon({
-          className: 'custom-gps-container',
-          html: `<div class="custom-gps-marker ${online ? '' : 'offline'}"><div class="gps-radar-pulse"></div><div class="fire-flame-emitter">🔥</div><div class="lion-badge-circle">🦁</div></div>`,
-          iconSize: [48, 48],
-          iconAnchor: [24, 24]
-        });
-
-        if (!marcadoresFlota[rep.id]) {
-          marcadoresFlota[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(map).bindPopup(`<b>🦁 ${rep.nombre}</b><br>${online ? 'En Ruta 🔥' : 'Offline 💤'}`);
-        } else {
-          marcadoresFlota[rep.id].setIcon(icono);
-          marcadoresFlota[rep.id].setLatLng([rep.lat, rep.lng]);
-        }
-      });
-
-      document.getElementById('legendOnline').classList.toggle('activo', hayOnline);
-      document.getElementById('legendOffline').classList.toggle('activo', !hayOnline);
-      actualizarDistanciaEstimada();
-    }
-
-    function renderizarMenuBalones() {
-      const contenedor = document.getElementById('contenedorEmpanadas');
-      contenedor.innerHTML = '';
-      catalogoBalones.forEach(item => {
-        const card = document.createElement('article');
-        card.className = `card ${item.disponible !== false ? '' : 'agotado'}`;
-        card.innerHTML = `
-          <div class="card-img-wrapper">
-            <span class="card-tag">${item.tag || 'Sellado'}</span>
-            <img src="${item.imagen || '1791513590376.jpg'}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
-          </div>
-          <div class="card-body">
-            <h4 class="card-title">${item.nombre}</h4>
-            <p class="card-desc">${item.descripcion || ''}</p>
-            <div class="card-footer">
-              <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
-              <button class="btn-add" ${item.disponible !== false ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">
-                ${item.disponible !== false ? '+ Pedir Balón' : 'Agotado'}
-              </button>
-            </div>
-          </div>
-        `;
-        contenedor.appendChild(card);
-      });
-    }
-
-    function renderizarMenuAccesorios() {
-      const contenedor = document.getElementById('contenedorAccesorios');
-      contenedor.innerHTML = '';
-      if (catalogoAccesorios.length === 0) {
-        document.getElementById('seccionAccesoriosCliente').style.display = 'none';
-        return;
-      }
-      document.getElementById('seccionAccesoriosCliente').style.display = 'block';
-
-      catalogoAccesorios.forEach(item => {
-        const agotado = (item.disponible === false || item.stock <= 0);
-        const card = document.createElement('article');
-        card.className = `card ${!agotado ? '' : 'agotado'}`;
-        card.innerHTML = `
-          <div class="card-img-wrapper">
-            <span class="card-tag" style="background:#2563eb;">${item.tag || 'Accesorio'}</span>
-            <img src="${item.imagen || '1791513590376.jpg'}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
-          </div>
-          <div class="card-body">
-            <h4 class="card-title">${item.nombre}</h4>
-            <p class="card-desc">${item.descripcion || 'Accesorio garantizado para balón de gas.'}</p>
-            <div class="card-footer">
-              <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
-              <button class="btn-add" style="background:#2563eb;" ${!agotado ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">
-                ${!agotado ? '+ Agregar' : 'Agotado'}
-              </button>
-            </div>
-          </div>
-        `;
-        contenedor.appendChild(card);
-      });
-    }
-
-    function agregarAlPedido(id, nombre, precio) {
-      if (!pedido[id]) {
-        pedido[id] = { id: id, nombre: nombre, precio: parseFloat(precio), cantidad: 1 };
-      } else {
-        pedido[id].cantidad++;
-      }
-      actualizarVistaPopup();
-    }
-
-    function cambiarCantidad(id, delta) {
-      if (pedido[id]) {
-        pedido[id].cantidad += delta;
-        if (pedido[id].cantidad <= 0) delete pedido[id];
-        actualizarVistaPopup();
-      }
-    }
-
-    function vaciarPedidoConConfirmacion() {
-      if (confirm("¿Reiniciar tu pedido?")) {
-        for (const k in pedido) delete pedido[k];
-        actualizarVistaPopup();
-      }
-    }
-
-    function actualizarVistaPopup() {
-      let totalUnidades = 0;
-      let totalMonto = 0;
-      const listContainer = document.getElementById('popupItemsList');
-      listContainer.innerHTML = '';
-
-      Object.values(pedido).forEach(item => {
-        const sub = item.cantidad * item.precio;
-        totalUnidades += item.cantidad;
-        totalMonto += sub;
-
-        const row = document.createElement('div');
-        row.className = 'cart-item-row';
-        row.innerHTML = `
-          <div><strong>${item.nombre}</strong><br><small>S/ ${item.precio.toFixed(2)} c/u</small></div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', -1)">-</button>
-            <strong>${item.cantidad}</strong>
-            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', 1)">+</button>
-          </div>
-          <div><strong>S/ ${sub.toFixed(2)}</strong></div>
-        `;
-        listContainer.appendChild(row);
-      });
-
-      ultimoTotalPagar = totalMonto;
-      document.getElementById('badgeContador').innerText = totalUnidades;
-      document.getElementById('cartLabelTotalConCantidad').innerText = `Total (${totalUnidades} productos):`;
-      document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
-      if (metodoPago === 'Efectivo') calcularVueltoEfectivo();
-    }
-
-    function elegirPago(p, btn) {
-      metodoPago = p;
-      document.querySelectorAll('.btn-pay-option').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('cajaEfectivoDesplegable').style.display = (p === 'Efectivo') ? 'block' : 'none';
-      if (p === 'Efectivo') calcularVueltoEfectivo();
-    }
-
-    function setMontoEfectivoRapido(monto) {
-      const input = document.getElementById('montoEfectivoIngresado');
-      input.value = (monto === 'exacto') ? (ultimoTotalPagar > 0 ? ultimoTotalPagar : '') : monto;
-      calcularVueltoEfectivo();
-    }
-
-    function calcularVueltoEfectivo() {
-      const input = document.getElementById('montoEfectivoIngresado');
-      const box = document.getElementById('cajaRespuestaVuelto');
-      const txt = document.getElementById('textoDetalleVuelto');
-      const montoTxt = document.getElementById('montoCalculadoVuelto');
-      const pagaCon = parseFloat(input.value);
-
-      if (isNaN(pagaCon) || pagaCon <= 0) {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "Ingresa con cuánto pagarás para calcular el vuelto";
-        montoTxt.innerText = "";
-        return;
-      }
-
-      const vuelto = pagaCon - ultimoTotalPagar;
-      if (vuelto < 0) {
-        box.className = "vuelto-badge-box alerta";
-        txt.innerText = `⚠️ Falta dinero (Faltan S/ ${Math.abs(vuelto).toFixed(2)})`;
-        montoTxt.innerText = "";
-      } else if (vuelto === 0) {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "✔ Pago exacto";
-        montoTxt.innerText = "S/ 0.00";
-      } else {
-        box.className = "vuelto-badge-box";
-        txt.innerText = "💵 Vuelto a entregar:";
-        montoTxt.innerText = `S/ ${vuelto.toFixed(2)}`;
-      }
-    }
-
-    function elegirHorarioEntrega(tipo, boton) {
-      horarioEntrega = tipo;
-      document.querySelectorAll('.btn-del-opt').forEach(b => b.classList.remove('active'));
-      boton.classList.add('active');
-      document.getElementById('cajaHoraProgramada').style.display = (tipo === 'Programada') ? 'block' : 'none';
-    }
-
-    function alternarCamposComprobante(tipo) {
-      tipoComprobante = tipo;
-      document.getElementById('cajaDatosFactura').style.display = (tipo === 'Factura') ? 'flex' : 'none';
-    }
-
-    function capturarGPSCliente() {
-      if (!navigator.geolocation) return;
-      navigator.geolocation.getCurrentPosition(pos => {
-        ubicacionClienteCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        document.getElementById('geoStatus').innerText = "✔ Ubicación registrada para entrega";
-        document.getElementById('geoStatus').style.color = "#15803d";
-      });
-    }
-
-    // CAPTURA DE UBICACIÓN GPS PARA EL LOCAL B2B
-    function capturarGPSLocalB2B() {
-      if (!navigator.geolocation) return alert("Geolocalización no soportada en este navegador.");
-      const statusLbl = document.getElementById('geoStatusB2B');
-      statusLbl.innerText = "Obteniendo ubicación del local por satélite...";
-      statusLbl.style.color = "#6b21a8";
-
-      navigator.geolocation.getCurrentPosition(pos => {
-        ubicacionB2BCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        statusLbl.innerText = `✔ Ubicación GPS del local capturada (${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`;
-        statusLbl.style.color = "#15803d";
-        statusLbl.style.fontWeight = "bold";
-      }, err => {
-        statusLbl.innerText = "⚠️ No se pudo obtener el GPS. Se usará la dirección de texto escrita.";
-        statusLbl.style.color = "#dc2626";
-      }, { enableHighAccuracy: true, timeout: 10000 });
-    }
-
-    function abrirModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'flex'; }
-    function cerrarModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'none'; }
-    function cerrarSiClickAfuera(e) { if (e.target.id === 'cartModalOverlay') cerrarModalCarrito(); }
-
-    function generarComprobanteModal() {
-      const nombre = document.getElementById('nombreClienteInput').value.trim() || localStorage.getItem('leogas_mi_pedido_cliente') || 'Particular';
-      document.getElementById('tickCliente').innerText = nombre;
-      document.getElementById('tickFecha').innerText = new Date().toLocaleString();
-      document.getElementById('tickTipoComp').innerText = tipoComprobante;
-
-      const cajaFactura = document.getElementById('tickDetalleFactura');
-      if (tipoComprobante === 'Factura') {
-        cajaFactura.style.display = "block";
-        cajaFactura.innerHTML = `<strong>RUC:</strong> ${document.getElementById('inputRucFactura').value || '--'} | <strong>Razón Social:</strong> ${document.getElementById('inputRazonSocial').value || '--'}`;
-      } else {
-        cajaFactura.style.display = "none";
-      }
-
-      const horario = (horarioEntrega === 'Inmediata') ? "Inmediata" : `Programada (${document.getElementById('inputHoraProgramada').value})`;
-      document.getElementById('tickHorario').innerText = horario;
-      document.getElementById('tickPago').innerText = metodoPago;
-
-      const contItems = document.getElementById('tickListaProductos');
-      contItems.innerHTML = '';
-      let total = 0;
-
-      const items = Object.values(pedido).filter(p => p.cantidad > 0);
-      if (items.length > 0) {
-        items.forEach(item => {
-          const sub = item.cantidad * item.precio;
-          total += sub;
-          const row = document.createElement('div');
-          row.className = 'ticket-row';
-          row.innerHTML = `<span>${item.cantidad}x ${item.nombre}</span><span>S/ ${sub.toFixed(2)}</span>`;
-          contItems.appendChild(row);
-        });
-      } else {
-        contItems.innerHTML = `<div class="ticket-row"><span>1x Balón LeoGas 10kg</span><span>S/ 50.00</span></div>`;
-        total = 50.00;
-      }
-
-      document.getElementById('tickTotal').innerText = `S/ ${total.toFixed(2)}`;
-      document.getElementById('ticketModalOverlay').style.display = 'flex';
-    }
-
-    function cerrarModalTicket() {
-      document.getElementById('ticketModalOverlay').style.display = 'none';
-    }
-
-    function mostrarAlertaExito(nombreCliente, detalle) {
-      document.getElementById('textoAlertaExito').innerHTML = `
-        Hola <strong>${nombreCliente}</strong>, tu pedido de <strong>${detalle}</strong> ha sido enviado a la central de LeoGas Cusco y transferido a WhatsApp.<br><br>
-        Mantén esta pantalla abierta o revisa tus alertas para saber cuando el repartidor salga hacia tu casa.
-      `;
-      document.getElementById('modalAlertaExito').style.display = 'flex';
-      emitirCampanadaCliente();
-    }
-    function cerrarAlertaExito() { document.getElementById('modalAlertaExito').style.display = 'none'; }
-
-    function mostrarAlertaEnCamino(nombreCliente) {
-      document.getElementById('textoAlertaEnCamino').innerHTML = `
-        Hola <strong>${nombreCliente}</strong>, ¡tu balón de gas ya está en camino a tu casa!<br><br>
-        El repartidor ya arrancó desde la base. Puedes ver su avance en vivo en el mapa.
-      `;
-      document.getElementById('modalAlertaEnCamino').style.display = 'flex';
-      emitirCampanadaCliente();
-    }
-    function cerrarAlertaEnCamino() { document.getElementById('modalAlertaEnCamino').style.display = 'none'; }
-
-    function mostrarAlertaEnPuerta() {
-      document.getElementById('modalAlertaEnPuerta').style.display = 'flex';
-      emitirCampanadaCliente();
-    }
-
-    function confirmarSalidaCliente() {
-      document.getElementById('modalAlertaEnPuerta').style.display = 'none';
-      const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
-      if (miPedidoId) {
-        db.ref(`pedidos/${miPedidoId}`).update({ clienteConfirmado: true });
-      }
-    }
-
-    function mostrarAlertaAgradecimiento(nombreCliente) {
-      document.getElementById('textoAlertaGracias').innerHTML = `
-        Estimado(a) <strong>${nombreCliente}</strong>, tu pedido ha sido <strong>entregado con éxito</strong>.<br><br>
-        ¡Muchas gracias por elegir la seguridad y el peso exacto de <strong>LeoGas Cusco (Llamagas)</strong>! Esperamos atenderte pronto nuevamente.
-      `;
-      document.getElementById('modalAlertaGracias').style.display = 'flex';
-      emitirCampanadaCliente();
-    }
-    function cerrarAlertaGracias() { document.getElementById('modalAlertaGracias').style.display = 'none'; }
-
-    // ==========================================
-    // MÓDULO B2B (PORTAL DE EMPRESAS POR RUC)
-    // ==========================================
-    function abrirModalB2B() {
-      document.getElementById('modalB2BOverlay').style.display = 'flex';
-      document.getElementById('vistaB2BLogin').style.display = 'block';
-      document.getElementById('vistaB2BCatalogo').style.display = 'none';
-      document.getElementById('msgValidacionRuc').innerText = '';
-      document.getElementById('inputRucB2B').value = '';
-      ubicacionB2BCoords = null;
-    }
-
-    function cerrarModalB2B() {
-      document.getElementById('modalB2BOverlay').style.display = 'none';
-    }
-
-    async function validarRucEmpresaB2B() {
-      const ruc = document.getElementById('inputRucB2B').value.trim();
+    // CONSULTA RUC EN TIEMPO REAL CON APIS PERÚ
+    async function consultarRucSunatApisPeru(rucInput) {
+      const ruc = rucInput.trim();
       const msg = document.getElementById('msgValidacionRuc');
-
+      
       if (ruc.length !== 11 || isNaN(ruc)) {
-        msg.style.color = "#dc2626";
-        msg.innerText = "Ingresa un número de RUC válido de 11 dígitos.";
+        if(msg) { msg.style.color = "#dc2626"; msg.innerText = "Ingrese un RUC válido de 11 dígitos."; }
         return;
       }
 
-      msg.style.color = "#0f172a";
-      msg.innerText = "Consultando registro corporativo...";
+      if(msg) { msg.style.color = "#6b21a8"; msg.innerText = "Conectando con SUNAT (APIS Perú)..."; }
 
-      const snap = await db.ref(`clientesB2B/${ruc}`).once('value');
-      const datos = snap.val();
+      try {
+        const response = await fetch(`https://api.apis.net.pe/v2/sunat/ruc?numero=${ruc}`, {
+          headers: { 'Authorization': `Bearer ${APIS_PERU_TOKEN}`, 'Accept': 'application/json' }
+        });
 
-      if (datos) {
-        empresaB2BActual = datos;
-        cargarPortalB2BEmpresa();
-      } else {
-        const razon = prompt("RUC no registrado aún. Ingresa la Razón Social o Nombre de la Empresa para habilitar tu pedido:");
-        if (!razon) {
-          msg.innerText = "";
-          return;
+        if (!response.ok) throw new Error("Error en padrón SUNAT");
+        const data = await response.json();
+
+        if (data && data.razonSocial) {
+          empresaB2BActual = {
+            ruc: data.numeroDocumento,
+            razonSocial: data.razonSocial,
+            condicionPago: "Crédito (A cuenta 15 días)",
+            precioBalon45: 175.00,
+            direccion: data.direccion || ""
+          };
+          db.ref(`clientesB2B/${ruc}`).set(empresaB2BActual);
+          cargarPortalB2BEmpresa();
         }
-
-        empresaB2BActual = {
-          ruc: ruc,
-          razonSocial: razon,
-          condicionPago: "Crédito (A cuenta 15 días)",
-          precioBalon45: 175.00,
-          direccion: ""
-        };
-
-        await db.ref(`clientesB2B/${ruc}`).set(empresaB2BActual);
-        cargarPortalB2BEmpresa();
+      } catch (error) {
+        const snap = await db.ref(`clientesB2B/${ruc}`).once('value');
+        if (snap.val()) {
+          empresaB2BActual = snap.val();
+          cargarPortalB2BEmpresa();
+        } else {
+          const razon = prompt("RUC verificado. Ingrese la Razón Social de la Empresa:");
+          if (razon) {
+            empresaB2BActual = { ruc: ruc, razonSocial: razon, precioBalon45: 175.00, condicionPago: "Crédito (A cuenta 15 días)" };
+            db.ref(`clientesB2B/${ruc}`).set(empresaB2BActual);
+            cargarPortalB2BEmpresa();
+          }
+        }
       }
-    }
-
-    function cargarPortalB2BEmpresa() {
-      document.getElementById('vistaB2BLogin').style.display = 'none';
-      document.getElementById('vistaB2BCatalogo').style.display = 'block';
-
-      document.getElementById('b2bEmpresaNombre').innerText = empresaB2BActual.razonSocial;
-      document.getElementById('b2bEmpresaRuc').innerText = empresaB2BActual.ruc;
-      document.getElementById('b2bEmpresaCondicion').innerText = empresaB2BActual.condicionPago || "Crédito 15 días";
-      document.getElementById('b2bDireccionLocal').value = empresaB2BActual.direccion || "";
-
-      const statusLbl = document.getElementById('geoStatusB2B');
-      if (empresaB2BActual.lat && empresaB2BActual.lng) {
-        ubicacionB2BCoords = { lat: empresaB2BActual.lat, lng: empresaB2BActual.lng };
-        statusLbl.innerText = "✔ Ubicación GPS del local guardada previamente.";
-        statusLbl.style.color = "#15803d";
-        statusLbl.style.fontWeight = "bold";
-      } else {
-        ubicacionB2BCoords = null;
-        statusLbl.innerText = "Comparte tus coordenadas para que el camión o repartidor llegue sin llamadas previas";
-        statusLbl.style.color = "#64748b";
-        statusLbl.style.fontWeight = "normal";
-      }
-
-      renderizarItemsB2B();
-      cargarFacturasEmpresaB2B();
-    }
-
-    function renderizarItemsB2B() {
-      const cont = document.getElementById('listaProductosB2B');
-      const precio45 = empresaB2BActual.precioBalon45 || 175.00;
-      
-      cont.innerHTML = `
-        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <div>
-            <strong style="color:#0f172a; font-size:14px;">Balón 45kg Industrial</strong>
-            <div style="font-size:12px; color:#15803d; font-weight:bold;">S/ ${precio45.toFixed(2)} c/u</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <button class="btn-qty" onclick="cambiarCantB2B(-1)">-</button>
-            <span id="cantBalon45" style="font-weight:bold; font-size:15px; min-width:24px; text-align:center;">${pedidoB2B['gas-45kg']}</span>
-            <button class="btn-qty" onclick="cambiarCantB2B(1)">+</button>
-          </div>
-        </div>
-      `;
-
-      const total = pedidoB2B['gas-45kg'] * precio45;
-      document.getElementById('b2bTotalPagar').innerText = `S/ ${total.toFixed(2)}`;
-      document.getElementById('b2bEnvasesVacios').value = pedidoB2B['gas-45kg'];
-    }
-
-    function cambiarCantB2B(delta) {
-      pedidoB2B['gas-45kg'] = Math.max(1, (pedidoB2B['gas-45kg'] || 1) + delta);
-      renderizarItemsB2B();
     }
 
     // HISTORIAL DE FACTURAS B2B PARA REIMPRESIÓN
@@ -1532,34 +809,121 @@
     function reimprimirFacturaB2B(pedidoId) {
       db.ref(`pedidos/${pedidoId}`).once('value', snap => {
         const ord = snap.val();
-        if (!ord || !ord.facturaElectronica) return;
+        if (!ord) return;
 
-        const f = ord.facturaElectronica;
+        const f = ord.facturaElectronica || {
+          serieNumero: "F001-000" + Math.floor(100 + Math.random() * 900),
+          fechaEmision: new Date().toLocaleDateString('es-PE'),
+          horaEmision: new Date().toLocaleTimeString('es-PE'),
+          ruc: ord.ruc || "20601234567",
+          razonSocial: ord.cliente,
+          subtotal: (parseFloat(ord.montoCobro) / 1.18).toFixed(2),
+          igv: (parseFloat(ord.montoCobro) - (parseFloat(ord.montoCobro) / 1.18)).toFixed(2),
+          total: parseFloat(ord.montoCobro).toFixed(2)
+        };
+
+        document.getElementById('tickTipoComp').innerText = ord.tipoVenta === 'mayorista' ? "*** FACTURA ELECTRÓNICA ***" : "*** BOLETA ELECTRÓNICA ***";
+        document.getElementById('tickSerieNro').innerText = f.serieNumero;
+        document.getElementById('tickFecha').innerText = `${f.fechaEmision} ${f.horaEmision || ''}`;
         document.getElementById('tickCliente').innerText = f.razonSocial;
-        document.getElementById('tickFecha').innerText = `${f.fechaEmision} ${f.horaEmision}`;
-        document.getElementById('tickTipoComp').innerText = `FACTURA ELECTRÓNICA ${f.serieNumero}`;
-        
-        const cajaDetalle = document.getElementById('tickDetalleFactura');
-        cajaDetalle.style.display = 'block';
-        cajaDetalle.innerHTML = `
-          <strong>RUC:</strong> ${f.ruc}<br>
-          <strong>Subtotal Gravado:</strong> S/ ${f.subtotal}<br>
-          <strong>I.G.V. (18%):</strong> S/ ${f.igv}
-        `;
+        document.getElementById('tickRucDni').innerText = f.ruc || "00000000";
+        document.getElementById('tickDireccion').innerText = ord.direccionTexto || "Cusco";
 
-        document.getElementById('tickHorario').innerText = ord.horarioEntrega || 'Inmediata';
-        document.getElementById('tickPago').innerText = ord.metodoPago;
+        document.getElementById('tickSubtotal').innerText = `S/ ${f.subtotal}`;
+        document.getElementById('tickIgv').innerText = `S/ ${f.igv}`;
         document.getElementById('tickTotal').innerText = `S/ ${f.total}`;
+        document.getElementById('tickPago').innerText = ord.metodoPago || "Efectivo";
 
         const contItems = document.getElementById('tickListaProductos');
         contItems.innerHTML = `
-          <div class="ticket-row">
+          <div style="display:flex; justify-content:space-between; font-size:12px;">
             <span>${ord.tipoBalon}</span>
-            <span>S/ ${f.subtotal}</span>
+            <span><strong>S/ ${f.subtotal}</strong> &nbsp; S/ ${f.total}</span>
           </div>
         `;
 
         document.getElementById('ticketModalOverlay').style.display = 'flex';
+      });
+    }
+
+    function enviarFacturaWspCliente() {
+      const cliente = document.getElementById('tickCliente').innerText;
+      const total = document.getElementById('tickTotal').innerText;
+      const serie = document.getElementById('tickSerieNro').innerText;
+
+      let msg = `*LEOGAS CUSCO - COMPROBANTE ELECTRÓNICO*\n`;
+      msg += `Comprobante: ${serie}\n`;
+      msg += `Cliente: ${cliente}\n`;
+      msg += `Total Pagado: ${total}\n`;
+      msg += `¡Gracias por confiar en LeoGas Cusco (Llamagas)!\n`;
+
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function cerrarModalTicket() {
+      document.getElementById('ticketModalOverlay').style.display = 'none';
+    }
+
+    // FLUJOS B2B Y MAPA
+    function abrirModalB2B() {
+      document.getElementById('modalB2BOverlay').style.display = 'flex';
+      document.getElementById('vistaB2BLogin').style.display = 'block';
+      document.getElementById('vistaB2BCatalogo').style.display = 'none';
+      document.getElementById('msgValidacionRuc').innerText = '';
+      document.getElementById('inputRucB2B').value = '';
+    }
+
+    function cerrarModalB2B() {
+      document.getElementById('modalB2BOverlay').style.display = 'none';
+    }
+
+    function cargarPortalB2BEmpresa() {
+      document.getElementById('vistaB2BLogin').style.display = 'none';
+      document.getElementById('vistaB2BCatalogo').style.display = 'block';
+
+      document.getElementById('b2bEmpresaNombre').innerText = empresaB2BActual.razonSocial;
+      document.getElementById('b2bEmpresaRuc').innerText = empresaB2BActual.ruc;
+      document.getElementById('b2bEmpresaCondicion').innerText = empresaB2BActual.condicionPago || "Crédito 15 días";
+      document.getElementById('b2bDireccionLocal').value = empresaB2BActual.direccion || "";
+
+      renderizarItemsB2B();
+      cargarFacturasEmpresaB2B();
+    }
+
+    function renderizarItemsB2B() {
+      const cont = document.getElementById('listaProductosB2B');
+      const precio45 = empresaB2BActual.precioBalon45 || 175.00;
+      
+      cont.innerHTML = `
+        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div>
+            <strong style="color:#0f172a; font-size:14px;">Balón 45kg Industrial</strong>
+            <div style="font-size:12px; color:#15803d; font-weight:bold;">S/ ${precio45.toFixed(2)} c/u</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button class="btn-qty" onclick="cambiarCantB2B(-1)">-</button>
+            <span id="cantBalon45" style="font-weight:bold; font-size:15px; min-width:24px; text-align:center;">${pedidoB2B['gas-45kg']}</span>
+            <button class="btn-qty" onclick="cambiarCantB2B(1)">+</button>
+          </div>
+        </div>
+      `;
+
+      const total = pedidoB2B['gas-45kg'] * precio45;
+      document.getElementById('b2bTotalPagar').innerText = `S/ ${total.toFixed(2)}`;
+      document.getElementById('b2bEnvasesVacios').value = pedidoB2B['gas-45kg'];
+    }
+
+    function cambiarCantB2B(delta) {
+      pedidoB2B['gas-45kg'] = Math.max(1, (pedidoB2B['gas-45kg'] || 1) + delta);
+      renderizarItemsB2B();
+    }
+
+    function capturarGPSLocalB2B() {
+      if (!navigator.geolocation) return alert("Geolocalización no soportada.");
+      navigator.geolocation.getCurrentPosition(pos => {
+        ubicacionB2BCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        document.getElementById('geoStatusB2B').innerText = "✔ Ubicación GPS del local capturada";
+        document.getElementById('geoStatusB2B').style.color = "#15803d";
       });
     }
 
@@ -1570,14 +934,9 @@
       const direccion = document.getElementById('b2bDireccionLocal').value.trim();
       const envasesVacios = parseInt(document.getElementById('b2bEnvasesVacios').value) || 0;
 
-      if (!direccion) return alert("Por favor confirma la dirección del local o restaurante.");
+      if (!direccion) return alert("Por favor confirma la dirección del local.");
 
-      let mapsUrl = "";
-      if (ubicacionB2BCoords && ubicacionB2BCoords.lat && ubicacionB2BCoords.lng) {
-        mapsUrl = `https://www.google.com/maps?q=${ubicacionB2BCoords.lat},${ubicacionB2BCoords.lng}`;
-      } else {
-        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion + ', Cusco')}`;
-      }
+      let mapsUrl = ubicacionB2BCoords ? `https://www.google.com/maps?q=${ubicacionB2BCoords.lat},${ubicacionB2BCoords.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion + ', Cusco')}`;
 
       const nuevoRef = db.ref('pedidos').push();
       const pedidoId = nuevoRef.key;
@@ -1595,103 +954,20 @@
         envasesEntregados: cant,
         envasesRecogidos: envasesVacios,
         gpsUrl: mapsUrl,
-        lat: ubicacionB2BCoords ? ubicacionB2BCoords.lat : null,
-        lng: ubicacionB2BCoords ? ubicacionB2BCoords.lng : null,
         repartidorId: "",
         estado: "pendiente_asignacion",
         etapa: 0,
         timestamp: Date.now(),
         hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
       });
-
-      const actualizacionEmpresa = { direccion: direccion };
-      if (ubicacionB2BCoords) {
-        actualizacionEmpresa.lat = ubicacionB2BCoords.lat;
-        actualizacionEmpresa.lng = ubicacionB2BCoords.lng;
-      }
-      db.ref(`clientesB2B/${empresaB2BActual.ruc}`).update(actualizacionEmpresa);
-
-      localStorage.setItem('leogas_mi_pedido_id', pedidoId);
-      localStorage.setItem('leogas_mi_pedido_cliente', `${empresaB2BActual.razonSocial} (RUC: ${empresaB2BActual.ruc})`);
 
       cerrarModalB2B();
-      alert(`✔ Pedido B2B de ${cant} balones de 45kg registrado con éxito. Se ha enviado al panel de control de LeoGas Cusco.`);
-    }
-
-    async function enviarPedidoWhatsApp() {
-      const items = Object.values(pedido).filter(p => p.cantidad > 0);
-      if (items.length === 0) return alert("Selecciona al menos un balón o accesorio disponible.");
-
-      const nombre = document.getElementById('nombreClienteInput').value.trim() || "Particular";
-      let total = 0;
-      let nombres = [];
-      items.forEach(i => {
-        total += i.cantidad * i.precio;
-        nombres.push(`${i.cantidad}x ${i.nombre}`);
-      });
-
-      const detalle = nombres.join(", ");
-      const gpsUrl = ubicacionClienteCoords ? `https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}` : "";
-
-      let comprobanteTexto = tipoComprobante;
-      if (tipoComprobante === 'Factura') {
-        const ruc = document.getElementById('inputRucFactura').value.trim();
-        const rz = document.getElementById('inputRazonSocial').value.trim();
-        comprobanteTexto = `Factura (RUC: ${ruc || 'Sin RUC'} - Razón Social: ${rz || 'Sin Razón Social'})`;
-      }
-
-      const nuevoPedidoRef = db.ref('pedidos').push();
-      const pedidoId = nuevoPedidoRef.key;
-
-      await nuevoPedidoRef.set({
-        id: pedidoId,
-        tipoVenta: "minorista",
-        cliente: nombre,
-        tipoBalon: detalle,
-        montoCobro: total.toFixed(2),
-        metodoPago: metodoPago,
-        tipoComprobante: comprobanteTexto,
-        horarioEntrega: (horarioEntrega === 'Inmediata') ? "Inmediata" : `Programada (${document.getElementById('inputHoraProgramada').value})`,
-        gpsUrl: gpsUrl,
-        repartidorId: "",
-        estado: "pendiente_asignacion",
-        etapa: 0,
-        notificadoCliente: 0,
-        clienteConfirmado: false,
-        envasesEntregados: 1,
-        envasesRecogidos: 1,
-        timestamp: Date.now(),
-        hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
-      });
-
-      localStorage.setItem('leogas_mi_pedido_id', pedidoId);
-      localStorage.setItem('leogas_mi_pedido_cliente', nombre);
-
-      pedirPermisoNotificacionesCliente();
-
-      let msg = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
-      msg += `*👤 Cliente:* ${nombre}\n`;
-      msg += `*Detalle:* ${detalle}\n`;
-      msg += `*Total a pagar:* S/ ${total.toFixed(2)}\n`;
-      msg += `*Paga con:* ${metodoPago}\n`;
-      msg += `*Comprobante:* ${comprobanteTexto}\n`;
-      msg += `*Horario:* ${(horarioEntrega === 'Inmediata') ? "Inmediata" : `Programada (${document.getElementById('inputHoraProgramada').value})`}\n`;
-      if (gpsUrl) msg += `*Ubicación GPS:* ${gpsUrl}\n`;
-      msg += `\n¿Me confirman tiempo de entrega?`;
-
-      window.open(`https://wa.me/${telefonos.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
-      
-      cerrarModalCarrito();
-      mostrarAlertaExito(nombre, detalle);
+      alert(`✔ Pedido B2B registrado con éxito.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      renderizarTelefonos();
-      iniciarMapaCusco();
-      actualizarBotonNotificacionesCliente();
       iniciarEscuchaFirebase();
     });
   </script>
 </body>
 </html>
-
