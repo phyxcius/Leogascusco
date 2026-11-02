@@ -85,72 +85,31 @@
       z-index: 1001;
     }
 
-    /* Estado oculto del Sidebar */
-    .sidebar-menu.hidden {
-      margin-left: calc(-1 * var(--sidebar-w));
-    }
+    .sidebar-menu.hidden { margin-left: calc(-1 * var(--sidebar-w)); }
 
     .sidebar-title {
-      font-size: 11px;
-      font-weight: 900;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 4px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      font-size: 11px; font-weight: 900; color: #94a3b8; text-transform: uppercase;
+      letter-spacing: 0.5px; padding: 4px 10px; display: flex; justify-content: space-between; align-items: center;
     }
 
     .tab-btn {
-      background: none;
-      border: none;
-      font-weight: 800;
-      font-size: 13px;
-      padding: 10px 14px;
-      color: #475569;
-      cursor: pointer;
-      border-radius: 10px;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.2s;
-      width: 100%;
+      background: none; border: none; font-weight: 800; font-size: 13px; padding: 10px 14px;
+      color: #475569; cursor: pointer; border-radius: 10px; text-align: left;
+      display: flex; align-items: center; gap: 10px; transition: all 0.2s; width: 100%;
     }
     .tab-btn:hover { background: #f8fafc; color: var(--primary); }
     .tab-btn.active { background: #f3e8ff; color: var(--primary-dark); font-weight: 900; }
 
-    /* ÁREA PRINCIPAL DERECHA */
-    .main-content-panel {
-      flex: 1;
-      padding: 18px 22px;
-      max-width: 1100px;
-      width: 100%;
-      min-width: 0;
-    }
+    .main-content-panel { flex: 1; padding: 18px 22px; max-width: 1100px; width: 100%; min-width: 0; }
 
-    /* OVERLAY OSCURO PARA MÓVILES */
     .sidebar-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.4);
-      z-index: 1000;
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.4); z-index: 1000;
     }
 
     @media (max-width: 768px) {
-      .sidebar-menu {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-      }
-      .sidebar-menu.hidden {
-        margin-left: 0;
-        transform: translateX(-100%);
-      }
+      .sidebar-menu { position: fixed; top: 0; left: 0; height: 100vh; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+      .sidebar-menu.hidden { margin-left: 0; transform: translateX(-100%); }
       .sidebar-overlay.active { display: block; }
     }
 
@@ -164,8 +123,14 @@
     .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
     .btn-edit { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
 
+    /* ESTILOS DEL ACORDEÓN TÉCNICO */
+    .accordion-card { border: 1.5px solid #cbd5e1; border-radius: 12px; background: #fff; margin-top: 20px; overflow: hidden; }
+    .accordion-header { background: #f1f5f9; padding: 12px 16px; font-size: 13px; font-weight: 800; color: #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+    .accordion-header:hover { background: #e2e8f0; }
+    .accordion-body { padding: 16px; display: none; background: #fafafa; border-top: 1px solid #cbd5e1; }
+    .accordion-body.open { display: block; }
+
     .repartidor-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
-    .repartidor-card.activo { border-color: #86efac; background: #f0fdf4; }
     .badge-status { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; background: #e2e8f0; color: #64748b; }
     .badge-status.online { background: #dcfce7; color: #15803d; }
 
@@ -271,7 +236,6 @@
     <!-- CABECERA SUPERIOR -->
     <div class="header-admin no-print">
       <div class="header-left-group">
-        <!-- BOTÓN TOGGLE MENÚ -->
         <button type="button" class="btn-toggle-menu" onclick="alternarSidebarMenu()">
           <span id="iconoToggleMenu">☰</span> Menú
         </button>
@@ -552,7 +516,7 @@
           </div>
         </div>
 
-        <!-- MÓDULO 8: GESTIÓN DE REPARTIDORES -->
+        <!-- MÓDULO 8: GESTIÓN DE REPARTIDORES + ACORDEÓN TÉCNICO (GITHUB & RESETEO) -->
         <div id="seccionGPS" style="display: none;">
           <div class="card" style="border:1.5px solid #c084fc; background:#faf5ff; margin-bottom:16px;">
             <h3 style="color:#6b21a8; font-size:15px; margin-bottom:10px;">➕ Registrar Nuevo Repartidor en Flota</h3>
@@ -574,6 +538,32 @@
           </div>
 
           <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
+
+          <!-- ACORDEÓN TÉCNICO: TOKEN GITHUB, DEPURACIÓN Y RESETEO -->
+          <div class="accordion-card">
+            <div class="accordion-header" onclick="toggleAcordeonTecnico()">
+              <span>⚙️ Configuración Avanzada, Token GitHub y Depuración</span>
+              <span id="iconoAcordeon">▼</span>
+            </div>
+            <div class="accordion-body" id="cuerpoAcordeonTecnico">
+              <label>Token de Acceso GitHub (API / Despliegue):</label>
+              <div style="display:flex; gap:8px; margin-top:4px;">
+                <input type="password" id="inputGitHubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1;">
+                <button type="button" class="btn btn-edit" onclick="guardarTokenGitHub()">Guardar Token</button>
+              </div>
+
+              <div style="margin-top:16px; border-top:1px dashed #cbd5e1; padding-top:12px;">
+                <label style="color:#dc2626; font-weight:900;">⚠️ Zona de Reseteo y Depuración del Sistema:</label>
+                <p style="font-size:12px; color:#64748b; margin:4px 0 10px;">
+                  Estas acciones limpian la base de datos de pedidos de prueba o reinician los contadores operativos.
+                </p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <button type="button" class="btn" style="background:#0284c7; color:#fff;" onclick="depurarConsolaSistema()">🛠️ Depurar Estado en Consola</button>
+                  <button type="button" class="btn btn-del" onclick="reseteoTotalSistemaFirebase()">💥 Reseteo Total del Sistema</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- MÓDULO 9: REPORTES CONTABLES CON CALENDARIO -->
@@ -849,7 +839,41 @@
       setTimeout(() => { if (mapAdmin) mapAdmin.invalidateSize(); }, 300);
     }
 
-    // Helper para garantizar que los repartidores siempre sean un Array
+    // CONTROL DEL ACORDEÓN TÉCNICO
+    function toggleAcordeonTecnico() {
+      const cuerpo = document.getElementById('cuerpoAcordeonTecnico');
+      const icono = document.getElementById('iconoAcordeon');
+      cuerpo.classList.toggle('open');
+      icono.innerText = cuerpo.classList.contains('open') ? '▲' : '▼';
+    }
+
+    // GUARDAR TOKEN GITHUB Y FUNCIONES DE DEPURACIÓN
+    function guardarTokenGitHub() {
+      const token = document.getElementById('inputGitHubToken').value.trim();
+      if (!token) return alert("Ingresa un token válido.");
+      localStorage.setItem("leogas_github_token", token);
+      alert("✔ Token de GitHub guardado en este navegador.");
+    }
+
+    function depurarConsolaSistema() {
+      console.log("=== ESTADO ACTUAL DEL SISTEMA LEOGAS ===");
+      console.log("Repartidores:", repartidoresLocales);
+      console.log("Pedidos:", pedidosLocales);
+      console.log("Clientes B2B:", clientesB2BLocales);
+      console.log("Catálogo Balones:", productos);
+      alert("ℹ️ Estado del sistema volcado en la consola de desarrollador (F12).");
+    }
+
+    async function reseteoTotalSistemaFirebase() {
+      if (prompt("⚠️ ADVERTENCIA: Esta acción eliminará todas las órdenes de la base de datos de pruebas. Escribe 'RESET' para confirmar:") === 'RESET') {
+        await db.ref('pedidos').remove();
+        alert("💥 Sistema reseteado. Órdenes eliminadas.");
+        location.reload();
+      } else {
+        alert("Operación cancelada.");
+      }
+    }
+
     function obtenerArrayRepartidores() {
       if (!repartidoresLocales) return [];
       return Array.isArray(repartidoresLocales) ? repartidoresLocales : Object.values(repartidoresLocales);
@@ -888,6 +912,11 @@
       document.getElementById('panelAdminPrincipal').style.display = 'block';
       iniciarMapaAdmin();
       iniciarEscuchaFirebase();
+
+      // Cargar token guardado si existe
+      const tGuardado = localStorage.getItem("leogas_github_token");
+      if (tGuardado) document.getElementById('inputGitHubToken').value = tGuardado;
+
       if (window.innerWidth <= 768) {
         cerrarSidebarMenu();
       }
@@ -1071,9 +1100,6 @@
       });
     }
 
-    // ==========================================
-    // FUNCIONES DE FACTURACIÓN ELECTRÓNICA Y WHATSAPP
-    // ==========================================
     async function emitirFacturaElectronica(pedidoId) {
       const p = pedidosLocales[pedidoId];
       if (!p) return;
@@ -1082,7 +1108,6 @@
       const subtotal = total / 1.18;
       const igv = total - subtotal;
 
-      // Obtener último número correlativo desde Firebase
       const refContador = db.ref('configuracion/correlativoFactura');
       const snap = await refContador.once('value');
       let correlativoActual = snap.val() || 1000;
@@ -1104,7 +1129,6 @@
         pdfUrl: `https://leogascusco.com/comprobante?id=${pedidoId}`
       };
 
-      // Guardar en la orden
       await db.ref(`pedidos/${pedidoId}`).update({
         facturaElectronica: datosFactura,
         facturado: true
