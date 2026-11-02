@@ -1266,7 +1266,6 @@
       }
     }
 
-    // PEDIDOS TELEFÓNICOS (B2C / B2B)
     function abrirModalPedidoTelefonico() {
       const sel = document.getElementById('telPedRepartidor');
       sel.innerHTML = '<option value="">-- Dejar en bandeja pendiente --</option>';
@@ -1342,7 +1341,6 @@
       alert("✔ Pedido registrado en Firebase.");
     }
 
-    // CIERRE DE CAJA Y LIQUIDACIÓN
     function renderizarLiquidacionDiaria() {
       const cont = document.getElementById('contenedorTarjetasLiquidacion');
       const tbodyPrint = document.getElementById('tablaBodyImpresionLiquidacion');
@@ -1393,7 +1391,6 @@
             envRecogidosChofer += parseInt(o.envasesRecogidos || 0);
           });
 
-          const totalChofer = efectivoChofer + digitalChofer;
           granTotalEfectivo += efectivoChofer;
           granTotalDigital += digitalChofer;
           granTotalCredito += creditoChofer;
