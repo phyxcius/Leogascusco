@@ -9,11 +9,47 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
-    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 980px; margin: auto; }
+    :root {
+      --primary: #6b21a8;
+      --primary-dark: #581c87;
+      --sidebar-w: 260px;
+    }
+
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #1e1b4b; margin: 0; padding: 0; }
     
-    .header-admin { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px; }
+    /* ENCABEZADO SUPERIOR */
+    .header-admin {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      background: #ffffff;
+      border-bottom: 1.5px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      gap: 12px;
+    }
     .header-left-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    h2 { color: #6b21a8; margin: 0; font-size: 20px; }
+    h2 { color: var(--primary); margin: 0; font-size: 19px; }
+
+    /* BOTÓN HAMBURGUESA / MENÚ */
+    .btn-toggle-menu {
+      background: #f3e8ff;
+      color: var(--primary);
+      border: 1.5px solid #d8b4fe;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-toggle-menu:hover { background: var(--primary); color: #fff; }
 
     .chuspa-badge {
       display: inline-flex; align-items: center; gap: 8px; background: #fefce8;
@@ -32,9 +68,91 @@
     }
     .btn-notif-header.activa { background: #dcfce7; color: #15803d; border-color: #86efac; }
 
-    .dashboard-tabs { display: flex; gap: 6px; margin: 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; overflow-x: auto; }
-    .tab-btn { background: none; border: none; font-weight: 800; font-size: 12.5px; padding: 8px 12px; color: #64748b; cursor: pointer; border-radius: 8px; white-space: nowrap; }
-    .tab-btn.active { background: #f3e8ff; color: #581c87; }
+    /* LAYOUT: SIDEBAR IZQUIERDA + CONTENIDO DERECHA */
+    .admin-layout-wrapper { display: flex; min-height: calc(100vh - 65px); position: relative; }
+
+    .sidebar-menu {
+      width: var(--sidebar-w);
+      background: #ffffff;
+      border-right: 1.5px solid #e2e8f0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.25s ease, margin-left 0.25s ease;
+      position: relative;
+      flex-shrink: 0;
+      z-index: 1001;
+    }
+
+    /* Estado oculto del Sidebar */
+    .sidebar-menu.hidden {
+      margin-left: calc(-1 * var(--sidebar-w));
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 900;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 10px 14px;
+      color: #475569;
+      cursor: pointer;
+      border-radius: 10px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .tab-btn:hover { background: #f8fafc; color: var(--primary); }
+    .tab-btn.active { background: #f3e8ff; color: var(--primary-dark); font-weight: 900; }
+
+    /* ÁREA PRINCIPAL DERECHA */
+    .main-content-panel {
+      flex: 1;
+      padding: 18px 22px;
+      max-width: 1100px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* OVERLAY OSCURO PARA MÓVILES */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+      }
+      .sidebar-menu.hidden {
+        margin-left: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar-overlay.active { display: block; }
+    }
 
     .card { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
     label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; }
@@ -88,7 +206,7 @@
     .edit-modal-box { background: #fff; max-width: 480px; width: 100%; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
 
     .login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-    .login-card { background: #fff; padding: 24px 28px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 380px; }
+    .login-card { background: #fff; padding: 24px 28px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 380px; margin: auto; }
 
     #printHeaderReport, #printHeaderLiquidacion { display: none; }
 
@@ -150,9 +268,16 @@
   <!-- PANEL PRINCIPAL -->
   <div id="panelAdminPrincipal" style="display: none;">
 
+    <!-- CABECERA SUPERIOR -->
     <div class="header-admin no-print">
       <div class="header-left-group">
-        <h2>🦁 Panel de Control LeoGas</h2>
+        <!-- BOTÓN TOGGLE MENÚ -->
+        <button type="button" class="btn-toggle-menu" onclick="alternarSidebarMenu()">
+          <span id="iconoToggleMenu">☰</span> Menú
+        </button>
+
+        <h2>🦁 LeoGas Control</h2>
+
         <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
           <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
           <div class="chuspa-text">
@@ -162,380 +287,399 @@
         </a>
 
         <button type="button" id="btnNotifHeader" class="btn-notif-header" onclick="solicitarPermisoNotificacionesManual(this)">
-          🔔 Activar Notificaciones
+          🔔 Alertas
         </button>
       </div>
+
       <button class="btn" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; font-size:12px;" onclick="cerrarSesionAdmin()">🚪 Salir</button>
     </div>
 
-    <div class="dashboard-tabs no-print">
-      <button class="tab-btn active" id="tabBtnPedidos" onclick="cambiarTab('pedidos')">📦 Pedidos y Flota en Vivo</button>
-      <button class="tab-btn" id="tabBtnB2B" onclick="cambiarTab('b2b')">🏢 Cartera B2B / Empresas</button>
-      <button class="tab-btn" id="tabBtnLiquidacion" onclick="cambiarTab('liquidacion')">💵 Cierre de Caja & Créditos</button>
-      <button class="tab-btn" id="tabBtnClientes" onclick="cambiarTab('clientes')">⭐ Clientes VIP</button>
-      <button class="tab-btn" id="tabBtnAccesorios" onclick="cambiarTab('accesorios')">🔧 Válvulas y Accesorios</button>
-      <button class="tab-btn" id="tabBtnProductos" onclick="cambiarTab('productos')">📝 Balones y Precios</button>
-      <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos</button>
-      <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 Repartidores</button>
-      <button class="tab-btn" id="tabBtnReportes" onclick="cambiarTab('reportes')">📊 Reporte Contable</button>
-    </div>
+    <!-- OVERLAY EN MÓVIL AL ABRIR MENÚ -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="cerrarSidebarMenu()"></div>
 
-    <!-- PESTAÑA 1: PEDIDOS EN VIVO -->
-    <div id="seccionPedidos">
-      <button type="button" class="btn btn-add no-print" style="background:#2563eb; margin-bottom:12px;" onclick="abrirModalPedidoTelefonico()">
-        📞 Registrar Pedido (Hogar o Mayorista / Crédito)
-      </button>
-
-      <div class="card" style="border: 2px solid #eab308; background: #fefce8; margin-bottom: 16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Entrantes (Web, Teléfono y Portal B2B)</h3>
-          <span id="badgeContadorEntrantes" style="background:#eab308; color:#fff; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">0 pendientes</span>
-        </div>
-        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente desde el portal web o pedidos telefónicos. Asigna directamente a la flota.</p>
-        <div id="listaOrdenesEntrantes">
-          <p style="font-size:12px; color:#a16207;">Esperando nuevos pedidos en tiempo real...</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:6px;">🛵 Secuencia de Flota y Entregas en Ruta</h3>
-        <div id="contenedorSecuenciasRepartidores">Cargando flota...</div>
-        <h4 style="margin-top:16px; font-size:14px;">📍 Mapa en Tiempo Real de Cusco:</h4>
-        <div id="adminMap"></div>
-      </div>
-    </div>
-
-    <!-- PESTAÑA CARTERA B2B -->
-    <div id="seccionB2B" style="display: none;">
-      <div class="card" style="border:1.5px solid #ca8a04; background:#fefce8;">
-        <h3 style="color:#854d0e; margin-bottom:8px;">🏢 Registro y Tarifario Especial de Empresas B2B</h3>
-        <p style="font-size:12px; color:#713f12; margin-bottom:12px;">
-          Configura restaurantes, pollerías y hoteles con su RUC, precio pactado por balón de 45kg y condición de crédito.
-        </p>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap:10px;">
-          <div>
-            <label>Número de RUC (11 dígitos):</label>
-            <input type="text" id="b2bNuevoRuc" maxlength="11" placeholder="Ej: 20601234567">
-          </div>
-          <div>
-            <label>Razón Social / Nombre Comercial:</label>
-            <input type="text" id="b2bNuevoRazon" placeholder="Ej: Pollería El Tablón">
-          </div>
-          <div>
-            <label>Precio Balón 45kg (S/):</label>
-            <input type="number" id="b2bNuevoPrecio" step="0.5" value="175.00">
-          </div>
-          <div>
-            <label>Condición de Pago:</label>
-            <select id="b2bNuevoCondicion">
-              <option value="Crédito (A cuenta 15 días)">📋 Crédito (15 días)</option>
-              <option value="Crédito (A cuenta 30 días)">📋 Crédito (30 días)</option>
-              <option value="Factura al Contado">💵 Factura al Contado</option>
-            </select>
-          </div>
-        </div>
-        <button type="button" class="btn btn-add" style="margin-top:12px; margin-bottom:0;" onclick="guardarEmpresaB2BManual()">
-          💾 Guardar Empresa en Cartera B2B
-        </button>
-      </div>
-
-      <div class="card">
-        <h3 style="color:#1e1b4b; font-size:15px; margin-bottom:8px;">Empresas y Restaurantes Registrados</h3>
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>RUC</th>
-              <th>Razón Social</th>
-              <th>Tarifa 45kg (S/)</th>
-              <th>Condición de Pago</th>
-              <th>Dirección Registrada</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tablaCarteraB2BBody">
-            <tr><td colspan="6" style="text-align:center;">Cargando empresas B2B...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- PESTAÑA 2: CIERRE DE CAJA / LIQUIDACIÓN -->
-    <div id="seccionLiquidacion" style="display: none;">
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;" class="no-print">
-          <div>
-            <h3 style="color:#6b21a8; margin:0;">💵 Cierre de Caja, Créditos y Envases</h3>
-            <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Dinero que debe rendir cada repartidor hoy (las ventas a crédito no exigen dinero en mano).</p>
-          </div>
-          <button class="btn btn-print" onclick="imprimirCierreCaja()">🖨️ Imprimir Liquidación de Hoy</button>
+    <!-- ESTRUCTURA PRINCIPAL: MENÚ IZQUIERDA + VENTANA DERECHA -->
+    <div class="admin-layout-wrapper">
+      
+      <!-- SIDEBAR LATERAL IZQUIERDA -->
+      <aside class="sidebar-menu no-print" id="sidebarMenu">
+        <div class="sidebar-title">
+          <span>Módulos del Sistema</span>
+          <button type="button" onclick="cerrarSidebarMenu()" style="background:none; border:none; font-size:16px; cursor:pointer; color:#64748b;">✖</button>
         </div>
 
-        <div class="report-summary-cards no-print">
-          <div class="summary-card">
-            <div class="summary-card-title">Efectivo Físico a Rendir</div>
-            <div class="summary-card-val" id="liqTotalEfectivo" style="color:#15803d;">S/ 0.00</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-card-title">Digital (Yape / Plin)</div>
-            <div class="summary-card-val" id="liqTotalDigital" style="color:#2563eb;">S/ 0.00</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-card-title">Créditos Mayoristas (A Cobrar)</div>
-            <div class="summary-card-val" id="liqTotalCredito" style="color:#d97706;">S/ 0.00</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-card-title">Recaudación Global Hoy</div>
-            <div class="summary-card-val" id="liqTotalGlobal">S/ 0.00</div>
-          </div>
-        </div>
+        <button class="tab-btn active" id="tabBtnPedidos" onclick="cambiarTab('pedidos')">📦 Pedidos y Flota</button>
+        <button class="tab-btn" id="tabBtnB2B" onclick="cambiarTab('b2b')">🏢 Cartera B2B / Empresas</button>
+        <button class="tab-btn" id="tabBtnLiquidacion" onclick="cambiarTab('liquidacion')">💵 Cierre de Caja & Créditos</button>
+        <button class="tab-btn" id="tabBtnClientes" onclick="cambiarTab('clientes')">⭐ Clientes VIP</button>
+        <button class="tab-btn" id="tabBtnAccesorios" onclick="cambiarTab('accesorios')">🔧 Válvulas y Accesorios</button>
+        <button class="tab-btn" id="tabBtnProductos" onclick="cambiarTab('productos')">📝 Balones y Precios</button>
+        <button class="tab-btn" id="tabBtnTelefonos" onclick="cambiarTab('telefonos')">📞 Teléfonos</button>
+        <button class="tab-btn" id="tabBtnGPS" onclick="cambiarTab('gps')">📡 Repartidores</button>
+        <button class="tab-btn" id="tabBtnReportes" onclick="cambiarTab('reportes')">📊 Reporte Contable</button>
+      </aside>
 
-        <div id="areaImpresionLiquidacion">
-          <div id="printHeaderLiquidacion">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div style="display:flex; align-items:center; gap:12px;">
-                <div style="font-size:38px;">🦁</div>
-                <div>
-                  <h1 style="font-size:22px; margin:0; color:#6b21a8;">LeoGas Cusco</h1>
-                  <div style="font-size:12px; color:#555;">Distribuidor Oficial Llamagas • El Moradito Rendidor</div>
-                  <div style="font-size:11px; color:#777;">Cusco, Perú</div>
-                </div>
-              </div>
-              <div style="display:flex; align-items:center; gap:8px; border:1px solid #ccc; padding:6px 12px; border-radius:12px;">
-                <img src="CHUSPITA-circulo.png" style="width:34px; height:34px; border-radius:50%;" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
-                <div style="text-align:right;">
-                  <div style="font-size:11px; font-weight:bold; color:#6b21a8;">La Chuspa Tech</div>
-                  <div style="font-size:9px; color:#b45309;">by La Chuspa Anuncios</div>
-                </div>
-              </div>
+      <!-- VENTANA DERECHA: CONTENIDO DE CADA MÓDULO -->
+      <main class="main-content-panel">
+
+        <!-- MÓDULO 1: PEDIDOS EN VIVO -->
+        <div id="seccionPedidos">
+          <button type="button" class="btn btn-add no-print" style="background:#2563eb; margin-bottom:12px;" onclick="abrirModalPedidoTelefonico()">
+            📞 Registrar Pedido (Hogar o Mayorista / Crédito)
+          </button>
+
+          <div class="card" style="border: 2px solid #eab308; background: #fefce8; margin-bottom: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Entrantes (Web, Teléfono y Portal B2B)</h3>
+              <span id="badgeContadorEntrantes" style="background:#eab308; color:#fff; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">0 pendientes</span>
             </div>
-
-            <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1;">
-              <span><strong>Reporte:</strong> Rendición de Cuentas y Control de Envases</span>
-              <span><strong>Fecha del Cierre:</strong> <span id="lblFechaCierreCaja"></span></span>
-              <span><strong>Emisión:</strong> <span id="lblEmisionCierreCaja"></span></span>
+            <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente desde el portal web o pedidos telefónicos. Asigna directamente a la flota.</p>
+            <div id="listaOrdenesEntrantes">
+              <p style="font-size:12px; color:#a16207;">Esperando nuevos pedidos en tiempo real...</p>
             </div>
           </div>
 
-          <div id="contenedorTarjetasLiquidacion" class="liqui-grid">
-            Cargando liquidaciones por chofer...
-          </div>
-
-          <table class="custom-table" id="tablaImpresionLiquidacion" style="margin-top:16px;">
-            <thead>
-              <tr>
-                <th>Repartidor / Chofer</th>
-                <th>Entregas</th>
-                <th>Efectivo Físico (S/)</th>
-                <th>Digital (S/)</th>
-                <th>Crédito (S/)</th>
-                <th>Envases Dejados/Recogidos</th>
-              </tr>
-            </thead>
-            <tbody id="tablaBodyImpresionLiquidacion"></tbody>
-            <tfoot>
-              <tr style="font-weight:900; background:#f1f5f9;">
-                <td colspan="2" style="text-align:right;">TOTALES GENERALES DE CAJA HOY:</td>
-                <td id="lblTotalPrintEfectivo" style="color:#15803d;">S/ 0.00</td>
-                <td id="lblTotalPrintDigital" style="color:#2563eb;">S/ 0.00</td>
-                <td id="lblTotalPrintCredito" style="color:#d97706;">S/ 0.00</td>
-                <td id="lblTotalPrintEnvases">--</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PESTAÑA 3: CLIENTES VIP -->
-    <div id="seccionClientes" style="display: none;">
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-          <div>
-            <h3 style="color:#6b21a8; margin:0;">⭐ Clientes Frecuentes y Fidelización</h3>
-            <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Historial acumulado por cliente minorista o comercial.</p>
-          </div>
-          <input type="text" id="buscadorClientesInput" placeholder="🔍 Buscar cliente..." oninput="filtrarTablaClientes()" style="max-width:240px; margin:0; padding:7px;">
-        </div>
-
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Cliente / Razón Social</th>
-              <th>Balones</th>
-              <th>Total Consumido</th>
-              <th>Último Pedido</th>
-              <th>Nivel</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tablaClientesVIPBody">
-            <tr><td colspan="6" style="text-align:center; padding:12px;">Cargando historial de clientes...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- PESTAÑA 4: ACCESORIOS -->
-    <div id="seccionAccesorios" style="display: none;">
-      <button class="btn btn-add no-print" onclick="agregarNuevoAccesorio()">➕ Agregar Nuevo Accesorio (Válvula, Manguera, Regulador)</button>
-      <div id="listaAccesorios">Cargando catálogo de accesorios...</div>
-      <button class="btn btn-save no-print" onclick="guardarAccesoriosFirebase()">💾 Guardar Accesorios en Firebase</button>
-      <div id="statusMsgAccesorios" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
-    </div>
-
-    <!-- PESTAÑA 5: PRODUCTOS Y BALONES -->
-    <div id="seccionProductos" style="display: none;">
-      <button class="btn btn-add no-print" onclick="agregarNuevoBalonProducto()">➕ Agregar Balón (10kg o 45kg Industrial)</button>
-      <div id="listaProductos">Cargando catálogo desde Firebase...</div>
-      <button class="btn btn-save no-print" onclick="guardarProductosFirebase()">💾 Guardar Precios y Stock en Firebase</button>
-      <div id="statusMsgProductos" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
-    </div>
-
-    <!-- PESTAÑA 6: TELÉFONOS -->
-    <div id="seccionTelefonos" style="display: none;">
-      <div class="card">
-        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:12px;">📞 Edición de Teléfonos del Volante y Pedidos</h3>
-        <label>Número WhatsApp para Pedidos (con código de país, ej: 51969773064):</label>
-        <input type="text" id="telWhatsApp" placeholder="51969773064">
-
-        <label>Teléfono 1 (Llamada Rápida 1):</label>
-        <input type="text" id="telFijo1" placeholder="950 727 212">
-
-        <label>Teléfono 2 (Llamada Rápida 2):</label>
-        <input type="text" id="telFijo2" placeholder="984 285 500">
-
-        <label>Teléfono 3 (Fijo o Central Cusco):</label>
-        <input type="text" id="telFijo3" placeholder="(084) 501111">
-
-        <button class="btn btn-save" onclick="guardarTelefonosFirebase()" style="margin-top:16px;">💾 Guardar Teléfonos en Firebase</button>
-      </div>
-    </div>
-
-    <!-- PESTAÑA 7: GESTIÓN DE REPARTIDORES -->
-    <div id="seccionGPS" style="display: none;">
-      <div class="card" style="border:1.5px solid #c084fc; background:#faf5ff; margin-bottom:16px;">
-        <h3 style="color:#6b21a8; font-size:15px; margin-bottom:10px;">➕ Registrar Nuevo Repartidor en Flota</h3>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
-          <div>
-            <label>Nombre del Chofer / Móvil:</label>
-            <input type="text" id="nuevoRepNombre" placeholder="Ej: Jorge / Edwin / Camión 1">
-          </div>
-          <div>
-            <label>Usuario de Acceso:</label>
-            <input type="text" id="nuevoRepUsuario" placeholder="Ej: jorge">
-          </div>
-          <div>
-            <label>Contraseña de Acceso:</label>
-            <input type="password" id="nuevoRepPassword" placeholder="Ej: jorge123">
+          <div class="card">
+            <h3 style="color:#6b21a8; font-size:15px; margin-bottom:6px;">🛵 Secuencia de Flota y Entregas en Ruta</h3>
+            <div id="contenedorSecuenciasRepartidores">Cargando flota...</div>
+            <h4 style="margin-top:16px; font-size:14px;">📍 Mapa en Tiempo Real de Cusco:</h4>
+            <div id="adminMap"></div>
           </div>
         </div>
-        <button class="btn btn-add" style="margin-top:12px; margin-bottom:0;" onclick="agregarNuevoRepartidor()">Guardar y Habilitar Repartidor 🛵</button>
-      </div>
 
-      <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
-    </div>
-
-    <!-- PESTAÑA 8: REPORTES CONTABLES CON CALENDARIO -->
-    <div id="seccionReportes" style="display: none;">
-      <div class="report-filters-bar no-print">
-        <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtros rápidos:</span>
-        <button type="button" class="filter-pill-btn active" id="fltTodos" onclick="aplicarFiltroFecha('todos', this)">Todos</button>
-        <button type="button" class="filter-pill-btn" id="fltHoy" onclick="aplicarFiltroFecha('hoy', this)">📅 Hoy</button>
-        <button type="button" class="filter-pill-btn" id="fltSemana" onclick="aplicarFiltroFecha('semana', this)">📆 Esta Semana</button>
-        <button type="button" class="filter-pill-btn" id="fltMes" onclick="aplicarFiltroFecha('mes', this)">🗓️ Este Mes</button>
-        <button type="button" class="filter-pill-btn" id="fltAnio" onclick="aplicarFiltroFecha('anio', this)">📅 Este Año</button>
-
-        <div style="margin-left:auto; display:flex; gap:8px;">
-          <button type="button" class="btn btn-export" onclick="exportarVentasExcelCSV()">📥 Descargar Excel (CSV)</button>
-          <button type="button" class="btn btn-print" onclick="imprimirReporteContable()">🖨️ Imprimir Reporte</button>
-        </div>
-
-        <div class="calendar-picker-box">
-          <div class="calendar-input-item">
-            <span>🗓️ Día exacto:</span>
-            <input type="date" id="calFechaDia" onchange="filtrarPorDiaCalendario(this.value)">
-          </div>
-
-          <div class="calendar-input-item">
-            <span>📅 Mes exacto:</span>
-            <input type="month" id="calFechaMes" onchange="filtrarPorMesCalendario(this.value)">
-          </div>
-
-          <div class="calendar-input-item">
-            <span>🏛️ Año:</span>
-            <input type="number" id="calFechaAnio" min="2024" max="2035" placeholder="2026" style="width:75px;" onchange="filtrarPorAnioCalendario(this.value)">
-          </div>
-
-          <div class="calendar-input-item" style="gap:4px;">
-            <span>Desde:</span>
-            <input type="date" id="calRangoDesde">
-            <span>Hasta:</span>
-            <input type="date" id="calRangoHasta">
-            <button type="button" class="btn btn-edit" style="padding:5px 9px; font-size:11px;" onclick="filtrarPorRangoCalendario()">Filtrar Rango</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="report-summary-cards no-print">
-        <div class="summary-card">
-          <div class="summary-card-title">Pedidos Completados</div>
-          <div class="summary-card-val" id="resumenCantPedidos">0</div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-card-title">Total Recaudado (S/)</div>
-          <div class="summary-card-val" id="resumenTotalSoles" style="color:#15803d;">S/ 0.00</div>
-        </div>
-      </div>
-
-      <div id="areaImpresion">
-        <div id="printHeaderReport">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div style="font-size:38px;">🦁</div>
+        <!-- MÓDULO 2: CARTERA B2B -->
+        <div id="seccionB2B" style="display: none;">
+          <div class="card" style="border:1.5px solid #ca8a04; background:#fefce8;">
+            <h3 style="color:#854d0e; margin-bottom:8px;">🏢 Registro y Tarifario Especial de Empresas B2B</h3>
+            <p style="font-size:12px; color:#713f12; margin-bottom:12px;">
+              Configura restaurantes, pollerías y hoteles con su RUC, precio pactado por balón de 45kg y condición de crédito.
+            </p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap:10px;">
               <div>
-                <h1 style="font-size:22px; margin:0; color:#6b21a8;">LeoGas Cusco</h1>
-                <div style="font-size:12px; color:#555;">Distribuidor Oficial Llamagas • El Moradito Rendidor</div>
-                <div style="font-size:11px; color:#777;">Cusco, Perú</div>
+                <label>Número de RUC (11 dígitos):</label>
+                <input type="text" id="b2bNuevoRuc" maxlength="11" placeholder="Ej: 20601234567">
+              </div>
+              <div>
+                <label>Razón Social / Nombre Comercial:</label>
+                <input type="text" id="b2bNuevoRazon" placeholder="Ej: Pollería El Tablón">
+              </div>
+              <div>
+                <label>Precio Balón 45kg (S/):</label>
+                <input type="number" id="b2bNuevoPrecio" step="0.5" value="175.00">
+              </div>
+              <div>
+                <label>Condición de Pago:</label>
+                <select id="b2bNuevoCondicion">
+                  <option value="Crédito (A cuenta 15 días)">📋 Crédito (15 días)</option>
+                  <option value="Crédito (A cuenta 30 días)">📋 Crédito (30 días)</option>
+                  <option value="Factura al Contado">💵 Factura al Contado</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="btn btn-add" style="margin-top:12px; margin-bottom:0;" onclick="guardarEmpresaB2BManual()">
+              💾 Guardar Empresa en Cartera B2B
+            </button>
+          </div>
+
+          <div class="card">
+            <h3 style="color:#1e1b4b; font-size:15px; margin-bottom:8px;">Empresas y Restaurantes Registrados</h3>
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>RUC</th>
+                  <th>Razón Social</th>
+                  <th>Tarifa 45kg (S/)</th>
+                  <th>Condición de Pago</th>
+                  <th>Dirección Registrada</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tablaCarteraB2BBody">
+                <tr><td colspan="6" style="text-align:center;">Cargando empresas B2B...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MÓDULO 3: CIERRE DE CAJA / LIQUIDACIÓN -->
+        <div id="seccionLiquidacion" style="display: none;">
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;" class="no-print">
+              <div>
+                <h3 style="color:#6b21a8; margin:0;">💵 Cierre de Caja, Créditos y Envases</h3>
+                <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Dinero que debe rendir cada repartidor hoy (las ventas a crédito no exigen dinero en mano).</p>
+              </div>
+              <button class="btn btn-print" onclick="imprimirCierreCaja()">🖨️ Imprimir Liquidación de Hoy</button>
+            </div>
+
+            <div class="report-summary-cards no-print">
+              <div class="summary-card">
+                <div class="summary-card-title">Efectivo Físico a Rendir</div>
+                <div class="summary-card-val" id="liqTotalEfectivo" style="color:#15803d;">S/ 0.00</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-card-title">Digital (Yape / Plin)</div>
+                <div class="summary-card-val" id="liqTotalDigital" style="color:#2563eb;">S/ 0.00</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-card-title">Créditos Mayoristas (A Cobrar)</div>
+                <div class="summary-card-val" id="liqTotalCredito" style="color:#d97706;">S/ 0.00</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-card-title">Recaudación Global Hoy</div>
+                <div class="summary-card-val" id="liqTotalGlobal">S/ 0.00</div>
               </div>
             </div>
 
-            <div style="display:flex; align-items:center; gap:8px; border:1px solid #ccc; padding:6px 12px; border-radius:12px;">
-              <img src="CHUSPITA-circulo.png" style="width:34px; height:34px; border-radius:50%;" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
-              <div style="text-align:right;">
-                <div style="font-size:11px; font-weight:bold; color:#6b21a8;">La Chuspa Tech</div>
-                <div style="font-size:9px; color:#b45309;">by La Chuspa Anuncios</div>
+            <div id="areaImpresionLiquidacion">
+              <div id="printHeaderLiquidacion">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="font-size:38px;">🦁</div>
+                    <div>
+                      <h1 style="font-size:22px; margin:0; color:#6b21a8;">LeoGas Cusco</h1>
+                      <div style="font-size:12px; color:#555;">Distribuidor Oficial Llamagas • El Moradito Rendidor</div>
+                      <div style="font-size:11px; color:#777;">Cusco, Perú</div>
+                    </div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; border:1px solid #ccc; padding:6px 12px; border-radius:12px;">
+                    <img src="CHUSPITA-circulo.png" style="width:34px; height:34px; border-radius:50%;" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+                    <div style="text-align:right;">
+                      <div style="font-size:11px; font-weight:bold; color:#6b21a8;">La Chuspa Tech</div>
+                      <div style="font-size:9px; color:#b45309;">by La Chuspa Anuncios</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1;">
+                  <span><strong>Reporte:</strong> Rendición de Cuentas y Control de Envases</span>
+                  <span><strong>Fecha del Cierre:</strong> <span id="lblFechaCierreCaja"></span></span>
+                  <span><strong>Emisión:</strong> <span id="lblEmisionCierreCaja"></span></span>
+                </div>
+              </div>
+
+              <div id="contenedorTarjetasLiquidacion" class="liqui-grid">
+                Cargando liquidaciones por chofer...
+              </div>
+
+              <table class="custom-table" id="tablaImpresionLiquidacion" style="margin-top:16px;">
+                <thead>
+                  <tr>
+                    <th>Repartidor / Chofer</th>
+                    <th>Entregas</th>
+                    <th>Efectivo Físico (S/)</th>
+                    <th>Digital (S/)</th>
+                    <th>Crédito (S/)</th>
+                    <th>Envases Dejados/Recogidos</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaBodyImpresionLiquidacion"></tbody>
+                <tfoot>
+                  <tr style="font-weight:900; background:#f1f5f9;">
+                    <td colspan="2" style="text-align:right;">TOTALES GENERALES DE CAJA HOY:</td>
+                    <td id="lblTotalPrintEfectivo" style="color:#15803d;">S/ 0.00</td>
+                    <td id="lblTotalPrintDigital" style="color:#2563eb;">S/ 0.00</td>
+                    <td id="lblTotalPrintCredito" style="color:#d97706;">S/ 0.00</td>
+                    <td id="lblTotalPrintEnvases">--</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÓDULO 4: CLIENTES VIP -->
+        <div id="seccionClientes" style="display: none;">
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+              <div>
+                <h3 style="color:#6b21a8; margin:0;">⭐ Clientes Frecuentes y Fidelización</h3>
+                <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Historial acumulado por cliente minorista o comercial.</p>
+              </div>
+              <input type="text" id="buscadorClientesInput" placeholder="🔍 Buscar cliente..." oninput="filtrarTablaClientes()" style="max-width:240px; margin:0; padding:7px;">
+            </div>
+
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Cliente / Razón Social</th>
+                  <th>Balones</th>
+                  <th>Total Consumido</th>
+                  <th>Último Pedido</th>
+                  <th>Nivel</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tablaClientesVIPBody">
+                <tr><td colspan="6" style="text-align:center; padding:12px;">Cargando historial de clientes...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MÓDULO 5: ACCESORIOS -->
+        <div id="seccionAccesorios" style="display: none;">
+          <button class="btn btn-add no-print" onclick="agregarNuevoAccesorio()">➕ Agregar Nuevo Accesorio (Válvula, Manguera, Regulador)</button>
+          <div id="listaAccesorios">Cargando catálogo de accesorios...</div>
+          <button class="btn btn-save no-print" onclick="guardarAccesoriosFirebase()">💾 Guardar Accesorios en Firebase</button>
+          <div id="statusMsgAccesorios" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
+        </div>
+
+        <!-- MÓDULO 6: BALONES Y PRECIOS -->
+        <div id="seccionProductos" style="display: none;">
+          <button class="btn btn-add no-print" onclick="agregarNuevoBalonProducto()">➕ Agregar Balón (10kg o 45kg Industrial)</button>
+          <div id="listaProductos">Cargando catálogo desde Firebase...</div>
+          <button class="btn btn-save no-print" onclick="guardarProductosFirebase()">💾 Guardar Precios y Stock en Firebase</button>
+          <div id="statusMsgProductos" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
+        </div>
+
+        <!-- MÓDULO 7: TELÉFONOS -->
+        <div id="seccionTelefonos" style="display: none;">
+          <div class="card">
+            <h3 style="color:#6b21a8; font-size:15px; margin-bottom:12px;">📞 Edición de Teléfonos del Volante y Pedidos</h3>
+            <label>Número WhatsApp para Pedidos (con código de país, ej: 51969773064):</label>
+            <input type="text" id="telWhatsApp" placeholder="51969773064">
+
+            <label>Teléfono 1 (Llamada Rápida 1):</label>
+            <input type="text" id="telFijo1" placeholder="950 727 212">
+
+            <label>Teléfono 2 (Llamada Rápida 2):</label>
+            <input type="text" id="telFijo2" placeholder="984 285 500">
+
+            <label>Teléfono 3 (Fijo o Central Cusco):</label>
+            <input type="text" id="telFijo3" placeholder="(084) 501111">
+
+            <button class="btn btn-save" onclick="guardarTelefonosFirebase()" style="margin-top:16px;">💾 Guardar Teléfonos en Firebase</button>
+          </div>
+        </div>
+
+        <!-- MÓDULO 8: GESTIÓN DE REPARTIDORES -->
+        <div id="seccionGPS" style="display: none;">
+          <div class="card" style="border:1.5px solid #c084fc; background:#faf5ff; margin-bottom:16px;">
+            <h3 style="color:#6b21a8; font-size:15px; margin-bottom:10px;">➕ Registrar Nuevo Repartidor en Flota</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+              <div>
+                <label>Nombre del Chofer / Móvil:</label>
+                <input type="text" id="nuevoRepNombre" placeholder="Ej: Jorge / Edwin / Camión 1">
+              </div>
+              <div>
+                <label>Usuario de Acceso:</label>
+                <input type="text" id="nuevoRepUsuario" placeholder="Ej: jorge">
+              </div>
+              <div>
+                <label>Contraseña de Acceso:</label>
+                <input type="password" id="nuevoRepPassword" placeholder="Ej: jorge123">
+              </div>
+            </div>
+            <button class="btn btn-add" style="margin-top:12px; margin-bottom:0;" onclick="agregarNuevoRepartidor()">Guardar y Habilitar Repartidor 🛵</button>
+          </div>
+
+          <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
+        </div>
+
+        <!-- MÓDULO 9: REPORTES CONTABLES CON CALENDARIO -->
+        <div id="seccionReportes" style="display: none;">
+          <div class="report-filters-bar no-print">
+            <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtros rápidos:</span>
+            <button type="button" class="filter-pill-btn active" id="fltTodos" onclick="aplicarFiltroFecha('todos', this)">Todos</button>
+            <button type="button" class="filter-pill-btn" id="fltHoy" onclick="aplicarFiltroFecha('hoy', this)">📅 Hoy</button>
+            <button type="button" class="filter-pill-btn" id="fltSemana" onclick="aplicarFiltroFecha('semana', this)">📆 Esta Semana</button>
+            <button type="button" class="filter-pill-btn" id="fltMes" onclick="aplicarFiltroFecha('mes', this)">🗓️ Este Mes</button>
+            <button type="button" class="filter-pill-btn" id="fltAnio" onclick="aplicarFiltroFecha('anio', this)">📅 Este Año</button>
+
+            <div style="margin-left:auto; display:flex; gap:8px;">
+              <button type="button" class="btn btn-export" onclick="exportarVentasExcelCSV()">📥 Descargar Excel (CSV)</button>
+              <button type="button" class="btn btn-print" onclick="imprimirReporteContable()">🖨️ Imprimir Reporte</button>
+            </div>
+
+            <div class="calendar-picker-box">
+              <div class="calendar-input-item">
+                <span>🗓️ Día exacto:</span>
+                <input type="date" id="calFechaDia" onchange="filtrarPorDiaCalendario(this.value)">
+              </div>
+
+              <div class="calendar-input-item">
+                <span>📅 Mes exacto:</span>
+                <input type="month" id="calFechaMes" onchange="filtrarPorMesCalendario(this.value)">
+              </div>
+
+              <div class="calendar-input-item">
+                <span>🏛️ Año:</span>
+                <input type="number" id="calFechaAnio" min="2024" max="2035" placeholder="2026" style="width:75px;" onchange="filtrarPorAnioCalendario(this.value)">
+              </div>
+
+              <div class="calendar-input-item" style="gap:4px;">
+                <span>Desde:</span>
+                <input type="date" id="calRangoDesde">
+                <span>Hasta:</span>
+                <input type="date" id="calRangoHasta">
+                <button type="button" class="btn btn-edit" style="padding:5px 9px; font-size:11px;" onclick="filtrarPorRangoCalendario()">Filtrar Rango</button>
               </div>
             </div>
           </div>
 
-          <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1;">
-            <span><strong>Reporte:</strong> Ventas de Balones de Gas</span>
-            <span><strong>Filtro:</strong> <span id="lblFiltroImpreso">Todos</span></span>
-            <span><strong>Emisión:</strong> <span id="lblFechaEmision"></span></span>
+          <div class="report-summary-cards no-print">
+            <div class="summary-card">
+              <div class="summary-card-title">Pedidos Completados</div>
+              <div class="summary-card-val" id="resumenCantPedidos">0</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-card-title">Total Recaudado (S/)</div>
+              <div class="summary-card-val" id="resumenTotalSoles" style="color:#15803d;">S/ 0.00</div>
+            </div>
+          </div>
+
+          <div id="areaImpresion">
+            <div id="printHeaderReport">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="font-size:38px;">🦁</div>
+                  <div>
+                    <h1 style="font-size:22px; margin:0; color:#6b21a8;">LeoGas Cusco</h1>
+                    <div style="font-size:12px; color:#555;">Distribuidor Oficial Llamagas • El Moradito Rendidor</div>
+                    <div style="font-size:11px; color:#777;">Cusco, Perú</div>
+                  </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:8px; border:1px solid #ccc; padding:6px 12px; border-radius:12px;">
+                  <img src="CHUSPITA-circulo.png" style="width:34px; height:34px; border-radius:50%;" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+                  <div style="text-align:right;">
+                    <div style="font-size:11px; font-weight:bold; color:#6b21a8;">La Chuspa Tech</div>
+                    <div style="font-size:9px; color:#b45309;">by La Chuspa Anuncios</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1;">
+                <span><strong>Reporte:</strong> Ventas de Balones de Gas</span>
+                <span><strong>Filtro:</strong> <span id="lblFiltroImpreso">Todos</span></span>
+                <span><strong>Emisión:</strong> <span id="lblFechaEmision"></span></span>
+              </div>
+            </div>
+
+            <h3 style="margin-bottom:8px;" class="no-print">📋 Reporte Contable de Entregas Realizadas</h3>
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Fecha y Hora</th>
+                  <th>Cliente</th>
+                  <th>Detalle Balón</th>
+                  <th>Repartidor</th>
+                  <th>Total</th>
+                  <th>Pago</th>
+                  <th>Envases (Dej/Rec)</th>
+                </tr>
+              </thead>
+              <tbody id="tablaVentasBody"></tbody>
+            </table>
+
+            <div style="margin-top:14px; text-align:right; font-size:15px; font-weight:900;">
+              <span>TOTAL GENERAL RECAUDADO: </span>
+              <span id="lblTotalFinalImpreso" style="color:#15803d;">S/ 0.00</span>
+            </div>
           </div>
         </div>
 
-        <h3 style="margin-bottom:8px;" class="no-print">📋 Reporte Contable de Entregas Realizadas</h3>
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Fecha y Hora</th>
-              <th>Cliente</th>
-              <th>Detalle Balón</th>
-              <th>Repartidor</th>
-              <th>Total</th>
-              <th>Pago</th>
-              <th>Envases (Dej/Rec)</th>
-            </tr>
-          </thead>
-          <tbody id="tablaVentasBody"></tbody>
-        </table>
-
-        <div style="margin-top:14px; text-align:right; font-size:15px; font-weight:900;">
-          <span>TOTAL GENERAL RECAUDADO: </span>
-          <span id="lblTotalFinalImpreso" style="color:#15803d;">S/ 0.00</span>
-        </div>
-      </div>
+      </main>
     </div>
 
   </div>
@@ -686,6 +830,25 @@
     let marcadoresAdmin = {};
     let cantidadPedidosEntrantesPrevia = 0;
 
+    // CONTROL DEL MENÚ LATERAL (SIDEBAR)
+    function alternarSidebarMenu() {
+      const sidebar = document.getElementById('sidebarMenu');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('hidden');
+      if (window.innerWidth <= 768) {
+        overlay.classList.toggle('active', !sidebar.classList.contains('hidden'));
+      }
+      setTimeout(() => { if (mapAdmin) mapAdmin.invalidateSize(); }, 300);
+    }
+
+    function cerrarSidebarMenu() {
+      const sidebar = document.getElementById('sidebarMenu');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.add('hidden');
+      overlay.classList.remove('active');
+      setTimeout(() => { if (mapAdmin) mapAdmin.invalidateSize(); }, 300);
+    }
+
     // Helper para garantizar que los repartidores siempre sean un Array
     function obtenerArrayRepartidores() {
       if (!repartidoresLocales) return [];
@@ -725,6 +888,10 @@
       document.getElementById('panelAdminPrincipal').style.display = 'block';
       iniciarMapaAdmin();
       iniciarEscuchaFirebase();
+      // En móviles iniciar con el menú cerrado para ver el contenido directamente
+      if (window.innerWidth <= 768) {
+        cerrarSidebarMenu();
+      }
     }
 
     function cerrarSesionAdmin() {
@@ -779,6 +946,11 @@
         document.getElementById('seccionReportes').style.display = 'block';
         renderizarReportesContables();
       }
+
+      // Si está en pantalla pequeña, cerrar el menú tras elegir pestaña
+      if (window.innerWidth <= 768) {
+        cerrarSidebarMenu();
+      }
     }
 
     function iniciarMapaAdmin() {
@@ -795,7 +967,7 @@
         renderizarGestionRepartidores();
         actualizarMapaAdmin();
         renderizarFlotaActiva();
-        renderizarOrdenesEntrantes(); // Actualiza los selectores de las órdenes inmediatamente
+        renderizarOrdenesEntrantes();
         renderizarLiquidacionDiaria();
       });
 
