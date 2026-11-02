@@ -41,7 +41,7 @@
     .nav-actions { display: flex; align-items: center; gap: 8px; }
     .nav-cta { background: var(--primary); color: var(--white); padding: 8px 18px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px; }
     .btn-b2b-header {
-      background: #1e1b4b;
+      background: #0f172a;
       color: #facc15;
       border: 1.5px solid #ca8a04;
       padding: 8px 14px;
@@ -53,9 +53,10 @@
       align-items: center;
       gap: 6px;
       transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
     .btn-b2b-header:hover {
-      background: #312e81;
+      background: #1e1b4b;
       transform: translateY(-1px);
     }
 
@@ -69,7 +70,43 @@
       border-bottom: 2px solid #eab308;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       padding: 10px 16px;
+      transition: all 0.3s ease;
     }
+
+    /* ESTILO DIFERENCIADO Y ATRACTIVO PARA EMPRESAS B2B */
+    .tracking-status-bar.modo-b2b {
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 45%, #1e1b4b 100%);
+      border-bottom: 2.5px solid #f59e0b;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.45);
+      color: #f8fafc;
+    }
+    .tracking-status-bar.modo-b2b #trackTituloCliente {
+      color: #facc15 !important;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+    }
+    .tracking-status-bar.modo-b2b #trackDetalleEstado {
+      color: #cbd5e1 !important;
+    }
+    .tracking-status-bar.modo-b2b .btn-ticket-modal {
+      background: #f59e0b !important;
+      color: #0f172a !important;
+      border: 1px solid #facc15;
+    }
+
+    .badge-b2b-pill {
+      background: #f59e0b;
+      color: #0f172a;
+      font-size: 9.5px;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
     .tracking-status-inner {
       max-width: 1200px;
       margin: 0 auto;
@@ -297,9 +334,12 @@
   <div class="tracking-status-bar" id="barraSeguimientoActivo">
     <div class="tracking-status-inner">
       <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:20px;">🛵</span>
+        <span style="font-size:22px;" id="trackIconoTipo">🛵</span>
         <div>
-          <strong id="trackTituloCliente" style="color:#6b21a8; font-size:13px;">Tu pedido de gas está activo</strong>
+          <div style="display:flex; align-items:center;">
+            <strong id="trackTituloCliente" style="color:#6b21a8; font-size:13.5px;">Tu pedido de gas está activo</strong>
+            <span id="badgeB2BTag" class="badge-b2b-pill" style="display:none;">B2B EMPRESA</span>
+          </div>
           <div id="trackDetalleEstado" style="font-size:11.5px; color:#475569;">En proceso de entrega...</div>
         </div>
       </div>
@@ -509,12 +549,12 @@
   <div class="cart-modal-overlay" id="modalB2BOverlay" style="display:none; align-items:center;">
     <div class="cart-modal-card" style="border-radius:18px; max-width:480px; padding:0; overflow:hidden;">
       
-      <div style="background:#1e1b4b; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="background:#0f172a; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #ca8a04;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:22px;">🏢</span>
+          <span style="font-size:24px;">🏢</span>
           <div>
-            <strong style="font-size:15px; color:#facc15;">Portal Empresas y Restaurantes</strong>
-            <div style="font-size:11px; color:#cbd5e1;">LeoGas Cusco • Atención Mayorista B2B</div>
+            <strong style="font-size:15px; color:#facc15;">Portal Corporativo & Restaurantes</strong>
+            <div style="font-size:11px; color:#94a3b8;">LeoGas Cusco • Atención Mayorista B2B</div>
           </div>
         </div>
         <button onclick="cerrarModalB2B()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
@@ -526,10 +566,10 @@
           Ingresa el <strong>RUC de tu empresa</strong> para acceder a tus tarifas comerciales preferenciales y línea de crédito.
         </p>
         
-        <label style="font-size:11px; font-weight:800; color:#6b21a8; text-transform:uppercase;">Número de RUC (11 dígitos):</label>
+        <label style="font-size:11px; font-weight:800; color:#0f172a; text-transform:uppercase;">Número de RUC (11 dígitos):</label>
         <div style="display:flex; gap:8px; margin-top:4px;">
           <input type="text" id="inputRucB2B" maxlength="11" placeholder="Ej: 20601234567" style="flex:1; padding:10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:15px; font-weight:bold;">
-          <button type="button" class="btn-add" style="padding:10px 16px; border-radius:8px; margin:0;" onclick="validarRucEmpresaB2B()">Ingresar ➔</button>
+          <button type="button" class="btn-b2b-header" style="border-radius:8px;" onclick="validarRucEmpresaB2B()">Ingresar ➔</button>
         </div>
         <div id="msgValidacionRuc" style="font-size:12px; margin-top:8px;"></div>
       </div>
@@ -559,10 +599,10 @@
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; border-top:1px dashed #cbd5e1; padding-top:12px;">
           <span style="font-weight:bold; font-size:14px;">Total a Facturar:</span>
-          <strong id="b2bTotalPagar" style="color:#6b21a8; font-size:18px;">S/ 0.00</strong>
+          <strong id="b2bTotalPagar" style="color:#0f172a; font-size:18px;">S/ 0.00</strong>
         </div>
 
-        <button type="button" class="btn-add" style="width:100%; padding:12px; border-radius:10px; font-weight:bold; margin-top:12px; font-size:14px;" onclick="enviarPedidoB2BFirebase()">
+        <button type="button" class="btn" style="background:#15803d; color:#fff; width:100%; padding:12px; border-radius:10px; font-weight:900; margin-top:12px; font-size:14px;" onclick="enviarPedidoB2BFirebase()">
           ✔ Confirmar y Despachar Pedido B2B
         </button>
       </div>
@@ -847,13 +887,15 @@
           // PASO 1 (EN CAMINO)
           if (etapaActual === 1 && etapaAnteriorVista !== 1) {
             etapaAnteriorVista = 1;
-            lanzarNotificacionCliente("🔥 LeoGas Cusco: ¡Repartidor en camino!", "Tu repartidor ya salió de la base con tu pedido hacia tu dirección.");
+            const tituloNotif = miOrden.tipoVenta === 'mayorista' ? "🏢 LeoGas B2B: ¡Cilindro Industrial en camino!" : "🔥 LeoGas Cusco: ¡Repartidor en camino!";
+            lanzarNotificacionCliente(tituloNotif, "Tu repartidor ya salió de la base con tu pedido hacia tu dirección.");
             mostrarAlertaEnCamino(miOrden.cliente || 'Estimado cliente');
           }
           // PASO 2 (EN PUERTA)
           else if (etapaActual === 2 && etapaAnteriorVista !== 2) {
             etapaAnteriorVista = 2;
-            lanzarNotificacionCliente("🦁 LeoGas Cusco: ¡Repartidor en tu puerta!", "Tu pedido ha llegado a tu dirección. Por favor sal a recibirlo.");
+            const tituloNotif = miOrden.tipoVenta === 'mayorista' ? "🏢 LeoGas B2B: ¡Repartidor en tu Local!" : "🦁 LeoGas Cusco: ¡Repartidor en tu puerta!";
+            lanzarNotificacionCliente(tituloNotif, "Tu pedido ha llegado a tu dirección. Por favor sal a recibirlo.");
             mostrarAlertaEnPuerta();
           }
         } else if (miOrden && miOrden.estado === 'completado') {
@@ -871,26 +913,42 @@
       });
     }
 
+    // ACTUALIZACIÓN DE BARRA CON DETECCIÓN B2B Y COLORES DIFERENCIADOS
     function actualizarBarraSeguimiento(orden) {
       const barra = document.getElementById('barraSeguimientoActivo');
       const tit = document.getElementById('trackTituloCliente');
       const det = document.getElementById('trackDetalleEstado');
       const pill = document.getElementById('trackPillEtapa');
+      const badgeB2B = document.getElementById('badgeB2BTag');
+      const iconoTipo = document.getElementById('trackIconoTipo');
 
       barra.style.display = 'block';
-      tit.innerText = `Pedido de ${orden.cliente}: ${orden.tipoBalon}`;
+
+      const esB2B = orden.tipoVenta === 'mayorista';
+
+      if (esB2B) {
+        barra.classList.add('modo-b2b');
+        badgeB2B.style.display = 'inline-block';
+        iconoTipo.innerText = '🏢';
+        tit.innerText = `Pedido B2B: ${orden.cliente}`;
+      } else {
+        barra.classList.remove('modo-b2b');
+        badgeB2B.style.display = 'none';
+        iconoTipo.innerText = '🛵';
+        tit.innerText = `Pedido de ${orden.cliente}: ${orden.tipoBalon}`;
+      }
 
       const etapa = orden.etapa || 0;
       if (etapa === 0) {
-        det.innerText = "Orden recibida en central. Asignando repartidor...";
+        det.innerText = esB2B ? "Orden comercial recibida. Asignando camión/unidad..." : "Orden recibida en central. Asignando repartidor...";
         pill.innerText = "⏳ En espera";
-        pill.style.background = "#6b21a8";
+        pill.style.background = esB2B ? "#334155" : "#6b21a8";
       } else if (etapa === 1) {
-        det.innerText = "El repartidor ya salió de la base hacia tu dirección 🔥";
+        det.innerText = esB2B ? "El transporte salió hacia tu local con balones industriales 🔥" : "El repartidor ya salió de la base hacia tu casa 🔥";
         pill.innerText = "🛵 1. En Camino";
         pill.style.background = "#e52329";
       } else if (etapa === 2) {
-        det.innerText = "¡El repartidor está en tu puerta! Sal a recibir tu balón 🚪";
+        det.innerText = esB2B ? "¡Unidad en tu local! Sal a recibir y canjear los envases 🚪" : "¡El repartidor está en tu puerta! Sal a recibir tu gas 🚪";
         pill.innerText = "🏠 2. En Puerta";
         pill.style.background = "#15803d";
       }
@@ -898,7 +956,10 @@
 
     function ocultarBarraSeguimiento() {
       const barra = document.getElementById('barraSeguimientoActivo');
-      if (barra) barra.style.display = 'none';
+      if (barra) {
+        barra.style.display = 'none';
+        barra.classList.remove('modo-b2b');
+      }
     }
 
     function renderizarTelefonos() {
@@ -1321,7 +1382,7 @@
         return;
       }
 
-      msg.style.color = "#6b21a8";
+      msg.style.color = "#0f172a";
       msg.innerText = "Consultando registro corporativo...";
 
       const snap = await db.ref(`clientesB2B/${ruc}`).once('value');
@@ -1369,7 +1430,7 @@
       cont.innerHTML = `
         <div style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <div>
-            <strong style="color:#1e1b4b; font-size:14px;">Balón 45kg Industrial</strong>
+            <strong style="color:#0f172a; font-size:14px;">Balón 45kg Industrial</strong>
             <div style="font-size:12px; color:#15803d; font-weight:bold;">S/ ${precio45.toFixed(2)} c/u</div>
           </div>
           <div style="display:flex; align-items:center; gap:6px;">
@@ -1422,7 +1483,6 @@
         hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
       });
 
-      // Guardar dirección para futuros pedidos de la empresa
       db.ref(`clientesB2B/${empresaB2BActual.ruc}/direccion`).set(direccion);
 
       localStorage.setItem('leogas_mi_pedido_id', pedidoId);
