@@ -55,10 +55,7 @@
       transition: all 0.2s;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .btn-b2b-header:hover {
-      background: #1e1b4b;
-      transform: translateY(-1px);
-    }
+    .btn-b2b-header:hover { background: #1e1b4b; transform: translateY(-1px); }
 
     /* BARRA DE SEGUIMIENTO EN VIVO */
     .tracking-status-bar {
@@ -79,53 +76,14 @@
       box-shadow: 0 6px 20px rgba(15, 23, 42, 0.45);
       color: #f8fafc;
     }
-    .tracking-status-bar.modo-b2b #trackTituloCliente {
-      color: #facc15 !important;
-      font-weight: 900;
-      letter-spacing: 0.3px;
-    }
-    .tracking-status-bar.modo-b2b #trackDetalleEstado {
-      color: #cbd5e1 !important;
-    }
-    .tracking-status-bar.modo-b2b .btn-ticket-modal {
-      background: #f59e0b !important;
-      color: #0f172a !important;
-      border: 1px solid #facc15;
-    }
+    .tracking-status-bar.modo-b2b #trackTituloCliente { color: #facc15 !important; font-weight: 900; letter-spacing: 0.3px; }
+    .tracking-status-bar.modo-b2b #trackDetalleEstado { color: #cbd5e1 !important; }
+    .tracking-status-bar.modo-b2b .btn-ticket-modal { background: #f59e0b !important; color: #0f172a !important; border: 1px solid #facc15; }
 
-    .badge-b2b-pill {
-      background: #f59e0b;
-      color: #0f172a;
-      font-size: 9.5px;
-      font-weight: 900;
-      padding: 2px 7px;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
-      display: inline-block;
-      margin-left: 6px;
-      vertical-align: middle;
-    }
+    .badge-b2b-pill { background: #f59e0b; color: #0f172a; font-size: 9.5px; font-weight: 900; padding: 2px 7px; border-radius: 6px; letter-spacing: 0.5px; display: inline-block; margin-left: 6px; vertical-align: middle; }
 
-    .tracking-status-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .tracking-tag-pill {
-      background: var(--primary);
-      color: #fff;
-      font-weight: 800;
-      font-size: 12px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .tracking-status-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tracking-tag-pill { background: var(--primary); color: #fff; font-weight: 800; font-size: 12px; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
 
     .hero { background: linear-gradient(135deg, #fef08a 0%, #fde047 50%, #facc15 100%); padding: 38px 20px 44px; text-align: center; border-bottom: 2px solid #eab308; }
     .hero-container { max-width: 800px; margin: 0 auto; }
@@ -313,7 +271,6 @@
       </div>
 
       <div class="nav-actions">
-        <!-- BOTÓN ACCESO EMPRESAS B2B -->
         <button type="button" class="btn-b2b-header" onclick="abrirModalB2B()">
           🏢 Empresas / B2B
         </button>
@@ -534,7 +491,7 @@
     </div>
   </div>
 
-  <!-- MODAL B2B EXCLUSIVO PARA EMPRESAS (CON HISTORIAL Y TICKET TÉRMICO) -->
+  <!-- MODAL B2B EXCLUSIVO PARA EMPRESAS -->
   <div class="cart-modal-overlay" id="modalB2BOverlay" style="display:none; align-items:center;">
     <div class="cart-modal-card" style="border-radius:18px; max-width:480px; padding:0; overflow:hidden;">
       
@@ -549,7 +506,6 @@
         <button onclick="cerrarModalB2B()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
       </div>
 
-      <!-- PASO A: IDENTIFICACIÓN CON RUC Y APIS PERÚ -->
       <div id="vistaB2BLogin" style="padding:22px;">
         <p style="font-size:13px; color:#475569; margin-bottom:12px;">
           Ingresa el <strong>RUC de tu empresa</strong> para consultar directamente el padrón SUNAT y acceder a tus tarifas preferenciales.
@@ -563,7 +519,6 @@
         <div id="msgValidacionRuc" style="font-size:12px; margin-top:8px;"></div>
       </div>
 
-      <!-- PASO B: CATÁLOGO INDUSTRIAL B2B + HISTORIAL DE FACTURAS -->
       <div id="vistaB2BCatalogo" style="display:none; padding:18px; max-height:75vh; overflow-y:auto;">
         <div style="background:#fefce8; border:1px solid #fde047; border-radius:10px; padding:10px 12px; margin-bottom:14px;">
           <strong id="b2bEmpresaNombre" style="color:#854d0e; font-size:14px;">Razón Social</strong>
@@ -595,7 +550,6 @@
           </span>
         </div>
 
-        <!-- SECCIÓN REIMPRESIÓN DE FACTURAS B2B -->
         <div style="margin-top:16px; background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <strong style="color:#0f172a; font-size:13px;">📑 Historial de Facturas y Re-impresión:</strong>
@@ -702,7 +656,7 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const APIS_PERU_TOKEN = "tu_token_apis_peru_aqui"; // Reemplaza con tu token real de apisperu.com
+    const APIS_PERU_TOKEN = "tu_token_apis_peru_aqui";
 
     let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
     let catalogoBalones = [];
@@ -722,7 +676,70 @@
     let pedidoB2B = { "gas-45kg": 1 };
     let ubicacionB2BCoords = null;
 
-    // CONSULTA RUC EN TIEMPO REAL CON APIS PERÚ
+    function emitirCampanadaCliente() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.8);
+      } catch (e) {}
+    }
+
+    function actualizarBotonNotificacionesCliente() {
+      const permiso = ("Notification" in window) ? Notification.permission : "denied";
+      const btn = document.getElementById('btnFlotanteNotificaciones');
+      const txt = document.getElementById('textoBtnNotif');
+      const ico = document.getElementById('iconoCampanaNotif');
+
+      if (permiso === "granted") {
+        btn.classList.add('activada');
+        ico.innerText = "🔔";
+        txt.innerText = "Alertas Activas ✔️";
+      } else {
+        btn.classList.remove('activada');
+        ico.innerText = "🔕";
+        txt.innerText = "Activar Alertas";
+      }
+    }
+
+    function solicitarPermisoNotificacionesManual(btn) {
+      if (!("Notification" in window)) return alert("Este navegador no soporta notificaciones.");
+      emitirCampanadaCliente();
+      Notification.requestPermission().then(perm => {
+        actualizarBotonNotificacionesCliente();
+        if (perm === "granted") {
+          lanzarNotificacionCliente("🦁 LeoGas Cusco", "¡Alertas activadas! Te avisaremos cuando el repartidor salga hacia tu casa.");
+        }
+      });
+    }
+
+    function pedirPermisoNotificacionesCliente() {
+      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission().then(() => actualizarBotonNotificacionesCliente());
+      } else {
+        actualizarBotonNotificacionesCliente();
+      }
+    }
+
+    function lanzarNotificacionCliente(titulo, mensaje) {
+      emitirCampanadaCliente();
+      if ("vibrate" in navigator) navigator.vibrate([400, 200, 400]);
+      if ("Notification" in window && Notification.permission === "granted") {
+        try {
+          const n = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
+          n.onclick = () => { window.focus(); n.close(); };
+        } catch(e) {}
+      }
+    }
+
+    // CONSULTA RUC SUNAT APIS PERÚ
     async function consultarRucSunatApisPeru(rucInput) {
       const ruc = rucInput.trim();
       const msg = document.getElementById('msgValidacionRuc');
@@ -864,7 +881,177 @@
       document.getElementById('ticketModalOverlay').style.display = 'none';
     }
 
-    // FLUJOS B2B Y MAPA
+    // MAPA LEAFLET Y FIREBASE
+    function iniciarMapaCusco() {
+      if (map) return;
+      map = L.map('cuscoMap').setView([-13.5167, -71.9788], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+      trazarZonasCoberturaCusco();
+    }
+
+    function trazarZonasCoberturaCusco() {
+      const estilo = (col) => ({ color: col, weight: 1.5, opacity: 0.8, fillColor: col, fillOpacity: 0.16 });
+      L.polygon([[-13.5110, -71.9860], [-13.5135, -71.9720], [-13.5220, -71.9750], [-13.5200, -71.9880]], estilo('#8b5cf6')).addTo(map).bindPopup("<b>Centro Histórico</b>");
+      L.polygon([[-13.5200, -71.9750], [-13.5210, -71.9560], [-13.5350, -71.9580], [-13.5330, -71.9740]], estilo('#f59e0b')).addTo(map).bindPopup("<b>Wanchaq</b>");
+      L.polygon([[-13.5210, -71.9560], [-13.5250, -71.9280], [-13.5450, -71.9320], [-13.5350, -71.9580]], estilo('#10b981')).addTo(map).bindPopup("<b>San Sebastián</b>");
+    }
+
+    function iniciarEscuchaFirebase() {
+      db.ref('repartidores').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          flotaActual = Object.values(data);
+          actualizarVisualizadorGPS(flotaActual);
+        }
+      });
+
+      db.ref('productos').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          catalogoBalones = Array.isArray(data) ? data : Object.values(data);
+          renderizarMenuBalones();
+        }
+      });
+
+      db.ref('accesorios').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          catalogoAccesorios = Array.isArray(data) ? data : Object.values(data);
+          renderizarMenuAccesorios();
+        }
+      });
+
+      db.ref('telefonos').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          telefonos = data;
+          renderizarTelefonos();
+        }
+      });
+
+      db.ref('pedidos').on('value', snap => {
+        const pedidos = snap.val();
+        if (!pedidos) {
+          ocultarBarraSeguimiento();
+          return;
+        }
+
+        const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
+        const miClienteNombre = localStorage.getItem('leogas_mi_pedido_cliente');
+        let miOrden = null;
+
+        if (miPedidoId && pedidos[miPedidoId]) {
+          miOrden = pedidos[miPedidoId];
+        } else if (miClienteNombre) {
+          miOrden = Object.values(pedidos).find(p => 
+            p.cliente && p.cliente.toLowerCase() === miClienteNombre.toLowerCase() && p.estado !== 'completado'
+          );
+          if (miOrden) localStorage.setItem('leogas_mi_pedido_id', miOrden.id);
+        }
+
+        if (miOrden && miOrden.estado !== 'completado') {
+          actualizarBarraSeguimiento(miOrden);
+          const etapaActual = miOrden.etapa || 0;
+
+          if (etapaActual === 1 && etapaAnteriorVista !== 1) {
+            etapaAnteriorVista = 1;
+            lanzarNotificacionCliente("🔥 Repartidor en camino", "Tu pedido va en camino.");
+          } else if (etapaActual === 2 && etapaAnteriorVista !== 2) {
+            etapaAnteriorVista = 2;
+            lanzarNotificacionCliente("🚪 En puerta", "El repartidor llegó.");
+          }
+        } else {
+          ocultarBarraSeguimiento();
+        }
+      });
+    }
+
+    function actualizarVisualizadorGPS(flota) {
+      if (!map) return;
+      let hayOnline = false;
+      flota.forEach(rep => {
+        const online = rep.online === true;
+        if (online) hayOnline = true;
+
+        const icono = L.divIcon({
+          className: 'custom-gps-container',
+          html: `<div class="custom-gps-marker ${online ? '' : 'offline'}"><div class="gps-radar-pulse"></div><div class="fire-flame-emitter">🔥</div><div class="lion-badge-circle">🦁</div></div>`,
+          iconSize: [48, 48],
+          iconAnchor: [24, 24]
+        });
+
+        if (!marcadoresFlota[rep.id]) {
+          marcadoresFlota[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(map);
+        } else {
+          marcadoresFlota[rep.id].setIcon(icono);
+          marcadoresFlota[rep.id].setLatLng([rep.lat, rep.lng]);
+        }
+      });
+      document.getElementById('legendOnline').classList.toggle('activo', hayOnline);
+      document.getElementById('legendOffline').classList.toggle('activo', !hayOnline);
+    }
+
+    function renderizarMenuBalones() {
+      const contenedor = document.getElementById('contenedorEmpanadas');
+      if (!contenedor) return;
+      contenedor.innerHTML = '';
+      catalogoBalones.forEach(item => {
+        const card = document.createElement('article');
+        card.className = `card ${item.disponible !== false ? '' : 'agotado'}`;
+        card.innerHTML = `
+          <div class="card-img-wrapper">
+            <span class="card-tag">${item.tag || 'Sellado'}</span>
+            <img src="${item.imagen || '1791513590376.jpg'}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">${item.nombre}</h4>
+            <p class="card-desc">${item.descripcion || ''}</p>
+            <div class="card-footer">
+              <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
+              <button class="btn-add" ${item.disponible !== false ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">
+                ${item.disponible !== false ? '+ Pedir Balón' : 'Agotado'}
+              </button>
+            </div>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    function renderizarMenuAccesorios() {
+      const contenedor = document.getElementById('contenedorAccesorios');
+      if (!contenedor) return;
+      contenedor.innerHTML = '';
+      catalogoAccesorios.forEach(item => {
+        const card = document.createElement('article');
+        card.className = `card`;
+        card.innerHTML = `
+          <div class="card-img-wrapper">
+            <span class="card-tag" style="background:#2563eb;">Accesorio</span>
+            <img src="${item.imagen || '1791513590376.jpg'}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">${item.nombre}</h4>
+            <p class="card-desc">${item.descripcion || ''}</p>
+            <div class="card-footer">
+              <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
+              <button class="btn-add" style="background:#2563eb;" onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">+ Agregar</button>
+            </div>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    function renderizarTelefonos() {
+      const container = document.getElementById('contenedorTelefonosFlyer');
+      if (!container) return;
+      container.innerHTML = `
+        <a href="tel:${telefonos.tel1.replace(/\D/g,'')}" class="contact-button"><span>📞</span> ${telefonos.tel1}</a>
+        <a href="tel:${telefonos.tel2.replace(/\D/g,'')}" class="contact-button"><span>📞</span> ${telefonos.tel2}</a>
+      `;
+    }
+
     function abrirModalB2B() {
       document.getElementById('modalB2BOverlay').style.display = 'flex';
       document.getElementById('vistaB2BLogin').style.display = 'block';
@@ -880,12 +1067,9 @@
     function cargarPortalB2BEmpresa() {
       document.getElementById('vistaB2BLogin').style.display = 'none';
       document.getElementById('vistaB2BCatalogo').style.display = 'block';
-
       document.getElementById('b2bEmpresaNombre').innerText = empresaB2BActual.razonSocial;
       document.getElementById('b2bEmpresaRuc').innerText = empresaB2BActual.ruc;
-      document.getElementById('b2bEmpresaCondicion').innerText = empresaB2BActual.condicionPago || "Crédito 15 días";
       document.getElementById('b2bDireccionLocal').value = empresaB2BActual.direccion || "";
-
       renderizarItemsB2B();
       cargarFacturasEmpresaB2B();
     }
@@ -893,24 +1077,20 @@
     function renderizarItemsB2B() {
       const cont = document.getElementById('listaProductosB2B');
       const precio45 = empresaB2BActual.precioBalon45 || 175.00;
-      
       cont.innerHTML = `
-        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
           <div>
             <strong style="color:#0f172a; font-size:14px;">Balón 45kg Industrial</strong>
             <div style="font-size:12px; color:#15803d; font-weight:bold;">S/ ${precio45.toFixed(2)} c/u</div>
           </div>
           <div style="display:flex; align-items:center; gap:6px;">
             <button class="btn-qty" onclick="cambiarCantB2B(-1)">-</button>
-            <span id="cantBalon45" style="font-weight:bold; font-size:15px; min-width:24px; text-align:center;">${pedidoB2B['gas-45kg']}</span>
+            <span style="font-weight:bold; font-size:15px; min-width:24px; text-align:center;">${pedidoB2B['gas-45kg']}</span>
             <button class="btn-qty" onclick="cambiarCantB2B(1)">+</button>
           </div>
         </div>
       `;
-
-      const total = pedidoB2B['gas-45kg'] * precio45;
-      document.getElementById('b2bTotalPagar').innerText = `S/ ${total.toFixed(2)}`;
-      document.getElementById('b2bEnvasesVacios').value = pedidoB2B['gas-45kg'];
+      document.getElementById('b2bTotalPagar').innerText = `S/ ${(pedidoB2B['gas-45kg'] * precio45).toFixed(2)}`;
     }
 
     function cambiarCantB2B(delta) {
@@ -932,12 +1112,9 @@
       const precio45 = empresaB2BActual.precioBalon45 || 175.00;
       const total = (cant * precio45).toFixed(2);
       const direccion = document.getElementById('b2bDireccionLocal').value.trim();
-      const envasesVacios = parseInt(document.getElementById('b2bEnvasesVacios').value) || 0;
-
       if (!direccion) return alert("Por favor confirma la dirección del local.");
 
       let mapsUrl = ubicacionB2BCoords ? `https://www.google.com/maps?q=${ubicacionB2BCoords.lat},${ubicacionB2BCoords.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion + ', Cusco')}`;
-
       const nuevoRef = db.ref('pedidos').push();
       const pedidoId = nuevoRef.key;
 
@@ -952,7 +1129,7 @@
         metodoPago: empresaB2BActual.condicionPago || "Crédito (A cuenta 15 días)",
         tipoComprobante: `Factura (RUC: ${empresaB2BActual.ruc} - ${empresaB2BActual.razonSocial})`,
         envasesEntregados: cant,
-        envasesRecogidos: envasesVacios,
+        envasesRecogidos: parseInt(document.getElementById('b2bEnvasesVacios').value) || 0,
         gpsUrl: mapsUrl,
         repartidorId: "",
         estado: "pendiente_asignacion",
@@ -962,11 +1139,132 @@
       });
 
       cerrarModalB2B();
-      alert(`✔ Pedido B2B registrado con éxito.`);
+      alert("✔ Pedido B2B registrado con éxito.");
+    }
+
+    function agregarAlPedido(id, nombre, precio) {
+      if (!pedido[id]) pedido[id] = { id, nombre, precio: parseFloat(precio), cantidad: 1 };
+      else pedido[id].cantidad++;
+      actualizarVistaPopup();
+    }
+
+    function cambiarCantidad(id, delta) {
+      if (pedido[id]) {
+        pedido[id].cantidad += delta;
+        if (pedido[id].cantidad <= 0) delete pedido[id];
+        actualizarVistaPopup();
+      }
+    }
+
+    function vaciarPedidoConConfirmacion() {
+      for (const k in pedido) delete pedido[k];
+      actualizarVistaPopup();
+    }
+
+    function actualizarVistaPopup() {
+      let totalUnidades = 0, totalMonto = 0;
+      const listContainer = document.getElementById('popupItemsList');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
+
+      Object.values(pedido).forEach(item => {
+        const sub = item.cantidad * item.precio;
+        totalUnidades += item.cantidad;
+        totalMonto += sub;
+        const row = document.createElement('div');
+        row.className = 'cart-item-row';
+        row.innerHTML = `
+          <div><strong>${item.nombre}</strong><br><small>S/ ${item.precio.toFixed(2)} c/u</small></div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', -1)">-</button>
+            <strong>${item.cantidad}</strong>
+            <button class="btn-qty" onclick="cambiarCantidad('${item.id}', 1)">+</button>
+          </div>
+          <div><strong>S/ ${sub.toFixed(2)}</strong></div>
+        `;
+        listContainer.appendChild(row);
+      });
+
+      ultimoTotalPagar = totalMonto;
+      document.getElementById('badgeContador').innerText = totalUnidades;
+      document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
+    }
+
+    function elegirPago(p, btn) {
+      metodoPago = p;
+      document.querySelectorAll('.btn-pay-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function elegirHorarioEntrega(tipo, boton) {
+      horarioEntrega = tipo;
+      document.querySelectorAll('.btn-del-opt').forEach(b => b.classList.remove('active'));
+      boton.classList.add('active');
+    }
+
+    function alternarCamposComprobante(tipo) {
+      tipoComprobante = tipo;
+      document.getElementById('cajaDatosFactura').style.display = (tipo === 'Factura') ? 'flex' : 'none';
+    }
+
+    function capturarGPSCliente() {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos => {
+        ubicacionClienteCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        document.getElementById('geoStatus').innerText = "✔ Ubicación registrada";
+        document.getElementById('geoStatus').style.color = "#15803d";
+      });
+    }
+
+    function abrirModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'flex'; }
+    function cerrarModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'none'; }
+    function cerrarSiClickAfuera(e) { if (e.target.id === 'cartModalOverlay') cerrarModalCarrito(); }
+
+    function generarComprobanteModal() {
+      const nombre = document.getElementById('nombreClienteInput').value.trim() || 'Particular';
+      document.getElementById('tickCliente').innerText = nombre;
+      document.getElementById('tickFecha').innerText = new Date().toLocaleString();
+      document.getElementById('tickTipoComp').innerText = `*** ${tipoComprobante.toUpperCase()} ELECTRÓNICA ***`;
+      document.getElementById('tickTotal').innerText = `S/ ${ultimoTotalPagar.toFixed(2)}`;
+      document.getElementById('ticketModalOverlay').style.display = 'flex';
+    }
+
+    async function enviarPedidoWhatsApp() {
+      const items = Object.values(pedido).filter(p => p.cantidad > 0);
+      if (items.length === 0) return alert("Selecciona al menos un producto.");
+      const nombre = document.getElementById('nombreClienteInput').value.trim() || "Particular";
+      let total = 0, nombres = [];
+      items.forEach(i => { total += i.cantidad * i.precio; nombres.push(`${i.cantidad}x ${i.nombre}`); });
+      const detalle = nombres.join(", ");
+      const gpsUrl = ubicacionClienteCoords ? `https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}` : "";
+
+      const nuevoRef = db.ref('pedidos').push();
+      await nuevoRef.set({
+        id: nuevoRef.key,
+        tipoVenta: "minorista",
+        cliente: nombre,
+        tipoBalon: detalle,
+        montoCobro: total.toFixed(2),
+        metodoPago: metodoPago,
+        gpsUrl: gpsUrl,
+        estado: "pendiente_asignacion",
+        etapa: 0,
+        timestamp: Date.now(),
+        hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
+      });
+
+      localStorage.setItem('leogas_mi_pedido_id', nuevoRef.key);
+      localStorage.setItem('leogas_mi_pedido_cliente', nombre);
+
+      let msg = `*¡Hola LeoGas Cusco! Deseo hacer un pedido:*\n*Cliente:* ${nombre}\n*Detalle:* ${detalle}\n*Total:* S/ ${total.toFixed(2)}`;
+      window.open(`https://wa.me/${telefonos.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+      cerrarModalCarrito();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      iniciarMapaCusco();
       iniciarEscuchaFirebase();
+      renderizarTelefonos();
     });
   </script>
 </body>
