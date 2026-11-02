@@ -204,8 +204,8 @@
     <button type="button" class="btn" style="background:#fee2e2; color:#dc2626; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:8px; border:none;" onclick="alternarConexionChofer()">Desconectarse</button>
   </div>
 
-  <!-- 3. VISTA A: MIS SOLICITUDES (ENTRANTES DE LA CENTRAL) -->
-  <div class="vista-panel" id="vistaSolicitudes">
+  <!-- 3. VISTA A: MIS SOLICITUDES (ENTRANTES DE LA CENTRAL - ACTIVA POR DEFECTO) -->
+  <div class="vista-panel activo" id="vistaSolicitudes">
     <div style="font-size:13px; font-weight:900; color:#1e1b4b; margin-bottom:8px;">📥 Solicitudes Entrantes de la Central:</div>
     <div id="contenedorListaSolicitudes">
       <div style="background:#fff; padding:16px; border-radius:12px; text-align:center; color:#64748b; font-size:13px;">Buscando solicitudes en tiempo real...</div>
@@ -213,7 +213,7 @@
   </div>
 
   <!-- 4. VISTA B: MAPA EN RUTA Y SECUENCIA -->
-  <div class="vista-panel activo" id="vistaMapaRuta">
+  <div class="vista-panel" id="vistaMapaRuta">
     <div class="bottom-delivery-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span id="badgeTipoVenta" style="background:#fef08a; color:#854d0e; font-size:10.5px; font-weight:900; padding:3px 8px; border-radius:8px;">RUTA DE REPARTO ACTIVA</span>
@@ -253,11 +253,11 @@
 
   <!-- 5. BARRA INFERIOR DE NAVEGACIÓN ESTILO INDRIVER -->
   <nav class="indriver-bottom-nav">
-    <button type="button" class="nav-tab-btn" id="tabBtnSolicitudes" onclick="cambiarVistaRepartidor('solicitudes')">
+    <button type="button" class="nav-tab-btn active" id="tabBtnSolicitudes" onclick="cambiarVistaRepartidor('solicitudes')">
       <span class="icon">📋</span>
       <span>Mis Solicitudes</span>
     </button>
-    <button type="button" class="nav-tab-btn active" id="tabBtnRuta" onclick="cambiarVistaRepartidor('ruta')">
+    <button type="button" class="nav-tab-btn" id="tabBtnRuta" onclick="cambiarVistaRepartidor('ruta')">
       <span class="icon">🗺️</span>
       <span>Mapa en Ruta</span>
     </button>
@@ -291,6 +291,8 @@
 
       document.getElementById('vistaSolicitudes').classList.toggle('activo', vista === 'solicitudes');
       document.getElementById('vistaMapaRuta').classList.toggle('activo', vista === 'ruta');
+
+      setTimeout(() => { if (mapRepartidor) mapRepartidor.invalidateSize(); }, 200);
     }
 
     function inicializarMapaRepartidor() {
