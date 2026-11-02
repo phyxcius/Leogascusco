@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LeoGas Cusco</title>
   
+  <!-- Leaflet CSS para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
@@ -84,7 +85,7 @@
     .liqui-stat-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px; }
 
     .edit-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 99999; justify-content: center; align-items: center; padding: 16px; backdrop-filter: blur(4px); }
-    .edit-modal-box { background: #fff; max-width: 460px; width: 100%; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+    .edit-modal-box { background: #fff; max-width: 480px; width: 100%; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
 
     .login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
     .login-card { background: #fff; padding: 24px 28px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 380px; }
@@ -169,6 +170,7 @@
 
     <div class="dashboard-tabs no-print">
       <button class="tab-btn active" id="tabBtnPedidos" onclick="cambiarTab('pedidos')">📦 Pedidos y Flota en Vivo</button>
+      <button class="tab-btn" id="tabBtnB2B" onclick="cambiarTab('b2b')">🏢 Cartera B2B / Empresas</button>
       <button class="tab-btn" id="tabBtnLiquidacion" onclick="cambiarTab('liquidacion')">💵 Cierre de Caja & Créditos</button>
       <button class="tab-btn" id="tabBtnClientes" onclick="cambiarTab('clientes')">⭐ Clientes VIP</button>
       <button class="tab-btn" id="tabBtnAccesorios" onclick="cambiarTab('accesorios')">🔧 Válvulas y Accesorios</button>
@@ -186,10 +188,10 @@
 
       <div class="card" style="border: 2px solid #eab308; background: #fefce8; margin-bottom: 16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Entrantes (Web y Teléfono)</h3>
+          <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Entrantes (Web, Teléfono y Portal B2B)</h3>
           <span id="badgeContadorEntrantes" style="background:#eab308; color:#fff; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">0 pendientes</span>
         </div>
-        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente por WhatsApp o por registro telefónico. Asigna a la flota en tiempo real.</p>
+        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente desde el portal web o pedidos telefónicos. Asigna directamente a la flota.</p>
         <div id="listaOrdenesEntrantes">
           <p style="font-size:12px; color:#a16207;">Esperando nuevos pedidos en tiempo real...</p>
         </div>
@@ -200,6 +202,60 @@
         <div id="contenedorSecuenciasRepartidores">Cargando flota...</div>
         <h4 style="margin-top:16px; font-size:14px;">📍 Mapa en Tiempo Real de Cusco:</h4>
         <div id="adminMap"></div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA NUEVA: CARTERA B2B / EMPRESAS -->
+    <div id="seccionB2B" style="display: none;">
+      <div class="card" style="border:1.5px solid #ca8a04; background:#fefce8;">
+        <h3 style="color:#854d0e; margin-bottom:8px;">🏢 Registro y Tarifario Especial de Empresas B2B</h3>
+        <p style="font-size:12px; color:#713f12; margin-bottom:12px;">
+          Configura restaurantes, pollerías y hoteles con su RUC, precio pactado por balón de 45kg y condición de crédito.
+        </p>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap:10px;">
+          <div>
+            <label>Número de RUC (11 dígitos):</label>
+            <input type="text" id="b2bNuevoRuc" maxlength="11" placeholder="Ej: 20601234567">
+          </div>
+          <div>
+            <label>Razón Social / Nombre Comercial:</label>
+            <input type="text" id="b2bNuevoRazon" placeholder="Ej: Pollería El Tablón">
+          </div>
+          <div>
+            <label>Precio Balón 45kg (S/):</label>
+            <input type="number" id="b2bNuevoPrecio" step="0.5" value="175.00">
+          </div>
+          <div>
+            <label>Condición de Pago:</label>
+            <select id="b2bNuevoCondicion">
+              <option value="Crédito (A cuenta 15 días)">📋 Crédito (15 días)</option>
+              <option value="Crédito (A cuenta 30 días)">📋 Crédito (30 días)</option>
+              <option value="Factura al Contado">💵 Factura al Contado</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="btn btn-add" style="margin-top:12px; margin-bottom:0;" onclick="guardarEmpresaB2BManual()">
+          💾 Guardar Empresa en Cartera B2B
+        </button>
+      </div>
+
+      <div class="card">
+        <h3 style="color:#1e1b4b; font-size:15px; margin-bottom:8px;">Empresas y Restaurantes Registrados</h3>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>RUC</th>
+              <th>Razón Social</th>
+              <th>Tarifa 45kg (S/)</th>
+              <th>Condición de Pago</th>
+              <th>Dirección Registrada</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaCarteraB2BBody">
+            <tr><td colspan="6" style="text-align:center;">Cargando empresas B2B...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -295,8 +351,8 @@
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
           <div>
-            <h3 style="color:#6b21a8; margin:0;">⭐ Clientes Frecuentes y Negocios B2B</h3>
-            <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Historial de consumo por cliente minorista o mayorista.</p>
+            <h3 style="color:#6b21a8; margin:0;">⭐ Clientes Frecuentes y Fidelización</h3>
+            <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Historial acumulado por cliente minorista o comercial.</p>
           </div>
           <input type="text" id="buscadorClientesInput" placeholder="🔍 Buscar cliente..." oninput="filtrarTablaClientes()" style="max-width:240px; margin:0; padding:7px;">
         </div>
@@ -308,7 +364,7 @@
               <th>Balones</th>
               <th>Total Consumido</th>
               <th>Último Pedido</th>
-              <th>Tipo</th>
+              <th>Nivel</th>
               <th>Acción</th>
             </tr>
           </thead>
@@ -379,7 +435,7 @@
       <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
     </div>
 
-    <!-- PESTAÑA 8: REPORTES CONTABLES -->
+    <!-- PESTAÑA 8: REPORTES CONTABLES CON CALENDARIO -->
     <div id="seccionReportes" style="display: none;">
       <div class="report-filters-bar no-print">
         <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtros rápidos:</span>
@@ -619,6 +675,7 @@
     let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
     let repartidoresLocales = {};
     let pedidosLocales = {};
+    let clientesB2BLocales = {};
     let ventasLocales = [];
     let ventasFiltradas = [];
     let clientesAgrupados = [];
@@ -672,6 +729,7 @@
     function cambiarTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('seccionPedidos').style.display = 'none';
+      document.getElementById('seccionB2B').style.display = 'none';
       document.getElementById('seccionLiquidacion').style.display = 'none';
       document.getElementById('seccionClientes').style.display = 'none';
       document.getElementById('seccionAccesorios').style.display = 'none';
@@ -684,6 +742,10 @@
         document.getElementById('tabBtnPedidos').classList.add('active');
         document.getElementById('seccionPedidos').style.display = 'block';
         setTimeout(() => { if (mapAdmin) mapAdmin.invalidateSize(); }, 200);
+      } else if (tab === 'b2b') {
+        document.getElementById('tabBtnB2B').classList.add('active');
+        document.getElementById('seccionB2B').style.display = 'block';
+        renderizarTablaCarteraB2B();
       } else if (tab === 'liquidacion') {
         document.getElementById('tabBtnLiquidacion').classList.add('active');
         document.getElementById('seccionLiquidacion').style.display = 'block';
@@ -720,6 +782,7 @@
     }
 
     function iniciarEscuchaFirebase() {
+      // 1. Pedidos (incluye mayoristas B2B)
       db.ref('pedidos').on('value', snap => {
         pedidosLocales = snap.val() || {};
         procesarVentasParaReportes();
@@ -730,6 +793,13 @@
         procesarClientesVIP();
       });
 
+      // 2. Cartera de clientes B2B
+      db.ref('clientesB2B').on('value', snap => {
+        clientesB2BLocales = snap.val() || {};
+        renderizarTablaCarteraB2B();
+      });
+
+      // 3. Repartidores
       db.ref('repartidores').on('value', snap => {
         repartidoresLocales = snap.val() || {};
         renderizarGestionRepartidores();
@@ -738,6 +808,7 @@
         renderizarLiquidacionDiaria();
       });
 
+      // 4. Catálogo de Balones
       db.ref('productos').on('value', snap => {
         const p = snap.val();
         if (p) {
@@ -752,11 +823,13 @@
         renderizarProductosEditor();
       });
 
+      // 5. Catálogo de Accesorios
       db.ref('accesorios').on('value', snap => {
         accesorios = snap.val() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
         renderizarAccesoriosEditor();
       });
 
+      // 6. Teléfonos
       db.ref('telefonos').on('value', snap => {
         if (snap.val()) telefonos = snap.val();
       });
@@ -791,7 +864,7 @@
           <div style="font-size:12px; color:#475569; margin:2px 0;">🛢️ <strong>${ord.tipoBalon}</strong> | Pago: <strong>${ord.metodoPago}</strong></div>
           ${ord.direccionTexto ? `<div style="font-size:12px; color:#b45309;">🏠 <strong>Dirección:</strong> ${ord.direccionTexto}</div>` : ''}
           <div style="font-size:11px; color:#64748b; margin-top:2px;">
-            Envases Llenos Despachados: <strong>${ord.envasesEntregados || 1}</strong>
+            Envases Llenos a Entregar: <strong>${ord.envasesEntregados || 1}</strong>
             ${ord.gpsUrl ? ` | <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb; font-weight:bold;">📍 Ver Mapa</a>` : ''}
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
@@ -816,7 +889,63 @@
       if (confirm("¿Anular este pedido?")) await db.ref(`pedidos/${id}`).remove();
     }
 
-    // PEDIDOS TELEFÓNICOS CON SOPORTE MAYORISTA Y CRÉDITOS
+    // GESTIÓN CARTERA B2B
+    async function guardarEmpresaB2BManual() {
+      const ruc = document.getElementById('b2bNuevoRuc').value.trim();
+      const razon = document.getElementById('b2bNuevoRazon').value.trim();
+      const precio = parseFloat(document.getElementById('b2bNuevoPrecio').value) || 175;
+      const condicion = document.getElementById('b2bNuevoCondicion').value;
+
+      if (ruc.length !== 11 || isNaN(ruc)) return alert("El RUC debe tener 11 dígitos numéricos.");
+      if (!razon) return alert("Ingresa la Razón Social.");
+
+      await db.ref(`clientesB2B/${ruc}`).set({
+        ruc: ruc,
+        razonSocial: razon,
+        precioBalon45: precio,
+        condicionPago: condicion,
+        direccion: ""
+      });
+
+      document.getElementById('b2bNuevoRuc').value = '';
+      document.getElementById('b2bNuevoRazon').value = '';
+      alert(`✔ Empresa "${razon}" registrada en la cartera B2B.`);
+    }
+
+    function renderizarTablaCarteraB2B() {
+      const tbody = document.getElementById('tablaCarteraB2BBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const lista = Object.values(clientesB2BLocales);
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:12px; color:#64748b;">No hay empresas registradas todavía.</td></tr>';
+        return;
+      }
+
+      lista.forEach(emp => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${emp.ruc}</strong></td>
+          <td>${emp.razonSocial}</td>
+          <td style="color:#15803d; font-weight:bold;">S/ ${parseFloat(emp.precioBalon45 || 175).toFixed(2)}</td>
+          <td><span style="background:#fef08a; color:#854d0e; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:800;">${emp.condicionPago || 'Crédito'}</span></td>
+          <td style="font-size:11.5px;">${emp.direccion || 'Sin dirección guardada'}</td>
+          <td>
+            <button class="btn btn-del" style="padding:4px 8px; font-size:11px;" onclick="eliminarEmpresaB2B('${emp.ruc}')">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function eliminarEmpresaB2B(ruc) {
+      if (confirm(`¿Eliminar la empresa con RUC ${ruc}?`)) {
+        await db.ref(`clientesB2B/${ruc}`).remove();
+      }
+    }
+
+    // PEDIDOS TELEFÓNICOS (B2C / B2B)
     function abrirModalPedidoTelefonico() {
       const sel = document.getElementById('telPedRepartidor');
       sel.innerHTML = '<option value="">-- Dejar en bandeja pendiente --</option>';
@@ -889,7 +1018,7 @@
       alert("✔ Pedido registrado en Firebase.");
     }
 
-    // CIERRE DE CAJA Y LIQUIDACIÓN CON CRÉDITO Y ENVASES
+    // CIERRE DE CAJA Y LIQUIDACIÓN
     function renderizarLiquidacionDiaria() {
       const cont = document.getElementById('contenedorTarjetasLiquidacion');
       const tbodyPrint = document.getElementById('tablaBodyImpresionLiquidacion');
@@ -1119,6 +1248,51 @@
       renderizarReportesContables();
     }
 
+    function filtrarPorDiaCalendario(fechaStr) {
+      if (!fechaStr) return;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      filtroFechaActivo = "dia_especifico";
+      const [y, m, d] = fechaStr.split('-').map(Number);
+      const inicio = new Date(y, m - 1, d, 0, 0, 0);
+      const fin = new Date(y, m - 1, d, 23, 59, 59);
+      ventasFiltradas = ventasLocales.filter(v => parseFechaSegura(v) >= inicio && parseFechaSegura(v) <= fin);
+      renderizarTablaYTotalesReporte(`Día exacto: ${fechaStr}`);
+    }
+
+    function filtrarPorMesCalendario(mesStr) {
+      if (!mesStr) return;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      filtroFechaActivo = "mes_especifico";
+      const [y, m] = mesStr.split('-').map(Number);
+      const inicio = new Date(y, m - 1, 1, 0, 0, 0);
+      const fin = new Date(y, m, 0, 23, 59, 59);
+      ventasFiltradas = ventasLocales.filter(v => parseFechaSegura(v) >= inicio && parseFechaSegura(v) <= fin);
+      renderizarTablaYTotalesReporte(`Mes: ${mesStr}`);
+    }
+
+    function filtrarPorAnioCalendario(anioNum) {
+      const anio = parseInt(anioNum);
+      if (isNaN(anio) || anio < 2020) return;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      filtroFechaActivo = "anio_especifico";
+      const inicio = new Date(anio, 0, 1, 0, 0, 0);
+      const fin = new Date(anio, 11, 31, 23, 59, 59);
+      ventasFiltradas = ventasLocales.filter(v => parseFechaSegura(v) >= inicio && parseFechaSegura(v) <= fin);
+      renderizarTablaYTotalesReporte(`Año: ${anio}`);
+    }
+
+    function filtrarPorRangoCalendario() {
+      const d1 = document.getElementById('calRangoDesde').value;
+      const d2 = document.getElementById('calRangoHasta').value;
+      if (!d1 || !d2) return alert("Selecciona ambas fechas.");
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      filtroFechaActivo = "rango_especifico";
+      const inicio = new Date(d1 + "T00:00:00");
+      const fin = new Date(d2 + "T23:59:59");
+      ventasFiltradas = ventasLocales.filter(v => parseFechaSegura(v) >= inicio && parseFechaSegura(v) <= fin);
+      renderizarTablaYTotalesReporte(`Rango: ${d1} al ${d2}`);
+    }
+
     function renderizarReportesContables() {
       const ahora = new Date();
       const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0);
@@ -1137,6 +1311,11 @@
         return true;
       });
 
+      const filtroMap = { 'todos': 'Todos', 'hoy': 'Hoy', 'semana': 'Semana', 'mes': 'Mes', 'anio': 'Año' };
+      renderizarTablaYTotalesReporte(filtroMap[filtroFechaActivo] || 'Personalizado');
+    }
+
+    function renderizarTablaYTotalesReporte(nombreFiltroTexto) {
       const tbody = document.getElementById('tablaVentasBody');
       tbody.innerHTML = '';
       let sumaTotal = 0;
@@ -1172,6 +1351,144 @@
       a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
       a.download = `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
+    }
+
+    function procesarClientesVIP() {
+      const mapa = {};
+      Object.values(pedidosLocales).filter(p => p.estado === 'completado').forEach(p => {
+        const nom = (p.cliente || 'Particular').trim();
+        if (!mapa[nom]) mapa[nom] = { nombre: nom, cantidad: 0, totalGasto: 0, ultimoPedido: parseFechaSegura(p) };
+        mapa[nom].cantidad += 1;
+        mapa[nom].totalGasto += parseFloat(p.montoCobro) || 0;
+      });
+      clientesAgrupados = Object.values(mapa).sort((a, b) => b.cantidad - a.cantidad);
+      renderizarTablaClientes(clientesAgrupados);
+    }
+
+    function renderizarTablaClientes(lista) {
+      const tbody = document.getElementById('tablaClientesVIPBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      lista.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${c.nombre}</strong></td>
+          <td>${c.cantidad}</td>
+          <td style="color:#15803d; font-weight:bold;">S/ ${c.totalGasto.toFixed(2)}</td>
+          <td style="font-size:11px;">${c.ultimoPedido.toLocaleDateString()}</td>
+          <td>${c.cantidad >= 4 ? '👑 VIP' : 'Estándar'}</td>
+          <td><a href="https://wa.me/?text=Hola%20${encodeURIComponent(c.nombre)}" target="_blank" class="btn" style="background:#25d366; color:#fff; padding:3px 8px; font-size:11px; text-decoration:none;">Promo</a></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filtrarTablaClientes() {
+      const q = document.getElementById('buscadorClientesInput').value.toLowerCase();
+      renderizarTablaClientes(clientesAgrupados.filter(c => c.nombre.toLowerCase().includes(q)));
+    }
+
+    function renderizarAccesoriosEditor() {
+      const cont = document.getElementById('listaAccesorios');
+      if (!cont) return;
+      cont.innerHTML = '';
+      accesorios.forEach((acc, i) => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <label>Accesorio:</label>
+          <input type="text" value="${acc.nombre}" onchange="accesorios[${i}].nombre = this.value">
+          <label>Precio (S/):</label>
+          <input type="number" step="0.5" value="${acc.precio}" onchange="accesorios[${i}].precio = parseFloat(this.value)">
+          <button class="btn btn-del" style="margin-top:8px;" onclick="eliminarAccesorio(${i})">🗑️ Eliminar</button>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    function agregarNuevoAccesorio() {
+      accesorios.push({ id: "acc-" + Date.now(), nombre: "Nuevo Accesorio", precio: 30.00 });
+      renderizarAccesoriosEditor();
+    }
+
+    function eliminarAccesorio(i) {
+      accesorios.splice(i, 1);
+      renderizarAccesoriosEditor();
+    }
+
+    async function guardarAccesoriosFirebase() {
+      await db.ref('accesorios').set(accesorios);
+      alert("✔ Accesorios guardados.");
+    }
+
+    function renderizarProductosEditor() {
+      const cont = document.getElementById('listaProductos');
+      if (!cont) return;
+      cont.innerHTML = '';
+      productos.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <label>Nombre Balón:</label>
+          <input type="text" value="${p.nombre}" onchange="productos[${i}].nombre = this.value">
+          <label>Precio (S/):</label>
+          <input type="number" step="0.5" value="${p.precio}" onchange="productos[${i}].precio = parseFloat(this.value)">
+          <button class="btn btn-del" style="margin-top:8px;" onclick="eliminarProducto(${i})">🗑️ Eliminar</button>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    function agregarNuevoBalonProducto() {
+      productos.push({ id: "gas-" + Date.now(), nombre: "Nuevo Balón", precio: 50.00 });
+      renderizarProductosEditor();
+    }
+
+    function eliminarProducto(i) {
+      productos.splice(i, 1);
+      renderizarProductosEditor();
+    }
+
+    async function guardarProductosFirebase() {
+      await db.ref('productos').set(productos);
+      alert("✔ Balones guardados.");
+    }
+
+    async function guardarTelefonosFirebase() {
+      await db.ref('telefonos').set({
+        whatsapp: document.getElementById('telWhatsApp').value.trim(),
+        tel1: document.getElementById('telFijo1').value.trim(),
+        tel2: document.getElementById('telFijo2').value.trim(),
+        tel3: document.getElementById('telFijo3').value.trim()
+      });
+      alert("✔ Teléfonos guardados.");
+    }
+
+    function abrirModalEditarOrden(id) {
+      const ord = pedidosLocales[id];
+      if (!ord) return;
+      document.getElementById('editOrdenId').value = id;
+      document.getElementById('editOrdenCliente').value = ord.cliente || '';
+      document.getElementById('editOrdenTipoBalon').value = ord.tipoBalon || '';
+      document.getElementById('editOrdenMonto').value = ord.montoCobro || 0;
+      document.getElementById('editOrdenPago').value = ord.metodoPago || 'Efectivo';
+      document.getElementById('modalEditarOrden').style.display = 'flex';
+    }
+
+    function cerrarModalEditarOrden() {
+      document.getElementById('modalEditarOrden').style.display = 'none';
+    }
+
+    async function guardarEdicionOrden() {
+      const id = document.getElementById('editOrdenId').value;
+      await db.ref(`pedidos/${id}`).update({
+        cliente: document.getElementById('editOrdenCliente').value.trim(),
+        tipoBalon: document.getElementById('editOrdenTipoBalon').value.trim(),
+        montoCobro: parseFloat(document.getElementById('editOrdenMonto').value).toFixed(2),
+        metodoPago: document.getElementById('editOrdenPago').value
+      });
+      cerrarModalEditarOrden();
+      alert("✔ Orden actualizada.");
     }
 
     window.onload = () => {
