@@ -888,7 +888,6 @@
       document.getElementById('panelAdminPrincipal').style.display = 'block';
       iniciarMapaAdmin();
       iniciarEscuchaFirebase();
-      // En móviles iniciar con el menú cerrado para ver el contenido directamente
       if (window.innerWidth <= 768) {
         cerrarSidebarMenu();
       }
@@ -947,7 +946,6 @@
         renderizarReportesContables();
       }
 
-      // Si está en pantalla pequeña, cerrar el menú tras elegir pestaña
       if (window.innerWidth <= 768) {
         cerrarSidebarMenu();
       }
@@ -960,7 +958,6 @@
     }
 
     function iniciarEscuchaFirebase() {
-      // 1. Repartidores (Carga prioritaria con re-renderizado automático de órdenes)
       db.ref('repartidores').on('value', snap => {
         const val = snap.val();
         repartidoresLocales = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
@@ -971,7 +968,6 @@
         renderizarLiquidacionDiaria();
       });
 
-      // 2. Pedidos
       db.ref('pedidos').on('value', snap => {
         pedidosLocales = snap.val() || {};
         procesarVentasParaReportes();
@@ -982,13 +978,11 @@
         procesarClientesVIP();
       });
 
-      // 3. Cartera de clientes B2B
       db.ref('clientesB2B').on('value', snap => {
         clientesB2BLocales = snap.val() || {};
         renderizarTablaCarteraB2B();
       });
 
-      // 4. Catálogo de Balones
       db.ref('productos').on('value', snap => {
         const p = snap.val();
         if (p) {
@@ -1003,13 +997,11 @@
         renderizarProductosEditor();
       });
 
-      // 5. Catálogo de Accesorios
       db.ref('accesorios').on('value', snap => {
         accesorios = snap.val() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
         renderizarAccesoriosEditor();
       });
 
-      // 6. Teléfonos
       db.ref('telefonos').on('value', snap => {
         if (snap.val()) telefonos = snap.val();
       });
@@ -1051,6 +1043,23 @@
             Envases Llenos a Entregar: <strong>${ord.envasesEntregados || 1}</strong>
             ${ord.gpsUrl ? ` | <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb; font-weight:bold;">📍 Ver Mapa</a>` : ''}
           </div>
+
+          <!-- MÓDULO DE FACTURACIÓN ELECTRÓNICA -->
+          <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+            ${!ord.facturado ? `
+              <button class="btn btn-save" style="padding:6px 10px; font-size:11px; margin:0; width:auto; background:#0284c7;" onclick="emitirFacturaElectronica('${ord.id}')">
+                🧾 Emitir Factura
+              </button>
+            ` : `
+              <span style="font-size:11.5px; font-weight:bold; color:#15803d; display:flex; align-items:center;">
+                ✔ ${ord.facturaElectronica.serieNumero}
+              </span>
+              <button class="btn btn-edit" style="padding:5px 9px; font-size:11px; margin:0; background:#25d366; color:#fff; border-color:#16a34a;" onclick="compartirFacturaWhatsApp('${ord.id}', '${ord.telefono || ''}')">
+                📲 Enviar WhatsApp
+              </button>
+            `}
+          </div>
+
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
             <select id="selRep_${ord.id}" style="flex:2; min-width:180px; margin:0; padding:7px;">${opciones}</select>
             <button class="btn" style="background:#16a34a; color:#fff;" onclick="asignarOrden('${ord.id}')">Asignar 🛵</button>
@@ -1060,6 +1069,79 @@
         `;
         contenedor.appendChild(div);
       });
+    }
+
+    // ==========================================
+    // FUNCIONES DE FACTURACIÓN ELECTRÓNICA Y WHATSAPP
+    // ==========================================
+    async function emitirFacturaElectronica(pedidoId) {
+      const p = pedidosLocales[pedidoId];
+      if (!p) return;
+
+      const total = parseFloat(p.montoCobro) || 0;
+      const subtotal = total / 1.18;
+      const igv = total - subtotal;
+
+      // Obtener último número correlativo desde Firebase
+      const refContador = db.ref('configuracion/correlativoFactura');
+      const snap = await refContador.once('value');
+      let correlativoActual = snap.val() || 1000;
+      correlativoActual++;
+      await refContador.set(correlativoActual);
+
+      const numeroFactura = `F001-${correlativoActual.toString().padStart(6, '0')}`;
+
+      const datosFactura = {
+        serieNumero: numeroFactura,
+        fechaEmision: new Date().toLocaleDateString('es-PE'),
+        horaEmision: new Date().toLocaleTimeString('es-PE'),
+        ruc: p.ruc || '20000000000',
+        razonSocial: p.cliente,
+        subtotal: subtotal.toFixed(2),
+        igv: igv.toFixed(2),
+        total: total.toFixed(2),
+        estadoSunat: 'EMITIDO_REGISTRADO',
+        pdfUrl: `https://leogascusco.com/comprobante?id=${pedidoId}`
+      };
+
+      // Guardar en la orden
+      await db.ref(`pedidos/${pedidoId}`).update({
+        facturaElectronica: datosFactura,
+        facturado: true
+      });
+
+      alert(`✔ Factura ${numeroFactura} generada con éxito.`);
+      renderizarOrdenesEntrantes();
+    }
+
+    function compartirFacturaWhatsApp(pedidoId, telefonoContacto) {
+      const p = pedidosLocales[pedidoId];
+      if (!p || !p.facturaElectronica) return alert("Primero debes emitir la factura.");
+
+      const f = p.facturaElectronica;
+      const tel = telefonoContacto ? telefonoContacto.replace(/\D/g, '') : '';
+
+      let msg = `*LEOGAS CUSCO - COMPROBANTE ELECTRÓNICO*\n`;
+      msg += `--------------------------------------\n`;
+      msg += `*Factura:* ${f.serieNumero}\n`;
+      msg += `*Fecha:* ${f.fechaEmision} ${f.horaEmision}\n`;
+      msg += `*Cliente:* ${f.razonSocial}\n`;
+      msg += `*RUC:* ${f.ruc}\n`;
+      msg += `*Detalle:* ${p.tipoBalon}\n`;
+      msg += `--------------------------------------\n`;
+      msg += `*Op. Gravada:* S/ ${f.subtotal}\n`;
+      msg += `*I.G.V. (18%):* S/ ${f.igv}\n`;
+      msg += `*TOTAL FACTURA:* S/ ${f.total}\n`;
+      msg += `*Condición:* ${p.metodoPago}\n`;
+      msg += `--------------------------------------\n`;
+      msg += `📄 *Descarga tu comprobante digital aquí:* \n${window.location.origin + window.location.pathname.replace('admin.html', 'index.html')}?factura=${pedidoId}\n\n`;
+      msg += `_Gracias por su preferencia con LeoGas Cusco (Llamagas)._`;
+
+      const urlWsp = tel 
+        ? `https://wa.me/51${tel}?text=${encodeURIComponent(msg)}` 
+        : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+      window.open(urlWsp, '_blank');
     }
 
     async function asignarOrden(id) {
