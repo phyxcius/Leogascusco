@@ -5,67 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración | LeoGas Cusco</title>
   
-  <!-- Leaflet CSS para Mapas -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #1e1b4b; padding: 18px; max-width: 980px; margin: auto; }
     
-    .header-admin {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
+    .header-admin { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px; }
     .header-left-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     h2 { color: #6b21a8; margin: 0; font-size: 20px; }
 
-    /* LOGO LA CHUSPA TECH */
     .chuspa-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #fefce8;
-      border: 1.5px solid #eab308;
-      padding: 4px 10px 4px 6px;
-      border-radius: 20px;
-      text-decoration: none;
-      box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2);
+      display: inline-flex; align-items: center; gap: 8px; background: #fefce8;
+      border: 1.5px solid #eab308; padding: 4px 10px 4px 6px; border-radius: 20px;
+      text-decoration: none; box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2);
     }
     .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid #ca8a04; background: #fff; }
     .chuspa-text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
     .chuspa-title { font-size: 11px; font-weight: 900; color: #6b21a8; }
     .chuspa-sub { font-size: 8.5px; font-weight: 700; color: #b45309; }
     
-    /* BOTÓN ACTIVAR NOTIFICACIONES */
     .btn-notif-header {
-      background: #ede9fe;
-      color: #6b21a8;
-      border: 1.5px solid #c4b5fd;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
+      background: #ede9fe; color: #6b21a8; border: 1.5px solid #c4b5fd;
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
     }
-    .btn-notif-header:hover {
-      background: #6b21a8;
-      color: #fff;
-    }
-    .btn-notif-header.activa {
-      background: #dcfce7;
-      color: #15803d;
-      border-color: #86efac;
-    }
+    .btn-notif-header.activa { background: #dcfce7; color: #15803d; border-color: #86efac; }
 
-    /* PESTAÑAS DE NAVEGACIÓN */
     .dashboard-tabs { display: flex; gap: 6px; margin: 16px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; overflow-x: auto; }
     .tab-btn { background: none; border: none; font-weight: 800; font-size: 12.5px; padding: 8px 12px; color: #64748b; cursor: pointer; border-radius: 8px; white-space: nowrap; }
     .tab-btn.active { background: #f3e8ff; color: #581c87; }
@@ -79,18 +44,12 @@
     .btn-add { background: #16a34a; color: white; margin-bottom: 14px; width: 100%; font-size: 14px; }
     .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
     .btn-edit { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-    .btn-wsp-promo { background: #25d366; color: #ffffff; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
-    
-    .admin-img-preview-box { display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #faf5ff; padding: 10px; border-radius: 8px; border: 1px solid #e9d5ff; }
-    .admin-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; }
 
-    /* TARJETAS DE REPARTIDORES */
     .repartidor-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
     .repartidor-card.activo { border-color: #86efac; background: #f0fdf4; }
     .badge-status { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; background: #e2e8f0; color: #64748b; }
     .badge-status.online { background: #dcfce7; color: #15803d; }
 
-    /* BARRA SECUENCIA */
     .secuencia-mini-bar { display: flex; border-radius: 6px; overflow: hidden; height: 24px; margin-top: 6px; background: #e2e8f0; gap: 2px; }
     .sec-block { flex: 1; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 800; opacity: 0.25; }
     .sec-block.activo { opacity: 1; font-weight: 900; }
@@ -100,12 +59,10 @@
 
     #adminMap { width: 100%; height: 320px; border-radius: 10px; border: 1px solid #cbd5e1; margin-top: 12px; }
 
-    /* REPORTES Y LIQUIDACIÓN */
     .report-filters-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #fff; padding: 12px 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
     .filter-pill-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; color: #475569; }
     .filter-pill-btn.active { background: #6b21a8; color: #fff; border-color: #581c87; }
     
-    /* SELECTOR PERSONALIZADO DE FECHAS (CALENDARIO) */
     .calendar-picker-box { display: flex; align-items: center; gap: 6px; background: #faf5ff; border: 1.5px solid #d8b4fe; padding: 6px 12px; border-radius: 10px; flex-wrap: wrap; width: 100%; margin-top: 4px; }
     .calendar-input-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #6b21a8; }
     .calendar-input-item input { margin: 0; padding: 5px 8px; font-size: 12px; width: auto; }
@@ -121,56 +78,33 @@
     .btn-export { background: #16a34a; color: #fff; }
     .btn-print { background: #2563eb; color: #fff; }
 
-    /* TARJETA LIQUIDACIÓN REPARTIDOR */
     .liqui-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
     .liqui-card { background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
     .liqui-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 8px; }
     .liqui-stat-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px; }
 
-    /* MODAL DE EDICIÓN DE ORDEN */
     .edit-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 99999; justify-content: center; align-items: center; padding: 16px; backdrop-filter: blur(4px); }
-    .edit-modal-box { background: #fff; max-width: 440px; width: 100%; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .edit-modal-box { background: #fff; max-width: 460px; width: 100%; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
 
-    /* MODAL DE NOTIFICACIÓN DE ENTREGA */
-    .delivery-modal-center { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); z-index: 99999; justify-content: center; align-items: center; padding: 16px; }
-    .delivery-modal-box { background: #ffffff; max-width: 400px; width: 100%; border-radius: 20px; padding: 24px; text-align: center; border: 3px solid #16a34a; }
-
-    /* LOGIN */
     .login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
     .login-card { background: #fff; padding: 24px 28px; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 380px; }
 
-    /* ENCABEZADOS DE IMPRESIÓN */
     #printHeaderReport, #printHeaderLiquidacion { display: none; }
 
-    /* REGLAS EXACTAS DE IMPRESIÓN */
     @media print {
       body { background: #fff !important; padding: 0 !important; color: #000 !important; }
       body * { visibility: hidden !important; }
       .no-print { display: none !important; }
 
-      /* Imprimir Reportes Contables */
       body.modo-imprimir-reporte #areaImpresion, 
-      body.modo-imprimir-reporte #areaImpresion * { 
-        visibility: visible !important; 
-      }
-      body.modo-imprimir-reporte #areaImpresion { 
-        position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; 
-      }
-      body.modo-imprimir-reporte #printHeaderReport { 
-        display: block !important; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 12px; 
-      }
+      body.modo-imprimir-reporte #areaImpresion * { visibility: visible !important; }
+      body.modo-imprimir-reporte #areaImpresion { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; }
+      body.modo-imprimir-reporte #printHeaderReport { display: block !important; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 12px; }
 
-      /* Imprimir Liquidación / Cierre de Caja */
       body.modo-imprimir-liquidacion #areaImpresionLiquidacion, 
-      body.modo-imprimir-liquidacion #areaImpresionLiquidacion * { 
-        visibility: visible !important; 
-      }
-      body.modo-imprimir-liquidacion #areaImpresionLiquidacion { 
-        position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; 
-      }
-      body.modo-imprimir-liquidacion #printHeaderLiquidacion { 
-        display: block !important; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 12px; 
-      }
+      body.modo-imprimir-liquidacion #areaImpresionLiquidacion * { visibility: visible !important; }
+      body.modo-imprimir-liquidacion #areaImpresionLiquidacion { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; }
+      body.modo-imprimir-liquidacion #printHeaderLiquidacion { display: block !important; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 12px; }
 
       .custom-table th { background: #eee !important; color: #000 !important; }
       .custom-table th, .custom-table td { border: 1px solid #999 !important; }
@@ -233,10 +167,9 @@
       <button class="btn" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; font-size:12px;" onclick="cerrarSesionAdmin()">🚪 Salir</button>
     </div>
 
-    <!-- PESTAÑAS -->
     <div class="dashboard-tabs no-print">
       <button class="tab-btn active" id="tabBtnPedidos" onclick="cambiarTab('pedidos')">📦 Pedidos y Flota en Vivo</button>
-      <button class="tab-btn" id="tabBtnLiquidacion" onclick="cambiarTab('liquidacion')">💵 Cierre de Caja</button>
+      <button class="tab-btn" id="tabBtnLiquidacion" onclick="cambiarTab('liquidacion')">💵 Cierre de Caja & Créditos</button>
       <button class="tab-btn" id="tabBtnClientes" onclick="cambiarTab('clientes')">⭐ Clientes VIP</button>
       <button class="tab-btn" id="tabBtnAccesorios" onclick="cambiarTab('accesorios')">🔧 Válvulas y Accesorios</button>
       <button class="tab-btn" id="tabBtnProductos" onclick="cambiarTab('productos')">📝 Balones y Precios</button>
@@ -247,9 +180,8 @@
 
     <!-- PESTAÑA 1: PEDIDOS EN VIVO -->
     <div id="seccionPedidos">
-      <!-- BOTÓN REGISTRAR LLAMADA TELEFÓNICA -->
       <button type="button" class="btn btn-add no-print" style="background:#2563eb; margin-bottom:12px;" onclick="abrirModalPedidoTelefonico()">
-        📞 Registrar Pedido por Llamada Telefónica
+        📞 Registrar Pedido (Hogar o Mayorista / Crédito)
       </button>
 
       <div class="card" style="border: 2px solid #eab308; background: #fefce8; margin-bottom: 16px;">
@@ -257,7 +189,7 @@
           <h3 style="color:#854d0e; font-size:15px; margin:0;">🔔 Órdenes Entrantes (Web y Teléfono)</h3>
           <span id="badgeContadorEntrantes" style="background:#eab308; color:#fff; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">0 pendientes</span>
         </div>
-        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente por WhatsApp o por llamada registrada. Puedes asignarlas, editarlas o anularlas.</p>
+        <p style="font-size:12px; color:#713f12; margin-bottom:10px;">Llegan automáticamente por WhatsApp o por registro telefónico. Asigna a la flota en tiempo real.</p>
         <div id="listaOrdenesEntrantes">
           <p style="font-size:12px; color:#a16207;">Esperando nuevos pedidos en tiempo real...</p>
         </div>
@@ -271,25 +203,29 @@
       </div>
     </div>
 
-    <!-- PESTAÑA 2: CIERRE DE CAJA / LIQUIDACIÓN (IMPRIMIBLE) -->
+    <!-- PESTAÑA 2: CIERRE DE CAJA / LIQUIDACIÓN -->
     <div id="seccionLiquidacion" style="display: none;">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;" class="no-print">
           <div>
-            <h3 style="color:#6b21a8; margin:0;">💵 Cierre de Caja y Liquidación Diaria</h3>
-            <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Dinero exacto que debe rendir cada repartidor al finalizar su turno hoy.</p>
+            <h3 style="color:#6b21a8; margin:0;">💵 Cierre de Caja, Créditos y Envases</h3>
+            <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Dinero que debe rendir cada repartidor hoy (las ventas a crédito no exigen dinero en mano).</p>
           </div>
           <button class="btn btn-print" onclick="imprimirCierreCaja()">🖨️ Imprimir Liquidación de Hoy</button>
         </div>
 
         <div class="report-summary-cards no-print">
           <div class="summary-card">
-            <div class="summary-card-title">Efectivo Total a Entregar</div>
+            <div class="summary-card-title">Efectivo Físico a Rendir</div>
             <div class="summary-card-val" id="liqTotalEfectivo" style="color:#15803d;">S/ 0.00</div>
           </div>
           <div class="summary-card">
-            <div class="summary-card-title">Digital (Yape / Plin / Banco)</div>
+            <div class="summary-card-title">Digital (Yape / Plin)</div>
             <div class="summary-card-val" id="liqTotalDigital" style="color:#2563eb;">S/ 0.00</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-title">Créditos Mayoristas (A Cobrar)</div>
+            <div class="summary-card-val" id="liqTotalCredito" style="color:#d97706;">S/ 0.00</div>
           </div>
           <div class="summary-card">
             <div class="summary-card-title">Recaudación Global Hoy</div>
@@ -297,7 +233,6 @@
           </div>
         </div>
 
-        <!-- ÁREA IMPRIMIBLE EXCLUSIVA DE CIERRE DE CAJA -->
         <div id="areaImpresionLiquidacion">
           <div id="printHeaderLiquidacion">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -319,7 +254,7 @@
             </div>
 
             <div style="display:flex; justify-content:space-between; margin-top:14px; font-size:12px; background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1;">
-              <span><strong>Reporte:</strong> Rendición de Cuentas y Cierre de Caja</span>
+              <span><strong>Reporte:</strong> Rendición de Cuentas y Control de Envases</span>
               <span><strong>Fecha del Cierre:</strong> <span id="lblFechaCierreCaja"></span></span>
               <span><strong>Emisión:</strong> <span id="lblEmisionCierreCaja"></span></span>
             </div>
@@ -329,15 +264,15 @@
             Cargando liquidaciones por chofer...
           </div>
 
-          <!-- RESUMEN EN TABLA PARA IMPRESIÓN FORMAL -->
           <table class="custom-table" id="tablaImpresionLiquidacion" style="margin-top:16px;">
             <thead>
               <tr>
                 <th>Repartidor / Chofer</th>
-                <th>Pedidos Hoy</th>
+                <th>Entregas</th>
                 <th>Efectivo Físico (S/)</th>
-                <th>Digital Yape/Plin (S/)</th>
-                <th>Total Rendido (S/)</th>
+                <th>Digital (S/)</th>
+                <th>Crédito (S/)</th>
+                <th>Envases Dejados/Recogidos</th>
               </tr>
             </thead>
             <tbody id="tablaBodyImpresionLiquidacion"></tbody>
@@ -346,7 +281,8 @@
                 <td colspan="2" style="text-align:right;">TOTALES GENERALES DE CAJA HOY:</td>
                 <td id="lblTotalPrintEfectivo" style="color:#15803d;">S/ 0.00</td>
                 <td id="lblTotalPrintDigital" style="color:#2563eb;">S/ 0.00</td>
-                <td id="lblTotalPrintGlobal" style="color:#6b21a8;">S/ 0.00</td>
+                <td id="lblTotalPrintCredito" style="color:#d97706;">S/ 0.00</td>
+                <td id="lblTotalPrintEnvases">--</td>
               </tr>
             </tfoot>
           </table>
@@ -359,8 +295,8 @@
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
           <div>
-            <h3 style="color:#6b21a8; margin:0;">⭐ Clientes Frecuentes y Fidelización LeoGas</h3>
-            <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Familias y negocios que más gas consumen en Cusco. Envíales promociones por WhatsApp con 1 clic.</p>
+            <h3 style="color:#6b21a8; margin:0;">⭐ Clientes Frecuentes y Negocios B2B</h3>
+            <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Historial de consumo por cliente minorista o mayorista.</p>
           </div>
           <input type="text" id="buscadorClientesInput" placeholder="🔍 Buscar cliente..." oninput="filtrarTablaClientes()" style="max-width:240px; margin:0; padding:7px;">
         </div>
@@ -368,12 +304,12 @@
         <table class="custom-table">
           <thead>
             <tr>
-              <th>Cliente / Referencia</th>
-              <th>Balones Pedidos</th>
+              <th>Cliente / Razón Social</th>
+              <th>Balones</th>
               <th>Total Consumido</th>
               <th>Último Pedido</th>
-              <th>Nivel</th>
-              <th>Fidelización</th>
+              <th>Tipo</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody id="tablaClientesVIPBody">
@@ -393,7 +329,7 @@
 
     <!-- PESTAÑA 5: PRODUCTOS Y BALONES -->
     <div id="seccionProductos" style="display: none;">
-      <button class="btn btn-add no-print" onclick="agregarNuevoBalonProducto()">➕ Agregar Nuevo Balón</button>
+      <button class="btn btn-add no-print" onclick="agregarNuevoBalonProducto()">➕ Agregar Balón (10kg o 45kg Industrial)</button>
       <div id="listaProductos">Cargando catálogo desde Firebase...</div>
       <button class="btn btn-save no-print" onclick="guardarProductosFirebase()">💾 Guardar Precios y Stock en Firebase</button>
       <div id="statusMsgProductos" style="text-align:center; margin-top:8px; font-weight:bold;"></div>
@@ -419,14 +355,14 @@
       </div>
     </div>
 
-    <!-- PESTAÑA 7: GESTIÓN DE REPARTIDORES CON USUARIO Y CONTRASEÑA -->
+    <!-- PESTAÑA 7: GESTIÓN DE REPARTIDORES -->
     <div id="seccionGPS" style="display: none;">
       <div class="card" style="border:1.5px solid #c084fc; background:#faf5ff; margin-bottom:16px;">
         <h3 style="color:#6b21a8; font-size:15px; margin-bottom:10px;">➕ Registrar Nuevo Repartidor en Flota</h3>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
           <div>
             <label>Nombre del Chofer / Móvil:</label>
-            <input type="text" id="nuevoRepNombre" placeholder="Ej: Jorge / Edwin / Moto 3">
+            <input type="text" id="nuevoRepNombre" placeholder="Ej: Jorge / Edwin / Camión 1">
           </div>
           <div>
             <label>Usuario de Acceso:</label>
@@ -443,7 +379,7 @@
       <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
     </div>
 
-    <!-- PESTAÑA 8: REPORTES CONTABLES CON CALENDARIO (DÍAS, MES, AÑO) -->
+    <!-- PESTAÑA 8: REPORTES CONTABLES -->
     <div id="seccionReportes" style="display: none;">
       <div class="report-filters-bar no-print">
         <span style="font-size:12px; font-weight:800; color:#1e1b4b;">Filtros rápidos:</span>
@@ -458,7 +394,6 @@
           <button type="button" class="btn btn-print" onclick="imprimirReporteContable()">🖨️ Imprimir Reporte</button>
         </div>
 
-        <!-- MÓDULO CALENDARIO -->
         <div class="calendar-picker-box">
           <div class="calendar-input-item">
             <span>🗓️ Día exacto:</span>
@@ -496,7 +431,6 @@
         </div>
       </div>
 
-      <!-- ÁREA DE IMPRESIÓN EXCLUSIVA DE REPORTES CONTABLES -->
       <div id="areaImpresion">
         <div id="printHeaderReport">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -535,6 +469,7 @@
               <th>Repartidor</th>
               <th>Total</th>
               <th>Pago</th>
+              <th>Envases (Dej/Rec)</th>
             </tr>
           </thead>
           <tbody id="tablaVentasBody"></tbody>
@@ -549,35 +484,69 @@
 
   </div>
 
-  <!-- MODAL: REGISTRAR PEDIDO TELEFÓNICO -->
+  <!-- MODAL: REGISTRAR PEDIDO TELEFÓNICO (B2C / B2B MAYORISTA) -->
   <div class="edit-modal-overlay" id="modalPedidoTelefonico">
     <div class="edit-modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0; font-size:16px; color:#1e1b4b;">📞 Nuevo Pedido por Llamada</h3>
+        <h3 style="margin:0; font-size:16px; color:#1e1b4b;">📞 Nuevo Pedido (Hogar o Negocio)</h3>
         <button type="button" style="background:none; border:none; font-size:20px; cursor:pointer;" onclick="cerrarModalPedidoTelefonico()">&times;</button>
       </div>
 
-      <label>Nombre del Cliente:</label>
-      <input type="text" id="telPedCliente" placeholder="Ej: Don Teófilo Quispe">
+      <label>Tipo de Venta:</label>
+      <select id="telPedTipoVenta" onchange="alternarCamposMayoristaModal(this.value)">
+        <option value="minorista">🏠 Minorista (Hogar / Familia)</option>
+        <option value="mayorista">🏢 Mayorista (Restaurante, Pollería, Negocio)</option>
+      </select>
 
-      <label>Dirección / Referencia de Casa:</label>
+      <label>Nombre del Cliente o Razón Social:</label>
+      <input type="text" id="telPedCliente" placeholder="Ej: Pollería Los Ángeles / Carmen Quispe">
+
+      <label>Dirección / Referencia de Entrega:</label>
       <input type="text" id="telPedDireccion" placeholder="Ej: Av. de la Cultura 820 frente a la UNSAAC">
 
-      <label>Producto solicitado:</label>
-      <select id="telPedProducto">
-        <option value="1x Balón LeoGas 10kg Normal|50">Balón LeoGas 10kg Normal - S/ 50.00</option>
-        <option value="1x Balón Gas Premium 10kg|55">Balón Gas Premium 10kg - S/ 55.00</option>
-        <option value="1x Regulador Premium + Válvula|45">Regulador Premium Doble Válvula - S/ 45.00</option>
-      </select>
+      <div style="display:flex; gap:10px;">
+        <div style="flex:2;">
+          <label>Producto solicitado:</label>
+          <select id="telPedProducto">
+            <option value="Balón LeoGas 10kg Normal|50">Balón LeoGas 10kg Normal - S/ 50.00</option>
+            <option value="Balón Gas Premium 10kg|55">Balón Gas Premium 10kg - S/ 55.00</option>
+            <option value="Balón 45kg Industrial|175">Balón 45kg Industrial - S/ 175.00</option>
+            <option value="Regulador Premium Doble Válvula|45">Regulador Premium Doble Válvula - S/ 45.00</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label>Cantidad:</label>
+          <input type="number" id="telPedCantidad" value="1" min="1" onchange="calcularTotalPedidoTelefonico()">
+        </div>
+      </div>
 
-      <label>Método de Pago:</label>
-      <select id="telPedPago">
-        <option value="Efectivo (Exacto)">💵 Efectivo (Monto exacto)</option>
-        <option value="Efectivo (Llevar vuelto)">💵 Efectivo (Requiere vuelto)</option>
-        <option value="Yape / Plin">🟣 Yape / Plin</option>
-      </select>
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <label>Monto a Cobrar (S/):</label>
+          <input type="number" step="0.5" id="telPedMontoTotal" value="50.00">
+        </div>
+        <div style="flex:1;">
+          <label>Forma de Pago:</label>
+          <select id="telPedPago">
+            <option value="Efectivo">💵 Efectivo</option>
+            <option value="Yape">🟣 Yape</option>
+            <option value="Plin">🔵 Plin</option>
+            <option value="Crédito (A cuenta 15 días)">📋 Crédito (Factura / A cuenta)</option>
+          </select>
+        </div>
+      </div>
 
-      <label>Asignar de una vez a Repartidor:</label>
+      <div id="cajaEnvasesMayorista" style="background:#fefce8; border:1px dashed #eab308; padding:8px 10px; border-radius:8px; margin-top:8px;">
+        <span style="font-size:11px; font-weight:800; color:#854d0e;">CONTROL DE ENVASES A DESPACHAR:</span>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <div style="flex:1;">
+            <label style="margin-top:0;">Llenos a enviar:</label>
+            <input type="number" id="telPedEnvasesEnviados" value="1" min="1">
+          </div>
+        </div>
+      </div>
+
+      <label>Asignar a Chofer / Unidad:</label>
       <select id="telPedRepartidor">
         <option value="">-- Dejar en bandeja pendiente --</option>
       </select>
@@ -616,6 +585,7 @@
         <option value="Yape">🟣 Yape</option>
         <option value="Plin">🔵 Plin</option>
         <option value="Transferencia">🏦 Transferencia</option>
+        <option value="Crédito (A cuenta 15 días)">📋 Crédito (Factura / A cuenta)</option>
       </select>
 
       <div style="display:flex; gap:10px; margin-top:16px;">
@@ -625,20 +595,7 @@
     </div>
   </div>
 
-  <!-- MODAL: NOTIFICACIÓN DE ENTREGA -->
-  <div class="delivery-modal-center" id="modalNotificacionEntrega">
-    <div class="delivery-modal-box">
-      <div style="font-size:46px;">🎉</div>
-      <h3 style="color:#15803d; font-size:19px; margin:6px 0;">¡ENTREGA COMPLETADA!</h3>
-      <p id="textoModalNotificacion" style="font-size:14px; color:#475569; margin:10px 0 16px;"></p>
-      <button type="button" class="btn btn-save" style="background:#15803d; margin:0;" onclick="cerrarNotificacionCentro()">Entendido ✔️</button>
-    </div>
-  </div>
-
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- SDK DE FIREBASE (TIEMPO REAL) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -672,38 +629,6 @@
     let marcadoresAdmin = {};
     let cantidadPedidosEntrantesPrevia = 0;
 
-    // ACTUALIZAR BOTONES DE NOTIFICACIÓN
-    function actualizarBotonesNotificacion() {
-      const permiso = ("Notification" in window) ? Notification.permission : "denied";
-      const btnHeader = document.getElementById('btnNotifHeader');
-      const btnLogin = document.getElementById('btnNotifLogin');
-
-      const texto = permiso === "granted" ? "🔔 Notificaciones Activas ✔️" : "🔔 Activar Notificaciones";
-      const clase = permiso === "granted" ? "btn-notif-header activa" : "btn-notif-header";
-
-      if (btnHeader) { btnHeader.innerHTML = texto; btnHeader.className = clase; }
-      if (btnLogin) { btnLogin.innerHTML = texto; btnLogin.className = clase; }
-    }
-
-    function solicitarPermisoNotificacionesManual(btn) {
-      if (!("Notification" in window)) return alert("Este navegador no soporta notificaciones.");
-      emitirCampanada();
-      Notification.requestPermission().then(perm => {
-        actualizarBotonesNotificacion();
-        if (perm === "granted") {
-          new Notification("🦁 LeoGas Cusco", { body: "¡Notificaciones activas para pedidos entrantes!", icon: "CHUSPITA-circulo.png" });
-        }
-      });
-    }
-
-    function pedirPermisoNotificacionesAdmin() {
-      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission().then(() => actualizarBotonesNotificacion());
-      } else {
-        actualizarBotonesNotificacion();
-      }
-    }
-
     function emitirCampanada() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -735,7 +660,6 @@
     function mostrarPanel() {
       document.getElementById('pantallaLogin').style.display = 'none';
       document.getElementById('panelAdminPrincipal').style.display = 'block';
-      pedirPermisoNotificacionesAdmin();
       iniciarMapaAdmin();
       iniciarEscuchaFirebase();
     }
@@ -795,28 +719,10 @@
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapAdmin);
     }
 
-    // CONEXIÓN EN TIEMPO REAL CON FIREBASE
     function iniciarEscuchaFirebase() {
-      // 1. Pedidos
       db.ref('pedidos').on('value', snap => {
         pedidosLocales = snap.val() || {};
         procesarVentasParaReportes();
-        
-        const entrantesActuales = Object.values(pedidosLocales).filter(p => p.estado === 'pendiente_asignacion');
-        
-        if (entrantesActuales.length > cantidadPedidosEntrantesPrevia) {
-          emitirCampanada();
-          if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
-          if ("Notification" in window && Notification.permission === "granted") {
-            const ultimo = entrantesActuales[entrantesActuales.length - 1];
-            new Notification("🔔 ¡Nuevo Pedido Entrante!", {
-              body: `Cliente: ${ultimo.cliente || 'Particular'} (Total: S/ ${ultimo.montoCobro})`,
-              icon: "CHUSPITA-circulo.png"
-            });
-          }
-        }
-        cantidadPedidosEntrantesPrevia = entrantesActuales.length;
-
         renderizarOrdenesEntrantes();
         renderizarFlotaActiva();
         renderizarReportesContables();
@@ -824,69 +730,38 @@
         procesarClientesVIP();
       });
 
-      // 2. Repartidores con usuario y contraseña
       db.ref('repartidores').on('value', snap => {
-        const data = snap.val();
-        if (data) {
-          repartidoresLocales = data;
-        } else {
-          repartidoresLocales = {
-            "rep-1": { id: "rep-1", nombre: "Edwin", usuario: "edwin", password: "123", online: false, lat: -13.5167, lng: -71.9788 },
-            "rep-2": { id: "rep-2", nombre: "Moto 2", usuario: "moto2", password: "123", online: false, lat: -13.5200, lng: -71.9700 }
-          };
-          db.ref('repartidores').set(repartidoresLocales);
-        }
+        repartidoresLocales = snap.val() || {};
         renderizarGestionRepartidores();
         actualizarMapaAdmin();
         renderizarFlotaActiva();
-        renderizarOrdenesEntrantes();
         renderizarLiquidacionDiaria();
       });
 
-      // 3. Catálogo de Balones
       db.ref('productos').on('value', snap => {
         const p = snap.val();
         if (p) {
           productos = Array.isArray(p) ? p : Object.values(p);
         } else {
           productos = [
-            { id: "gas-1", nombre: "Balón LeoGas 10kg Normal o Regular", tag: "El Moradito Rendidor", descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad.", precio: 50.00, disponible: true, imagen: "1791513590376.jpg" },
-            { id: "gas-2", nombre: "Balón Gas Premium 10kg", tag: "Máximo Rendimiento", descripcion: "GLP de alta pureza con válvula anti-fugas.", precio: 55.00, disponible: true, imagen: "1791513590376.jpg" }
+            { id: "gas-1", nombre: "Balón LeoGas 10kg Normal", tag: "El Moradito", precio: 50.00, disponible: true },
+            { id: "gas-2", nombre: "Balón 45kg Industrial", tag: "Comercial B2B", precio: 175.00, disponible: true }
           ];
           db.ref('productos').set(productos);
         }
         renderizarProductosEditor();
       });
 
-      // 4. Catálogo de Válvulas y Accesorios
       db.ref('accesorios').on('value', snap => {
-        const acc = snap.val();
-        if (acc) {
-          accesorios = Array.isArray(acc) ? acc : Object.values(acc);
-        } else {
-          accesorios = [
-            { id: "acc-1", nombre: "Regulador Premium Doble Válvula con Manómetro", tag: "Seguridad Total", precio: 45.00, disponible: true, stock: 15, descripcion: "Regulador anti-fugas con indicador de presión.", imagen: "1791513590376.jpg" },
-            { id: "acc-2", nombre: "Manguera Flexible Reforzada (2 metros) + Abrazaderas", tag: "Alta Presión", precio: 25.00, disponible: true, stock: 20, descripcion: "Manguera reforzada para gas con 2 abrazaderas inoxidables.", imagen: "1791513590376.jpg" }
-          ];
-          db.ref('accesorios').set(accesorios);
-        }
+        accesorios = snap.val() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
         renderizarAccesoriosEditor();
       });
 
-      // 5. Teléfonos
       db.ref('telefonos').on('value', snap => {
-        const t = snap.val();
-        if (t) {
-          telefonos = t;
-          document.getElementById('telWhatsApp').value = t.whatsapp || "";
-          document.getElementById('telFijo1').value = t.tel1 || "";
-          document.getElementById('telFijo2').value = t.tel2 || "";
-          document.getElementById('telFijo3').value = t.tel3 || "";
-        }
+        if (snap.val()) telefonos = snap.val();
       });
     }
 
-    // ---------------- PEDIDOS Y FLOTA ----------------
     function renderizarOrdenesEntrantes() {
       const contenedor = document.getElementById('listaOrdenesEntrantes');
       const badge = document.getElementById('badgeContadorEntrantes');
@@ -894,7 +769,7 @@
       badge.innerText = `${lista.length} pendientes`;
 
       if (lista.length === 0) {
-        contenedor.innerHTML = '<p style="font-size:12px; color:#a16207;">No hay pedidos pendientes de asignación en este momento.</p>';
+        contenedor.innerHTML = '<p style="font-size:12px; color:#a16207;">No hay pedidos pendientes de asignación.</p>';
         return;
       }
 
@@ -910,80 +785,45 @@
 
         div.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong>👤 ${ord.cliente}</strong>
+            <strong>👤 ${ord.cliente} ${ord.tipoVenta === 'mayorista' ? '<span style="background:#fef08a; color:#854d0e; font-size:10px; padding:2px 6px; border-radius:8px;">B2B Mayorista</span>' : ''}</strong>
             <span style="color:#15803d; font-weight:900; font-size:15px;">S/ ${parseFloat(ord.montoCobro).toFixed(2)}</span>
           </div>
-          <div style="font-size:12px; color:#475569; margin:2px 0;">🛢️ <strong>${ord.tipoBalon}</strong> | 💵 Pago: <strong>${ord.metodoPago}</strong></div>
-          ${ord.direccionTexto ? `<div style="font-size:12px; color:#b45309; margin-bottom:2px;">🏠 <strong>Dirección:</strong> ${ord.direccionTexto}</div>` : ''}
-          <div style="font-size:11px; color:#64748b; margin-bottom:4px;">
-            🕒 ${ord.hora || '--'} 
-            ${ord.tipoComprobante ? `| 🧾 <strong>${ord.tipoComprobante}</strong>` : ''} 
-            ${ord.horarioEntrega ? `| 🚀 ${ord.horarioEntrega}` : ''}
-            ${ord.gpsUrl ? `| <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb; font-weight:bold;">📍 Ver Mapa</a>` : ''}
+          <div style="font-size:12px; color:#475569; margin:2px 0;">🛢️ <strong>${ord.tipoBalon}</strong> | Pago: <strong>${ord.metodoPago}</strong></div>
+          ${ord.direccionTexto ? `<div style="font-size:12px; color:#b45309;">🏠 <strong>Dirección:</strong> ${ord.direccionTexto}</div>` : ''}
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">
+            Envases Llenos Despachados: <strong>${ord.envasesEntregados || 1}</strong>
+            ${ord.gpsUrl ? ` | <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb; font-weight:bold;">📍 Ver Mapa</a>` : ''}
           </div>
-          
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
             <select id="selRep_${ord.id}" style="flex:2; min-width:180px; margin:0; padding:7px;">${opciones}</select>
             <button class="btn" style="background:#16a34a; color:#fff;" onclick="asignarOrden('${ord.id}')">Asignar 🛵</button>
-            <button class="btn btn-edit" onclick="abrirModalEditarOrden('${ord.id}')">✏️ Editar</button>
-            <button class="btn btn-del" onclick="anularOrdenEntrante('${ord.id}')">🚫 Anular</button>
+            <button class="btn btn-edit" onclick="abrirModalEditarOrden('${ord.id}')">✏️</button>
+            <button class="btn btn-del" onclick="anularOrdenEntrante('${ord.id}')">🚫</button>
           </div>
         `;
         contenedor.appendChild(div);
       });
     }
 
+    async function asignarOrden(id) {
+      const repId = document.getElementById(`selRep_${id}`).value;
+      if (!repId) return alert("Selecciona un repartidor.");
+      await db.ref(`pedidos/${id}`).update({ repartidorId: repId, estado: "activo", etapa: 0 });
+      alert("✔ Pedido encomendado al chofer.");
+    }
+
     async function anularOrdenEntrante(id) {
-      const comanda = pedidosLocales[id];
-      const clienteNombre = comanda ? comanda.cliente : 'este cliente';
-      if (confirm(`¿Seguro que deseas ANULAR la orden de "${clienteNombre}"?`)) {
-        await db.ref(`pedidos/${id}`).remove();
-        alert("✔ Orden anulada y retirada de la bandeja.");
-      }
+      if (confirm("¿Anular este pedido?")) await db.ref(`pedidos/${id}`).remove();
     }
 
-    function abrirModalEditarOrden(id) {
-      const ord = pedidosLocales[id];
-      if (!ord) return;
-      document.getElementById('editOrdenId').value = id;
-      document.getElementById('editOrdenCliente').value = ord.cliente || '';
-      document.getElementById('editOrdenTipoBalon').value = ord.tipoBalon || '';
-      document.getElementById('editOrdenMonto').value = ord.montoCobro || 0;
-      document.getElementById('editOrdenPago').value = ord.metodoPago || 'Efectivo';
-      document.getElementById('modalEditarOrden').style.display = 'flex';
-    }
-
-    function cerrarModalEditarOrden() {
-      document.getElementById('modalEditarOrden').style.display = 'none';
-    }
-
-    async function guardarEdicionOrden() {
-      const id = document.getElementById('editOrdenId').value;
-      if (!id) return;
-
-      const nuevoCliente = document.getElementById('editOrdenCliente').value.trim();
-      const nuevoBalon = document.getElementById('editOrdenTipoBalon').value.trim();
-      const nuevoMonto = parseFloat(document.getElementById('editOrdenMonto').value) || 0;
-      const nuevoPago = document.getElementById('editOrdenPago').value;
-
-      await db.ref(`pedidos/${id}`).update({
-        cliente: nuevoCliente,
-        tipoBalon: nuevoBalon,
-        montoCobro: nuevoMonto.toFixed(2),
-        metodoPago: nuevoPago
-      });
-
-      cerrarModalEditarOrden();
-      alert("✔ Orden actualizada con éxito.");
-    }
-
-    // FUNCIONES DEL PEDIDO TELEFÓNICO
+    // PEDIDOS TELEFÓNICOS CON SOPORTE MAYORISTA Y CRÉDITOS
     function abrirModalPedidoTelefonico() {
       const sel = document.getElementById('telPedRepartidor');
       sel.innerHTML = '<option value="">-- Dejar en bandeja pendiente --</option>';
       Object.values(repartidoresLocales).forEach(r => {
         sel.innerHTML += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
       });
+      calcularTotalPedidoTelefonico();
       document.getElementById('modalPedidoTelefonico').style.display = 'flex';
     }
 
@@ -991,36 +831,53 @@
       document.getElementById('modalPedidoTelefonico').style.display = 'none';
     }
 
-    async function guardarPedidoTelefonicoFirebase() {
-      const cliente = document.getElementById('telPedCliente').value.trim() || 'Cliente Telefónico';
-      const direccion = document.getElementById('telPedDireccion').value.trim();
+    function alternarCamposMayoristaModal(tipo) {
+      const caja = document.getElementById('cajaEnvasesMayorista');
+      const prodSel = document.getElementById('telPedProducto');
+      if (tipo === 'mayorista') {
+        caja.style.display = 'block';
+        prodSel.value = "Balón 45kg Industrial|175";
+      } else {
+        prodSel.value = "Balón LeoGas 10kg Normal|50";
+      }
+      calcularTotalPedidoTelefonico();
+    }
+
+    function calcularTotalPedidoTelefonico() {
       const prodVal = document.getElementById('telPedProducto').value.split('|');
-      const tipoBalon = prodVal[0];
-      const montoCobro = parseFloat(prodVal[1]).toFixed(2);
+      const unitario = parseFloat(prodVal[1]) || 50;
+      const cant = parseInt(document.getElementById('telPedCantidad').value) || 1;
+      document.getElementById('telPedMontoTotal').value = (unitario * cant).toFixed(2);
+      document.getElementById('telPedEnvasesEnviados').value = cant;
+    }
+
+    async function guardarPedidoTelefonicoFirebase() {
+      const cliente = document.getElementById('telPedCliente').value.trim() || 'Cliente';
+      const direccion = document.getElementById('telPedDireccion').value.trim();
+      const tipoVenta = document.getElementById('telPedTipoVenta').value;
+      const prodVal = document.getElementById('telPedProducto').value.split('|');
+      const nombreProd = prodVal[0];
+      const cant = parseInt(document.getElementById('telPedCantidad').value) || 1;
+      const montoTotal = parseFloat(document.getElementById('telPedMontoTotal').value) || 0;
       const metodoPago = document.getElementById('telPedPago').value;
       const repId = document.getElementById('telPedRepartidor').value;
 
-      if (!direccion) {
-        return alert("Por favor ingresa la dirección o referencia dada por el cliente.");
-      }
+      if (!direccion) return alert("Por favor ingresa la dirección.");
 
-      const direccionBusqueda = encodeURIComponent(`${direccion}, Cusco`);
-      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${direccionBusqueda}`;
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion + ', Cusco')}`;
+      const nuevoRef = db.ref('pedidos').push();
 
-      const nuevoPedidoRef = db.ref('pedidos').push();
-      const nuevoId = nuevoPedidoRef.key;
-
-      await nuevoPedidoRef.set({
-        id: nuevoId,
+      await nuevoRef.set({
+        id: nuevoRef.key,
         cliente: `${cliente} (Llamada)`,
+        tipoVenta: tipoVenta,
         direccionTexto: direccion,
-        tipoBalon: tipoBalon,
-        montoCobro: montoCobro,
+        tipoBalon: `${cant}x ${nombreProd}`,
+        montoCobro: montoTotal.toFixed(2),
         metodoPago: metodoPago,
-        tipoComprobante: "Boleta",
-        horarioEntrega: "Inmediata (Llamada)",
+        envasesEntregados: cant,
+        envasesRecogidos: 0,
         gpsUrl: mapsUrl,
-        origen: "telefono",
         repartidorId: repId || "",
         estado: repId ? "activo" : "pendiente_asignacion",
         etapa: 0,
@@ -1029,91 +886,10 @@
       });
 
       cerrarModalPedidoTelefonico();
-      document.getElementById('telPedCliente').value = '';
-      document.getElementById('telPedDireccion').value = '';
-
-      emitirCampanada();
-      alert("✔ Pedido telefónico registrado con éxito.");
+      alert("✔ Pedido registrado en Firebase.");
     }
 
-    async function asignarOrden(id) {
-      const repId = document.getElementById(`selRep_${id}`).value;
-      if (!repId) return alert("Selecciona un repartidor.");
-
-      await db.ref(`pedidos/${id}`).update({
-        repartidorId: repId,
-        estado: "activo",
-        etapa: 0
-      });
-
-      emitirCampanada();
-      alert("✔ Pedido encomendado. Ya aparece en la pantalla del repartidor.");
-    }
-
-    function renderizarFlotaActiva() {
-      const contenedor = document.getElementById('contenedorSecuenciasRepartidores');
-      contenedor.innerHTML = '';
-
-      Object.values(repartidoresLocales).forEach(rep => {
-        const ordenActiva = Object.values(pedidosLocales).find(p => p.repartidorId === rep.id && p.estado !== 'completado');
-        const etapa = ordenActiva ? ordenActiva.etapa : 0;
-
-        if (estadosPrevios[rep.id] && estadosPrevios[rep.id] !== 3 && etapa === 3) {
-          mostrarNotificacionCentro(rep.nombre);
-        }
-        estadosPrevios[rep.id] = etapa;
-
-        const card = document.createElement('div');
-        card.className = `repartidor-card ${rep.online ? 'activo' : ''}`;
-        card.innerHTML = `
-          <div style="display:flex; justify-content:space-between;">
-            <strong>🦁 ${rep.nombre}</strong>
-            <span class="badge-status ${rep.online ? 'online' : ''}">${rep.online ? 'Online 🟢' : 'Offline 💤'}</span>
-          </div>
-          <div style="font-size:12px; margin-top:2px;">
-            ${ordenActiva ? `🛢️ <strong>${ordenActiva.tipoBalon}</strong> para <em>${ordenActiva.cliente}</em> (S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)})` : '<span style="color:#64748b;">Sin orden activa</span>'}
-          </div>
-          <div class="secuencia-mini-bar">
-            <div class="sec-block sec-rojo ${etapa === 1 && ordenActiva ? 'activo' : ''}">1. EN CAMINO</div>
-            <div class="sec-block sec-gris-osc ${etapa === 2 ? 'activo' : ''}">2. ENTREGADO</div>
-            <div class="sec-block sec-gris-claro ${etapa === 3 ? 'activo' : ''}">3. COMPLETADO</div>
-          </div>
-        `;
-        contenedor.appendChild(card);
-      });
-    }
-
-    function actualizarMapaAdmin() {
-      if (!mapAdmin) return;
-      Object.values(repartidoresLocales).forEach(rep => {
-        const online = rep.online === true;
-        const icono = L.divIcon({
-          html: `<div style="background:${online ? '#7e22ce' : '#64748b'}; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:18px;">🦁</div>`,
-          iconSize: [34, 34],
-          iconAnchor: [17, 17]
-        });
-
-        if (!marcadoresAdmin[rep.id]) {
-          marcadoresAdmin[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(mapAdmin).bindPopup(`<b>${rep.nombre}</b><br>${online ? 'En Ruta 🔥' : 'Offline 💤'}`);
-        } else {
-          marcadoresAdmin[rep.id].setIcon(icono);
-          marcadoresAdmin[rep.id].setLatLng([rep.lat, rep.lng]);
-        }
-      });
-    }
-
-    function mostrarNotificacionCentro(nombreRepartidor) {
-      document.getElementById('textoModalNotificacion').innerHTML = `El repartidor <strong>${nombreRepartidor}</strong> acaba de completar su entrega.`;
-      document.getElementById('modalNotificacionEntrega').style.display = 'flex';
-      emitirCampanada();
-      if ("vibrate" in navigator) navigator.vibrate([300, 150, 300]);
-    }
-
-    function cerrarNotificacionCentro() {
-      document.getElementById('modalNotificacionEntrega').style.display = 'none';
-    }
-
-    // ---------------- 1. LIQUIDACIÓN DIARIA POR REPARTIDOR (CIERRE DE CAJA) ----------------
+    // CIERRE DE CAJA Y LIQUIDACIÓN CON CRÉDITO Y ENVASES
     function renderizarLiquidacionDiaria() {
       const cont = document.getElementById('contenedorTarjetasLiquidacion');
       const tbodyPrint = document.getElementById('tablaBodyImpresionLiquidacion');
@@ -1126,77 +902,93 @@
 
       let granTotalEfectivo = 0;
       let granTotalDigital = 0;
+      let granTotalCredito = 0;
+      let totalLlenos = 0;
+      let totalVacios = 0;
+
       cont.innerHTML = '';
       if (tbodyPrint) tbodyPrint.innerHTML = '';
 
-      const listaChoferes = Object.values(repartidoresLocales);
+      Object.values(repartidoresLocales).forEach(rep => {
+        const ordenesChofer = ventasHoy.filter(p => p.repartidorId === rep.id);
+        let efectivoChofer = 0;
+        let digitalChofer = 0;
+        let creditoChofer = 0;
+        let envDejadosChofer = 0;
+        let envRecogidosChofer = 0;
 
-      if (listaChoferes.length === 0) {
-        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados.</p>';
-        if (tbodyPrint) tbodyPrint.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay repartidores en la flota.</td></tr>';
-      } else {
-        listaChoferes.forEach(rep => {
-          const ordenesChofer = ventasHoy.filter(p => p.repartidorId === rep.id);
-          let efectivoChofer = 0;
-          let digitalChofer = 0;
-
-          ordenesChofer.forEach(o => {
-            const m = parseFloat(o.montoCobro) || 0;
-            if ((o.metodoPago || '').toLowerCase().includes('efectivo')) {
-              efectivoChofer += m;
-            } else {
-              digitalChofer += m;
-            }
-          });
-
-          const totalChofer = efectivoChofer + digitalChofer;
-          granTotalEfectivo += efectivoChofer;
-          granTotalDigital += digitalChofer;
-
-          const card = document.createElement('div');
-          card.className = 'liqui-card';
-          card.innerHTML = `
-            <div class="liqui-header">
-              <strong style="color:#6b21a8; font-size:15px;">🦁 ${rep.nombre}</strong>
-              <span class="badge-status ${ordenesChofer.length > 0 ? 'online' : ''}">${ordenesChofer.length} pedidos hoy</span>
-            </div>
-            <div class="liqui-stat-row">
-              <span>💵 Efectivo Físico a Rendir:</span>
-              <strong style="color:#15803d; font-size:14px;">S/ ${efectivoChofer.toFixed(2)}</strong>
-            </div>
-            <div class="liqui-stat-row">
-              <span>🟣 Digital (Yape / Plin / Transf):</span>
-              <strong style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</strong>
-            </div>
-            <div class="liqui-stat-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:6px; font-weight:900;">
-              <span>Total Recaudado por Chofer:</span>
-              <span>S/ ${totalChofer.toFixed(2)}</span>
-            </div>
-          `;
-          cont.appendChild(card);
-
-          if (tbodyPrint) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td><strong>${rep.nombre}</strong></td>
-              <td>${ordenesChofer.length} entrega(s)</td>
-              <td style="color:#15803d; font-weight:bold;">S/ ${efectivoChofer.toFixed(2)}</td>
-              <td style="color:#2563eb; font-weight:bold;">S/ ${digitalChofer.toFixed(2)}</td>
-              <td><strong>S/ ${totalChofer.toFixed(2)}</strong></td>
-            `;
-            tbodyPrint.appendChild(tr);
+        ordenesChofer.forEach(o => {
+          const m = parseFloat(o.montoCobro) || 0;
+          const pago = (o.metodoPago || '').toLowerCase();
+          
+          if (pago.includes('crédito') || pago.includes('credito') || pago.includes('cuenta')) {
+            creditoChofer += m;
+          } else if (pago.includes('efectivo')) {
+            efectivoChofer += m;
+          } else {
+            digitalChofer += m;
           }
-        });
-      }
 
-      const totalGlobal = granTotalEfectivo + granTotalDigital;
+          envDejadosChofer += parseInt(o.envasesEntregados || 1);
+          envRecogidosChofer += parseInt(o.envasesRecogidos || 0);
+        });
+
+        granTotalEfectivo += efectivoChofer;
+        granTotalDigital += digitalChofer;
+        granTotalCredito += creditoChofer;
+        totalLlenos += envDejadosChofer;
+        totalVacios += envRecogidosChofer;
+
+        const card = document.createElement('div');
+        card.className = 'liqui-card';
+        card.innerHTML = `
+          <div class="liqui-header">
+            <strong style="color:#6b21a8; font-size:15px;">🦁 ${rep.nombre}</strong>
+            <span class="badge-status ${ordenesChofer.length > 0 ? 'online' : ''}">${ordenesChofer.length} entregas</span>
+          </div>
+          <div class="liqui-stat-row">
+            <span>💵 Efectivo Físico a Rendir:</span>
+            <strong style="color:#15803d; font-size:14px;">S/ ${efectivoChofer.toFixed(2)}</strong>
+          </div>
+          <div class="liqui-stat-row">
+            <span>🟣 Digital (Yape / Plin):</span>
+            <strong style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</strong>
+          </div>
+          <div class="liqui-stat-row">
+            <span>📋 Créditos B2B (Sin efectivo):</span>
+            <strong style="color:#d97706;">S/ ${creditoChofer.toFixed(2)}</strong>
+          </div>
+          <div class="liqui-stat-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:6px; font-weight:800; font-size:11.5px;">
+            <span>🔄 Envases Dejados vs Recogidos:</span>
+            <span>${envDejadosChofer} llenos / ${envRecogidosChofer} vacíos</span>
+          </div>
+        `;
+        cont.appendChild(card);
+
+        if (tbodyPrint) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${rep.nombre}</strong></td>
+            <td>${ordenesChofer.length}</td>
+            <td style="color:#15803d;"><strong>S/ ${efectivoChofer.toFixed(2)}</strong></td>
+            <td style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</td>
+            <td style="color:#d97706;">S/ ${creditoChofer.toFixed(2)}</td>
+            <td>${envDejadosChofer} dejados / ${envRecogidosChofer} recogidos</td>
+          `;
+          tbodyPrint.appendChild(tr);
+        }
+      });
+
+      const totalGlobal = granTotalEfectivo + granTotalDigital + granTotalCredito;
       document.getElementById('liqTotalEfectivo').innerText = `S/ ${granTotalEfectivo.toFixed(2)}`;
       document.getElementById('liqTotalDigital').innerText = `S/ ${granTotalDigital.toFixed(2)}`;
+      document.getElementById('liqTotalCredito').innerText = `S/ ${granTotalCredito.toFixed(2)}`;
       document.getElementById('liqTotalGlobal').innerText = `S/ ${totalGlobal.toFixed(2)}`;
 
       if (document.getElementById('lblTotalPrintEfectivo')) document.getElementById('lblTotalPrintEfectivo').innerText = `S/ ${granTotalEfectivo.toFixed(2)}`;
       if (document.getElementById('lblTotalPrintDigital')) document.getElementById('lblTotalPrintDigital').innerText = `S/ ${granTotalDigital.toFixed(2)}`;
-      if (document.getElementById('lblTotalPrintGlobal')) document.getElementById('lblTotalPrintGlobal').innerText = `S/ ${totalGlobal.toFixed(2)}`;
+      if (document.getElementById('lblTotalPrintCredito')) document.getElementById('lblTotalPrintCredito').innerText = `S/ ${granTotalCredito.toFixed(2)}`;
+      if (document.getElementById('lblTotalPrintEnvases')) document.getElementById('lblTotalPrintEnvases').innerText = `${totalLlenos} dejados / ${totalVacios} recogidos`;
 
       const hoyStr = new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       if (document.getElementById('lblFechaCierreCaja')) document.getElementById('lblFechaCierreCaja').innerText = hoyStr;
@@ -1216,263 +1008,63 @@
       window.print();
     }
 
-    // ---------------- 2. HISTORIAL DE CLIENTES VIP ----------------
-    function procesarClientesVIP() {
-      const mapaClientes = {};
+    function renderizarFlotaActiva() {
+      const contenedor = document.getElementById('contenedorSecuenciasRepartidores');
+      contenedor.innerHTML = '';
+      Object.values(repartidoresLocales).forEach(rep => {
+        const ordenActiva = Object.values(pedidosLocales).find(p => p.repartidorId === rep.id && p.estado !== 'completado');
+        const etapa = ordenActiva ? ordenActiva.etapa : 0;
+        const card = document.createElement('div');
+        card.className = `repartidor-card ${rep.online ? 'activo' : ''}`;
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between;">
+            <strong>🦁 ${rep.nombre}</strong>
+            <span class="badge-status ${rep.online ? 'online' : ''}">${rep.online ? 'Online 🟢' : 'Offline 💤'}</span>
+          </div>
+          <div style="font-size:12px; margin-top:2px;">
+            ${ordenActiva ? `🛢️ <strong>${ordenActiva.tipoBalon}</strong> (${ordenActiva.cliente})` : '<span style="color:#64748b;">Disponible</span>'}
+          </div>
+          <div class="secuencia-mini-bar">
+            <div class="sec-block sec-rojo ${etapa === 1 ? 'activo' : ''}">1. EN CAMINO</div>
+            <div class="sec-block sec-gris-osc ${etapa === 2 ? 'activo' : ''}">2. ENTREGADO</div>
+            <div class="sec-block sec-gris-claro ${etapa === 3 ? 'activo' : ''}">3. COMPLETADO</div>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
 
-      Object.values(pedidosLocales).filter(p => p.estado === 'completado').forEach(p => {
-        const nombre = (p.cliente || 'Particular').trim();
-        if (!mapaClientes[nombre]) {
-          mapaClientes[nombre] = { nombre: nombre, cantidad: 0, totalGasto: 0, ultimoPedido: parseFechaSegura(p) };
+    function actualizarMapaAdmin() {
+      if (!mapAdmin) return;
+      Object.values(repartidoresLocales).forEach(rep => {
+        const icono = L.divIcon({
+          html: `<div style="background:${rep.online ? '#7e22ce' : '#64748b'}; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:18px;">🦁</div>`,
+          iconSize: [34, 34], iconAnchor: [17, 17]
+        });
+        if (!marcadoresAdmin[rep.id]) {
+          marcadoresAdmin[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(mapAdmin);
+        } else {
+          marcadoresAdmin[rep.id].setIcon(icono);
+          marcadoresAdmin[rep.id].setLatLng([rep.lat, rep.lng]);
         }
-        mapaClientes[nombre].cantidad += 1;
-        mapaClientes[nombre].totalGasto += parseFloat(p.montoCobro) || 0;
-        const fechaActual = parseFechaSegura(p);
-        if (fechaActual > mapaClientes[nombre].ultimoPedido) {
-          mapaClientes[nombre].ultimoPedido = fechaActual;
-        }
-      });
-
-      clientesAgrupados = Object.values(mapaClientes).sort((a, b) => b.cantidad - a.cantidad);
-      renderizarTablaClientes(clientesAgrupados);
-    }
-
-    function renderizarTablaClientes(lista) {
-      const tbody = document.getElementById('tablaClientesVIPBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-
-      if (lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:12px; color:#94a3b8;">Aún no hay clientes con pedidos completados.</td></tr>';
-        return;
-      }
-
-      lista.forEach(c => {
-        let nivelBadge = '<span style="background:#f1f5f9; color:#475569; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800;">Ocasional</span>';
-        if (c.cantidad >= 5) nivelBadge = '<span style="background:#fef08a; color:#854d0e; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:900;">👑 VIP Oro</span>';
-        else if (c.cantidad >= 2) nivelBadge = '<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800;">⭐ Frecuente</span>';
-
-        const mensajePromo = encodeURIComponent(`¡Hola ${c.nombre}! Te saludamos de LeoGas Cusco. Gracias por tu preferencia de siempre con Llamagas. Tenemos una promoción especial para tu próximo pedido de balón de gas 🔥🦁.`);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>👤 ${c.nombre}</strong></td>
-          <td><strong>${c.cantidad}</strong> balones</td>
-          <td style="color:#15803d; font-weight:bold;">S/ ${c.totalGasto.toFixed(2)}</td>
-          <td style="font-size:11px; color:#64748b;">${c.ultimoPedido.toLocaleDateString()}</td>
-          <td>${nivelBadge}</td>
-          <td>
-            <a href="https://wa.me/?text=${mensajePromo}" target="_blank" class="btn-wsp-promo">💬 Enviar Promo</a>
-          </td>
-        `;
-        tbody.appendChild(tr);
       });
     }
 
-    function filtrarTablaClientes() {
-      const q = document.getElementById('buscadorClientesInput').value.toLowerCase();
-      const filtrados = clientesAgrupados.filter(c => c.nombre.toLowerCase().includes(q));
-      renderizarTablaClientes(filtrados);
-    }
-
-    // ---------------- 3. VÁLVULAS Y ACCESORIOS CON CARGA DE IMÁGENES ----------------
-    function renderizarAccesoriosEditor() {
-      const cont = document.getElementById('listaAccesorios');
-      if (!cont) return;
-      cont.innerHTML = '';
-
-      accesorios.forEach((acc, i) => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <label>Nombre del Accesorio:</label>
-          <input type="text" value="${acc.nombre}" onchange="accesorios[${i}].nombre = this.value">
-
-          <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-              <label>Precio de Venta (S/):</label>
-              <input type="number" step="0.5" value="${acc.precio}" onchange="accesorios[${i}].precio = parseFloat(this.value) || 0">
-            </div>
-            <div style="flex:1;">
-              <label>Stock Disponible:</label>
-              <input type="number" value="${acc.stock || 0}" onchange="accesorios[${i}].stock = parseInt(this.value) || 0">
-            </div>
-            <div style="flex:1;">
-              <label>Estado en Catálogo:</label>
-              <select onchange="accesorios[${i}].disponible = (this.value === 'true')">
-                <option value="true" ${acc.disponible !== false ? 'selected' : ''}>🟢 Disponible</option>
-                <option value="false" ${acc.disponible === false ? 'selected' : ''}>🔴 Agotado</option>
-              </select>
-            </div>
-          </div>
-
-          <label>Descripción / Garantía:</label>
-          <input type="text" value="${acc.descripcion || ''}" onchange="accesorios[${i}].descripcion = this.value">
-
-          <label>Foto Real del Accesorio:</label>
-          <div class="admin-img-preview-box">
-            <img id="prev-acc-${i}" class="admin-thumb" src="${acc.imagen || '1791513590376.jpg'}" onerror="this.src='1791513590376.jpg'">
-            <div style="flex:1;">
-              <input type="file" accept="image/*" onchange="subirImagenAccesorio(event, ${i})" style="font-size:12px;">
-              <input type="text" value="${acc.imagen || ''}" placeholder="o URL / nombre del archivo" onchange="accesorios[${i}].imagen = this.value; document.getElementById('prev-acc-${i}').src = this.value;" style="margin-top:4px;">
-            </div>
-          </div>
-
-          <button class="btn btn-del" style="margin-top:10px;" onclick="eliminarAccesorio(${i})">🗑️ Eliminar Accesorio</button>
-        `;
-        cont.appendChild(div);
-      });
-    }
-
-    function subirImagenAccesorio(event, index) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        accesorios[index].imagen = e.target.result;
-        document.getElementById(`prev-acc-${index}`).src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function agregarNuevoAccesorio() {
-      accesorios.push({
-        id: "acc-" + Date.now(),
-        nombre: "Nuevo Accesorio para Gas",
-        tag: "Garantía de Fábrica",
-        precio: 30.00,
-        stock: 10,
-        disponible: true,
-        descripcion: "Accesorio certificado para instalaciones domésticas de GLP.",
-        imagen: "1791513590376.jpg"
-      });
-      renderizarAccesoriosEditor();
-    }
-
-    function eliminarAccesorio(i) {
-      if (confirm(`¿Eliminar "${accesorios[i].nombre}"?`)) {
-        accesorios.splice(i, 1);
-        renderizarAccesoriosEditor();
-      }
-    }
-
-    async function guardarAccesoriosFirebase() {
-      const msg = document.getElementById('statusMsgAccesorios');
-      msg.style.color = "#6b21a8";
-      msg.innerText = "⏳ Guardando accesorios en Firebase...";
-      await db.ref('accesorios').set(accesorios);
-      msg.style.color = "#15803d";
-      msg.innerText = "✔ ¡Válvulas y accesorios guardados en tiempo real!";
-      setTimeout(() => { msg.innerText = ""; }, 4000);
-    }
-
-    // ---------------- GESTIÓN DE PRODUCTOS Y PRECIOS (BALONES) ----------------
-    function renderizarProductosEditor() {
-      const cont = document.getElementById('listaProductos');
-      cont.innerHTML = '';
-
-      productos.forEach((p, i) => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <label>Nombre:</label>
-          <input type="text" value="${p.nombre}" onchange="productos[${i}].nombre = this.value">
-
-          <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-              <label>Precio (S/):</label>
-              <input type="number" step="0.5" value="${p.precio}" onchange="productos[${i}].precio = parseFloat(this.value) || 0">
-            </div>
-            <div style="flex:1;">
-              <label>Disponibilidad / Stock:</label>
-              <select onchange="productos[${i}].disponible = (this.value === 'true')">
-                <option value="true" ${p.disponible !== false ? 'selected' : ''}>🟢 Disponible</option>
-                <option value="false" ${p.disponible === false ? 'selected' : ''}>🔴 Agotado</option>
-              </select>
-            </div>
-          </div>
-
-          <label>Descripción:</label>
-          <input type="text" value="${p.descripcion || ''}" onchange="productos[${i}].descripcion = this.value">
-
-          <label>Imagen del Balón:</label>
-          <div class="admin-img-preview-box">
-            <img id="prev-${i}" class="admin-thumb" src="${p.imagen}" onerror="this.src='1791513590376.jpg'">
-            <div style="flex:1;">
-              <input type="file" accept="image/*" onchange="subirImagen(event, ${i})" style="font-size:12px;">
-              <input type="text" value="${p.imagen}" placeholder="o escribe nombre de archivo" onchange="productos[${i}].imagen = this.value; document.getElementById('prev-${i}').src = this.value;" style="margin-top:4px;">
-            </div>
-          </div>
-
-          <button class="btn btn-del" style="margin-top:10px;" onclick="eliminarProducto(${i})">🗑️ Eliminar Producto</button>
-        `;
-        cont.appendChild(div);
-      });
-    }
-
-    function subirImagen(event, index) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        productos[index].imagen = e.target.result;
-        document.getElementById(`prev-${index}`).src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function agregarNuevoBalonProducto() {
-      productos.push({
-        id: "gas-" + Date.now(),
-        nombre: "Nuevo Balón de Gas",
-        tag: "Sellado",
-        descripcion: "Balón con precinto de garantía y peso exacto.",
-        precio: 50.00,
-        disponible: true,
-        imagen: "1791513590376.jpg"
-      });
-      renderizarProductosEditor();
-    }
-
-    function eliminarProducto(i) {
-      if (confirm(`¿Eliminar "${productos[i].nombre}"?`)) {
-        productos.splice(i, 1);
-        renderizarProductosEditor();
-      }
-    }
-
-    async function guardarProductosFirebase() {
-      const msg = document.getElementById('statusMsgProductos');
-      msg.style.color = "#6b21a8";
-      msg.innerText = "⏳ Guardando en Firebase...";
-      await db.ref('productos').set(productos);
-      msg.style.color = "#15803d";
-      msg.innerText = "✔ ¡Precios y productos actualizados en tiempo real!";
-      setTimeout(() => { msg.innerText = ""; }, 4000);
-    }
-
-    // ---------------- GESTIÓN DE REPARTIDORES CON USUARIO Y CONTRASEÑA ----------------
     function renderizarGestionRepartidores() {
       const cont = document.getElementById('listaRepartidoresConfig');
+      if (!cont) return;
       cont.innerHTML = '';
-      const lista = Object.values(repartidoresLocales);
-
-      if (lista.length === 0) {
-        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados en el sistema.</p>';
-        return;
-      }
-
-      lista.forEach(rep => {
+      Object.values(repartidoresLocales).forEach(rep => {
         const div = document.createElement('div');
         div.className = 'repartidor-card';
         div.innerHTML = `
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end;">
             <div>
-              <label>Nombre Chofer / Unidad:</label>
-              <input type="text" id="inpRepName_${rep.id}" value="${rep.nombre || ''}" style="font-weight:bold;">
+              <label>Chofer:</label>
+              <input type="text" id="inpRepName_${rep.id}" value="${rep.nombre || ''}">
             </div>
             <div>
-              <label>Usuario Login:</label>
+              <label>Usuario:</label>
               <input type="text" id="inpRepUser_${rep.id}" value="${rep.usuario || ''}">
             </div>
             <div>
@@ -1480,12 +1072,9 @@
               <input type="text" id="inpRepPass_${rep.id}" value="${rep.password || ''}">
             </div>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-edit" style="flex:1;" onclick="guardarDatosRepartidorManual('${rep.id}')">💾 Guardar</button>
+              <button class="btn btn-edit" style="flex:1;" onclick="guardarDatosRepartidorManual('${rep.id}')">💾</button>
               <button class="btn btn-del" onclick="eliminarRepartidor('${rep.id}')">🗑️</button>
             </div>
-          </div>
-          <div style="font-size:11px; color:#64748b; margin-top:6px;">
-            Estado GPS: <strong>${rep.online ? '🟢 Conectado' : '💤 Desconectado'}</strong> | ID Interno: <code>${rep.id}</code>
           </div>
         `;
         cont.appendChild(div);
@@ -1496,169 +1085,38 @@
       const nombre = document.getElementById('nuevoRepNombre').value.trim();
       const usuario = document.getElementById('nuevoRepUsuario').value.trim().toLowerCase();
       const pass = document.getElementById('nuevoRepPassword').value.trim();
-
-      if (!nombre || !usuario || !pass) {
-        return alert("Por favor completa el nombre, usuario y contraseña del repartidor.");
-      }
-
-      const repetido = Object.values(repartidoresLocales).find(r => r.usuario && r.usuario.toLowerCase() === usuario);
-      if (repetido) {
-        return alert(`El usuario "${usuario}" ya está asignado a otro chofer.`);
-      }
-
+      if (!nombre || !usuario || !pass) return alert("Completa los datos.");
       const nuevoId = "rep-" + Date.now();
-      await db.ref(`repartidores/${nuevoId}`).set({
-        id: nuevoId,
-        nombre: nombre,
-        usuario: usuario,
-        password: pass,
-        online: false,
-        lat: -13.5167,
-        lng: -71.9788
-      });
-
-      document.getElementById('nuevoRepNombre').value = '';
-      document.getElementById('nuevoRepUsuario').value = '';
-      document.getElementById('nuevoRepPassword').value = '';
-
-      alert(`✔ Repartidor "${nombre}" registrado con éxito. Podrá ingresar con su usuario y contraseña.`);
+      await db.ref(`repartidores/${nuevoId}`).set({ id: nuevoId, nombre, usuario, password: pass, online: false, lat: -13.5167, lng: -71.9788 });
+      alert("✔ Repartidor creado.");
     }
 
     async function guardarDatosRepartidorManual(id) {
-      const nuevoNombre = document.getElementById(`inpRepName_${id}`).value.trim();
-      const nuevoUser = document.getElementById(`inpRepUser_${id}`).value.trim().toLowerCase();
-      const nuevoPass = document.getElementById(`inpRepPass_${id}`).value.trim();
-
-      if (!nuevoNombre || !nuevoUser || !nuevoPass) {
-        return alert("El nombre, usuario y contraseña no pueden estar vacíos.");
-      }
-
       await db.ref(`repartidores/${id}`).update({
-        nombre: nuevoNombre,
-        usuario: nuevoUser,
-        password: nuevoPass
+        nombre: document.getElementById(`inpRepName_${id}`).value.trim(),
+        usuario: document.getElementById(`inpRepUser_${id}`).value.trim().toLowerCase(),
+        password: document.getElementById(`inpRepPass_${id}`).value.trim()
       });
-
-      alert("✔ Credenciales y nombre del chofer actualizados.");
+      alert("✔ Guardado.");
     }
 
     async function eliminarRepartidor(id) {
-      const rep = repartidoresLocales[id];
-      const nombre = rep ? rep.nombre : 'este repartidor';
-      if (confirm(`¿Deseas eliminar a "${nombre}" de la flota?`)) {
-        await db.ref(`repartidores/${id}`).remove();
-        alert("✔ Repartidor eliminado.");
-      }
+      if (confirm("¿Eliminar chofer?")) await db.ref(`repartidores/${id}`).remove();
     }
 
-    // ---------------- TELÉFONOS ----------------
-    async function guardarTelefonosFirebase() {
-      await db.ref('telefonos').set({
-        whatsapp: document.getElementById('telWhatsApp').value.trim(),
-        tel1: document.getElementById('telFijo1').value.trim(),
-        tel2: document.getElementById('telFijo2').value.trim(),
-        tel3: document.getElementById('telFijo3').value.trim()
-      });
-      alert("✔ Teléfonos guardados al instante en Firebase.");
-    }
-
-    // ---------------- REPORTES CONTABLES POR FECHAS Y CALENDARIO ----------------
     function procesarVentasParaReportes() {
       ventasLocales = Object.values(pedidosLocales).filter(p => p.estado === 'completado');
     }
 
     function parseFechaSegura(p) {
-      if (p.timestamp) return new Date(p.timestamp);
-      return new Date();
+      return p.timestamp ? new Date(p.timestamp) : new Date();
     }
 
     function aplicarFiltroFecha(periodo, boton) {
       filtroFechaActivo = periodo;
       document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
       if (boton) boton.classList.add('active');
-      
-      document.getElementById('calFechaDia').value = '';
-      document.getElementById('calFechaMes').value = '';
-      document.getElementById('calFechaAnio').value = '';
-      document.getElementById('calRangoDesde').value = '';
-      document.getElementById('calRangoHasta').value = '';
-
       renderizarReportesContables();
-    }
-
-    function filtrarPorDiaCalendario(fechaStr) {
-      if (!fechaStr) return;
-      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
-      filtroFechaActivo = "dia_especifico";
-      
-      const [y, m, d] = fechaStr.split('-').map(Number);
-      const inicioDia = new Date(y, m - 1, d, 0, 0, 0);
-      const finDia = new Date(y, m - 1, d, 23, 59, 59);
-
-      ventasFiltradas = ventasLocales.filter(v => {
-        const f = parseFechaSegura(v);
-        return f >= inicioDia && f <= finDia;
-      });
-
-      renderizarTablaYTotalesReporte(`Día exacto: ${fechaStr}`);
-    }
-
-    function filtrarPorMesCalendario(mesStr) {
-      if (!mesStr) return;
-      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
-      filtroFechaActivo = "mes_especifico";
-
-      const [y, m] = mesStr.split('-').map(Number);
-      const inicioMes = new Date(y, m - 1, 1, 0, 0, 0);
-      const finMes = new Date(y, m, 0, 23, 59, 59);
-
-      ventasFiltradas = ventasLocales.filter(v => {
-        const f = parseFechaSegura(v);
-        return f >= inicioMes && f <= finMes;
-      });
-
-      renderizarTablaYTotalesReporte(`Mes: ${mesStr}`);
-    }
-
-    function filtrarPorAnioCalendario(anioNum) {
-      const anio = parseInt(anioNum);
-      if (isNaN(anio) || anio < 2020) return;
-      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
-      filtroFechaActivo = "anio_especifico";
-
-      const inicioAnio = new Date(anio, 0, 1, 0, 0, 0);
-      const finAnio = new Date(anio, 11, 31, 23, 59, 59);
-
-      ventasFiltradas = ventasLocales.filter(v => {
-        const f = parseFechaSegura(v);
-        return f >= inicioAnio && f <= finAnio;
-      });
-
-      renderizarTablaYTotalesReporte(`Año: ${anio}`);
-    }
-
-    function filtrarPorRangoCalendario() {
-      const desdeStr = document.getElementById('calRangoDesde').value;
-      const hastaStr = document.getElementById('calRangoHasta').value;
-
-      if (!desdeStr || !hastaStr) {
-        return alert("Por favor selecciona ambas fechas (Desde y Hasta).");
-      }
-
-      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
-      filtroFechaActivo = "rango_especifico";
-
-      const [y1, m1, d1] = desdeStr.split('-').map(Number);
-      const [y2, m2, d2] = hastaStr.split('-').map(Number);
-      const fechaDesde = new Date(y1, m1 - 1, d1, 0, 0, 0);
-      const fechaHasta = new Date(y2, m2 - 1, d2, 23, 59, 59);
-
-      ventasFiltradas = ventasLocales.filter(v => {
-        const f = parseFechaSegura(v);
-        return f >= fechaDesde && f <= fechaHasta;
-      });
-
-      renderizarTablaYTotalesReporte(`Rango: ${desdeStr} al ${hastaStr}`);
     }
 
     function renderizarReportesContables() {
@@ -1679,66 +1137,44 @@
         return true;
       });
 
-      const filtroMap = {
-        'todos': 'Todos los registros',
-        'hoy': 'Hoy',
-        'semana': 'Esta Semana',
-        'mes': 'Este Mes',
-        'anio': `Este Año (${ahora.getFullYear()})`
-      };
-      
-      renderizarTablaYTotalesReporte(filtroMap[filtroFechaActivo] || 'Filtro Personalizado');
-    }
-
-    function renderizarTablaYTotalesReporte(nombreFiltroTexto) {
       const tbody = document.getElementById('tablaVentasBody');
       tbody.innerHTML = '';
       let sumaTotal = 0;
 
-      if (ventasFiltradas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:12px; color:#94a3b8;">No hay ventas completadas en el periodo seleccionado.</td></tr>';
-      } else {
-        ventasFiltradas.forEach(v => {
-          const tot = parseFloat(v.montoCobro) || 0;
-          sumaTotal += tot;
-          const chofer = repartidoresLocales[v.repartidorId]?.nombre || v.repartidorId || "General";
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${v.hora || '--'}</td>
-            <td>${v.cliente || 'Particular'}</td>
-            <td>${v.tipoBalon || '--'}</td>
-            <td><strong>${chofer}</strong></td>
-            <td><strong>S/ ${tot.toFixed(2)}</strong></td>
-            <td>${v.metodoPago || 'Efectivo'}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
+      ventasFiltradas.forEach(v => {
+        const tot = parseFloat(v.montoCobro) || 0;
+        sumaTotal += tot;
+        const chofer = repartidoresLocales[v.repartidorId]?.nombre || "General";
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${v.hora || '--'}</td>
+          <td>${v.cliente || 'Particular'}</td>
+          <td>${v.tipoBalon || '--'}</td>
+          <td><strong>${chofer}</strong></td>
+          <td><strong>S/ ${tot.toFixed(2)}</strong></td>
+          <td>${v.metodoPago || 'Efectivo'}</td>
+          <td>${v.envasesEntregados || 1} dej. / ${v.envasesRecogidos || 0} rec.</td>
+        `;
+        tbody.appendChild(tr);
+      });
 
       document.getElementById('resumenCantPedidos').innerText = `${ventasFiltradas.length}`;
       document.getElementById('resumenTotalSoles').innerText = `S/ ${sumaTotal.toFixed(2)}`;
-      
-      document.getElementById('lblFiltroImpreso').innerText = nombreFiltroTexto;
-      document.getElementById('lblFechaEmision').innerText = new Date().toLocaleString();
       document.getElementById('lblTotalFinalImpreso').innerText = `S/ ${sumaTotal.toFixed(2)}`;
     }
 
     function exportarVentasExcelCSV() {
-      if (ventasFiltradas.length === 0) return alert("No hay ventas en la lista actual para exportar.");
-      let csv = "\uFEFFHora;Cliente;Detalle Balon;Repartidor;Total (S/);Pago\r\n";
+      let csv = "\uFEFFHora;Cliente;Detalle;Repartidor;Total;Pago;EnvasesDejados;EnvasesRecogidos\r\n";
       ventasFiltradas.forEach(v => {
-        const chofer = repartidoresLocales[v.repartidorId]?.nombre || v.repartidorId || "General";
-        csv += `"${v.hora || ''}";"${v.cliente || ''}";"${v.tipoBalon || ''}";"${chofer}";"${parseFloat(v.montoCobro || 0).toFixed(2)}";"${v.metodoPago || ''}"\r\n`;
+        csv += `"${v.hora || ''}";"${v.cliente || ''}";"${v.tipoBalon || ''}";"${repartidoresLocales[v.repartidorId]?.nombre || 'General'}";"${v.montoCobro}";"${v.metodoPago}";"${v.envasesEntregados || 1}";"${v.envasesRecogidos || 0}"\r\n`;
       });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `Reporte_LeoGas_${filtroFechaActivo}_${new Date().toISOString().slice(0,10)}.csv`;
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      a.download = `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
     }
 
     window.onload = () => {
-      actualizarBotonesNotificacion();
       if (sessionStorage.getItem("leogas_auth") === "true") mostrarPanel();
     };
   </script>
