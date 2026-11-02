@@ -12,7 +12,6 @@
       --primary: #6b21a8;
       --primary-dark: #581c87;
       --accent: #f59e0b;
-      --accent-hover: #d97706;
       --dark: #1e1b4b;
       --text: #334155;
       --white: #ffffff;
@@ -32,7 +31,6 @@
     .brand-text span { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--dark); font-weight: 700; }
 
     .chuspa-nav-badge { display: flex; align-items: center; gap: 8px; background: #fefce8; border: 1.5px solid #eab308; padding: 5px 12px 5px 6px; border-radius: 26px; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(234, 179, 8, 0.2); }
-    .chuspa-nav-badge:hover { transform: scale(1.04); background: #ffffff; box-shadow: 0 4px 10px rgba(107, 33, 168, 0.25); }
     .chuspa-nav-img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #ca8a04; background: #fff; }
     .chuspa-nav-info { display: flex; flex-direction: column; line-height: 1.15; }
     .chuspa-nav-title { font-size: 12px; font-weight: 900; color: var(--primary); }
@@ -40,48 +38,14 @@
 
     .nav-actions { display: flex; align-items: center; gap: 8px; }
     .nav-cta { background: var(--primary); color: var(--white); padding: 8px 18px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px; }
-    .btn-b2b-header {
-      background: #0f172a;
-      color: #facc15;
-      border: 1.5px solid #ca8a04;
-      padding: 8px 14px;
-      border-radius: 30px;
-      font-weight: 800;
-      font-size: 13px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
-    .btn-b2b-header:hover { background: #1e1b4b; transform: translateY(-1px); }
+    .btn-b2b-header { background: #0f172a; color: #facc15; border: 1.5px solid #ca8a04; padding: 8px 14px; border-radius: 30px; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 
     /* BARRA DE SEGUIMIENTO EN VIVO */
     .tracking-status-bar {
-      display: none;
-      position: sticky;
-      top: 64px;
-      z-index: 999;
+      display: none; position: sticky; top: 64px; z-index: 999;
       background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-      border-bottom: 2px solid #eab308;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 10px 16px;
-      transition: all 0.3s ease;
+      border-bottom: 2px solid #eab308; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 10px 16px;
     }
-
-    .tracking-status-bar.modo-b2b {
-      background: linear-gradient(135deg, #090d16 0%, #0f172a 45%, #1e1b4b 100%);
-      border-bottom: 2.5px solid #f59e0b;
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.45);
-      color: #f8fafc;
-    }
-    .tracking-status-bar.modo-b2b #trackTituloCliente { color: #facc15 !important; font-weight: 900; letter-spacing: 0.3px; }
-    .tracking-status-bar.modo-b2b #trackDetalleEstado { color: #cbd5e1 !important; }
-    .tracking-status-bar.modo-b2b .btn-ticket-modal { background: #f59e0b !important; color: #0f172a !important; border: 1px solid #facc15; }
-
-    .badge-b2b-pill { background: #f59e0b; color: #0f172a; font-size: 9.5px; font-weight: 900; padding: 2px 7px; border-radius: 6px; letter-spacing: 0.5px; display: inline-block; margin-left: 6px; vertical-align: middle; }
-
     .tracking-status-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
     .tracking-tag-pill { background: var(--primary); color: #fff; font-weight: 800; font-size: 12px; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
 
@@ -95,7 +59,7 @@
 
     .flyer-section { max-width: 1200px; margin: 26px auto; padding: 0 20px; }
     .flyer-card { background: var(--white); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); border: 2px solid #fde047; display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
-    .flyer-img-container { flex: 1; min-width: 250px; max-width: 360px; margin: 0 auto; cursor: pointer; }
+    .flyer-img-container { flex: 1; min-width: 250px; max-width: 360px; margin: 0 auto; }
     .flyer-img-container img { width: 100%; height: auto; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); display: block; }
     .flyer-info { flex: 2; min-width: 280px; }
     .flyer-info h3 { font-size: 23px; font-weight: 900; color: var(--primary); margin-bottom: 6px; }
@@ -108,35 +72,18 @@
     .map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px; }
     .map-header h3 { font-size: 18px; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 8px; }
     .gps-legend-box { display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; }
-    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 800; opacity: 0.35; transition: all 0.3s ease; }
-    .legend-item.activo { opacity: 1; transform: scale(1.05); }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 800; opacity: 0.35; }
+    .legend-item.activo { opacity: 1; }
     .legend-item.online.activo { color: #15803d; }
     .legend-item.offline.activo { color: #dc2626; }
-    .legend-divider { color: #cbd5e1; font-size: 12px; }
-
     .map-wrapper { position: relative; border-radius: 12px; overflow: hidden; }
-    .map-wrapper.fullscreen-map { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important; border-radius: 0 !important; margin: 0 !important; }
-    .map-wrapper.fullscreen-map #cuscoMap { height: 100vh !important; border-radius: 0 !important; }
-
-    .btn-toggle-fullscreen { position: absolute; top: 14px; right: 14px; z-index: 1000; background: rgba(255, 255, 255, 0.95); border: 1.5px solid #6b21a8; color: #6b21a8; padding: 8px 14px; border-radius: 24px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.18); display: flex; align-items: center; gap: 6px; }
-    .btn-center-map { position: absolute; top: 60px; right: 14px; z-index: 1000; background: rgba(255, 255, 255, 0.95); border: 1.5px solid #2563eb; color: #2563eb; padding: 8px 14px; border-radius: 24px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.18); display: flex; align-items: center; gap: 6px; }
-    .distance-eta-badge { position: absolute; bottom: 14px; left: 14px; z-index: 1000; background: rgba(30, 27, 75, 0.95); color: #facc15; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.25); border: 1px solid #ca8a04; display: none; }
     #cuscoMap { width: 100%; height: 380px; border-radius: 10px; z-index: 10; }
-
-    .custom-gps-marker { position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
-    .gps-radar-pulse { position: absolute; width: 58px; height: 58px; border-radius: 50%; background: rgba(107, 33, 168, 0.28); animation: radarPulse 2s ease-out infinite; pointer-events: none; }
-    @keyframes radarPulse { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
-    .lion-badge-circle { position: relative; width: 42px; height: 42px; background: linear-gradient(135deg, #7e22ce 0%, #4c1d95 100%); border: 2.5px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 23px; box-shadow: 0 4px 12px rgba(107, 33, 168, 0.55); z-index: 2; }
-    .custom-gps-marker.offline .lion-badge-circle { background: #64748b; }
-    .custom-gps-marker.offline .gps-radar-pulse, .custom-gps-marker.offline .fire-flame-emitter { display: none; }
-    .fire-flame-emitter { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 17px; z-index: 3; }
 
     .section-menu { max-width: 1200px; margin: 20px auto 40px; padding: 0 20px; }
     .menu-header { background: var(--white); padding: 16px 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
     .menu-header h3 { font-size: 20px; font-weight: 800; color: var(--dark); }
     .grid-empanadas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; }
     .card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; border: 1px solid #f1f5f9; }
-    .card.agotado { opacity: 0.65; }
     .card-img-wrapper { position: relative; height: 180px; background: #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
     .card-tag { position: absolute; top: 10px; left: 10px; background: rgba(107, 33, 168, 0.9); color: var(--white); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 16px; }
@@ -146,103 +93,49 @@
     .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid #f3f4f6; }
     .price { font-size: 19px; font-weight: 900; color: var(--primary); }
     .btn-add { background: var(--primary); color: var(--white); border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
 
-    /* BOTÓN FLOTANTE CARRITO */
-    .chat-bubble-container { position: fixed; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 10px; z-index: 1500; cursor: pointer; user-select: none; }
-    .chat-bubble-label { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); color: var(--primary-dark); font-weight: 900; font-size: 14px; padding: 8px 14px; border-radius: 20px; box-shadow: 0 4px 14px rgba(107, 33, 168, 0.25); border: 2px solid var(--primary); }
-    .chat-bubble-btn { position: relative; width: 62px; height: 62px; background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); border-radius: 50%; box-shadow: 0 6px 20px rgba(107, 33, 168, 0.45); display: flex; align-items: center; justify-content: center; border: 2px solid #facc15; }
-    .chat-badge { position: absolute; top: -3px; right: -3px; background-color: #ef4444; color: var(--white); border: 2px solid var(--white); font-size: 11px; font-weight: 800; min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    /* BOTONES FLOTANTES */
+    .chat-bubble-container { position: fixed; bottom: 24px; right: 24px; display: flex; align-items: center; gap: 10px; z-index: 1500; cursor: pointer; }
+    .chat-bubble-label { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); color: var(--primary-dark); font-weight: 900; font-size: 14px; padding: 8px 14px; border-radius: 20px; border: 2px solid var(--primary); }
+    .chat-bubble-btn { position: relative; width: 62px; height: 62px; background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #facc15; }
+    .chat-badge { position: absolute; top: -3px; right: -3px; background-color: #ef4444; color: var(--white); font-size: 11px; font-weight: 800; min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-    /* BOTÓN FLOTANTE ACTIVAR NOTIFICACIONES */
-    .floating-notif-btn {
-      position: fixed;
-      bottom: 24px;
-      left: 20px;
-      z-index: 1500;
-      background: #ffffff;
-      color: #6b21a8;
-      border: 2px solid #a855f7;
-      padding: 10px 16px;
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 6px 18px rgba(107, 33, 168, 0.25);
-      transition: all 0.25s ease;
-      user-select: none;
-    }
-    .floating-notif-btn:hover { background: #6b21a8; color: #ffffff; transform: translateY(-2px); }
-    .floating-notif-btn.activada { background: #dcfce7; color: #15803d; border-color: #22c55e; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25); }
+    .floating-notif-btn { position: fixed; bottom: 24px; left: 20px; z-index: 1500; background: #ffffff; color: #6b21a8; border: 2px solid #a855f7; padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .floating-notif-btn.activada { background: #dcfce7; color: #15803d; border-color: #22c55e; }
 
-    /* CARRITO MODAL */
-    .cart-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: flex-end; }
-    .cart-modal-card { background: var(--white); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 -10px 30px rgba(0,0,0,0.25); animation: slideUp 0.25s ease-out; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
+    /* MODAL CARRITO */
+    .cart-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); z-index: 2000; justify-content: center; align-items: flex-end; }
+    .cart-modal-card { background: var(--white); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; max-height: 92vh; display: flex; flex-direction: column; }
     .cart-modal-header { padding: 16px 20px; background: var(--primary); color: var(--white); border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-    .btn-close-cart { background: none; border: none; color: var(--white); font-size: 24px; cursor: pointer; }
     .cart-modal-body { padding: 16px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-    .cart-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .btn-vaciar-cart { background: none; border: none; color: #dc2626; font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: underline; }
-    .cart-items-box { display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
+    .cart-items-box { display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto; }
     .cart-item-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
-    .btn-qty { background: #e2e8f0; border: none; width: 26px; height: 26px; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-    .popup-section-label { font-size: 11px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px; }
+    .btn-qty { background: #e2e8f0; border: none; width: 26px; height: 26px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .popup-section-label { font-size: 11px; text-transform: uppercase; font-weight: 800; color: #64748b; }
 
     .grid-payments { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .btn-pay-option { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 7px 4px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; }
     .btn-pay-option.active { background: var(--primary); color: var(--white); }
 
-    .cash-box-drawer { display: block; background: #fdf4ff; border: 2px dashed #d8b4fe; border-radius: 10px; padding: 12px 14px; margin-top: 8px; }
-    .cash-input-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-    .cash-input { flex: 1; padding: 8px 12px; font-size: 16px; font-weight: 800; border: 1px solid #c084fc; border-radius: 8px; color: var(--primary-dark); background: #fff; }
-    .cash-quick-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-    .btn-quick-cash { background: #fff; border: 1px solid #d8b4fe; color: var(--primary-dark); font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
-    .vuelto-badge-box { margin-top: 10px; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .cash-box-drawer { display: none; background: #fdf4ff; border: 2px dashed #d8b4fe; border-radius: 10px; padding: 12px; margin-top: 8px; }
+    .cash-input { width: 100%; padding: 8px; font-size: 15px; font-weight: 800; border: 1px solid #c084fc; border-radius: 8px; margin-top: 4px; }
+    .vuelto-badge-box { margin-top: 8px; padding: 8px; border-radius: 8px; font-size: 12.5px; font-weight: 800; background: #dcfce7; color: #15803d; border: 1px solid #86efac; display: flex; justify-content: space-between; }
     .vuelto-badge-box.alerta { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
-    .delivery-time-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
-    .grid-delivery-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .btn-del-opt { background: #fff; border: 1.5px solid #cbd5e1; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--dark); text-align: center; }
-    .btn-del-opt.active { background: var(--primary); color: #fff; border-color: var(--primary-dark); }
-
-    .comprobante-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
-    .client-name-input { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
-    .geo-box { display: flex; flex-direction: column; gap: 6px; background: #faf5ff; border: 1px solid #e9d5ff; padding: 10px 12px; border-radius: 8px; }
-    .btn-geo { background: var(--primary); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
-
+    .delivery-time-box, .comprobante-box, .geo-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 10px; }
+    .client-name-input { width: 100%; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; margin-top: 4px; }
     .cart-modal-footer { padding: 14px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 10px; }
     .btn-order-wsp { background: #25d366; color: var(--white); padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-ticket-modal { background: #3b82f6; color: #fff; padding: 10px; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-    /* ALERTAS VISUALES AL CENTRO */
-    .center-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 5000; justify-content: center; align-items: center; padding: 16px; }
-    .center-alert-card { background: #ffffff; width: 100%; max-width: 420px; border-radius: 20px; padding: 24px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: zoomInAlert 0.25s ease-out; }
-    @keyframes zoomInAlert { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
+    /* ALERTAS MODAL */
+    .center-alert-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 5000; justify-content: center; align-items: center; padding: 16px; }
+    .center-alert-card { background: #ffffff; width: 100%; max-width: 420px; border-radius: 20px; padding: 24px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
     .alert-icon-circle { width: 70px; height: 70px; margin: 0 auto 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; }
-    .alert-icon-success { background: #dcfce7; border: 2px solid #22c55e; }
-    .alert-icon-road { background: #fee2e2; border: 2px solid #ef4444; }
-    .alert-icon-door { background: #dcfce7; border: 2px solid #16a34a; }
-    .alert-icon-finish { background: #f3e8ff; border: 2px solid #a855f7; }
-
-    .center-alert-card h3 { font-size: 20px; font-weight: 900; color: #1e1b4b; margin-bottom: 8px; }
-    .center-alert-card p { font-size: 13.5px; color: #475569; margin-bottom: 18px; line-height: 1.45; }
-
-    .alert-btn-group { display: flex; flex-direction: column; gap: 8px; }
-    .btn-alert-action { width: 100%; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 14px; border: none; cursor: pointer; }
-    .btn-alert-primary { background: var(--primary); color: #fff; }
-    .btn-alert-success { background: #16a34a; color: #fff; }
 
     @media print {
       body * { visibility: hidden; }
       #ticketImprimible, #ticketImprimible * { visibility: visible; }
-      #ticketImprimible { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; }
-      .no-print { display: none !important; }
+      #ticketImprimible { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; border: none !important; }
     }
   </style>
 </head>
@@ -259,21 +152,16 @@
             <span>Llamagas • El Moradito Rendidor</span>
           </div>
         </a>
-
-        <!-- LOGO LA CHUSPA TECH -->
-        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-nav-badge" title="Visitar La Chuspa Anuncios">
-          <img src="CHUSPITA-circulo.png" alt="La Chuspa Anuncios" class="chuspa-nav-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
+        <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-nav-badge">
+          <img src="CHUSPITA-circulo.png" alt="La Chuspa" class="chuspa-nav-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
           <div class="chuspa-nav-info">
             <span class="chuspa-nav-title">La Chuspa Tech</span>
             <span class="chuspa-sub">by La Chuspa Anuncios</span>
           </div>
         </a>
       </div>
-
       <div class="nav-actions">
-        <button type="button" class="btn-b2b-header" onclick="abrirModalB2B()">
-          🏢 Empresas / B2B
-        </button>
+        <button type="button" class="btn-b2b-header" onclick="abrirModalB2B()">🏢 Empresas / B2B</button>
         <a href="#menu" class="nav-cta">Pedir Gas</a>
       </div>
     </div>
@@ -283,50 +171,22 @@
   <div class="tracking-status-bar" id="barraSeguimientoActivo">
     <div class="tracking-status-inner">
       <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:22px;" id="trackIconoTipo">🛵</span>
+        <span style="font-size:22px;">🛵</span>
         <div>
-          <div style="display:flex; align-items:center;">
-            <strong id="trackTituloCliente" style="color:#6b21a8; font-size:13.5px;">Tu pedido de gas está activo</strong>
-            <span id="badgeB2BTag" class="badge-b2b-pill" style="display:none;">B2B EMPRESA</span>
-          </div>
+          <strong id="trackTituloCliente" style="color:#6b21a8; font-size:13.5px;">Tu pedido de gas está activo</strong>
           <div id="trackDetalleEstado" style="font-size:11.5px; color:#475569;">En proceso de entrega...</div>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span class="tracking-tag-pill" id="trackPillEtapa">1. En Camino</span>
-        <button type="button" class="btn-ticket-modal" style="padding:6px 12px; font-size:11.5px;" onclick="generarComprobanteModal()">🧾 Comprobante</button>
-      </div>
+      <span class="tracking-tag-pill" id="trackPillEtapa">1. En Camino</span>
     </div>
   </div>
 
-  <!-- SECCIÓN HERO -->
+  <!-- HERO & VOLANTE -->
   <section class="hero">
     <div class="hero-container">
       <span class="badge-hero">Mayor seguridad con LeoGas tu distribuidora de confianza</span>
       <h2>¡Solo la seguridad hace la diferencia!</h2>
       <p>Pide tu balón de gas en Cusco al instante con seguimiento en tiempo real.</p>
-      
-      <div class="hero-features">
-        <div class="feature-pill">📍 Rastreo en Vivo</div>
-        <div class="feature-pill">⚖️ Balón Sellado 10kg</div>
-        <div class="feature-pill">💵 Yape, Plin y Efectivo con Vuelto</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- VOLANTE -->
-  <section class="flyer-section">
-    <div class="flyer-card">
-      <div class="flyer-img-container">
-        <img id="imgFlyerOficial" src="1791513590376.jpg" alt="Volante Oficial LeoGas Cusco" onerror="this.src='1791513590376.jpg'">
-      </div>
-      <div class="flyer-info">
-        <span class="badge-hero" style="background:#f59e0b; color:#1e1b4b; margin-bottom:8px;">Distribuidor Oficial</span>
-        <h3>LeoGas Cusco — Llamagas</h3>
-        <p class="flyer-slogan">"Ordena tu Pedido aquí y te lo traemos en minutos"</p>
-        <div class="popup-section-label" style="margin-bottom:8px;">Teléfonos de Pedido Inmediato:</div>
-        <div class="flyer-contact-grid" id="contenedorTelefonosFlyer"></div>
-      </div>
     </div>
   </section>
 
@@ -335,58 +195,35 @@
     <div class="map-card">
       <div class="map-header">
         <h3>📍 Repartidores en Ruta LeoGas - Cusco</h3>
-        <div class="gps-legend-box" id="legendBoxGPS">
+        <div class="gps-legend-box">
           <div class="legend-item online" id="legendOnline"><span>🦁🔥</span> <span>Online</span></div>
           <span class="legend-divider">|</span>
           <div class="legend-item offline activo" id="legendOffline"><span>🦁💤</span> <span>Offline</span></div>
         </div>
       </div>
-
-      <div class="map-wrapper" id="contenedorEnvolventeMapa">
-        <button type="button" class="btn-toggle-fullscreen" onclick="alternarPantallaCompletaMapa()">
-          <span id="iconoPantallaCompleta">⛶</span>
-          <span id="textoPantallaCompleta">Ampliar Mapa</span>
-        </button>
-
-        <button type="button" class="btn-center-map" onclick="centrarEnMiUbicacionCliente()">
-          <span>🎯 Centrar en mi casa</span>
-        </button>
-
-        <div id="badgeDistanciaTiempo" class="distance-eta-badge">
-          🛵 Repartidor más cercano a <span id="distanciaKmTexto">--</span> (~<span id="tiempoMinTexto">--</span> min)
-        </div>
-
-        <div id="cuscoMap"></div>
+      <div class="map-wrapper">
+        <div id="cuscoMap" style="width:100%; height:380px; border-radius:10px;"></div>
       </div>
     </div>
   </section>
 
-  <!-- CATÁLOGO 1: BALONES DE GAS -->
+  <!-- CATÁLOGOS -->
   <section class="section-menu" id="menu">
-    <div class="menu-header">
-      <h3>Elige tu Balón de Gas</h3>
-      <p style="font-size: 13px; color: #64748b;">Selecciona tu balón de 10 kg con precinto de seguridad y peso exacto.</p>
-    </div>
+    <div class="menu-header"><h3>Elige tu Balón de Gas</h3></div>
     <div class="grid-empanadas" id="contenedorEmpanadas"></div>
   </section>
 
-  <!-- CATÁLOGO 2: VÁLVULAS, REGULADORES Y ACCESORIOS -->
-  <section class="section-menu" id="seccionAccesoriosCliente">
-    <div class="menu-header" style="border-left: 4px solid var(--accent);">
-      <h3>🔧 Válvulas, Reguladores y Accesorios de Gas</h3>
-      <p style="font-size: 13px; color: #64748b;">Repuestos originales certificados para máxima seguridad en tu cocina.</p>
-    </div>
+  <section class="section-menu" id="seccionAccesoriosCliente" style="display:none;">
+    <div class="menu-header" style="border-left: 4px solid var(--accent);"><h3>🔧 Válvulas y Accesorios</h3></div>
     <div class="grid-empanadas" id="contenedorAccesorios"></div>
   </section>
 
-  <!-- BOTÓN FLOTANTE ACTIVAR NOTIFICACIONES -->
-  <div class="floating-notif-btn" id="btnFlotanteNotificaciones" onclick="solicitarPermisoNotificacionesManual(this)">
-    <span id="iconoCampanaNotif">🔔</span>
-    <span id="textoBtnNotif">Activar Alertas</span>
-  </div>
+  <!-- BOTONES FLOTANTES -->
+  <button type="button" class="floating-notif-btn" id="btnFlotanteNotificaciones" onclick="solicitarPermisoNotificacionesManual()">
+    <span id="iconoCampanaNotif">🔔</span> <span id="textoBtnNotif">Activar Alertas</span>
+  </button>
 
-  <!-- BOTÓN FLOTANTE CARRITO -->
-  <div class="chat-bubble-container" id="btnFlotanteContenedor" onclick="abrirModalCarrito()">
+  <div class="chat-bubble-container" onclick="abrirModalCarrito()">
     <div class="chat-bubble-label"><span>🔥 Pedidos</span></div>
     <div class="chat-bubble-btn">
       <span style="font-size:32px;">🦁</span>
@@ -394,246 +231,109 @@
     </div>
   </div>
 
-  <!-- MODAL CHECKOUT HOGAR -->
+  <!-- MODAL CARRITO -->
   <div class="cart-modal-overlay" id="cartModalOverlay" onclick="cerrarSiClickAfuera(event)">
     <div class="cart-modal-card">
       <div class="cart-modal-header">
         <h3>🦁 Pedido LeoGas Cusco</h3>
-        <button class="btn-close-cart" onclick="cerrarModalCarrito()">&times;</button>
+        <button style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;" onclick="cerrarModalCarrito()">&times;</button>
       </div>
-
       <div class="cart-modal-body">
         <div>
-          <div class="cart-header-actions">
-            <span class="popup-section-label">Productos seleccionados:</span>
-            <button type="button" class="btn-vaciar-cart" onclick="vaciarPedidoConConfirmacion()">🗑️ Vaciar pedido</button>
-          </div>
+          <span class="popup-section-label">Productos:</span>
           <div class="cart-items-box" id="popupItemsList"></div>
         </div>
 
         <div>
-          <div class="popup-section-label" style="margin-bottom:6px;">Forma de Pago:</div>
+          <span class="popup-section-label">Forma de Pago:</span>
           <div class="grid-payments">
-            <button type="button" class="btn-pay-option active" id="btnPayEfectivo" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
+            <button type="button" class="btn-pay-option active" onclick="elegirPago('Efectivo', this)">💵 Efectivo</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Yape', this)">🟣 Yape</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Plin', this)">🔵 Plin</button>
             <button type="button" class="btn-pay-option" onclick="elegirPago('Transferencia', this)">🏦 Transf.</button>
           </div>
 
-          <div class="cash-box-drawer" id="cajaEfectivoDesplegable">
-            <div style="font-size: 12px; font-weight: 800; color: var(--primary);">💵 ¿Con cuánto en efectivo pagarás?</div>
-            <div class="cash-input-row">
-              <span style="font-weight: 800; font-size: 14px; color: var(--primary);">S/</span>
-              <input type="number" id="montoEfectivoIngresado" class="cash-input" placeholder="Ej. 100" min="0" step="5" oninput="calcularVueltoEfectivo()"/>
-            </div>
-            <div class="cash-quick-btns">
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido('exacto')">Pagar Exacto</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(50)">S/ 50</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(100)">S/ 100</button>
-              <button type="button" class="btn-quick-cash" onclick="setMontoEfectivoRapido(200)">S/ 200</button>
-            </div>
+          <div class="cash-box-drawer" id="cajaEfectivoDesplegable" style="display:block;">
+            <label style="font-size:11px; font-weight:800; color:var(--primary);">¿Con cuánto en efectivo pagarás?</label>
+            <input type="number" id="montoEfectivoIngresado" class="cash-input" placeholder="Ej. 100" min="0" step="5" oninput="calcularVueltoEfectivo()"/>
             <div class="vuelto-badge-box" id="cajaRespuestaVuelto">
-              <span id="textoDetalleVuelto">Ingresa con cuánto pagarás para calcular el vuelto</span>
-              <span id="montoCalculadoVuelto" style="font-size: 15px;"></span>
+              <span id="textoDetalleVuelto">Ingresa monto para vuelto</span>
+              <span id="montoCalculadoVuelto"></span>
             </div>
           </div>
         </div>
 
         <div class="delivery-time-box">
-          <span class="popup-section-label">Horario de Entrega:</span>
-          <div class="grid-delivery-opts">
-            <button type="button" class="btn-del-opt active" id="btnDelInmediata" onclick="elegirHorarioEntrega('Inmediata', this)">🚀 Inmediata (Lo antes posible)</button>
-            <button type="button" class="btn-del-opt" id="btnDelProgramada" onclick="elegirHorarioEntrega('Programada', this)">🕒 Programar Horario</button>
-          </div>
-          <div id="cajaHoraProgramada" style="display:none; margin-top:6px;">
-            <input type="time" id="inputHoraProgramada" class="client-name-input" value="14:00" />
+          <span class="popup-section-label">Horario:</span>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-pay-option active" style="flex:1;" onclick="elegirHorarioEntrega('Inmediata', this)">Inmediata</button>
+            <button type="button" class="btn-pay-option" style="flex:1;" onclick="elegirHorarioEntrega('Programada', this)">Programada</button>
           </div>
         </div>
 
-        <div class="comprobante-box">
-          <span class="popup-section-label">Tipo de Comprobante:</span>
-          <div style="display:flex; gap:16px; margin-top:4px;">
-            <label style="font-size:13px; font-weight:700; cursor:pointer;"><input type="radio" name="tipoComp" value="Boleta" checked onchange="alternarCamposComprobante(this.value)"> Boleta</label>
-            <label style="font-size:13px; font-weight:700; cursor:pointer;"><input type="radio" name="tipoComp" value="Factura" onchange="alternarCamposComprobante(this.value)"> Factura</label>
-          </div>
-          <div id="cajaDatosFactura" style="display:none; margin-top:6px; flex-direction:column; gap:6px;">
-            <input type="text" id="inputRucFactura" class="client-name-input" placeholder="Número de RUC (11 dígitos)" maxlength="11" />
-            <input type="text" id="inputRazonSocial" class="client-name-input" placeholder="Razón Social / Nombre Empresa" />
-          </div>
+        <div class="geo-box">
+          <button type="button" class="btn-add" style="background:var(--primary); width:100%; padding:8px;" onclick="capturarGPSCliente()">📍 Activar ubicación exacta</button>
+          <span id="geoStatus" style="font-size:11px; color:#64748b; text-align:center;">Ubicación opcional</span>
         </div>
 
         <div>
-          <div class="popup-section-label" style="margin-bottom:6px;">Dirección de Entrega:</div>
-          <div class="geo-box">
-            <button type="button" class="btn-geo" onclick="capturarGPSCliente()">📍 Activar mi ubicación exacta</button>
-            <span id="geoStatus" style="font-size:11px; color:#64748b; text-align:center;">Envía tus coordenadas para llevar el balón hasta tu casa</span>
-          </div>
-        </div>
-
-        <div class="client-name-box">
-          <label class="popup-section-label" for="nombreClienteInput">¿Por quién preguntamos? (Nombre o referencia):</label>
-          <input type="text" id="nombreClienteInput" class="client-name-input" placeholder="Ej: Sra. Carmen / Familia Quispe"/>
+          <label class="popup-section-label">Nombre o Referencia:</label>
+          <input type="text" id="nombreClienteInput" class="client-name-input" placeholder="Ej: Sra. Carmen"/>
         </div>
       </div>
 
       <div class="cart-modal-footer">
         <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px;">
-          <span id="cartLabelTotalConCantidad">Total a pagar:</span>
-          <span style="color:var(--primary); font-size:19px;" id="cartTotalMonto">S/ 0.00</span>
+          <span>Total:</span> <span style="color:var(--primary);" id="cartTotalMonto">S/ 0.00</span>
         </div>
-        <button class="btn-order-wsp" id="btnPrincipalPedirWsp" onclick="enviarPedidoWhatsApp()">
-          <span>Pedir a LeoGas por WhatsApp</span> 💬
-        </button>
-        <button type="button" class="btn-ticket-modal" onclick="generarComprobanteModal()">
-          <span>🧾 Ver e Imprimir Comprobante Digital</span>
-        </button>
+        <button class="btn-order-wsp" onclick="enviarPedidoWhatsApp()">Pedir a LeoGas por WhatsApp 💬</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL B2B EXCLUSIVO PARA EMPRESAS -->
+  <!-- MODAL B2B -->
   <div class="cart-modal-overlay" id="modalB2BOverlay" style="display:none; align-items:center;">
-    <div class="cart-modal-card" style="border-radius:18px; max-width:480px; padding:0; overflow:hidden;">
-      
-      <div style="background:#0f172a; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #ca8a04;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:24px;">🏢</span>
-          <div>
-            <strong style="font-size:15px; color:#facc15;">Portal Corporativo & Restaurantes</strong>
-            <div style="font-size:11px; color:#94a3b8;">LeoGas Cusco • Atención Mayorista B2B</div>
-          </div>
-        </div>
-        <button onclick="cerrarModalB2B()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
+    <div class="cart-modal-card" style="max-width:480px; padding:0; overflow:hidden;">
+      <div style="background:#0f172a; color:#fff; padding:16px; display:flex; justify-content:space-between; align-items:center;">
+        <strong>🏢 Portal Corporativo B2B</strong>
+        <button onclick="cerrarModalB2B()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">&times;</button>
       </div>
-
-      <div id="vistaB2BLogin" style="padding:22px;">
-        <p style="font-size:13px; color:#475569; margin-bottom:12px;">
-          Ingresa el <strong>RUC de tu empresa</strong> para consultar directamente el padrón SUNAT y acceder a tus tarifas preferenciales.
-        </p>
-        
-        <label style="font-size:11px; font-weight:800; color:#0f172a; text-transform:uppercase;">Número de RUC (11 dígitos):</label>
+      <div style="padding:20px;">
+        <label style="font-size:11px; font-weight:800;">RUC (11 dígitos):</label>
         <div style="display:flex; gap:8px; margin-top:4px;">
-          <input type="text" id="inputRucB2B" maxlength="11" placeholder="Ej: 20601234567" style="flex:1; padding:10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:15px; font-weight:bold;">
-          <button type="button" class="btn-b2b-header" style="border-radius:8px;" onclick="consultarRucSunatApisPeru(document.getElementById('inputRucB2B').value)">Consultar ➔</button>
+          <input type="text" id="inputRucB2B" maxlength="11" placeholder="Ej: 20601234567" style="flex:1; padding:9px; border:1px solid #cbd5e1; border-radius:6px;">
+          <button class="btn-b2b-header" onclick="consultarRucSunatApisPeru(document.getElementById('inputRucB2B').value)">Consultar</button>
         </div>
         <div id="msgValidacionRuc" style="font-size:12px; margin-top:8px;"></div>
       </div>
-
-      <div id="vistaB2BCatalogo" style="display:none; padding:18px; max-height:75vh; overflow-y:auto;">
-        <div style="background:#fefce8; border:1px solid #fde047; border-radius:10px; padding:10px 12px; margin-bottom:14px;">
-          <strong id="b2bEmpresaNombre" style="color:#854d0e; font-size:14px;">Razón Social</strong>
-          <div style="font-size:11px; color:#a16207;">RUC: <span id="b2bEmpresaRuc">--</span> | Condición: <span id="b2bEmpresaCondicion" style="font-weight:bold;">Crédito 15 días</span></div>
-        </div>
-
-        <div style="font-size:12px; font-weight:800; color:#475569; margin-bottom:6px;">SELECCIONA TUS BALONES INDUSTRIALES:</div>
-        <div id="listaProductosB2B"></div>
-
-        <div style="margin-top:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px;">
-          <label style="font-size:11px; font-weight:800; color:#475569;">ENVASES VACÍOS PARA CANJE:</label>
-          <div style="display:flex; gap:8px; margin-top:4px; align-items:center;">
-            <input type="number" id="b2bEnvasesVacios" value="1" min="0" style="padding:6px 10px; width:80px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
-            <span style="font-size:11.5px; color:#64748b;">balones vacíos que entregarás al chofer</span>
-          </div>
-        </div>
-
-        <div style="margin-top:12px;">
-          <label style="font-size:11px; font-weight:800; color:#475569;">DIRECCIÓN DEL LOCAL O RESTAURANTE:</label>
-          <input type="text" id="b2bDireccionLocal" placeholder="Ej: Calle Nueva Alta 374 - Local Principal" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; margin-top:4px;">
-        </div>
-
-        <div style="margin-top:10px; background:#faf5ff; border:1.5px dashed #c084fc; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
-          <button type="button" class="btn" style="background:#7e22ce; color:#fff; font-weight:800; font-size:12.5px; padding:8px 12px; border-radius:8px;" onclick="capturarGPSLocalB2B()">
-            📍 Activar ubicación exacta del local (GPS)
-          </button>
-          <span id="geoStatusB2B" style="font-size:11px; color:#64748b; text-align:center;">
-            Comparte tus coordenadas para que el camión llegue sin llamadas previas
-          </span>
-        </div>
-
-        <div style="margin-top:16px; background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <strong style="color:#0f172a; font-size:13px;">📑 Historial de Facturas y Re-impresión:</strong>
-            <button type="button" class="btn" style="background:#f1f5f9; color:#475569; font-size:11px; padding:4px 8px;" onclick="cargarFacturasEmpresaB2B()">🔄 Actualizar</button>
-          </div>
-          <div id="contenedorFacturasB2B" style="max-height:160px; overflow-y:auto; font-size:12px;">
-            Cargando facturas registradas...
-          </div>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; border-top:1px dashed #cbd5e1; padding-top:12px;">
-          <span style="font-weight:bold; font-size:14px;">Total a Facturar:</span>
-          <strong id="b2bTotalPagar" style="color:#0f172a; font-size:18px;">S/ 0.00</strong>
-        </div>
-
-        <button type="button" class="btn" style="background:#15803d; color:#fff; width:100%; padding:12px; border-radius:10px; font-weight:900; margin-top:12px; font-size:14px;" onclick="enviarPedidoB2BFirebase()">
-          ✔ Confirmar y Despachar Pedido B2B
-        </button>
-      </div>
-
     </div>
   </div>
 
-  <!-- MODAL TICKET / FACTURA ELECTRÓNICA DIGITAL -->
-  <div class="ticket-modal-overlay" id="ticketModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); z-index:3500; justify-content:center; align-items:center; padding:16px;">
-    <div class="ticket-box" id="ticketImprimible" style="background:#fff; width:100%; max-width:400px; border-radius:20px; padding:24px 20px; box-shadow:0 15px 35px rgba(0,0,0,0.3); font-family:system-ui, sans-serif; font-size:12.5px; color:#1e1b4b; max-height:90vh; overflow-y:auto;">
-      
-      <div class="ticket-header" style="text-align:center; border-bottom:2px dashed #cbd5e1; padding-bottom:12px; margin-bottom:12px;">
-        <div style="font-size:32px; margin-bottom:4px;">🦁</div>
-        <h2 style="font-size:17px; font-weight:900; color:#6b21a8; margin:0; text-transform:uppercase;">LEOGAS CUSCO</h2>
-        <div style="font-size:11px; color:#64748b; font-weight:700;">Distribuidor Oficial Llamagas • Cusco, Gourmet</div>
-        <div style="font-size:11px; color:#334155; margin-top:2px;"><strong>RUC:</strong> 20611922311</div>
-        <div style="font-size:11px; color:#334155;">Calle Garcilaso / Central Cusco • Teléfa: 084 501111</div>
-        
-        <div style="margin-top:10px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; padding:6px; text-align:center;">
-          <strong id="tickTipoComp" style="font-size:13px; color:#1e1b4b; display:block;">*** FACTURA ELECTRÓNICA ***</strong>
-          <span id="tickSerieNro" style="font-size:11.5px; color:#b45309; font-weight:800;">F001-00000000</span>
-        </div>
-        <div style="font-size:11px; color:#64748b; margin-top:6px;"><span id="tickFecha">--/--/2026 --:--</span></div>
-      </div>
+  <!-- MODALES DE ALERTA EN VIVO PARA EL CLIENTE -->
+  <div class="center-alert-overlay" id="modalAlertaEnCamino">
+    <div class="center-alert-card" style="border: 2px solid #ef4444;">
+      <div class="alert-icon-circle" style="background:#fee2e2;">🛵🔥</div>
+      <h3 style="color:#b91c1c;">¡Tu Balón está en Camino!</h3>
+      <p>El repartidor ya salió de la base con tu pedido hacia tu dirección.</p>
+      <button class="btn-add" style="width:100%; padding:12px;" onclick="document.getElementById('modalAlertaEnCamino').style.display='none'">Ver en Mapa 🗺️</button>
+    </div>
+  </div>
 
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:12px; font-size:12px;">
-        <div><strong>Cliente / Razón Social:</strong> <span id="tickCliente">--</span></div>
-        <div><strong>Doc (RUC / DNI):</strong> <span id="tickRucDni">--</span></div>
-        <div><strong>Dirección de Entrega:</strong> <span id="tickDireccion">Cusco</span></div>
-      </div>
+  <div class="center-alert-overlay" id="modalAlertaEnPuerta">
+    <div class="center-alert-card" style="border: 2px solid #16a34a;">
+      <div class="alert-icon-circle" style="background:#dcfce7;">🚪🦁</div>
+      <h3 style="color:#15803d;">¡Repartidor en tu Puerta!</h3>
+      <p>El repartidor de LeoGas Cusco ya está afuera con tu pedido.</p>
+      <button class="btn-add" style="width:100%; padding:12px; background:#16a34a;" onclick="document.getElementById('modalAlertaEnPuerta').style.display='none'">Aceptar ✔️</button>
+    </div>
+  </div>
 
-      <div style="border-bottom:2px dashed #cbd5e1; padding-bottom:10px; margin-bottom:10px;">
-        <div style="display:flex; justify-content:space-between; font-weight:800; color:#475569; font-size:11px; border-bottom:1px solid #e2e8f0; padding-bottom:4px; margin-bottom:6px;">
-          <span>CANT. / DESCRIPCIÓN</span>
-          <span>P.UNIT. &nbsp; SUBT.</span>
-        </div>
-        <div id="tickListaProductos" style="display:flex; flex-direction:column; gap:6px;"></div>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:4px; text-align:right; font-size:13px; margin-bottom:12px;">
-        <div>OP. GRAVADA: &nbsp; <strong id="tickSubtotal" style="font-weight:700;">S/ 0.00</strong></div>
-        <div>I.G.V. (18%): &nbsp; <strong id="tickIgv" style="font-weight:700;">S/ 0.00</strong></div>
-        <div style="font-size:15px; font-weight:900; color:#6b21a8; margin-top:4px; border-top:1px solid #cbd5e1; padding-top:4px;">
-          TOTAL A PAGAR: &nbsp; <span id="tickTotal">S/ 0.00</span>
-        </div>
-      </div>
-
-      <div style="font-size:11px; color:#475569; border-top:1px dashed #cbd5e1; padding-top:8px; margin-bottom:14px;">
-        <div><strong>MÉTODO DE PAGO:</strong> <span id="tickPago">Efectivo</span></div>
-        <div><strong>OPERADOR / CAJA:</strong> Central Comercial B2B</div>
-        <div style="text-align:center; margin-top:8px; font-size:10px; color:#777;">
-          Autorizado mediante Operador de Servicios Electrónicos (OSE) / Conectado a SUNAT vía APIS Perú<br>
-          <strong>¡Gracias por su preferencia con LeoGas Cusco!</strong>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:8px; flex-wrap:wrap;" class="no-print">
-        <button type="button" class="btn" style="flex:1; background:#16a34a; color:#fff; padding:10px; border-radius:8px; font-weight:900; font-size:13px; border:none; cursor:pointer;" onclick="window.print()">
-          🖨️ Imprimir / PDF
-        </button>
-        <button type="button" class="btn" style="flex:1; background:#25d366; color:#fff; padding:10px; border-radius:8px; font-weight:900; font-size:13px; border:none; cursor:pointer;" onclick="enviarFacturaWspCliente()">
-          📲 WhatsApp
-        </button>
-        <button type="button" class="btn" style="background:#cbd5e1; color:#334155; padding:10px 14px; border-radius:8px; font-weight:900; font-size:13px; border:none; cursor:pointer;" onclick="cerrarModalTicket()">
-          ✖ Cerrar
-        </button>
-      </div>
-
+  <div class="center-alert-overlay" id="modalAlertaGracias">
+    <div class="center-alert-card" style="border: 2px solid #a855f7;">
+      <div class="alert-icon-circle" style="background:#f3e8ff;">🦁✨</div>
+      <h3 style="color:#6b21a8;">¡Pedido Finalizado con Éxito!</h3>
+      <p>Tu pedido ha sido entregado. ¡Gracias por confiar en LeoGas Cusco!</p>
+      <button class="btn-add" style="width:100%; padding:12px;" onclick="document.getElementById('modalAlertaGracias').style.display='none'">Aceptar ✔️</button>
     </div>
   </div>
 
@@ -646,11 +346,7 @@
       apiKey: "AIzaSyCnYaUN-aZYzEip9z3wsuKnbwdfYscFZkY",
       authDomain: "leogas-cusco.firebaseapp.com",
       databaseURL: "https://leogas-cusco-default-rtdb.firebaseio.com",
-      projectId: "leogas-cusco",
-      storageBucket: "leogas-cusco.firebasestorage.app",
-      messagingSenderId: "1042930313066",
-      appId: "1:1042930313066:web:ce6c424afe606f63322713",
-      measurementId: "G-MBYC61L9BL"
+      projectId: "leogas-cusco"
     };
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -658,7 +354,7 @@
 
     const APIS_PERU_TOKEN = "tu_token_apis_peru_aqui";
 
-    let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500", tel3: "(084) 501111" };
+    let telefonos = { whatsapp: "51969773064", tel1: "950 727 212", tel2: "984 285 500" };
     let catalogoBalones = [];
     let catalogoAccesorios = [];
     const pedido = {};
@@ -668,251 +364,47 @@
     let ubicacionClienteCoords = null;
     let ultimoTotalPagar = 0;
     let map = null;
-    let clienteMarker = null;
     let marcadoresFlota = {};
-    let flotaActual = [];
+    let etapaAnteriorVista = -1;
 
-    let empresaB2BActual = null;
-    let pedidoB2B = { "gas-45kg": 1 };
-    let ubicacionB2BCoords = null;
-
-    // FUNCIÓN CORREGIDA Y COMPLETA PARA ENVIAR PEDIDO A WHATSAPP CON GPS Y DETALLES
-    async function enviarPedidoWhatsApp() {
-      const items = Object.values(pedido).filter(p => p.cantidad > 0);
-      if (items.length === 0) return alert("Selecciona al menos un balón o accesorio disponible.");
-
-      const nombre = document.getElementById('nombreClienteInput').value.trim() || "Particular";
-      let total = 0;
-      let nombres = [];
-      items.forEach(i => {
-        total += i.cantidad * i.precio;
-        nombres.push(`${i.cantidad}x ${i.nombre}`);
-      });
-
-      const detalle = nombres.join(", ");
-      
-      const gpsUrl = ubicacionClienteCoords 
-        ? `https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}` 
-        : "No especificada";
-
-      let comprobanteTexto = tipoComprobante;
-      if (tipoComprobante === 'Factura') {
-        const ruc = document.getElementById('inputRucFactura').value.trim();
-        const rz = document.getElementById('inputRazonSocial').value.trim();
-        comprobanteTexto = `Factura (RUC: ${ruc || 'Sin RUC'} - Razón Social: ${rz || 'Sin Razón Social'})`;
-      }
-
-      const horarioElegido = (horarioEntrega === 'Inmediata') 
-        ? "Inmediata (Lo antes posible)" 
-        : `Programada (${document.getElementById('inputHoraProgramada').value})`;
-
-      const nuevoPedidoRef = db.ref('pedidos').push();
-      const pedidoId = nuevoPedidoRef.key;
-
-      await nuevoPedidoRef.set({
-        id: pedidoId,
-        tipoVenta: "minorista",
-        cliente: nombre,
-        tipoBalon: detalle,
-        montoCobro: total.toFixed(2),
-        metodoPago: metodoPago,
-        tipoComprobante: comprobanteTexto,
-        horarioEntrega: horarioElegido,
-        gpsUrl: ubicacionClienteCoords ? gpsUrl : "",
-        lat: ubicacionClienteCoords ? ubicacionClienteCoords.lat : null,
-        lng: ubicacionClienteCoords ? ubicacionClienteCoords.lng : null,
-        repartidorId: "",
-        estado: "pendiente_asignacion",
-        etapa: 0,
-        envasesEntregados: 1,
-        envasesRecogidos: 1,
-        timestamp: Date.now(),
-        hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
-      });
-
-      localStorage.setItem('leogas_mi_pedido_id', pedidoId);
-      localStorage.setItem('leogas_mi_pedido_cliente', nombre);
-
-      // CONSTRUCCIÓN DEL MENSAJE COMPLETO PARA WHATSAPP
-      let msg = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
-      msg += `*👤 Cliente / Referencia:* ${nombre}\n`;
-      msg += `*🛢️ Detalle:* ${detalle}\n`;
-      msg += `*💰 Total a pagar:* S/ ${total.toFixed(2)}\n`;
-      msg += `*💵 Forma de Pago:* ${metodoPago}\n`;
-      msg += `*🧾 Comprobante:* ${comprobanteTexto}\n`;
-      msg += `*🕒 Horario:* ${horarioElegido}\n`;
-      msg += `*📍 Ubicación GPS:* ${gpsUrl}\n\n`;
-      msg += `_¡Gracias por su preferencia con LeoGas Cusco (Llamagas)._`;
-
-      window.open(`https://wa.me/${telefonos.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
-      
-      cerrarModalCarrito();
-    }
-
-    // CONSULTA RUC SUNAT APIS PERÚ
-    async function consultarRucSunatApisPeru(rucInput) {
-      const ruc = rucInput.trim();
-      const msg = document.getElementById('msgValidacionRuc');
-      
-      if (ruc.length !== 11 || isNaN(ruc)) {
-        if(msg) { msg.style.color = "#dc2626"; msg.innerText = "Ingrese un RUC válido de 11 dígitos."; }
-        return;
-      }
-
-      if(msg) { msg.style.color = "#6b21a8"; msg.innerText = "Conectando con SUNAT (APIS Perú)..."; }
-
+    function emitirCampanadaCliente() {
       try {
-        const response = await fetch(`https://api.apis.net.pe/v2/sunat/ruc?numero=${ruc}`, {
-          headers: { 'Authorization': `Bearer ${APIS_PERU_TOKEN}`, 'Accept': 'application/json' }
-        });
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.8);
+      } catch (e) {}
+    }
 
-        if (!response.ok) throw new Error("Error en padrón SUNAT");
-        const data = await response.json();
+    function solicitarPermisoNotificacionesManual() {
+      if (!("Notification" in window)) return alert("Tu navegador no soporta notificaciones.");
+      emitirCampanadaCliente();
+      Notification.requestPermission().then(perm => {
+        actualizarBotonNotificacionesCliente();
+        if (perm === "granted") new Notification("🦁 LeoGas Cusco", { body: "¡Notificaciones activadas!" });
+      });
+    }
 
-        if (data && data.razonSocial) {
-          empresaB2BActual = {
-            ruc: data.numeroDocumento,
-            razonSocial: data.razonSocial,
-            condicionPago: "Crédito (A cuenta 15 días)",
-            precioBalon45: 175.00,
-            direccion: data.direccion || ""
-          };
-          db.ref(`clientesB2B/${ruc}`).set(empresaB2BActual);
-          cargarPortalB2BEmpresa();
-        }
-      } catch (error) {
-        const snap = await db.ref(`clientesB2B/${ruc}`).once('value');
-        if (snap.val()) {
-          empresaB2BActual = snap.val();
-          cargarPortalB2BEmpresa();
-        } else {
-          const razon = prompt("RUC verificado. Ingrese la Razón Social de la Empresa:");
-          if (razon) {
-            empresaB2BActual = { ruc: ruc, razonSocial: razon, precioBalon45: 175.00, condicionPago: "Crédito (A cuenta 15 días)" };
-            db.ref(`clientesB2B/${ruc}`).set(empresaB2BActual);
-            cargarPortalB2BEmpresa();
-          }
-        }
+    function actualizarBotonNotificacionesCliente() {
+      const perm = ("Notification" in window) ? Notification.permission : "denied";
+      const btn = document.getElementById('btnFlotanteNotificaciones');
+      if (perm === "granted") {
+        btn.classList.add('activada');
+        document.getElementById('textoBtnNotif').innerText = "Alertas Activas ✔️";
       }
-    }
-
-    // HISTORIAL DE FACTURAS B2B PARA REIMPRESIÓN
-    function cargarFacturasEmpresaB2B() {
-      const contenedor = document.getElementById('contenedorFacturasB2B');
-      if (!empresaB2BActual || !empresaB2BActual.ruc) return;
-
-      db.ref('pedidos').orderByChild('ruc').equalTo(empresaB2BActual.ruc).once('value', snap => {
-        const pedidos = snap.val();
-        if (!pedidos) {
-          contenedor.innerHTML = '<span style="color:#94a3b8;">No hay facturas emitidas para este RUC.</span>';
-          return;
-        }
-
-        const lista = Object.values(pedidos).filter(p => p.facturaElectronica);
-        if (lista.length === 0) {
-          contenedor.innerHTML = '<span style="color:#94a3b8;">Aún no se han generado facturas para tus pedidos.</span>';
-          return;
-        }
-
-        contenedor.innerHTML = '';
-        lista.reverse().forEach(ord => {
-          const f = ord.facturaElectronica;
-          const row = document.createElement('div');
-          row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #e2e8f0;";
-          row.innerHTML = `
-            <div>
-              <strong>${f.serieNumero}</strong> (${f.fechaEmision})<br>
-              <small style="color:#64748b;">${ord.tipoBalon} - S/ ${f.total}</small>
-            </div>
-            <button type="button" class="btn" style="background:#0f172a; color:#facc15; font-size:11px; padding:4px 8px;" onclick="reimprimirFacturaB2B('${ord.id}')">
-              🖨️ Ver / Imprimir
-            </button>
-          `;
-          contenedor.appendChild(row);
-        });
-      });
-    }
-
-    function reimprimirFacturaB2B(pedidoId) {
-      db.ref(`pedidos/${pedidoId}`).once('value', snap => {
-        const ord = snap.val();
-        if (!ord) return;
-
-        const f = ord.facturaElectronica || {
-          serieNumero: "F001-000" + Math.floor(100 + Math.random() * 900),
-          fechaEmision: new Date().toLocaleDateString('es-PE'),
-          horaEmision: new Date().toLocaleTimeString('es-PE'),
-          ruc: ord.ruc || "20601234567",
-          razonSocial: ord.cliente,
-          subtotal: (parseFloat(ord.montoCobro) / 1.18).toFixed(2),
-          igv: (parseFloat(ord.montoCobro) - (parseFloat(ord.montoCobro) / 1.18)).toFixed(2),
-          total: parseFloat(ord.montoCobro).toFixed(2)
-        };
-
-        document.getElementById('tickTipoComp').innerText = ord.tipoVenta === 'mayorista' ? "*** FACTURA ELECTRÓNICA ***" : "*** BOLETA ELECTRÓNICA ***";
-        document.getElementById('tickSerieNro').innerText = f.serieNumero;
-        document.getElementById('tickFecha').innerText = `${f.fechaEmision} ${f.horaEmision || ''}`;
-        document.getElementById('tickCliente').innerText = f.razonSocial;
-        document.getElementById('tickRucDni').innerText = f.ruc || "00000000";
-        document.getElementById('tickDireccion').innerText = ord.direccionTexto || "Cusco";
-
-        document.getElementById('tickSubtotal').innerText = `S/ ${f.subtotal}`;
-        document.getElementById('tickIgv').innerText = `S/ ${f.igv}`;
-        document.getElementById('tickTotal').innerText = `S/ ${f.total}`;
-        document.getElementById('tickPago').innerText = ord.metodoPago || "Efectivo";
-
-        const contItems = document.getElementById('tickListaProductos');
-        contItems.innerHTML = `
-          <div style="display:flex; justify-content:space-between; font-size:12px;">
-            <span>${ord.tipoBalon}</span>
-            <span><strong>S/ ${f.subtotal}</strong> &nbsp; S/ ${f.total}</span>
-          </div>
-        `;
-
-        document.getElementById('ticketModalOverlay').style.display = 'flex';
-      });
-    }
-
-    function enviarFacturaWspCliente() {
-      const cliente = document.getElementById('tickCliente').innerText;
-      const total = document.getElementById('tickTotal').innerText;
-      const serie = document.getElementById('tickSerieNro').innerText;
-
-      let msg = `*LEOGAS CUSCO - COMPROBANTE ELECTRÓNICO*\n`;
-      msg += `Comprobante: ${serie}\n`;
-      msg += `Cliente: ${cliente}\n`;
-      msg += `Total Pagado: ${total}\n`;
-      msg += `¡Gracias por confiar en LeoGas Cusco (Llamagas)!\n`;
-
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    function cerrarModalTicket() {
-      document.getElementById('ticketModalOverlay').style.display = 'none';
-    }
-
-    // MAPA LEAFLET Y FIREBASE
-    function iniciarMapaCusco() {
-      if (map) return;
-      map = L.map('cuscoMap').setView([-13.5167, -71.9788], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
-      trazarZonasCoberturaCusco();
-    }
-
-    function trazarZonasCoberturaCusco() {
-      const estilo = (col) => ({ color: col, weight: 1.5, opacity: 0.8, fillColor: col, fillOpacity: 0.16 });
-      L.polygon([[-13.5110, -71.9860], [-13.5135, -71.9720], [-13.5220, -71.9750], [-13.5200, -71.9880]], estilo('#8b5cf6')).addTo(map).bindPopup("<b>Centro Histórico</b>");
-      L.polygon([[-13.5200, -71.9750], [-13.5210, -71.9560], [-13.5350, -71.9580], [-13.5330, -71.9740]], estilo('#f59e0b')).addTo(map).bindPopup("<b>Wanchaq</b>");
-      L.polygon([[-13.5210, -71.9560], [-13.5250, -71.9280], [-13.5450, -71.9320], [-13.5350, -71.9580]], estilo('#10b981')).addTo(map).bindPopup("<b>San Sebastián</b>");
     }
 
     function iniciarEscuchaFirebase() {
       db.ref('repartidores').on('value', snap => {
         const data = snap.val();
-        if (data) {
-          flotaActual = Object.values(data);
-          actualizarVisualizadorGPS(flotaActual);
-        }
+        if (data) actualizarVisualizadorGPS(Object.values(data));
       });
 
       db.ref('productos').on('value', snap => {
@@ -931,29 +423,62 @@
         }
       });
 
-      db.ref('telefonos').on('value', snap => {
-        const data = snap.val();
-        if (data) {
-          telefonos = data;
-          renderizarTelefonos();
+      // Monitoreo en tiempo real del pedido del cliente
+      db.ref('pedidos').on('value', snap => {
+        const pedidos = snap.val();
+        if (!pedidos) return;
+
+        const miPedidoId = localStorage.getItem('leogas_mi_pedido_id');
+        let miOrden = miPedidoId ? pedidos[miPedidoId] : null;
+
+        if (miOrden) {
+          const barra = document.getElementById('barraSeguimientoActivo');
+          const etapa = miOrden.etapa || 0;
+
+          if (miOrden.estado === 'completado') {
+            barra.style.display = 'none';
+            if (etapaAnteriorVista !== 3) {
+              etapaAnteriorVista = 3;
+              emitirCampanadaCliente();
+              document.getElementById('modalAlertaGracias').style.display = 'flex';
+              localStorage.removeItem('leogas_mi_pedido_id');
+            }
+          } else {
+            barra.style.display = 'block';
+            document.getElementById('trackTituloCliente').innerText = `Pedido: ${miOrden.tipoBalon}`;
+            
+            if (etapa === 1 && etapaAnteriorVista !== 1) {
+              etapaAnteriorVista = 1;
+              emitirCampanadaCliente();
+              document.getElementById('modalAlertaEnCamino').style.display = 'flex';
+              document.getElementById('trackPillEtapa').innerText = "🛵 1. En Camino";
+            } else if (etapa === 2 && etapaAnteriorVista !== 2) {
+              etapaAnteriorVista = 2;
+              emitirCampanadaCliente();
+              document.getElementById('modalAlertaEnPuerta').style.display = 'flex';
+              document.getElementById('trackPillEtapa').innerText = "🚪 2. En Puerta";
+            }
+          }
         }
       });
+    }
+
+    // MAPA
+    function iniciarMapaCusco() {
+      if (map) return;
+      map = L.map('cuscoMap').setView([-13.5167, -71.9788], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
     }
 
     function actualizarVisualizadorGPS(flota) {
       if (!map) return;
       let hayOnline = false;
       flota.forEach(rep => {
-        const online = rep.online === true;
-        if (online) hayOnline = true;
-
+        if (rep.online) hayOnline = true;
         const icono = L.divIcon({
-          className: 'custom-gps-container',
-          html: `<div class="custom-gps-marker ${online ? '' : 'offline'}"><div class="gps-radar-pulse"></div><div class="fire-flame-emitter">🔥</div><div class="lion-badge-circle">🦁</div></div>`,
-          iconSize: [48, 48],
-          iconAnchor: [24, 24]
+          html: `<div style="background:${rep.online ? '#7e22ce' : '#64748b'}; color:#fff; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:16px;">🦁</div>`,
+          iconSize: [36, 36], iconAnchor: [18, 18]
         });
-
         if (!marcadoresFlota[rep.id]) {
           marcadoresFlota[rep.id] = L.marker([rep.lat || -13.5167, rep.lng || -71.9788], { icon: icono }).addTo(map);
         } else {
@@ -965,13 +490,14 @@
       document.getElementById('legendOffline').classList.toggle('activo', !hayOnline);
     }
 
+    // RENDERIZAR MENÚS
     function renderizarMenuBalones() {
       const contenedor = document.getElementById('contenedorEmpanadas');
       if (!contenedor) return;
       contenedor.innerHTML = '';
       catalogoBalones.forEach(item => {
         const card = document.createElement('article');
-        card.className = `card ${item.disponible !== false ? '' : 'agotado'}`;
+        card.className = 'card';
         card.innerHTML = `
           <div class="card-img-wrapper">
             <span class="card-tag">${item.tag || 'Sellado'}</span>
@@ -982,9 +508,7 @@
             <p class="card-desc">${item.descripcion || ''}</p>
             <div class="card-footer">
               <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
-              <button class="btn-add" ${item.disponible !== false ? '' : 'disabled'} onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">
-                ${item.disponible !== false ? '+ Pedir Balón' : 'Agotado'}
-              </button>
+              <button class="btn-add" onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">+ Pedir Balón</button>
             </div>
           </div>
         `;
@@ -993,20 +517,18 @@
     }
 
     function renderizarMenuAccesorios() {
+      const sec = document.getElementById('seccionAccesoriosCliente');
       const contenedor = document.getElementById('contenedorAccesorios');
-      if (!contenedor) return;
+      if (!contenedor || catalogoAccesorios.length === 0) return;
+      sec.style.display = 'block';
       contenedor.innerHTML = '';
       catalogoAccesorios.forEach(item => {
         const card = document.createElement('article');
-        card.className = `card`;
+        card.className = 'card';
         card.innerHTML = `
-          <div class="card-img-wrapper">
-            <span class="card-tag" style="background:#2563eb;">Accesorio</span>
-            <img src="${item.imagen || '1791513590376.jpg'}" alt="${item.nombre}" onerror="this.src='1791513590376.jpg'">
-          </div>
+          <div class="card-img-wrapper"><span class="card-tag" style="background:#2563eb;">Accesorio</span></div>
           <div class="card-body">
             <h4 class="card-title">${item.nombre}</h4>
-            <p class="card-desc">${item.descripcion || ''}</p>
             <div class="card-footer">
               <span class="price">S/ ${parseFloat(item.precio).toFixed(2)}</span>
               <button class="btn-add" style="background:#2563eb;" onclick="agregarAlPedido('${item.id}', '${item.nombre}', ${item.precio})">+ Agregar</button>
@@ -1018,104 +540,11 @@
     }
 
     function renderizarTelefonos() {
-      const container = document.getElementById('contenedorTelefonosFlyer');
-      if (!container) return;
-      container.innerHTML = `
-        <a href="tel:${telefonos.tel1.replace(/\D/g,'')}" class="contact-button"><span>📞</span> ${telefonos.tel1}</a>
-        <a href="tel:${telefonos.tel2.replace(/\D/g,'')}" class="contact-button"><span>📞</span> ${telefonos.tel2}</a>
-      `;
+      const cont = document.getElementById('contenedorTelefonosFlyer');
+      if (cont) cont.innerHTML = `<a href="tel:${telefonos.tel1}" class="contact-button">📞 ${telefonos.tel1}</a>`;
     }
 
-    function abrirModalB2B() {
-      document.getElementById('modalB2BOverlay').style.display = 'flex';
-      document.getElementById('vistaB2BLogin').style.display = 'block';
-      document.getElementById('vistaB2BCatalogo').style.display = 'none';
-      document.getElementById('msgValidacionRuc').innerText = '';
-      document.getElementById('inputRucB2B').value = '';
-    }
-
-    function cerrarModalB2B() {
-      document.getElementById('modalB2BOverlay').style.display = 'none';
-    }
-
-    function cargarPortalB2BEmpresa() {
-      document.getElementById('vistaB2BLogin').style.display = 'none';
-      document.getElementById('vistaB2BCatalogo').style.display = 'block';
-      document.getElementById('b2bEmpresaNombre').innerText = empresaB2BActual.razonSocial;
-      document.getElementById('b2bEmpresaRuc').innerText = empresaB2BActual.ruc;
-      document.getElementById('b2bDireccionLocal').value = empresaB2BActual.direccion || "";
-      renderizarItemsB2B();
-      cargarFacturasEmpresaB2B();
-    }
-
-    function renderizarItemsB2B() {
-      const cont = document.getElementById('listaProductosB2B');
-      const precio45 = empresaB2BActual.precioBalon45 || 175.00;
-      cont.innerHTML = `
-        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <strong style="color:#0f172a; font-size:14px;">Balón 45kg Industrial</strong>
-            <div style="font-size:12px; color:#15803d; font-weight:bold;">S/ ${precio45.toFixed(2)} c/u</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <button class="btn-qty" onclick="cambiarCantB2B(-1)">-</button>
-            <span style="font-weight:bold; font-size:15px; min-width:24px; text-align:center;">${pedidoB2B['gas-45kg']}</span>
-            <button class="btn-qty" onclick="cambiarCantB2B(1)">+</button>
-          </div>
-        </div>
-      `;
-      document.getElementById('b2bTotalPagar').innerText = `S/ ${(pedidoB2B['gas-45kg'] * precio45).toFixed(2)}`;
-    }
-
-    function cambiarCantB2B(delta) {
-      pedidoB2B['gas-45kg'] = Math.max(1, (pedidoB2B['gas-45kg'] || 1) + delta);
-      renderizarItemsB2B();
-    }
-
-    function capturarGPSLocalB2B() {
-      if (!navigator.geolocation) return alert("Geolocalización no soportada.");
-      navigator.geolocation.getCurrentPosition(pos => {
-        ubicacionB2BCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        document.getElementById('geoStatusB2B').innerText = "✔ Ubicación GPS del local capturada";
-        document.getElementById('geoStatusB2B').style.color = "#15803d";
-      });
-    }
-
-    async function enviarPedidoB2BFirebase() {
-      const cant = pedidoB2B['gas-45kg'];
-      const precio45 = empresaB2BActual.precioBalon45 || 175.00;
-      const total = (cant * precio45).toFixed(2);
-      const direccion = document.getElementById('b2bDireccionLocal').value.trim();
-      if (!direccion) return alert("Por favor confirma la dirección del local.");
-
-      let mapsUrl = ubicacionB2BCoords ? `https://www.google.com/maps?q=${ubicacionB2BCoords.lat},${ubicacionB2BCoords.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion + ', Cusco')}`;
-      const nuevoRef = db.ref('pedidos').push();
-      const pedidoId = nuevoRef.key;
-
-      await nuevoRef.set({
-        id: pedidoId,
-        tipoVenta: "mayorista",
-        cliente: `${empresaB2BActual.razonSocial} (RUC: ${empresaB2BActual.ruc})`,
-        ruc: empresaB2BActual.ruc,
-        direccionTexto: direccion,
-        tipoBalon: `${cant}x Balón 45kg Industrial`,
-        montoCobro: total,
-        metodoPago: empresaB2BActual.condicionPago || "Crédito (A cuenta 15 días)",
-        tipoComprobante: `Factura (RUC: ${empresaB2BActual.ruc} - ${empresaB2BActual.razonSocial})`,
-        envasesEntregados: cant,
-        envasesRecogidos: parseInt(document.getElementById('b2bEnvasesVacios').value) || 0,
-        gpsUrl: mapsUrl,
-        repartidorId: "",
-        estado: "pendiente_asignacion",
-        etapa: 0,
-        timestamp: Date.now(),
-        hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
-      });
-
-      cerrarModalB2B();
-      alert("✔ Pedido B2B registrado con éxito.");
-    }
-
+    // CARRITO Y CÁLCULO DE VUELTO CORREGIDO
     function agregarAlPedido(id, nombre, precio) {
       if (!pedido[id]) pedido[id] = { id, nombre, precio: parseFloat(precio), cantidad: 1 };
       else pedido[id].cantidad++;
@@ -1128,11 +557,6 @@
         if (pedido[id].cantidad <= 0) delete pedido[id];
         actualizarVistaPopup();
       }
-    }
-
-    function vaciarPedidoConConfirmacion() {
-      for (const k in pedido) delete pedido[k];
-      actualizarVistaPopup();
     }
 
     function actualizarVistaPopup() {
@@ -1148,8 +572,8 @@
         const row = document.createElement('div');
         row.className = 'cart-item-row';
         row.innerHTML = `
-          <div><strong>${item.nombre}</strong><br><small>S/ ${item.precio.toFixed(2)} c/u</small></div>
-          <div style="display:flex; align-items:center; gap:6px;">
+          <div><strong>${item.nombre}</strong><br><small>S/ ${item.precio.toFixed(2)}</small></div>
+          <div style="display:flex; gap:6px; align-items:center;">
             <button class="btn-qty" onclick="cambiarCantidad('${item.id}', -1)">-</button>
             <strong>${item.cantidad}</strong>
             <button class="btn-qty" onclick="cambiarCantidad('${item.id}', 1)">+</button>
@@ -1162,30 +586,57 @@
       ultimoTotalPagar = totalMonto;
       document.getElementById('badgeContador').innerText = totalUnidades;
       document.getElementById('cartTotalMonto').innerText = `S/ ${totalMonto.toFixed(2)}`;
+      if (metodoPago === 'Efectivo') calcularVueltoEfectivo();
     }
 
     function elegirPago(p, btn) {
       metodoPago = p;
       document.querySelectorAll('.btn-pay-option').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      
+      // Mostrar u ocultar cajón de efectivo de forma limpia
+      const cajaEfectivo = document.getElementById('cajaEfectivoDesplegable');
+      cajaEfectivo.style.display = (p === 'Efectivo') ? 'block' : 'none';
+      if (p === 'Efectivo') calcularVueltoEfectivo();
     }
 
-    function elegirHorarioEntrega(tipo, boton) {
+    function calcularVueltoEfectivo() {
+      const input = document.getElementById('montoEfectivoIngresado');
+      const box = document.getElementById('cajaRespuestaVuelto');
+      const txt = document.getElementById('textoDetalleVuelto');
+      const montoTxt = document.getElementById('montoCalculadoVuelto');
+      const pagaCon = parseFloat(input.value);
+
+      if (isNaN(pagaCon) || pagaCon <= 0) {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "Ingresa monto para vuelto";
+        montoTxt.innerText = "";
+        return;
+      }
+
+      const vuelto = pagaCon - ultimoTotalPagar;
+      if (vuelto < 0) {
+        box.className = "vuelto-badge-box alerta";
+        txt.innerText = `⚠️ Falta dinero (Faltan S/ ${Math.abs(vuelto).toFixed(2)})`;
+        montoTxt.innerText = "";
+      } else {
+        box.className = "vuelto-badge-box";
+        txt.innerText = "💵 Vuelto a entregar:";
+        montoTxt.innerText = `S/ ${vuelto.toFixed(2)}`;
+      }
+    }
+
+    function elegirHorarioEntrega(tipo, btn) {
       horarioEntrega = tipo;
-      document.querySelectorAll('.btn-del-opt').forEach(b => b.classList.remove('active'));
-      boton.classList.add('active');
-    }
-
-    function alternarCamposComprobante(tipo) {
-      tipoComprobante = tipo;
-      document.getElementById('cajaDatosFactura').style.display = (tipo === 'Factura') ? 'flex' : 'none';
+      btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
     }
 
     function capturarGPSCliente() {
-      if (!navigator.geolocation) return;
+      if (!navigator.geolocation) return alert("Geolocalización no soportada.");
       navigator.geolocation.getCurrentPosition(pos => {
         ubicacionClienteCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        document.getElementById('geoStatus').innerText = "✔ Ubicación registrada";
+        document.getElementById('geoStatus').innerText = "✔ Ubicación exacta registrada";
         document.getElementById('geoStatus').style.color = "#15803d";
       });
     }
@@ -1194,19 +645,56 @@
     function cerrarModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'none'; }
     function cerrarSiClickAfuera(e) { if (e.target.id === 'cartModalOverlay') cerrarModalCarrito(); }
 
-    function generarComprobanteModal() {
-      const nombre = document.getElementById('nombreClienteInput').value.trim() || 'Particular';
-      document.getElementById('tickCliente').innerText = nombre;
-      document.getElementById('tickFecha').innerText = new Date().toLocaleString();
-      document.getElementById('tickTipoComp').innerText = `*** ${tipoComprobante.toUpperCase()} ELECTRÓNICA ***`;
-      document.getElementById('tickTotal').innerText = `S/ ${ultimoTotalPagar.toFixed(2)}`;
-      document.getElementById('ticketModalOverlay').style.display = 'flex';
+    function abrirModalB2B() { document.getElementById('modalB2BOverlay').style.display = 'flex'; }
+    function cerrarModalB2B() { document.getElementById('modalB2BOverlay').style.display = 'none'; }
+
+    async function enviarPedidoWhatsApp() {
+      const items = Object.values(pedido).filter(p => p.cantidad > 0);
+      if (items.length === 0) return alert("Selecciona al menos un producto.");
+
+      const nombre = document.getElementById('nombreClienteInput').value.trim() || "Particular";
+      let total = 0, nombres = [];
+      items.forEach(i => { total += i.cantidad * i.precio; nombres.push(`${i.cantidad}x ${i.nombre}`); });
+      const detalle = nombres.join(", ");
+      const gpsUrl = ubicacionClienteCoords ? `https://www.google.com/maps?q=${ubicacionClienteCoords.lat},${ubicacionClienteCoords.lng}` : "No especificada";
+
+      const nuevoRef = db.ref('pedidos').push();
+      const pedidoId = nuevoRef.key;
+
+      await nuevoRef.set({
+        id: pedidoId,
+        tipoVenta: "minorista",
+        cliente: nombre,
+        tipoBalon: detalle,
+        montoCobro: total.toFixed(2),
+        metodoPago: metodoPago,
+        gpsUrl: ubicacionClienteCoords ? gpsUrl : "",
+        estado: "pendiente_asignacion",
+        etapa: 0,
+        timestamp: Date.now(),
+        hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
+      });
+
+      localStorage.setItem('leogas_mi_pedido_id', pedidoId);
+      localStorage.setItem('leogas_mi_pedido_cliente', nombre);
+
+      let msg = `*¡Hola LeoGas Cusco! Deseo hacer un pedido de gas:*\n\n`;
+      msg += `*👤 Cliente / Referencia:* ${nombre}\n`;
+      msg += `*🛢️ Detalle:* ${detalle}\n`;
+      msg += `*💰 Total a pagar:* S/ ${total.toFixed(2)}\n`;
+      msg += `*💵 Forma de Pago:* ${metodoPago}\n`;
+      msg += `*📍 Ubicación GPS:* ${gpsUrl}\n\n`;
+      msg += `_¡Gracias por su preferencia con LeoGas Cusco (Llamagas)._`;
+
+      window.open(`https://wa.me/${telefonos.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+      cerrarModalCarrito();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       iniciarMapaCusco();
       iniciarEscuchaFirebase();
       renderizarTelefonos();
+      actualizarBotonNotificacionesCliente();
     });
   </script>
 </body>
