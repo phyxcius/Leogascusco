@@ -205,7 +205,7 @@
       </div>
     </div>
 
-    <!-- PESTAÑA NUEVA: CARTERA B2B / EMPRESAS -->
+    <!-- PESTAÑA CARTERA B2B -->
     <div id="seccionB2B" style="display: none;">
       <div class="card" style="border:1.5px solid #ca8a04; background:#fefce8;">
         <h3 style="color:#854d0e; margin-bottom:8px;">🏢 Registro y Tarifario Especial de Empresas B2B</h3>
@@ -686,6 +686,12 @@
     let marcadoresAdmin = {};
     let cantidadPedidosEntrantesPrevia = 0;
 
+    // Helper para garantizar que los repartidores siempre sean un Array
+    function obtenerArrayRepartidores() {
+      if (!repartidoresLocales) return [];
+      return Array.isArray(repartidoresLocales) ? repartidoresLocales : Object.values(repartidoresLocales);
+    }
+
     function emitirCampanada() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -782,7 +788,18 @@
     }
 
     function iniciarEscuchaFirebase() {
-      // 1. Pedidos (incluye mayoristas B2B)
+      // 1. Repartidores (Carga prioritaria con re-renderizado automático de órdenes)
+      db.ref('repartidores').on('value', snap => {
+        const val = snap.val();
+        repartidoresLocales = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
+        renderizarGestionRepartidores();
+        actualizarMapaAdmin();
+        renderizarFlotaActiva();
+        renderizarOrdenesEntrantes(); // Actualiza los selectores de las órdenes inmediatamente
+        renderizarLiquidacionDiaria();
+      });
+
+      // 2. Pedidos
       db.ref('pedidos').on('value', snap => {
         pedidosLocales = snap.val() || {};
         procesarVentasParaReportes();
@@ -793,19 +810,10 @@
         procesarClientesVIP();
       });
 
-      // 2. Cartera de clientes B2B
+      // 3. Cartera de clientes B2B
       db.ref('clientesB2B').on('value', snap => {
         clientesB2BLocales = snap.val() || {};
         renderizarTablaCarteraB2B();
-      });
-
-      // 3. Repartidores
-      db.ref('repartidores').on('value', snap => {
-        repartidoresLocales = snap.val() || {};
-        renderizarGestionRepartidores();
-        actualizarMapaAdmin();
-        renderizarFlotaActiva();
-        renderizarLiquidacionDiaria();
       });
 
       // 4. Catálogo de Balones
@@ -847,13 +855,17 @@
       }
 
       contenedor.innerHTML = '';
+      const choferes = obtenerArrayRepartidores();
+
       lista.forEach(ord => {
         const div = document.createElement('div');
         div.style.cssText = "background:#fff; border:1px solid #fde047; border-radius:10px; padding:12px; margin-bottom:8px;";
 
         let opciones = '<option value="">-- Seleccionar Repartidor --</option>';
-        Object.values(repartidoresLocales).forEach(r => {
-          opciones += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
+        choferes.forEach(r => {
+          if (r && r.id && r.nombre) {
+            opciones += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
+          }
         });
 
         div.innerHTML = `
@@ -879,8 +891,11 @@
     }
 
     async function asignarOrden(id) {
-      const repId = document.getElementById(`selRep_${id}`).value;
-      if (!repId) return alert("Selecciona un repartidor.");
+      const selectElement = document.getElementById(`selRep_${id}`);
+      if (!selectElement) return;
+      const repId = selectElement.value;
+      if (!repId) return alert("Selecciona un repartidor de la lista.");
+      
       await db.ref(`pedidos/${id}`).update({ repartidorId: repId, estado: "activo", etapa: 0 });
       alert("✔ Pedido encomendado al chofer.");
     }
@@ -949,8 +964,11 @@
     function abrirModalPedidoTelefonico() {
       const sel = document.getElementById('telPedRepartidor');
       sel.innerHTML = '<option value="">-- Dejar en bandeja pendiente --</option>';
-      Object.values(repartidoresLocales).forEach(r => {
-        sel.innerHTML += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
+      const choferes = obtenerArrayRepartidores();
+      choferes.forEach(r => {
+        if (r && r.id && r.nombre) {
+          sel.innerHTML += `<option value="${r.id}">${r.nombre} ${r.online ? '🟢' : '💤'}</option>`;
+        }
       });
       calcularTotalPedidoTelefonico();
       document.getElementById('modalPedidoTelefonico').style.display = 'flex';
@@ -1038,75 +1056,84 @@
       cont.innerHTML = '';
       if (tbodyPrint) tbodyPrint.innerHTML = '';
 
-      Object.values(repartidoresLocales).forEach(rep => {
-        const ordenesChofer = ventasHoy.filter(p => p.repartidorId === rep.id);
-        let efectivoChofer = 0;
-        let digitalChofer = 0;
-        let creditoChofer = 0;
-        let envDejadosChofer = 0;
-        let envRecogidosChofer = 0;
+      const choferes = obtenerArrayRepartidores();
 
-        ordenesChofer.forEach(o => {
-          const m = parseFloat(o.montoCobro) || 0;
-          const pago = (o.metodoPago || '').toLowerCase();
-          
-          if (pago.includes('crédito') || pago.includes('credito') || pago.includes('cuenta')) {
-            creditoChofer += m;
-          } else if (pago.includes('efectivo')) {
-            efectivoChofer += m;
-          } else {
-            digitalChofer += m;
-          }
+      if (choferes.length === 0) {
+        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados.</p>';
+        if (tbodyPrint) tbodyPrint.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay repartidores en la flota.</td></tr>';
+      } else {
+        choferes.forEach(rep => {
+          if (!rep || !rep.id) return;
+          const ordenesChofer = ventasHoy.filter(p => p.repartidorId === rep.id);
+          let efectivoChofer = 0;
+          let digitalChofer = 0;
+          let creditoChofer = 0;
+          let envDejadosChofer = 0;
+          let envRecogidosChofer = 0;
 
-          envDejadosChofer += parseInt(o.envasesEntregados || 1);
-          envRecogidosChofer += parseInt(o.envasesRecogidos || 0);
-        });
+          ordenesChofer.forEach(o => {
+            const m = parseFloat(o.montoCobro) || 0;
+            const pago = (o.metodoPago || '').toLowerCase();
+            
+            if (pago.includes('crédito') || pago.includes('credito') || pago.includes('cuenta')) {
+              creditoChofer += m;
+            } else if (pago.includes('efectivo')) {
+              efectivoChofer += m;
+            } else {
+              digitalChofer += m;
+            }
 
-        granTotalEfectivo += efectivoChofer;
-        granTotalDigital += digitalChofer;
-        granTotalCredito += creditoChofer;
-        totalLlenos += envDejadosChofer;
-        totalVacios += envRecogidosChofer;
+            envDejadosChofer += parseInt(o.envasesEntregados || 1);
+            envRecogidosChofer += parseInt(o.envasesRecogidos || 0);
+          });
 
-        const card = document.createElement('div');
-        card.className = 'liqui-card';
-        card.innerHTML = `
-          <div class="liqui-header">
-            <strong style="color:#6b21a8; font-size:15px;">🦁 ${rep.nombre}</strong>
-            <span class="badge-status ${ordenesChofer.length > 0 ? 'online' : ''}">${ordenesChofer.length} entregas</span>
-          </div>
-          <div class="liqui-stat-row">
-            <span>💵 Efectivo Físico a Rendir:</span>
-            <strong style="color:#15803d; font-size:14px;">S/ ${efectivoChofer.toFixed(2)}</strong>
-          </div>
-          <div class="liqui-stat-row">
-            <span>🟣 Digital (Yape / Plin):</span>
-            <strong style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</strong>
-          </div>
-          <div class="liqui-stat-row">
-            <span>📋 Créditos B2B (Sin efectivo):</span>
-            <strong style="color:#d97706;">S/ ${creditoChofer.toFixed(2)}</strong>
-          </div>
-          <div class="liqui-stat-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:6px; font-weight:800; font-size:11.5px;">
-            <span>🔄 Envases Dejados vs Recogidos:</span>
-            <span>${envDejadosChofer} llenos / ${envRecogidosChofer} vacíos</span>
-          </div>
-        `;
-        cont.appendChild(card);
+          const totalChofer = efectivoChofer + digitalChofer;
+          granTotalEfectivo += efectivoChofer;
+          granTotalDigital += digitalChofer;
+          granTotalCredito += creditoChofer;
+          totalLlenos += envDejadosChofer;
+          totalVacios += envRecogidosChofer;
 
-        if (tbodyPrint) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${rep.nombre}</strong></td>
-            <td>${ordenesChofer.length}</td>
-            <td style="color:#15803d;"><strong>S/ ${efectivoChofer.toFixed(2)}</strong></td>
-            <td style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</td>
-            <td style="color:#d97706;">S/ ${creditoChofer.toFixed(2)}</td>
-            <td>${envDejadosChofer} dejados / ${envRecogidosChofer} recogidos</td>
+          const card = document.createElement('div');
+          card.className = 'liqui-card';
+          card.innerHTML = `
+            <div class="liqui-header">
+              <strong style="color:#6b21a8; font-size:15px;">🦁 ${rep.nombre}</strong>
+              <span class="badge-status ${ordenesChofer.length > 0 ? 'online' : ''}">${ordenesChofer.length} entregas</span>
+            </div>
+            <div class="liqui-stat-row">
+              <span>💵 Efectivo Físico a Rendir:</span>
+              <strong style="color:#15803d; font-size:14px;">S/ ${efectivoChofer.toFixed(2)}</strong>
+            </div>
+            <div class="liqui-stat-row">
+              <span>🟣 Digital (Yape / Plin):</span>
+              <strong style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</strong>
+            </div>
+            <div class="liqui-stat-row">
+              <span>📋 Créditos B2B (Sin efectivo):</span>
+              <strong style="color:#d97706;">S/ ${creditoChofer.toFixed(2)}</strong>
+            </div>
+            <div class="liqui-stat-row" style="border-top:1px dashed #cbd5e1; padding-top:6px; margin-top:6px; font-weight:800; font-size:11.5px;">
+              <span>🔄 Envases Dejados vs Recogidos:</span>
+              <span>${envDejadosChofer} llenos / ${envRecogidosChofer} vacíos</span>
+            </div>
           `;
-          tbodyPrint.appendChild(tr);
-        }
-      });
+          cont.appendChild(card);
+
+          if (tbodyPrint) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><strong>${rep.nombre}</strong></td>
+              <td>${ordenesChofer.length}</td>
+              <td style="color:#15803d;"><strong>S/ ${efectivoChofer.toFixed(2)}</strong></td>
+              <td style="color:#2563eb;">S/ ${digitalChofer.toFixed(2)}</td>
+              <td style="color:#d97706;">S/ ${creditoChofer.toFixed(2)}</td>
+              <td>${envDejadosChofer} dejados / ${envRecogidosChofer} recogidos</td>
+            `;
+            tbodyPrint.appendChild(tr);
+          }
+        });
+      }
 
       const totalGlobal = granTotalEfectivo + granTotalDigital + granTotalCredito;
       document.getElementById('liqTotalEfectivo').innerText = `S/ ${granTotalEfectivo.toFixed(2)}`;
@@ -1140,7 +1167,10 @@
     function renderizarFlotaActiva() {
       const contenedor = document.getElementById('contenedorSecuenciasRepartidores');
       contenedor.innerHTML = '';
-      Object.values(repartidoresLocales).forEach(rep => {
+      const choferes = obtenerArrayRepartidores();
+
+      choferes.forEach(rep => {
+        if (!rep || !rep.id) return;
         const ordenActiva = Object.values(pedidosLocales).find(p => p.repartidorId === rep.id && p.estado !== 'completado');
         const etapa = ordenActiva ? ordenActiva.etapa : 0;
         const card = document.createElement('div');
@@ -1165,7 +1195,10 @@
 
     function actualizarMapaAdmin() {
       if (!mapAdmin) return;
-      Object.values(repartidoresLocales).forEach(rep => {
+      const choferes = obtenerArrayRepartidores();
+
+      choferes.forEach(rep => {
+        if (!rep || !rep.id) return;
         const icono = L.divIcon({
           html: `<div style="background:${rep.online ? '#7e22ce' : '#64748b'}; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:18px;">🦁</div>`,
           iconSize: [34, 34], iconAnchor: [17, 17]
@@ -1183,7 +1216,15 @@
       const cont = document.getElementById('listaRepartidoresConfig');
       if (!cont) return;
       cont.innerHTML = '';
-      Object.values(repartidoresLocales).forEach(rep => {
+      const choferes = obtenerArrayRepartidores();
+
+      if (choferes.length === 0) {
+        cont.innerHTML = '<p style="color:#64748b; font-size:13px;">No hay repartidores registrados en el sistema.</p>';
+        return;
+      }
+
+      choferes.forEach(rep => {
+        if (!rep || !rep.id) return;
         const div = document.createElement('div');
         div.className = 'repartidor-card';
         div.innerHTML = `
@@ -1319,11 +1360,13 @@
       const tbody = document.getElementById('tablaVentasBody');
       tbody.innerHTML = '';
       let sumaTotal = 0;
+      const choferes = obtenerArrayRepartidores();
 
       ventasFiltradas.forEach(v => {
         const tot = parseFloat(v.montoCobro) || 0;
         sumaTotal += tot;
-        const chofer = repartidoresLocales[v.repartidorId]?.nombre || "General";
+        const choferObj = choferes.find(r => r.id === v.repartidorId);
+        const chofer = choferObj ? choferObj.nombre : "General";
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${v.hora || '--'}</td>
@@ -1344,8 +1387,10 @@
 
     function exportarVentasExcelCSV() {
       let csv = "\uFEFFHora;Cliente;Detalle;Repartidor;Total;Pago;EnvasesDejados;EnvasesRecogidos\r\n";
+      const choferes = obtenerArrayRepartidores();
       ventasFiltradas.forEach(v => {
-        csv += `"${v.hora || ''}";"${v.cliente || ''}";"${v.tipoBalon || ''}";"${repartidoresLocales[v.repartidorId]?.nombre || 'General'}";"${v.montoCobro}";"${v.metodoPago}";"${v.envasesEntregados || 1}";"${v.envasesRecogidos || 0}"\r\n`;
+        const choferObj = choferes.find(r => r.id === v.repartidorId);
+        csv += `"${v.hora || ''}";"${v.cliente || ''}";"${v.tipoBalon || ''}";"${choferObj ? choferObj.nombre : 'General'}";"${v.montoCobro}";"${v.metodoPago}";"${v.envasesEntregados || 1}";"${v.envasesRecogidos || 0}"\r\n`;
       });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
@@ -1377,7 +1422,7 @@
           <td style="color:#15803d; font-weight:bold;">S/ ${c.totalGasto.toFixed(2)}</td>
           <td style="font-size:11px;">${c.ultimoPedido.toLocaleDateString()}</td>
           <td>${c.cantidad >= 4 ? '👑 VIP' : 'Estándar'}</td>
-          <td><a href="https://wa.me/?text=Hola%20${encodeURIComponent(c.nombre)}" target="_blank" class="btn" style="background:#25d366; color:#fff; padding:3px 8px; font-size:11px; text-decoration:none;">Promo</a></td>
+          <td><a href="https://wa.me/?text=Hola%20${encodeURIComponent(c.nombre)}" target="_blank" class="btn" style="background:#2563eb; color:#fff; padding:3px 8px; font-size:11px; text-decoration:none;">Promo</a></td>
         `;
         tbody.appendChild(tr);
       });
