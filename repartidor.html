@@ -38,19 +38,36 @@
       align-items: center;
     }
 
-    /* TARJETA INFERIOR TIPO ITINERARIO RUTA */
-    .bottom-delivery-card {
+    /* VISTAS PRINCIPALES (OCULTAR / MOSTRAR) */
+    .vista-panel {
       position: absolute;
-      bottom: 0;
+      bottom: 75px; /* Deja espacio para la barra inferior estilo InDriver */
       left: 0;
       width: 100%;
-      background: #ffffff;
-      border-radius: 24px 24px 0 0;
-      padding: 20px;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
       z-index: 10;
-      max-height: 58vh;
+      padding: 0 16px;
+      display: none;
+      max-height: 62vh;
       overflow-y: auto;
+    }
+    .vista-panel.activo { display: block; }
+
+    /* TARJETA INFERIOR TIPO ITINERARIO RUTA */
+    .bottom-delivery-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
+    }
+
+    /* TARJETA DE SOLICITUD ENTRADA (ESTILO INDRIVER) */
+    .solicitud-indriver-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      border: 1.5px solid #e2e8f0;
     }
 
     .indriver-price-tag {
@@ -134,6 +151,40 @@
       width: 100%;
       margin-top: 6px;
     }
+
+    /* BARRA DE NAVEGACIÓN INFERIOR ESTILO INDRIVER */
+    .indriver-bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      background: #ffffff;
+      border-top: 1.5px solid #e2e8f0;
+      display: flex;
+      z-index: 20;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
+    }
+    .nav-tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      font-weight: 800;
+      font-size: 13px;
+      color: #64748b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-tab-btn.active {
+      color: #6b21a8;
+      background: #f8fafc;
+    }
+    .nav-tab-btn span.icon { font-size: 18px; }
   </style>
 </head>
 <body>
@@ -153,42 +204,64 @@
     <button type="button" class="btn" style="background:#fee2e2; color:#dc2626; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:8px; border:none;" onclick="alternarConexionChofer()">Desconectarse</button>
   </div>
 
-  <!-- 3. TARJETA INFERIOR TIPO ITINERARIO Y RUTA -->
-  <div class="bottom-delivery-card">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <span id="badgeTipoVenta" style="background:#fef08a; color:#854d0e; font-size:10.5px; font-weight:900; padding:3px 8px; border-radius:8px;">RUTA DE REPARTO ACTIVA</span>
-      <span class="indriver-price-tag" id="lblMontoOrden">S/ 0.00</span>
+  <!-- 3. VISTA A: MIS SOLICITUDES (ENTRANTES DE LA CENTRAL) -->
+  <div class="vista-panel" id="vistaSolicitudes">
+    <div style="font-size:13px; font-weight:900; color:#1e1b4b; margin-bottom:8px;">📥 Solicitudes Entrantes de la Central:</div>
+    <div id="contenedorListaSolicitudes">
+      <div style="background:#fff; padding:16px; border-radius:12px; text-align:center; color:#64748b; font-size:13px;">Buscando solicitudes en tiempo real...</div>
     </div>
+  </div>
 
-    <h3 id="lblClienteOrden" style="margin:6px 0 2px; font-size:16px; color:#1e1b4b;">Buscando ruta asignada...</h3>
-    
-    <!-- CONTENEDOR DE LA RUTA / ITINERARIO DE PEDIDOS -->
-    <div id="contenedorItinerarioRuta" style="margin: 8px 0; max-height: 140px; overflow-y: auto;">
-      <div class="route-point-row" style="background:#fefce8; border-color:#eab308;">
-        <div class="route-badge-letter" style="background:#ca8a04;">Base</div>
-        <div>
-          <div style="font-size:10px; font-weight:800; color:#854d0e;">PUNTO DE PARTIDA</div>
-          <strong style="font-size:12px;">Central LeoGas Cusco (Calle Garcilaso)</strong>
+  <!-- 4. VISTA B: MAPA EN RUTA Y SECUENCIA -->
+  <div class="vista-panel activo" id="vistaMapaRuta">
+    <div class="bottom-delivery-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="badgeTipoVenta" style="background:#fef08a; color:#854d0e; font-size:10.5px; font-weight:900; padding:3px 8px; border-radius:8px;">RUTA DE REPARTO ACTIVA</span>
+        <span class="indriver-price-tag" id="lblMontoOrden">S/ 0.00</span>
+      </div>
+
+      <h3 id="lblClienteOrden" style="margin:6px 0 2px; font-size:16px; color:#1e1b4b;">Buscando ruta asignada...</h3>
+      
+      <!-- CONTENEDOR DE LA RUTA / ITINERARIO -->
+      <div id="contenedorItinerarioRuta" style="margin: 8px 0; max-height: 130px; overflow-y: auto;">
+        <div class="route-point-row" style="background:#fefce8; border-color:#eab308;">
+          <div class="route-badge-letter" style="background:#ca8a04;">Base</div>
+          <div>
+            <div style="font-size:10px; font-weight:800; color:#854d0e;">PUNTO DE PARTIDA</div>
+            <strong style="font-size:12px;">Central LeoGas Cusco (Calle Garcilaso)</strong>
+          </div>
         </div>
       </div>
+
+      <!-- Botón de Navegación GPS Directa -->
+      <a id="btnNavegarRuta" href="#" target="_blank" class="btn-nav-maps" style="display:none;">
+        🧭 Abrir Navegación GPS (Google Maps / Waze)
+      </a>
+
+      <!-- Barra de Secuencia de Entrega -->
+      <div class="secuencia-steps-bar">
+        <div class="step-block" id="step1" style="background:#e52329;">1. EN CAMINO</div>
+        <div class="step-block" id="step2" style="background:#555557;">2. EN PUERTA</div>
+        <div class="step-block" id="step3" style="background:#8b8e91;">3. COMPLETADO</div>
+      </div>
+
+      <button type="button" class="btn-accion-repartidor" id="btnAvanzarEtapa" onclick="avanzarEtapaPedido()">
+        Esperando asignación...
+      </button>
     </div>
-
-    <!-- Botón para abrir navegador GPS nativo -->
-    <a id="btnNavegarRuta" href="#" target="_blank" class="btn-nav-maps" style="display:none;">
-      🧭 Abrir Navegación GPS (Google Maps / Waze)
-    </a>
-
-    <!-- Barra de Secuencia de Entrega -->
-    <div class="secuencia-steps-bar">
-      <div class="step-block" id="step1" style="background:#e52329;">1. EN CAMINO</div>
-      <div class="step-block" id="step2" style="background:#555557;">2. EN PUERTA</div>
-      <div class="step-block" id="step3" style="background:#8b8e91;">3. COMPLETADO</div>
-    </div>
-
-    <button type="button" class="btn-accion-repartidor" id="btnAvanzarEtapa" onclick="avanzarEtapaPedido()">
-      Esperando asignación...
-    </button>
   </div>
+
+  <!-- 5. BARRA INFERIOR DE NAVEGACIÓN ESTILO INDRIVER -->
+  <nav class="indriver-bottom-nav">
+    <button type="button" class="nav-tab-btn" id="tabBtnSolicitudes" onclick="cambiarVistaRepartidor('solicitudes')">
+      <span class="icon">📋</span>
+      <span>Mis Solicitudes</span>
+    </button>
+    <button type="button" class="nav-tab-btn active" id="tabBtnRuta" onclick="cambiarVistaRepartidor('ruta')">
+      <span class="icon">🗺️</span>
+      <span>Mapa en Ruta</span>
+    </button>
+  </nav>
 
   <!-- Leaflet JS y Firebase SDKs -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -211,6 +284,14 @@
     let markerDestino = null;
     let pedidoActivo = null;
     let miRepartidorId = localStorage.getItem('leogas_rep_id') || "rep-1"; 
+
+    function cambiarVistaRepartidor(vista) {
+      document.getElementById('tabBtnSolicitudes').classList.toggle('active', vista === 'solicitudes');
+      document.getElementById('tabBtnRuta').classList.toggle('active', vista === 'ruta');
+
+      document.getElementById('vistaSolicitudes').classList.toggle('activo', vista === 'solicitudes');
+      document.getElementById('vistaMapaRuta').classList.toggle('activo', vista === 'ruta');
+    }
 
     function inicializarMapaRepartidor() {
       if (mapRepartidor) return;
@@ -242,20 +323,63 @@
         const pedidos = snap.val();
         if (!pedidos) {
           mostrarSinPedidos();
+          renderizarSolicitudesEntrantes({});
           return;
         }
 
         const ordenes = Object.values(pedidos);
-        // Filtrar todas las órdenes activas asignadas a este chofer
+        
+        // 1. Órdenes pendientes o sin asignar para la pestaña "Mis Solicitudes"
+        renderizarSolicitudesEntrantes(pedidos);
+
+        // 2. Órdenes asignadas y activas para este repartidor ("Mapa en Ruta")
         const rutaActivaChofer = ordenes.filter(p => p.repartidorId === miRepartidorId && p.estado !== 'completado');
 
         if (rutaActivaChofer.length > 0) {
-          pedidoActivo = rutaActivaChofer[0]; // La primera orden activa en curso
+          pedidoActivo = rutaActivaChofer[0];
           actualizarItinerarioChofer(pedidoActivo, rutaActivaChofer);
         } else {
           mostrarSinPedidos();
         }
       });
+    }
+
+    function renderizarSolicitudesEntrantes(pedidosObj) {
+      const contenedor = document.getElementById('contenedorListaSolicitudes');
+      const pendientes = Object.values(pedidosObj).filter(p => p.estado === 'pendiente_asignacion' || !p.repartidorId);
+
+      if (pendientes.length === 0) {
+        contenedor.innerHTML = '<div style="background:#fff; padding:16px; border-radius:12px; text-align:center; color:#64748b; font-size:13px;">No hay nuevas solicitudes en este momento.</div>';
+        return;
+      }
+
+      contenedor.innerHTML = '';
+      pendientes.forEach(ord => {
+        const card = document.createElement('div');
+        card.className = 'solicitud-indriver-card';
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="color:#1e1b4b; font-size:15px;">👤 ${ord.cliente}</strong>
+            <span class="indriver-price-tag">S/ ${parseFloat(ord.montoCobro || 0).toFixed(2)}</span>
+          </div>
+          <div style="font-size:12.5px; color:#475569; margin-bottom:4px;">🛢️ <strong>${ord.tipoBalon}</strong> | Pago: <strong>${ord.metodoPago}</strong></div>
+          <div style="font-size:12px; color:#b45309; margin-bottom:10px;">📍 ${ord.direccionTexto || 'Cusco'}</div>
+          <button type="button" class="btn-accion-repartidor" style="margin-top:0; padding:10px; font-size:13.5px;" onclick="aceptarSolicitud('${ord.id}')">
+            Aceptar Pedido ➔
+          </button>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    async function aceptarSolicitud(pedidoId) {
+      await db.ref(`pedidos/${pedidoId}`).update({
+        repartidorId: miRepartidorId,
+        estado: 'activo',
+        etapa: 0
+      });
+      alert("✔ ¡Pedido aceptado y añadido a tu ruta!");
+      cambiarVistaRepartidor('ruta');
     }
 
     function mostrarSinPedidos() {
@@ -272,17 +396,16 @@
             <strong style="font-size:12px;">Central LeoGas Cusco (Calle Garcilaso)</strong>
           </div>
         </div>
-        <div style="text-align:center; padding:10px; color:#64748b; font-size:12px;">No hay entregas pendientes en tu ruta actual.</div>
+        <div style="text-align:center; padding:10px; color:#64748b; font-size:12px;">Revisa la pestaña "Mis Solicitudes" para aceptar pedidos.</div>
       `;
 
       if (markerDestino) { mapRepartidor.removeLayer(markerDestino); markerDestino = null; }
     }
 
     function actualizarItinerarioChofer(orden, listaRuta) {
-      document.getElementById('lblClienteOrden').innerText = `${orden.cliente} (${listaRuta.length} pedidos en ruta)`;
+      document.getElementById('lblClienteOrden').innerText = `${orden.cliente} (${listaRuta.length} en ruta)`;
       document.getElementById('lblMontoOrden').innerText = `S/ ${parseFloat(orden.montoCobro || 0).toFixed(2)}`;
 
-      // Renderizar la lista completa de puntos de la ruta
       const contItinerario = document.getElementById('contenedorItinerarioRuta');
       contItinerario.innerHTML = `
         <div class="route-point-row" style="background:#fefce8; border-color:#eab308;">
@@ -318,7 +441,6 @@
       else if (etapa === 1) btn.innerText = "🚪 Marcar: En Puerta del Cliente";
       else if (etapa === 2) btn.innerText = "✔ Marcar: Entrega Completada";
 
-      // Botón de Navegación GPS Directa
       const btnMaps = document.getElementById('btnNavegarRuta');
       btnMaps.style.display = 'block';
       if (orden.lat && orden.lng) {
