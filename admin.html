@@ -1091,7 +1091,6 @@
             ${ord.gpsUrl ? ` | <a href="${ord.gpsUrl}" target="_blank" style="color:#2563eb; font-weight:bold;">📍 Ver Mapa</a>` : ''}
           </div>
 
-          <!-- MÓDULO DE FACTURACIÓN ELECTRÓNICA -->
           <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
             ${!ord.facturado ? `
               <button class="btn btn-save" style="padding:6px 10px; font-size:11px; margin:0; width:auto; background:#0284c7;" onclick="emitirFacturaElectronica('${ord.id}')">
@@ -1179,10 +1178,7 @@
       msg += `📄 *Descarga tu comprobante digital aquí:* \n${window.location.origin + window.location.pathname.replace('admin.html', 'index.html')}?factura=${pedidoId}\n\n`;
       msg += `_Gracias por su preferencia con LeoGas Cusco (Llamagas)._`;
 
-      const urlWsp = tel 
-        ? `https://wa.me/51${tel}?text=${encodeURIComponent(msg)}` 
-        : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-
+      const urlWsp = tel ? `https://wa.me/51${tel}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
       window.open(urlWsp, '_blank');
     }
 
@@ -1457,8 +1453,10 @@
       window.print();
     }
 
+    // FUNCIÓN ACTUALIZADA DE FLOTA ACTIVA CON INDICADOR VISUAL DE ESTADO Y ORDEN
     function renderizarFlotaActiva() {
       const contenedor = document.getElementById('contenedorSecuenciasRepartidores');
+      if (!contenedor) return;
       contenedor.innerHTML = '';
       const choferes = obtenerArrayRepartidores();
 
@@ -1466,19 +1464,22 @@
         if (!rep || !rep.id) return;
         const ordenActiva = Object.values(pedidosLocales).find(p => p.repartidorId === rep.id && p.estado !== 'completado');
         const etapa = ordenActiva ? ordenActiva.etapa : 0;
+        
         const card = document.createElement('div');
         card.className = `repartidor-card ${rep.online ? 'activo' : ''}`;
         card.innerHTML = `
-          <div style="display:flex; justify-content:space-between;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
             <strong>🦁 ${rep.nombre}</strong>
-            <span class="badge-status ${rep.online ? 'online' : ''}">${rep.online ? 'Online 🟢' : 'Offline 💤'}</span>
+            <span style="background:${rep.online ? '#dcfce7' : '#fee2e2'}; color:${rep.online ? '#15803d' : '#dc2626'}; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:10px;">
+              ${rep.online ? '🟢 En Línea' : '💤 Inactivo'}
+            </span>
           </div>
-          <div style="font-size:12px; margin-top:2px;">
-            ${ordenActiva ? `🛢️ <strong>${ordenActiva.tipoBalon}</strong> (${ordenActiva.cliente})` : '<span style="color:#64748b;">Disponible</span>'}
+          <div style="font-size:12px; margin-top:4px;">
+            ${ordenActiva ? `🔥 <strong>Orden:</strong> ${ordenActiva.tipoBalon} (${ordenActiva.cliente})` : '<span style="color:#64748b;">Libre / Disponible</span>'}
           </div>
           <div class="secuencia-mini-bar">
             <div class="sec-block sec-rojo ${etapa === 1 ? 'activo' : ''}">1. EN CAMINO</div>
-            <div class="sec-block sec-gris-osc ${etapa === 2 ? 'activo' : ''}">2. ENTREGADO</div>
+            <div class="sec-block sec-gris-osc ${etapa === 2 ? 'activo' : ''}">2. EN PUERTA</div>
             <div class="sec-block sec-gris-claro ${etapa === 3 ? 'activo' : ''}">3. COMPLETADO</div>
           </div>
         `;
