@@ -545,7 +545,7 @@
     </div>
   </div>
 
-  <!-- MODAL B2B EXCLUSIVO PARA EMPRESAS -->
+  <!-- MODAL B2B EXCLUSIVO PARA EMPRESAS (CON UBICACIÓN EXACTA GPS) -->
   <div class="cart-modal-overlay" id="modalB2BOverlay" style="display:none; align-items:center;">
     <div class="cart-modal-card" style="border-radius:18px; max-width:480px; padding:0; overflow:hidden;">
       
@@ -592,9 +592,20 @@
           </div>
         </div>
 
+        <!-- DIRECCIÓN DEL LOCAL Y LOCALIZACIÓN GPS -->
         <div style="margin-top:12px;">
-          <label style="font-size:11px; font-weight:800; color:#475569;">DIRECCIÓN DE ENTREGA / LOCAL:</label>
-          <input type="text" id="b2bDireccionLocal" placeholder="Ej: Calle Nueva Alta 450 - Local Principal" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; margin-top:4px;">
+          <label style="font-size:11px; font-weight:800; color:#475569;">DIRECCIÓN DEL LOCAL O RESTAURANTE:</label>
+          <input type="text" id="b2bDireccionLocal" placeholder="Ej: Calle Nueva Alta 374 - Local Principal" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; margin-top:4px;">
+        </div>
+
+        <!-- MÓDULO PARA COMPARTIR GPS DEL LOCAL B2B -->
+        <div style="margin-top:10px; background:#faf5ff; border:1.5px dashed #c084fc; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
+          <button type="button" class="btn" style="background:#7e22ce; color:#fff; font-weight:800; font-size:12.5px; padding:8px 12px; border-radius:8px;" onclick="capturarGPSLocalB2B()">
+            📍 Activar ubicación exacta del local (GPS)
+          </button>
+          <span id="geoStatusB2B" style="font-size:11px; color:#64748b; text-align:center;">
+            Comparte tus coordenadas para que el camión o repartidor llegue sin llamadas previas
+          </span>
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; border-top:1px dashed #cbd5e1; padding-top:12px;">
@@ -753,6 +764,7 @@
     // ESTADO PORTAL B2B
     let empresaB2BActual = null;
     let pedidoB2B = { "gas-45kg": 1 };
+    let ubicacionB2BCoords = null; // Coordenadas GPS específicas del restaurante/local
 
     // SONIDO Y VIBRACIÓN
     function emitirCampanadaCliente() {
@@ -913,7 +925,6 @@
       });
     }
 
-    // ACTUALIZACIÓN DE BARRA CON DETECCIÓN B2B Y COLORES DIFERENCIADOS
     function actualizarBarraSeguimiento(orden) {
       const barra = document.getElementById('barraSeguimientoActivo');
       const tit = document.getElementById('trackTituloCliente');
@@ -1264,6 +1275,24 @@
       });
     }
 
+    // CAPTURA DE UBICACIÓN GPS PARA EL LOCAL B2B
+    function capturarGPSLocalB2B() {
+      if (!navigator.geolocation) return alert("Geolocalización no soportada en este navegador.");
+      const statusLbl = document.getElementById('geoStatusB2B');
+      statusLbl.innerText = "Obteniendo ubicación del local por satélite...";
+      statusLbl.style.color = "#6b21a8";
+
+      navigator.geolocation.getCurrentPosition(pos => {
+        ubicacionB2BCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        statusLbl.innerText = `✔ Ubicación GPS del local capturada (${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`;
+        statusLbl.style.color = "#15803d";
+        statusLbl.style.fontWeight = "bold";
+      }, err => {
+        statusLbl.innerText = "⚠️ No se pudo obtener el GPS. Se usará la dirección de texto escrita.";
+        statusLbl.style.color = "#dc2626";
+      }, { enableHighAccuracy: true, timeout: 10000 });
+    }
+
     function abrirModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'flex'; }
     function cerrarModalCarrito() { document.getElementById('cartModalOverlay').style.display = 'none'; }
     function cerrarSiClickAfuera(e) { if (e.target.id === 'cartModalOverlay') cerrarModalCarrito(); }
@@ -1366,6 +1395,7 @@
       document.getElementById('vistaB2BCatalogo').style.display = 'none';
       document.getElementById('msgValidacionRuc').innerText = '';
       document.getElementById('inputRucB2B').value = '';
+      ubicacionB2BCoords = null;
     }
 
     function cerrarModalB2B() {
@@ -1420,6 +1450,20 @@
       document.getElementById('b2bEmpresaCondicion').innerText = empresaB2BActual.condicionPago || "Crédito 15 días";
       document.getElementById('b2bDireccionLocal').value = empresaB2BActual.direccion || "";
 
+      // Restaurar estado de GPS si la empresa ya tenía ubicación guardada
+      const statusLbl = document.getElementById('geoStatusB2B');
+      if (empresaB2BActual.lat && empresaB2BActual.lng) {
+        ubicacionB2BCoords = { lat: empresaB2BActual.lat, lng: empresaB2BActual.lng };
+        statusLbl.innerText = "✔ Ubicación GPS del local guardada previamente.";
+        statusLbl.style.color = "#15803d";
+        statusLbl.style.fontWeight = "bold";
+      } else {
+        ubicacionB2BCoords = null;
+        statusLbl.innerText = "Comparte tus coordenadas para que el camión o repartidor llegue sin llamadas previas";
+        statusLbl.style.color = "#64748b";
+        statusLbl.style.fontWeight = "normal";
+      }
+
       renderizarItemsB2B();
     }
 
@@ -1460,6 +1504,14 @@
 
       if (!direccion) return alert("Por favor confirma la dirección del local o restaurante.");
 
+      // Si activó el GPS, genera el link directo con coordenadas; si no, genera el link de búsqueda por dirección
+      let mapsUrl = "";
+      if (ubicacionB2BCoords && ubicacionB2BCoords.lat && ubicacionB2BCoords.lng) {
+        mapsUrl = `https://www.google.com/maps?q=${ubicacionB2BCoords.lat},${ubicacionB2BCoords.lng}`;
+      } else {
+        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion + ', Cusco')}`;
+      }
+
       const nuevoRef = db.ref('pedidos').push();
       const pedidoId = nuevoRef.key;
 
@@ -1475,7 +1527,9 @@
         tipoComprobante: `Factura (RUC: ${empresaB2BActual.ruc} - ${empresaB2BActual.razonSocial})`,
         envasesEntregados: cant,
         envasesRecogidos: envasesVacios,
-        gpsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion + ', Cusco')}`,
+        gpsUrl: mapsUrl,
+        lat: ubicacionB2BCoords ? ubicacionB2BCoords.lat : null,
+        lng: ubicacionB2BCoords ? ubicacionB2BCoords.lng : null,
         repartidorId: "",
         estado: "pendiente_asignacion",
         etapa: 0,
@@ -1483,7 +1537,13 @@
         hora: new Date().toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit' })
       });
 
-      db.ref(`clientesB2B/${empresaB2BActual.ruc}/direccion`).set(direccion);
+      // Guardar dirección y coordenadas en la cartera B2B para próximos pedidos
+      const actualizacionEmpresa = { direccion: direccion };
+      if (ubicacionB2BCoords) {
+        actualizacionEmpresa.lat = ubicacionB2BCoords.lat;
+        actualizacionEmpresa.lng = ubicacionB2BCoords.lng;
+      }
+      db.ref(`clientesB2B/${empresaB2BActual.ruc}`).update(actualizacionEmpresa);
 
       localStorage.setItem('leogas_mi_pedido_id', pedidoId);
       localStorage.setItem('leogas_mi_pedido_cliente', `${empresaB2BActual.razonSocial} (RUC: ${empresaB2BActual.ruc})`);
