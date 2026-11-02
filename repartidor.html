@@ -12,7 +12,52 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
     body, html { width: 100%; height: 100%; overflow: hidden; background: #f8fafc; color: #1e1b4b; }
 
-    /* MAPA DE FONDO A PANTALLA COMPLETA */
+    /* PANTALLA DE LOGIN PARA REPATIDORES */
+    #pantallaLoginRepartidor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #f8fafc;
+      z-index: 99999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .login-card-rep {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 1.5px solid #e2e8f0;
+      text-align: center;
+    }
+    .login-card-rep input {
+      width: 100%;
+      padding: 11px;
+      margin-top: 8px;
+      margin-bottom: 14px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    .login-card-rep label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      display: block;
+      text-align: left;
+    }
+
+    /* CONTENEDOR PRINCIPAL CUANDO YA ESTÁ LOGUEADO */
+    #panelRepartidorApp { display: none; width: 100%; height: 100%; position: relative; }
+
+    /* MAPA DE FONDO SOLO PARA LA VISTA DE RUTA */
     #mapaRepartidor {
       width: 100%;
       height: 100vh;
@@ -38,19 +83,26 @@
       align-items: center;
     }
 
-    /* VISTAS PRINCIPALES (OCULTAR / MOSTRAR) */
+    /* VISTAS PRINCIPALES */
     .vista-panel {
       position: absolute;
-      bottom: 75px; /* Deja espacio para la barra inferior estilo InDriver */
+      top: 80px;
+      bottom: 75px;
       left: 0;
       width: 100%;
       z-index: 10;
       padding: 0 16px;
       display: none;
-      max-height: 62vh;
       overflow-y: auto;
     }
     .vista-panel.activo { display: block; }
+
+    /* VISTA MIS SOLICITUDES (FONDO BLANCO SÓLIDO SIN MAPA) */
+    #vistaSolicitudes {
+      background: #f8fafc;
+      z-index: 25; /* Encima del mapa para que se vea limpio tipo InDriver */
+      top: 75px;
+    }
 
     /* TARJETA INFERIOR TIPO ITINERARIO RUTA */
     .bottom-delivery-card {
@@ -66,7 +118,7 @@
       border-radius: 16px;
       padding: 16px;
       margin-bottom: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       border: 1.5px solid #e2e8f0;
     }
 
@@ -162,7 +214,7 @@
       background: #ffffff;
       border-top: 1.5px solid #e2e8f0;
       display: flex;
-      z-index: 20;
+      z-index: 30;
       box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
     }
     .nav-tab-btn {
@@ -189,79 +241,103 @@
 </head>
 <body>
 
-  <!-- 1. MAPA INTERACTIVO SUPERIOR -->
-  <div id="mapaRepartidor"></div>
-
-  <!-- 2. ESTADO SUPERIOR FLOTANTE -->
-  <div class="top-status-floating">
-    <div style="display:flex; align-items:center; gap:8px;">
-      <span style="font-size:22px;">🦁</span>
-      <div>
-        <strong id="lblNombreChofer" style="font-size:13px; color:#6b21a8;">Repartidor LeoGas</strong>
-        <div style="font-size:10px; color:#15803d; font-weight:800;">● GPS ACTIVO EN RUTA</div>
-      </div>
-    </div>
-    <button type="button" class="btn" style="background:#fee2e2; color:#dc2626; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:8px; border:none;" onclick="alternarConexionChofer()">Desconectarse</button>
-  </div>
-
-  <!-- 3. VISTA A: MIS SOLICITUDES (ENTRANTES DE LA CENTRAL - ACTIVA POR DEFECTO) -->
-  <div class="vista-panel activo" id="vistaSolicitudes">
-    <div style="font-size:13px; font-weight:900; color:#1e1b4b; margin-bottom:8px;">📥 Solicitudes Entrantes de la Central:</div>
-    <div id="contenedorListaSolicitudes">
-      <div style="background:#fff; padding:16px; border-radius:12px; text-align:center; color:#64748b; font-size:13px;">Buscando solicitudes en tiempo real...</div>
-    </div>
-  </div>
-
-  <!-- 4. VISTA B: MAPA EN RUTA Y SECUENCIA -->
-  <div class="vista-panel" id="vistaMapaRuta">
-    <div class="bottom-delivery-card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span id="badgeTipoVenta" style="background:#fef08a; color:#854d0e; font-size:10.5px; font-weight:900; padding:3px 8px; border-radius:8px;">RUTA DE REPARTO ACTIVA</span>
-        <span class="indriver-price-tag" id="lblMontoOrden">S/ 0.00</span>
-      </div>
-
-      <h3 id="lblClienteOrden" style="margin:6px 0 2px; font-size:16px; color:#1e1b4b;">Buscando ruta asignada...</h3>
+  <!-- PANTALLA DE INICIO DE SESIÓN PARA REPARTIDORES -->
+  <div id="pantallaLoginRepartidor">
+    <div class="login-card-rep">
+      <div style="font-size: 40px; margin-bottom: 6px;">🛵</div>
+      <h3 style="color: #6b21a8; margin-bottom: 4px;">Acceso Repartidores</h3>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">LeoGas Cusco • Flota en Ruta</p>
       
-      <!-- CONTENEDOR DE LA RUTA / ITINERARIO -->
-      <div id="contenedorItinerarioRuta" style="margin: 8px 0; max-height: 130px; overflow-y: auto;">
-        <div class="route-point-row" style="background:#fefce8; border-color:#eab308;">
-          <div class="route-badge-letter" style="background:#ca8a04;">Base</div>
-          <div>
-            <div style="font-size:10px; font-weight:800; color:#854d0e;">PUNTO DE PARTIDA</div>
-            <strong style="font-size:12px;">Central LeoGas Cusco (Calle Garcilaso)</strong>
-          </div>
+      <form onsubmit="verificarLoginRepartidor(event)">
+        <label>Usuario:</label>
+        <input type="text" id="repLoginUser" placeholder="ej: jorge" required autofocus>
+        
+        <label>Contraseña:</label>
+        <input type="password" id="repLoginPass" placeholder="••••••••" required>
+        
+        <button type="submit" class="btn-accion-repartidor" style="margin-top: 4px;">Iniciar Sesión</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APLICACIÓN PRINCIPAL DE REPARTIDOR -->
+  <div id="panelRepartidorApp">
+
+    <!-- 1. MAPA INTERACTIVO SUPERIOR (SOLO PARA VISTA RUTA) -->
+    <div id="mapaRepartidor"></div>
+
+    <!-- 2. ESTADO SUPERIOR FLOTANTE -->
+    <div class="top-status-floating">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:22px;">🦁</span>
+        <div>
+          <strong id="lblNombreChofer" style="font-size:13px; color:#6b21a8;">Repartidor LeoGas</strong>
+          <div style="font-size:10px; color:#15803d; font-weight:800;">● GPS ACTIVO EN RUTA</div>
         </div>
       </div>
-
-      <!-- Botón de Navegación GPS Directa -->
-      <a id="btnNavegarRuta" href="#" target="_blank" class="btn-nav-maps" style="display:none;">
-        🧭 Abrir Navegación GPS (Google Maps / Waze)
-      </a>
-
-      <!-- Barra de Secuencia de Entrega -->
-      <div class="secuencia-steps-bar">
-        <div class="step-block" id="step1" style="background:#e52329;">1. EN CAMINO</div>
-        <div class="step-block" id="step2" style="background:#555557;">2. EN PUERTA</div>
-        <div class="step-block" id="step3" style="background:#8b8e91;">3. COMPLETADO</div>
-      </div>
-
-      <button type="button" class="btn-accion-repartidor" id="btnAvanzarEtapa" onclick="avanzarEtapaPedido()">
-        Esperando asignación...
-      </button>
+      <button type="button" class="btn" style="background:#fee2e2; color:#dc2626; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:8px; border:none;" onclick="cerrarSesionRepartidor()">Desconectarse</button>
     </div>
-  </div>
 
-  <!-- 5. BARRA INFERIOR DE NAVEGACIÓN ESTILO INDRIVER -->
-  <nav class="indriver-bottom-nav">
-    <button type="button" class="nav-tab-btn active" id="tabBtnSolicitudes" onclick="cambiarVistaRepartidor('solicitudes')">
-      <span class="icon">📋</span>
-      <span>Mis Solicitudes</span>
-    </button>
-    <button type="button" class="nav-tab-btn" id="tabBtnRuta" onclick="cambiarVistaRepartidor('ruta')">
-      <span class="icon">🗺️</span>
-      <span>Mapa en Ruta</span>
-    </button>
-  </nav>
+    <!-- 3. VISTA A: MIS SOLICITUDES (LISTA DE ENTRADAS TIPO INDRIVER - ACTIVA POR DEFECTO) -->
+    <div class="vista-panel activo" id="vistaSolicitudes">
+      <div style="font-size:14px; font-weight:900; color:#1e1b4b; margin-bottom:10px;">📋 Solicitudes Entrantes / Disponibles:</div>
+      <div id="contenedorListaSolicitudes">
+        <div style="background:#fff; padding:16px; border-radius:12px; text-align:center; color:#64748b; font-size:13px;">Buscando solicitudes en tiempo real...</div>
+      </div>
+    </div>
+
+    <!-- 4. VISTA B: MAPA EN RUTA Y SECUENCIA -->
+    <div class="vista-panel" id="vistaMapaRuta">
+      <div class="bottom-delivery-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="badgeTipoVenta" style="background:#fef08a; color:#854d0e; font-size:10.5px; font-weight:900; padding:3px 8px; border-radius:8px;">RUTA DE REPARTO ACTIVA</span>
+          <span class="indriver-price-tag" id="lblMontoOrden">S/ 0.00</span>
+        </div>
+
+        <h3 id="lblClienteOrden" style="margin:6px 0 2px; font-size:16px; color:#1e1b4b;">Buscando ruta asignada...</h3>
+        
+        <!-- CONTENEDOR DE LA RUTA / ITINERARIO -->
+        <div id="contenedorItinerarioRuta" style="margin: 8px 0; max-height: 130px; overflow-y: auto;">
+          <div class="route-point-row" style="background:#fefce8; border-color:#eab308;">
+            <div class="route-badge-letter" style="background:#ca8a04;">Base</div>
+            <div>
+              <div style="font-size:10px; font-weight:800; color:#854d0e;">PUNTO DE PARTIDA</div>
+              <strong style="font-size:12px;">Central LeoGas Cusco (Calle Garcilaso)</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de Navegación GPS Directa -->
+        <a id="btnNavegarRuta" href="#" target="_blank" class="btn-nav-maps" style="display:none;">
+          🧭 Abrir Navegación GPS (Google Maps / Waze)
+        </a>
+
+        <!-- Barra de Secuencia de Entrega -->
+        <div class="secuencia-steps-bar">
+          <div class="step-block" id="step1" style="background:#e52329;">1. EN CAMINO</div>
+          <div class="step-block" id="step2" style="background:#555557;">2. EN PUERTA</div>
+          <div class="step-block" id="step3" style="background:#8b8e91;">3. COMPLETADO</div>
+        </div>
+
+        <button type="button" class="btn-accion-repartidor" id="btnAvanzarEtapa" onclick="avanzarEtapaPedido()">
+          Esperando asignación...
+        </button>
+      </div>
+    </div>
+
+    <!-- 5. BARRA INFERIOR DE NAVEGACIÓN ESTILO INDRIVER -->
+    <nav class="indriver-bottom-nav">
+      <button type="button" class="nav-tab-btn active" id="tabBtnSolicitudes" onclick="cambiarVistaRepartidor('solicitudes')">
+        <span class="icon">📋</span>
+        <span>Mis Solicitudes</span>
+      </button>
+      <button type="button" class="nav-tab-btn" id="tabBtnRuta" onclick="cambiarVistaRepartidor('ruta')">
+        <span class="icon">🗺️</span>
+        <span>Mapa en Ruta</span>
+      </button>
+    </nav>
+
+  </div>
 
   <!-- Leaflet JS y Firebase SDKs -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -283,7 +359,60 @@
     let markerChofer = null;
     let markerDestino = null;
     let pedidoActivo = null;
-    let miRepartidorId = localStorage.getItem('leogas_rep_id') || "rep-1"; 
+    let miRepartidorId = localStorage.getItem('leogas_rep_id') || ""; 
+    let miRepartidorNombre = localStorage.getItem('leogas_rep_nombre') || "";
+
+    function verificarSesionRepartidor() {
+      if (miRepartidorId && miRepartidorNombre) {
+        document.getElementById('pantallaLoginRepartidor').style.display = 'none';
+        document.getElementById('panelRepartidorApp').style.display = 'block';
+        document.getElementById('lblNombreChofer').innerText = miRepartidorNombre;
+        inicializarMapaRepartidor();
+        escucharPedidosRepartidor();
+      } else {
+        document.getElementById('pantallaLoginRepartidor').style.display = 'flex';
+        document.getElementById('panelRepartidorApp').style.display = 'none';
+      }
+    }
+
+    async function verificarLoginRepartidor(e) {
+      e.preventDefault();
+      const user = document.getElementById('repLoginUser').value.trim().toLowerCase();
+      const pass = document.getElementById('repLoginPass').value.trim();
+
+      const snap = await db.ref('repartidores').once('value');
+      const choferesObj = snap.val();
+
+      if (!choferesObj) {
+        return alert("No hay repartidores registrados en el sistema. Configúralos desde el panel de administración.");
+      }
+
+      const listaChoferes = Object.values(choferesObj);
+      const choferEncontrado = listaChoferes.find(c => c.usuario && c.usuario.toLowerCase() === user && c.password === pass);
+
+      if (choferEncontrado) {
+        localStorage.setItem('leogas_rep_id', choferEncontrado.id);
+        localStorage.setItem('leogas_rep_nombre', choferEncontrado.nombre);
+        miRepartidorId = choferEncontrado.id;
+        miRepartidorNombre = choferEncontrado.nombre;
+
+        await db.ref(`repartidores/${miRepartidorId}`).update({ online: true });
+
+        alert(`¡Bienvenido, ${miRepartidorNombre}!`);
+        verificarSesionRepartidor();
+      } else {
+        alert("Usuario o contraseña incorrectos.");
+      }
+    }
+
+    function cerrarSesionRepartidor() {
+      if (miRepartidorId) {
+        db.ref(`repartidores/${miRepartidorId}`).update({ online: false });
+      }
+      localStorage.removeItem('leogas_rep_id');
+      localStorage.removeItem('leogas_rep_nombre');
+      location.reload();
+    }
 
     function cambiarVistaRepartidor(vista) {
       document.getElementById('tabBtnSolicitudes').classList.toggle('active', vista === 'solicitudes');
@@ -305,7 +434,9 @@
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
 
-          db.ref(`repartidores/${miRepartidorId}`).update({ lat, lng, online: true });
+          if (miRepartidorId) {
+            db.ref(`repartidores/${miRepartidorId}`).update({ lat, lng, online: true });
+          }
 
           if (!markerChofer) {
             const iconoChofer = L.divIcon({
@@ -331,17 +462,18 @@
 
         const ordenes = Object.values(pedidos);
         
-        // 1. Órdenes pendientes o sin asignar para la pestaña "Mis Solicitudes"
+        // 1. Órdenes pendientes o sin asignar para "Mis Solicitudes"
         renderizarSolicitudesEntrantes(pedidos);
 
-        // 2. Órdenes asignadas y activas para este repartidor ("Mapa en Ruta")
-        const rutaActivaChofer = ordenes.filter(p => p.repartidorId === miRepartidorId && p.estado !== 'completado');
+        // 2. Órdenes asignadas y activas o completadas para este repartidor ("Mapa en Ruta" / Itinerario)
+        const rutaChofer = ordenes.filter(p => p.repartidorId === miRepartidorId);
+        const rutaActivaChofer = rutaChofer.filter(p => p.estado !== 'completado');
 
         if (rutaActivaChofer.length > 0) {
           pedidoActivo = rutaActivaChofer[0];
-          actualizarItinerarioChofer(pedidoActivo, rutaActivaChofer);
+          actualizarItinerarioChofer(pedidoActivo, rutaChofer);
         } else {
-          mostrarSinPedidos();
+          mostrarSinPedidos(rutaChofer);
         }
       });
     }
@@ -384,13 +516,14 @@
       cambiarVistaRepartidor('ruta');
     }
 
-    function mostrarSinPedidos() {
-      document.getElementById('lblClienteOrden').innerText = "Sin pedidos asignados 💤";
+    function mostrarSinPedidos(todasLasDelChofer = []) {
+      document.getElementById('lblClienteOrden').innerText = "Sin pedidos activos 💤";
       document.getElementById('lblMontoOrden').innerText = "S/ 0.00";
       document.getElementById('btnAvanzarEtapa').innerText = "Esperando asignación...";
       document.getElementById('btnNavegarRuta').style.display = 'none';
 
-      document.getElementById('contenedorItinerarioRuta').innerHTML = `
+      const contItinerario = document.getElementById('contenedorItinerarioRuta');
+      contItinerario.innerHTML = `
         <div class="route-point-row" style="background:#fefce8; border-color:#eab308;">
           <div class="route-badge-letter" style="background:#ca8a04;">Base</div>
           <div>
@@ -398,14 +531,30 @@
             <strong style="font-size:12px;">Central LeoGas Cusco (Calle Garcilaso)</strong>
           </div>
         </div>
-        <div style="text-align:center; padding:10px; color:#64748b; font-size:12px;">Revisa la pestaña "Mis Solicitudes" para aceptar pedidos.</div>
       `;
+
+      if (todasLasDelChofer.length > 0) {
+        todasLasDelChofer.forEach((item, index) => {
+          contItinerario.innerHTML += `
+            <div class="route-point-row" style="background:#f0fdf4; border-color:#86efac;">
+              <div class="route-badge-letter destino" style="background:#16a34a;">✔</div>
+              <div>
+                <div style="font-size:10px; font-weight:800; color:#15803d;">FINALIZADO / COMPLETADO</div>
+                <strong style="font-size:12px; color:#1e1b4b;">${item.cliente}: ${item.tipoBalon}</strong><br>
+                <small style="color:#64748b;">📍 ${item.direccionTexto || 'Cusco'}</small>
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        contItinerario.innerHTML += `<div style="text-align:center; padding:10px; color:#64748b; font-size:12px;">No hay entregas pendientes. Acepta pedidos en "Mis Solicitudes".</div>`;
+      }
 
       if (markerDestino) { mapRepartidor.removeLayer(markerDestino); markerDestino = null; }
     }
 
-    function actualizarItinerarioChofer(orden, listaRuta) {
-      document.getElementById('lblClienteOrden').innerText = `${orden.cliente} (${listaRuta.length} en ruta)`;
+    function actualizarItinerarioChofer(orden, listaRutaCompleta) {
+      document.getElementById('lblClienteOrden').innerText = `${orden.cliente} (${listaRutaCompleta.filter(p=>p.estado!=='completado').length} activos en ruta)`;
       document.getElementById('lblMontoOrden').innerText = `S/ ${parseFloat(orden.montoCobro || 0).toFixed(2)}`;
 
       const contItinerario = document.getElementById('contenedorItinerarioRuta');
@@ -419,13 +568,30 @@
         </div>
       `;
 
-      listaRuta.forEach((item, index) => {
-        const esActual = item.id === orden.id;
+      listaRutaCompleta.forEach((item, index) => {
+        const esCompletado = item.estado === 'completado';
+        const esActual = item.id === orden.id && !esCompletado;
+
+        let estiloFondo = "";
+        let etiquetaEstado = `ENTREGA #${index + 1} - S/ ${item.montoCobro}`;
+
+        if (esCompletado) {
+          estiloFondo = "background:#f0fdf4; border-color:#86efac; opacity:0.8;";
+          etapaIcono = "✔";
+          etiquetaEstado += " (FINALIZADO)";
+        } else if (esActual) {
+          estiloFondo = "border: 2px solid #16a34a; background:#f0fdf4;";
+          etiquetaEstado += " ⭐ (EN CURSO)";
+        } else {
+          estiloFondo = "background:#f8fafc;";
+          etiquetaEstado += " (EN RUTA)";
+        }
+
         contItinerario.innerHTML += `
-          <div class="route-point-row" style="${esActual ? 'border: 2px solid #16a34a; background:#f0fdf4;' : ''}">
-            <div class="route-badge-letter destino">${index + 1}</div>
+          <div class="route-point-row" style="${estiloFondo}">
+            <div class="route-badge-letter ${esCompletado ? 'destino' : ''}" style="${esCompletado ? 'background:#16a34a;' : ''}">${esCompletado ? '✔' : (index + 1)}</div>
             <div>
-              <div style="font-size:10px; font-weight:800; color:#15803d;">ENTREGA #${index + 1} - S/ ${item.montoCobro} ${esActual ? '⭐ (EN CURSO)' : ''}</div>
+              <div style="font-size:10px; font-weight:800; color:${esCompletado ? '#15803d' : '#6b21a8'};">${etiquetaEstado}</div>
               <strong style="font-size:12px; color:#1e1b4b;">${item.cliente}: ${item.tipoBalon}</strong><br>
               <small style="color:#64748b;">📍 ${item.direccionTexto || 'Cusco'}</small>
             </div>
@@ -477,15 +643,8 @@
       if (nuevaEtapa === 3) alert("🎉 ¡Entrega de gas completada con éxito!");
     }
 
-    function alternarConexionChofer() {
-      db.ref(`repartidores/${miRepartidorId}`).update({ online: false });
-      alert("Te has desconectado de la flota.");
-      location.reload();
-    }
-
     window.onload = () => {
-      inicializarMapaRepartidor();
-      escucharPedidosRepartidor();
+      verificarSesionRepartidor();
     };
   </script>
 </body>
