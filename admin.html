@@ -539,7 +539,7 @@
 
           <div id="listaRepartidoresConfig">Cargando lista de repartidores...</div>
 
-          <!-- ACORDEÓN TÉCNICO PROTEGIDO CON CLAVE DE ADMIN -->
+          <!-- ACORDEÓN TÉCNICO PROTEGIDO CON CLAVE DE ADMIN (VENTANA FLOTANTE PROMPT) -->
           <div class="accordion-card">
             <div class="accordion-header" onclick="toggleAcordeonTecnico()">
               <span>🔐 Configuración Avanzada, Token GitHub y Depuración (Protegido)</span>
@@ -547,18 +547,8 @@
             </div>
             <div class="accordion-body" id="cuerpoAcordeonTecnico">
               
-              <!-- PASO A: VALIDAR CLAVE DE ADMIN -->
-              <div id="cajaPasswordAdminTecnico">
-                <label style="color:#6b21a8; font-size:12px; margin-bottom:4px;">Ingresa la contraseña de Administrador para desbloquear:</label>
-                <div style="display:flex; gap:8px; margin-top:4px; align-items:center;">
-                  <input type="password" id="inputClaveAdminTecnica" placeholder="••••••••" style="flex:1; width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
-                  <button type="button" class="btn btn-save" style="margin:0; padding:10px 14px; white-space:nowrap;" onclick="desbloquearAcordeonTecnico()">Desbloquear 🔓</button>
-                </div>
-                <div id="msgErrorClaveTecnica" style="color:#dc2626; font-size:11px; font-weight:800; margin-top:6px;"></div>
-              </div>
-
-              <!-- PASO B: CONTENIDO OCULTO HASTA VALIDAR -->
-              <div id="contenidoOcultoTecnico" style="display:none; margin-top:10px;">
+              <!-- CONTENIDO OCULTO HASTA VALIDAR CON PROMPT -->
+              <div id="contenidoOcultoTecnico" style="display:none;">
                 <label>Token de Acceso GitHub (API / Despliegue):</label>
                 <div style="display:flex; gap:8px; margin-top:4px;">
                   <input type="password" id="inputGitHubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1;">
@@ -854,25 +844,25 @@
       setTimeout(() => { if (mapAdmin) mapAdmin.invalidateSize(); }, 300);
     }
 
-    // CONTROL DEL ACORDEÓN TÉCNICO
+    // CONTROL DEL ACORDEÓN TÉCNICO CON VENTANA FLOTANTE (PROMPT)
     function toggleAcordeonTecnico() {
+      const contenido = document.getElementById('contenidoOcultoTecnico');
       const cuerpo = document.getElementById('cuerpoAcordeonTecnico');
       const icono = document.getElementById('iconoAcordeon');
-      cuerpo.classList.toggle('open');
-      icono.innerText = cuerpo.classList.contains('open') ? '▲' : '▼';
-    }
 
-    // DESBLOQUEAR CONFIGURACIÓN AVANZADA CON CONTRASEÑA DE ADMIN
-    function desbloquearAcordeonTecnico() {
-      const pass = document.getElementById('inputClaveAdminTecnica').value.trim();
-      const err = document.getElementById('msgErrorClaveTecnica');
+      if (contenido.style.display === 'block') {
+        cuerpo.classList.toggle('open');
+        icono.innerText = cuerpo.classList.contains('open') ? '▲' : '▼';
+        return;
+      }
 
+      const pass = prompt("🔐 Ingresa la contraseña de Administrador para ver la configuración avanzada:");
       if (pass === 'regocijo123') {
-        err.innerText = "";
-        document.getElementById('cajaPasswordAdminTecnico').style.display = 'none';
-        document.getElementById('contenidoOcultoTecnico').style.display = 'block';
-      } else {
-        err.innerText = "Contraseña incorrecta. Acceso denegado.";
+        contenido.style.display = 'block';
+        cuerpo.classList.add('open');
+        icono.innerText = '▲';
+      } else if (pass !== null) {
+        alert("❌ Contraseña incorrecta. Acceso denegado.");
       }
     }
 
