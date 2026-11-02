@@ -3,144 +3,133 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acceso Repartidor | LeoGas Cusco</title>
+  <title>Panel de Repartidor | LeoGas Cusco</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f8fafc; color: #1e1b4b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 18px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #f8fafc; color: #1e1b4b; }
 
-    .driver-card { background: #ffffff; width: 100%; max-width: 460px; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0; padding: 24px 20px; text-align: center; }
-    h1 { font-size: 22px; font-weight: 900; color: #6b21a8; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 12px; }
-
-    .chuspa-badge {
-      display: inline-flex; align-items: center; gap: 8px; background: #fefce8;
-      border: 1.5px solid #eab308; padding: 4px 10px 4px 6px; border-radius: 20px;
-      text-decoration: none; box-shadow: 0 2px 5px rgba(234, 179, 8, 0.2); margin-bottom: 14px;
+    /* CONTENEDOR PRINCIPAL: MAPA ARRIBA (100% DE PANTALLA) */
+    #mapaRepartidor {
+      width: 100%;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
     }
-    .chuspa-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid #ca8a04; background: #fff; }
-    .chuspa-text { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
-    .chuspa-title { font-size: 11px; font-weight: 900; color: #6b21a8; }
-    .chuspa-sub { font-size: 8.5px; font-weight: 700; color: #b45309; }
 
-    label { font-size: 11px; font-weight: 800; color: #64748b; display: block; margin-top: 8px; text-transform: uppercase; text-align: left; }
-    input { width: 100%; padding: 12px; margin-top: 4px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box; }
-
-    .status-panel { padding: 10px; border-radius: 10px; background: #f1f5f9; margin-bottom: 16px; font-size: 12px; }
-    .status-panel.online { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; font-weight: 800; }
-
-    .order-box { background: #faf5ff; border: 2px solid #c084fc; border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: left; }
-    .order-box.empty { background: #f8fafc; border: 1.5px dashed #cbd5e1; text-align: center; color: #64748b; }
-
-    .cultura-bar { display: flex; border-radius: 8px; overflow: hidden; border: 2px solid #cbd5e1; background: #e2e8f0; gap: 3px; margin-top: 8px; }
-    .cultura-step { flex: 1; padding: 12px 4px; border: none; cursor: pointer; color: #ffffff; font-weight: 900; font-size: 11px; text-align: center; opacity: 0.3; }
-    .step-rojo { background-color: #e52329; }
-    .step-gris-osc { background-color: #555557; }
-    .step-gris-claro { background-color: #8b8e91; }
-    .cultura-step.activo { opacity: 1 !important; }
-    .cultura-step:disabled { cursor: not-allowed; }
-
-    .btn-action { width: 100%; padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; margin-bottom: 8px; }
-    .btn-connect { background: #16a34a; color: #ffffff; }
-    .btn-disconnect { background: #dc2626; color: #ffffff; display: none; }
-    .btn-save { background: #6b21a8; color: white; width: 100%; font-size: 15px; padding: 12px; margin-top: 14px; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; }
-
-    .driver-modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(5px); z-index: 99999;
-      justify-content: center; align-items: center; padding: 16px;
+    /* BARRA SUPERIOR FLOTANTE (ESTILO INDRIVE) */
+    .top-status-floating {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 10;
+      background: #ffffff;
+      padding: 12px 16px;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .driver-modal-box {
-      background: #ffffff; width: 100%; max-width: 380px; border-radius: 20px;
-      padding: 24px 20px; text-align: center; border: 3px solid #16a34a;
+
+    /* TARJETA INFERIOR FLOTANTE CON SECUENCIA Y DATOS */
+    .bottom-delivery-card {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 24px 24px 0 0;
+      padding: 20px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+      z-index: 10;
+      max-height: 45vh;
+      overflow-y: auto;
     }
-    .btn-modal-ok { background: #16a34a; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 10px; font-size: 15px; font-weight: 900; cursor: pointer; margin-top: 14px; }
+
+    .secuencia-steps-bar {
+      display: flex;
+      border-radius: 8px;
+      overflow: hidden;
+      height: 26px;
+      margin: 12px 0;
+      background: #e2e8f0;
+      gap: 2px;
+    }
+    .step-block {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 800;
+      opacity: 0.3;
+    }
+    .step-block.activo { opacity: 1; background: #16a34a !important; }
+
+    .btn-accion-repartidor {
+      width: 100%;
+      background: #16a34a;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- PANTALLA 1: LOGIN DEL CHOFER -->
-  <div class="driver-card" id="pantallaLoginChofer">
-    <div style="font-size:48px;">🦁</div>
-    <h1>Acceso Repartidor</h1>
-    <p class="subtitle">LeoGas Cusco • Flota y Distribución B2B</p>
+  <!-- 1. MAPA EN LA MISMA VENTANA (OCUPA EL FONDO SUPERIOR) -->
+  <div id="mapaRepartidor"></div>
 
-    <div style="display:flex; justify-content:center;">
-      <a href="https://lachuspaanuncios.com/" target="_blank" rel="noopener noreferrer" class="chuspa-badge">
-        <img src="CHUSPITA-circulo.png" alt="La Chuspa Tech" class="chuspa-img" onerror="this.src='https://lachuspaanuncios.com/wp-content/uploads/2023/10/cropped-logo-la-chuspa.png'">
-        <div class="chuspa-text">
-          <span class="chuspa-title">La Chuspa Tech</span>
-          <span class="chuspa-sub">by La Chuspa Anuncios</span>
-        </div>
-      </a>
+  <!-- 2. ESTADO SUPERIOR FLOTANTE -->
+  <div class="top-status-floating">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:22px;">🦁</span>
+      <div>
+        <strong style="font-size:13px; color:#6b21a8;" id="lblNombreChofer">Chofer Conectado</strong>
+        <div style="font-size:10px; color:#15803d; font-weight:800;">● GPS ACTIVO EN VIVO</div>
+      </div>
     </div>
-
-    <form onsubmit="verificarLoginChofer(event)">
-      <label>Usuario del Repartidor</label>
-      <input type="text" id="loginChoferUser" placeholder="ej: jorge" required autofocus>
-
-      <label>Contraseña</label>
-      <input type="password" id="loginChoferPass" placeholder="••••••••" required>
-
-      <button type="submit" class="btn-save">Ingresar al Turno 🛵</button>
-    </form>
-    <div id="errorLoginMsg" style="color:#dc2626; font-size:12px; font-weight:800; margin-top:10px;"></div>
+    <button type="button" class="btn" style="background:#fee2e2; color:#dc2626; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:8px; border:none;" onclick="cambiarEstadoOnline(false)">Desconectarse</button>
   </div>
 
-  <!-- PANTALLA 2: PANEL DE OPERACIONES EN RUTA -->
-  <div class="driver-card" id="panelChoferActivo" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <div style="display:flex; align-items:center; gap:6px;">
-        <span style="font-size:26px;">🦁</span>
-        <strong style="color:#6b21a8; font-size:16px;" id="lblNombreChoferConectado">Chofer</strong>
-      </div>
-      <button onclick="cerrarSesionChofer()" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; font-size:11px; font-weight:bold; padding:4px 10px; border-radius:6px; cursor:pointer;">🚪 Salir</button>
-    </div>
-    
-    <div class="status-panel" id="panelEstado">
-      <span id="textoEstado">Offline 💤 (Desconectado)</span>
+  <!-- 3. TARJETA INFERIOR FLOTANTE CON SECUENCIA Y DETALLES -->
+  <div class="bottom-delivery-card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span id="badgeTipoVenta" style="background:#fef08a; color:#854d0e; font-size:10.5px; font-weight:900; padding:3px 8px; border-radius:8px;">PEDIDO EN CURSO</span>
+      <strong id="lblMontoOrden" style="font-size:18px; color:#15803d; font-weight:900;">S/ 0.00</strong>
     </div>
 
-    <div id="cajaOrdenAsignada" class="order-box empty">
-      Esperando comanda asignada desde caja...
+    <h3 id="lblClienteOrden" style="margin:6px 0 2px; font-size:17px; color:#1e1b4b;">Esperando asignación de pedido...</h3>
+    <p id="lblDireccionOrden" style="font-size:12.5px; color:#64748b; margin-bottom:8px;">📍 --</p>
+
+    <!-- Barra de Secuencia de Entrega -->
+    <div class="secuencia-steps-bar">
+      <div class="step-block" id="step1" style="background:#e52329;">1. EN CAMINO</div>
+      <div class="step-block" id="step2" style="background:#555557;">2. EN PUERTA</div>
+      <div class="step-block" id="step3" style="background:#8b8e91;">3. COMPLETADO</div>
     </div>
 
-    <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px;">
-      <div style="font-size:11px; font-weight:800; color:#475569; display:flex; justify-content:space-between;">
-        <span>Secuencia de Entrega</span>
-        <span id="estadoActualTag" style="color:#6b21a8;">En espera</span>
-      </div>
-
-      <div class="cultura-bar">
-        <button type="button" id="btnPaso1" class="cultura-step step-rojo" onclick="avanzarSecuencia(1)" disabled>
-          <span>🟥 PASO 1</span><br>En Camino
-        </button>
-        <button type="button" id="btnPaso2" class="cultura-step step-gris-osc" onclick="avanzarSecuencia(2)" disabled>
-          <span>⬛ PASO 2</span><br>Entregado
-        </button>
-        <button type="button" id="btnPaso3" class="cultura-step step-gris-claro" onclick="avanzarSecuencia(3)" disabled>
-          <span>⬜ PASO 3</span><br>Completado
-        </button>
-      </div>
-    </div>
-
-    <button id="btnConectar" class="btn-action btn-connect" onclick="iniciarGPS()">
-      ▶️ CONECTAR GPS EN RUTA
-    </button>
-    <button id="btnDesconectar" class="btn-action btn-disconnect" onclick="detenerGPS()">
-      ⏹️ TERMINAR TURNO (Desconectar)
+    <button type="button" class="btn-accion-repartidor" id="btnAvanzarEtapa" onclick="avanzarEtapaPedido()">
+      🛵 Iniciar Ruta al Local / Casa
     </button>
   </div>
 
-  <!-- MODAL: CLIENTE CONFIRMÓ QUE YA SALE -->
-  <div class="driver-modal-overlay" id="modalClienteSale">
-    <div class="driver-modal-box">
-      <div style="font-size:48px;">🚪🏃‍♂️</div>
-      <h3 style="color:#15803d; font-size:20px; font-weight:900;">¡EL CLIENTE YA SALE!</h3>
-      <p id="textoClienteSale" style="font-size:14px; color:#334155; margin-top:8px; line-height:1.4;"></p>
-      <button type="button" class="btn-modal-ok" onclick="cerrarModalClienteSale()">¡Entendido! 👍</button>
-    </div>
-  </div>
-
+  <!-- Leaflet JS y Firebase -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -149,272 +138,121 @@
       apiKey: "AIzaSyCnYaUN-aZYzEip9z3wsuKnbwdfYscFZkY",
       authDomain: "leogas-cusco.firebaseapp.com",
       databaseURL: "https://leogas-cusco-default-rtdb.firebaseio.com",
-      projectId: "leogas-cusco",
-      storageBucket: "leogas-cusco.firebasestorage.app",
-      messagingSenderId: "1042930313066",
-      appId: "1:1042930313066:web:ce6c424afe606f63322713",
-      measurementId: "G-MBYC61L9BL"
+      projectId: "leogas-cusco"
     };
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let choferActual = null;
-    let ordenActiva = null;
-    let watchIdGPS = null;
-    let idUltimaOrdenVista = null;
-    let avisoSalidaMostrado = false;
-    let listaRepartidoresFirebase = {};
+    let mapRepartidor = null;
+    let markerChofer = null;
+    let markerDestino = null;
+    let pedidoActivo = null;
+    let miRepartidorId = localStorage.getItem('leogas_rep_id') || "rep-1"; // ID del chofer logueado
 
-    function emitirTimbreChofer() {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.2);
-        gain.gain.setValueAtTime(0.4, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.9);
-      } catch(e) {}
-    }
+    function inicializarMapaRepartidor() {
+      if (mapRepartidor) return;
+      // Centrado inicial en Cusco
+      mapRepartidor = L.map('mapaRepartidor', { zoomControl: false }).setView([-13.5167, -71.9788], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapRepartidor);
 
-    function lanzarAlertaChofer(titulo, mensaje) {
-      emitirTimbreChofer();
-      if ("vibrate" in navigator) navigator.vibrate([400, 150, 400]);
-      if ("Notification" in window && Notification.permission === "granted") {
-        try {
-          const notif = new Notification(titulo, { body: mensaje, icon: "CHUSPITA-circulo.png" });
-          notif.onclick = () => { window.focus(); notif.close(); };
-        } catch(e) {}
+      // Iniciar seguimiento GPS del propio celular del repartidor en tiempo real
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(pos => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          // Actualizar posición en Firebase para que el Admin la vea en vivo
+          db.ref(`repartidores/${miRepartidorId}`).update({ lat, lng, online: true });
+
+          // Dibujar marcador del chofer en su propio mapa
+          if (!markerChofer) {
+            const iconoChofer = L.divIcon({
+              html: "<div style='background:#7e22ce; color:white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:20px; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);'>🛵</div>",
+              iconSize: [40, 40], iconAnchor: [20, 20]
+            });
+            markerChofer = L.marker([lat, lng], { icon: iconoChofer }).addTo(mapRepartidor);
+          } else {
+            markerChofer.setLatLng([lat, lng]);
+          }
+        }, err => console.log(err), { enableHighAccuracy: true });
       }
     }
 
-    function escucharRepartidoresParaLogin() {
-      db.ref('repartidores').on('value', snap => {
-        listaRepartidoresFirebase = snap.val() || {};
-        const choferGuardadoId = localStorage.getItem("leogas_chofer_autenticado_id");
-        if (choferGuardadoId && listaRepartidoresFirebase[choferGuardadoId]) {
-          choferActual = listaRepartidoresFirebase[choferGuardadoId];
-          mostrarPanelRepartidor();
-        }
-      });
-    }
-
-    function verificarLoginChofer(e) {
-      e.preventDefault();
-      const u = document.getElementById('loginChoferUser').value.trim().toLowerCase();
-      const p = document.getElementById('loginChoferPass').value.trim();
-      const errorMsg = document.getElementById('errorLoginMsg');
-
-      const encontrado = Object.values(listaRepartidoresFirebase).find(r => 
-        (r.usuario && r.usuario.toLowerCase() === u) && (r.password && r.password.toString() === p)
-      );
-
-      if (encontrado) {
-        choferActual = encontrado;
-        localStorage.setItem("leogas_chofer_autenticado_id", encontrado.id);
-        errorMsg.innerText = "";
-        mostrarPanelRepartidor();
-      } else {
-        errorMsg.innerText = "Usuario o contraseña incorrectos.";
-      }
-    }
-
-    function mostrarPanelRepartidor() {
-      document.getElementById('pantallaLoginChofer').style.display = 'none';
-      document.getElementById('panelChoferActivo').style.display = 'block';
-      document.getElementById('lblNombreChoferConectado').innerText = choferActual.nombre;
-      escucharComandasEnTiempoReal();
-    }
-
-    function cerrarSesionChofer() {
-      if (watchIdGPS) detenerGPS();
-      localStorage.removeItem("leogas_chofer_autenticado_id");
-      location.reload();
-    }
-
-    function escucharComandasEnTiempoReal() {
-      if (!choferActual) return;
-
+    // Escuchar el pedido asignado a este repartidor en tiempo real desde Firebase
+    function escucharPedidosRepartidor() {
       db.ref('pedidos').on('value', snap => {
         const pedidos = snap.val();
-        ordenActiva = null;
+        if (!pedidos) return;
 
-        if (pedidos) {
-          ordenActiva = Object.values(pedidos).find(p => p.repartidorId === choferActual.id && p.estado !== 'completado');
+        // Buscar pedido activo asignado a este chofer
+        const ordenes = Object.values(pedidos);
+        pedidoActivo = ordenes.find(p => p.repartidorId === miRepartidorId && p.estado !== 'completado');
+
+        if (pedidoActivo) {
+          actualizarInterfazConPedido(pedidoActivo);
+        } else {
+          document.getElementById('lblClienteOrden').innerText = "Sin pedidos asignados por ahora 💤";
+          document.getElementById('lblDireccionOrden').innerText = "Esperando que el administrador te asigne una orden...";
+          document.getElementById('lblMontoOrden').innerText = "S/ 0.00";
         }
-
-        if (ordenActiva && ordenActiva.id !== idUltimaOrdenVista) {
-          if (idUltimaOrdenVista !== null) {
-            lanzarAlertaChofer("🛵 ¡Nueva orden asignada!", `Llevar ${ordenActiva.tipoBalon} a ${ordenActiva.cliente}`);
-          }
-          idUltimaOrdenVista = ordenActiva.id;
-          avisoSalidaMostrado = false;
-        } else if (!ordenActiva) {
-          idUltimaOrdenVista = null;
-          avisoSalidaMostrado = false;
-        }
-
-        if (ordenActiva && ordenActiva.clienteConfirmado === true && !avisoSalidaMostrado) {
-          avisoSalidaMostrado = true;
-          lanzarAlertaChofer("🚪 ¡El cliente ya sale!", `${ordenActiva.cliente} confirmó que está saliendo a la puerta.`);
-          document.getElementById('textoClienteSale').innerText = `${ordenActiva.cliente} confirmó que ya sale a recibir el gas.`;
-          document.getElementById('modalClienteSale').style.display = 'flex';
-        }
-
-        renderizarVistaOrden();
       });
     }
 
-    function cerrarModalClienteSale() {
-      document.getElementById('modalClienteSale').style.display = 'none';
-    }
+    function actualizarInterfazConPedido(orden) {
+      document.getElementById('lblClienteOrden').innerText = orden.cliente || 'Cliente';
+      document.getElementById('lblDireccionOrden').innerText = `📍 ${orden.direccionTexto || 'Cusco'}`;
+      document.getElementById('lblMontoOrden').innerText = `S/ ${parseFloat(orden.montoCobro || 0).toFixed(2)}`;
+      
+      const etapa = orden.etapa || 0;
+      document.getElementById('step1').classList.toggle('activo', etapa >= 1);
+      document.getElementById('step2').classList.toggle('activo', etapa >= 2);
+      document.getElementById('step3').classList.toggle('activo', etapa >= 3);
 
-    function renderizarVistaOrden() {
-      const caja = document.getElementById('cajaOrdenAsignada');
-      const b1 = document.getElementById('btnPaso1');
-      const b2 = document.getElementById('btnPaso2');
-      const b3 = document.getElementById('btnPaso3');
-
-      if (!ordenActiva) {
-        caja.className = "order-box empty";
-        caja.innerHTML = "💤 No tienes comandas pendientes. Espera a que caja te asigne un balón.";
-        b1.disabled = true; b2.disabled = true; b3.disabled = true;
-        b1.classList.remove('activo'); b2.classList.remove('activo'); b3.classList.remove('activo');
-        document.getElementById('estadoActualTag').innerText = "Sin orden";
-        return;
-      }
-
-      const pagoTexto = (ordenActiva.metodoPago || '').toLowerCase();
-      const esCredito = pagoTexto.includes('crédito') || pagoTexto.includes('credito') || pagoTexto.includes('cuenta');
-      const esMayorista = ordenActiva.tipoVenta === 'mayorista';
-
-      caja.className = "order-box";
-      caja.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong style="color:#7e22ce; font-size:15px;">${ordenActiva.tipoBalon}</strong>
-          <span style="color:${esCredito ? '#d97706' : '#15803d'}; font-weight:bold; font-size:14px;">
-            ${esCredito ? '📋 A CRÉDITO: ' : '💵 Cobrar: '} S/ ${parseFloat(ordenActiva.montoCobro).toFixed(2)}
-          </span>
-        </div>
-
-        ${esMayorista ? '<div style="margin-bottom:6px;"><span style="background:#fefce8; color:#854d0e; border:1px solid #fde047; font-size:11px; font-weight:900; padding:2px 8px; border-radius:10px;">🏢 PEDIDO MAYORISTA / EMPRESA</span></div>' : ''}
-
-        <div style="font-size:13px;">👤 <strong>Cliente:</strong> ${ordenActiva.cliente}</div>
-        ${ordenActiva.direccionTexto ? `<div style="font-size:13px; color:#b45309; margin:3px 0;">🏠 <strong>Dirección:</strong> ${ordenActiva.direccionTexto}</div>` : ''}
-        <div style="font-size:13px;">💳 <strong>Condición de Pago:</strong> <span style="font-weight:bold; color:${esCredito ? '#d97706' : '#1e1b4b'};">${ordenActiva.metodoPago}</span></div>
-
-        <!-- CONTROL DE ENVASES / CASCOS (LLENOS VS VACÍOS) -->
-        <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:10px; padding:10px; margin-top:10px;">
-          <div style="font-size:11px; font-weight:900; color:#475569; display:flex; justify-content:space-between;">
-            <span>🔄 CONTROL DE ENVASES (CASCOS)</span>
-            <span style="color:#6b21a8;">Canje en Puerta</span>
-          </div>
-          <div style="display:flex; gap:10px; margin-top:6px;">
-            <div style="flex:1;">
-              <span style="font-size:11px; color:#15803d; font-weight:bold;">Llenos dejados:</span>
-              <input type="number" id="inpEnvasesDejados" value="${ordenActiva.envasesEntregados || 1}" min="0" style="padding:7px; font-weight:900; text-align:center; font-size:15px; margin-top:2px;">
-            </div>
-            <div style="flex:1;">
-              <span style="font-size:11px; color:#2563eb; font-weight:bold;">Vacíos recogidos:</span>
-              <input type="number" id="inpEnvasesRecogidos" value="${ordenActiva.envasesRecogidos || 0}" min="0" style="padding:7px; font-weight:900; text-align:center; font-size:15px; margin-top:2px;">
-            </div>
-          </div>
-          <div style="font-size:10px; color:#64748b; margin-top:4px;">* Ajusta la cantidad antes de pulsar Paso 2 o 3.</div>
-        </div>
-
-        ${ordenActiva.clienteConfirmado ? '<div style="margin-top:8px; font-size:12px; font-weight:800; color:#15803d; background:#dcfce7; padding:6px; border-radius:6px; text-align:center;">🚪 El cliente confirmó que está saliendo a la puerta</div>' : ''}
-        ${ordenActiva.gpsUrl ? `<a href="${ordenActiva.gpsUrl}" target="_blank" style="display:inline-block; background:#2563eb; color:#fff; text-decoration:none; padding:8px 14px; border-radius:8px; font-weight:bold; font-size:12px; margin-top:10px; width:100%; text-align:center;">🗺️ Abrir Ruta en Google Maps</a>` : ''}
-      `;
-
-      const etapa = ordenActiva.etapa || 0;
-      b1.classList.toggle('activo', etapa === 1);
-      b2.classList.toggle('activo', etapa === 2);
-      b3.classList.toggle('activo', etapa === 3);
-
+      const btn = document.getElementById('btnAvanzarEtapa');
       if (etapa === 0) {
-        b1.disabled = false; b2.disabled = true; b3.disabled = true;
-        document.getElementById('estadoActualTag').innerText = "Orden Asignada (Pulsa Paso 1 al salir)";
+        btn.innerText = "🛵 Marcar: En Camino al Local/Casa";
       } else if (etapa === 1) {
-        b1.disabled = true; b2.disabled = false; b3.disabled = true;
-        document.getElementById('estadoActualTag').innerText = "Paso 1: En Camino 🔥";
+        btn.innerText = "🚪 Marcar: En Puerta / Local";
       } else if (etapa === 2) {
-        b1.disabled = true; b2.disabled = true; b3.disabled = false;
-        document.getElementById('estadoActualTag').innerText = "Paso 2: En Puerta 🚪";
-      } else if (etapa === 3) {
-        b1.disabled = true; b2.disabled = true; b3.disabled = true;
-        document.getElementById('estadoActualTag').innerText = "Paso 3: Completado ✔️";
+        btn.innerText = "✔ Marcar: Entrega Completada";
+      }
+
+      // Si el pedido tiene coordenadas o ubicación, marcar el destino en el mapa superior
+      if (orden.lat && orden.lng) {
+        if (!markerDestino) {
+          const iconoDestino = L.divIcon({
+            html: "<div style='background:#2563eb; color:white; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; font-size:18px; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.3);'>🏠</div>",
+            iconSize: [38, 38], iconAnchor: [19, 19]
+          });
+          markerDestino = L.marker([orden.lat, orden.lng], { icon: iconoDestino }).addTo(mapRepartidor);
+        } else {
+          markerDestino.setLatLng([orden.lat, orden.lng]);
+        }
+        mapRepartidor.setView([orden.lat, orden.lng], 15);
       }
     }
 
-    async function avanzarSecuencia(paso) {
-      if (!ordenActiva) return;
-      const etapaActual = ordenActiva.etapa || 0;
+    async function avanzarEtapaPedido() {
+      if (!pedidoActivo) return alert("No hay ningún pedido activo.");
+      let nuevaEtapa = (pedidoActivo.etapa || 0) + 1;
 
-      if (etapaActual === 0 && paso !== 1) {
-        return alert("⛔ Primero debes presionar 'Paso 1: En Camino' cuando salgas de la base.");
-      }
-      if (etapaActual === 1 && paso === 3) {
-        return alert("⛔ Debes marcar primero 'Paso 2: Entregado' antes de completar.");
-      }
+      if (nuevaEtapa > 3) nuevaEtapa = 3;
 
-      // Guardar el conteo real de envases llenos vs vacíos
-      const envDej = parseInt(document.getElementById('inpEnvasesDejados')?.value) || parseInt(ordenActiva.envasesEntregados || 1);
-      const envRec = parseInt(document.getElementById('inpEnvasesRecogidos')?.value) || 0;
-
-      const updates = { 
-        etapa: paso,
-        envasesEntregados: envDej,
-        envasesRecogidos: envRec
-      };
-      if (paso === 3) updates.estado = "completado";
-
-      await db.ref(`pedidos/${ordenActiva.id}`).update(updates);
-      if (paso === 3) alert("✔ ¡Entrega finalizada y envases registrados con éxito!");
-    }
-
-    function iniciarGPS() {
-      if (!choferActual) return alert("Inicia sesión primero.");
-      if (!navigator.geolocation) return alert("GPS no disponible.");
-
-      if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission();
+      const updates = { etapa: nuevaEtapa };
+      if (nuevaEtapa === 3) {
+        updates.estado = "completado";
       }
 
-      navigator.geolocation.getCurrentPosition(pos => {
-        actualizarCoordenadas(choferActual.id, true, pos.coords.latitude, pos.coords.longitude);
-        document.getElementById('btnConectar').style.display = "none";
-        document.getElementById('btnDesconectar').style.display = "block";
-        document.getElementById('panelEstado').className = "status-panel online";
-        document.getElementById('textoEstado').innerText = "Online 🔥 (En Ruta Activo)";
-
-        watchIdGPS = navigator.geolocation.watchPosition(p => {
-          actualizarCoordenadas(choferActual.id, true, p.coords.latitude, p.coords.longitude);
-        }, null, { enableHighAccuracy: true });
-      });
-    }
-
-    function detenerGPS() {
-      if (watchIdGPS) navigator.geolocation.clearWatch(watchIdGPS);
-      if (choferActual) actualizarCoordenadas(choferActual.id, false, null, null);
-      document.getElementById('btnConectar').style.display = "block";
-      document.getElementById('btnDesconectar').style.display = "none";
-      document.getElementById('panelEstado').className = "status-panel";
-      document.getElementById('textoEstado').innerText = "Offline 💤 (Desconectado)";
-    }
-
-    function actualizarCoordenadas(repId, online, lat, lng) {
-      const data = { online: online };
-      if (lat && lng) { data.lat = lat; data.lng = lng; }
-      db.ref(`repartidores/${repId}`).update(data);
+      await db.ref(`pedidos/${pedidoActivo.id}`).update(updates);
+      if (nuevaEtapa === 3) {
+        alert("🎉 ¡Entrega finalizada con éxito!");
+      }
     }
 
     window.onload = () => {
-      escucharRepartidoresParaLogin();
+      inicializarMapaRepartidor();
+      escucharPedidosRepartidor();
     };
   </script>
 </body>
