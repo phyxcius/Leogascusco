@@ -107,8 +107,27 @@ function getStored<T>(key: string, fallback: T): T {
   }
 }
 
-export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [activePortal, setActivePortal] = useState<'cliente' | 'admin' | 'repartidor'>('cliente');
+function detectInitialPortal(): 'cliente' | 'admin' | 'repartidor' {
+  if (typeof window === 'undefined') return 'cliente';
+  const path = window.location.pathname.toLowerCase();
+  const search = window.location.search.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  if (path.includes('admin') || search.includes('portal=admin') || hash.includes('admin')) {
+    return 'admin';
+  }
+  if (path.includes('repartidor') || search.includes('portal=repartidor') || hash.includes('repartidor')) {
+    return 'repartidor';
+  }
+  return 'cliente';
+}
+
+export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 'cliente' | 'admin' | 'repartidor' }> = ({
+  children,
+  initialPortal
+}) => {
+  const [activePortal, setActivePortal] = useState<'cliente' | 'admin' | 'repartidor'>(
+    initialPortal || detectInitialPortal()
+  );
 
   const [productos, setProductos] = useState<Producto[]>(() => getStored('leogas_productos', INITIAL_PRODUCTOS));
   const [accesorios, setAccesorios] = useState<Accesorio[]>(() => getStored('leogas_accesorios', INITIAL_ACCESORIOS));
@@ -125,6 +144,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [isAdminLogged, setIsAdminLogged] = useState<boolean>(() => localStorage.getItem('leogas_admin_logged') === 'true');
   const [currentRepartidorId, setCurrentRepartidorId] = useState<string | null>(() => localStorage.getItem('leogas_rep_id'));
+
+  // Listen to cross-window storage events so independent windows sync state automatically
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (!e.key || !e.newValue) return;
+      try {
+        if (e.key === 'leogas_pedidos') setPedidos(JSON.parse(e.newValue));
+        if (e.key === 'leogas_repartidores') setRepartidores(JSON.parse(e.newValue));
+        if (e.key === 'leogas_productos') setProductos(JSON.parse(e.newValue));
+        if (e.key === 'leogas_accesorios') setAccesorios(JSON.parse(e.newValue));
+        if (e.key === 'leogas_telefonos') setTelefonos(JSON.parse(e.newValue));
+        if (e.key === 'leogas_empresas_b2b') setEmpresasB2B(JSON.parse(e.newValue));
+        if (e.key === 'leogas_clientes_vip') setClientesVIP(JSON.parse(e.newValue));
+        if (e.key === 'leogas_ventas') setVentas(JSON.parse(e.newValue));
+        if (e.key === 'leogas_mi_pedido_id') setActiveCustomerOrderId(e.newValue);
+        if (e.key === 'leogas_admin_logged') setIsAdminLogged(e.newValue === 'true');
+        if (e.key === 'leogas_rep_id') setCurrentRepartidorId(e.newValue);
+      } catch (err) {
+        console.error('Storage sync error:', err);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Sync state to localStorage
   useEffect(() => { localStorage.setItem('leogas_productos', JSON.stringify(productos)); }, [productos]);

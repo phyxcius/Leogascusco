@@ -31,9 +31,39 @@ Sistema integral de venta y distribución de balones de gas GLP a domicilio y pa
    - **Repartidores**: Gestión de choferes, estado en línea y contraseñas.
    - **Reporte Contable**: Filtros temporales, métricas, búsqueda y exportación a CSV.
 
+## Ventanas y Archivos Independientes
+
+La aplicación está configurada como una arquitectura multi-página (MPA) con sincronización en tiempo real vía `localStorage` y `StorageEvent`:
+
+1. **`index.html` (Ventana Cliente)**:
+   - Acceso para clientes para pedir gas GLP, ver el catálogo, calcular vuelto y seguir su pedido en tiempo real.
+2. **`repartidor.html` (Ventana Repartidor)**:
+   - Portal móvil para choferes y repartidores en ruta con GPS, cambio de estados ("En camino", "En puerta", "Entregado") y navegación.
+3. **`admin.html` (Ventana Administrador)**:
+   - Panel de control de 9 módulos para administración, asignación de pedidos, flota, B2B, inventario, liquidación y balance contable.
+
+En la barra de navegación de cada ventana se incluye el menú **"Ventanas ↗"** para abrir cualquiera de los portales en una pestaña o ventana independiente (ideal para operar en múltiples pantallas o desde el teléfono del repartidor).
+
+## Solución para GitHub Pages (Pantalla en Blanco / Error 404)
+
+- **Rutas Relativas (`base: './'`)**: En `vite.config.ts` se estableció `base: './'`, lo cual garantiza que los archivos CSS y JS carguen correctamente sin importar el nombre del repositorio en GitHub (`phyxcius.github.io/Leogas/`).
+- **Archivo `404.html` de Respaldo**: Se incluye un `404.html` que redirige de inmediato a `index.html`, `admin.html` o `repartidor.html` según la URL solicitada, evitando pantallas de error de GitHub.
+- **Construcción para GitHub Pages**:
+  ```bash
+  npm run build
+  ```
+  La carpeta generada `dist/` contiene:
+  - `dist/index.html`
+  - `dist/admin.html`
+  - `dist/repartidor.html`
+  - `dist/404.html`
+  - `dist/assets/...` (con rutas relativas `./assets/...`)
+
 ## Pila Tecnológica
 - React 19 + TypeScript
-- Vite 6
+- Vite 6 (Multi-Page MPA + base relativa)
 - Tailwind CSS v4
 - Leaflet Maps
 - Lucide React
+- Web Audio API (Chimes de estado y notificación)
+

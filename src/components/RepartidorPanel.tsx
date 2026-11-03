@@ -8,9 +8,11 @@ import {
   LogOut,
   Navigation,
   Clock,
-  Check
+  Check,
+  ExternalLink
 } from 'lucide-react';
 import L from 'leaflet';
+import { getPageUrl } from '../utils/assets';
 
 export const RepartidorPanel: React.FC = () => {
   const {
@@ -210,6 +212,28 @@ export const RepartidorPanel: React.FC = () => {
               ))}
             </div>
           </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-center gap-2">
+            <a
+              href={getPageUrl('index.html')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-bold text-purple-800 hover:underline flex items-center gap-1"
+            >
+              <ExternalLink className="w-3 h-3" />
+              <span>Ventana Cliente ↗</span>
+            </a>
+            <span className="text-slate-300">•</span>
+            <a
+              href={getPageUrl('admin.html')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-bold text-slate-700 hover:underline flex items-center gap-1"
+            >
+              <ExternalLink className="w-3 h-3" />
+              <span>Ventana Admin ↗</span>
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -218,7 +242,7 @@ export const RepartidorPanel: React.FC = () => {
   return (
     <div className="max-w-xl mx-auto px-4 py-4 min-h-[85vh] flex flex-col justify-between">
       {/* Top Floating Driver Bar */}
-      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-3 mb-4">
+      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-3 mb-4 flex-wrap">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-lg">
             🛵
@@ -232,14 +256,27 @@ export const RepartidorPanel: React.FC = () => {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={repartidorLogout}
-          className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Salir</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href={getPageUrl('index.html')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1"
+            title="Abrir ventana de cliente"
+          >
+            <ExternalLink className="w-3 h-3" />
+            <span>Cliente ↗</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={repartidorLogout}
+            className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Salir</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Panel Views */}

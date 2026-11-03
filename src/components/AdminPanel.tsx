@@ -18,10 +18,12 @@ import {
   CheckCircle,
   Menu,
   X,
-  PhoneCall
+  PhoneCall,
+  ExternalLink
 } from 'lucide-react';
 import L from 'leaflet';
 import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP } from '../types/index';
+import { getPageUrl } from '../utils/assets';
 
 export const AdminPanel: React.FC = () => {
   const {
@@ -294,14 +296,38 @@ export const AdminPanel: React.FC = () => {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={adminLogout}
-          className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Cerrar Sesión</span>
-        </button>
+        <div className="flex items-center flex-wrap gap-2">
+          <a
+            href={getPageUrl('index.html')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
+            title="Abrir ventana de cliente en nueva pestaña"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-purple-700" />
+            <span>Ventana Cliente ↗</span>
+          </a>
+
+          <a
+            href={getPageUrl('repartidor.html')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
+            title="Abrir ventana de repartidor en nueva pestaña"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-amber-700" />
+            <span>Ventana Repartidor ↗</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={adminLogout}
+            className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">

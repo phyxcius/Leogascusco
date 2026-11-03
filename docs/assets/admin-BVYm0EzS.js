@@ -1,0 +1,1 @@
+import{R as a,j as e,a as t,A as i}from"./index-T3V6SAdr.js";a.createRoot(document.getElementById("root")).render(e.jsxDEV(t.StrictMode,{children:e.jsxDEV(i,{initialPortal:"admin"},void 0,!1,{fileName:"/app/applet/src/pages/admin.tsx",lineNumber:8,columnNumber:5},void 0)},void 0,!1,{fileName:"/app/applet/src/pages/admin.tsx",lineNumber:7,columnNumber:3},void 0));

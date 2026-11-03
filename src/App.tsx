@@ -142,10 +142,13 @@ const MainApp: React.FC = () => {
   );
 };
 
-export default function App() {
+export { MainApp };
+
+export default function App({ initialPortal }: { initialPortal?: 'cliente' | 'admin' | 'repartidor' }) {
   return (
-    <AppProvider>
+    <AppProvider initialPortal={initialPortal}>
       <MainApp />
     </AppProvider>
   );
 }
+

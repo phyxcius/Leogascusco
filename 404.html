@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeoGas Cusco | Redirigiendo...</title>
+    <script>
+      // Single Page App and Subpath redirect for GitHub Pages
+      (function() {
+        var path = window.location.pathname.toLowerCase();
+        var search = window.location.search;
+        var hash = window.location.hash;
+
+        // If the path asks for admin
+        if (path.indexOf('admin') !== -1) {
+          window.location.replace('./admin.html' + search + hash);
+          return;
+        }
+        // If the path asks for repartidor
+        if (path.indexOf('repartidor') !== -1) {
+          window.location.replace('./repartidor.html' + search + hash);
+          return;
+        }
+        // Default: redirect to index.html
+        window.location.replace('./index.html' + search + hash);
+      })();
+    </script>
+  </head>
+  <body style="font-family: system-ui, sans-serif; background: #fafaf9; color: #1e1b4b; text-align: center; padding: 60px 20px;">
+    <div style="max-width: 450px; margin: 0 auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 2px solid #facc15;">
+      <h1 style="color: #6b21a8; font-size: 24px; margin-bottom: 8px;">🦁 LeoGas Cusco</h1>
+      <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Redirigiendo al sistema de balones de gas a domicilio...</p>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a href="./index.html" style="background: #6b21a8; color: white; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px;">Abrir Ventana Cliente (index.html)</a>
+        <a href="./repartidor.html" style="background: #f1f5f9; color: #1e293b; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid #cbd5e1;">Abrir Ventana Repartidor (repartidor.html)</a>
+        <a href="./admin.html" style="background: #f1f5f9; color: #1e293b; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid #cbd5e1;">Abrir Ventana Admin (admin.html)</a>
+      </div>
+    </div>
+  </body>
+</html>

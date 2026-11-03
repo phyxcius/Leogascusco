@@ -1,7 +1,8 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { ShoppingCart, Building2, Bell, Truck, ShieldCheck, User } from 'lucide-react';
+import { ShoppingCart, Building2, Bell, Truck, ShieldCheck, User, ExternalLink } from 'lucide-react';
 import { playChimeSound } from '../utils/audio';
+import { getAssetUrl, getPageUrl } from '../utils/assets';
 
 interface NavbarProps {
   onOpenCart: () => void;
@@ -10,6 +11,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCart, onOpenB2B }) => {
   const { activePortal, setActivePortal, cartCount } = useApp();
+  const [showWindowMenu, setShowWindowMenu] = React.useState(false);
 
   const handleNotificationClick = () => {
     playChimeSound();
@@ -55,7 +57,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart, onOpenB2B }) => {
             title="Desarrollado con La Chuspa Tech"
           >
             <img
-              src="/CHUSPITA-circulo.png"
+              src={getAssetUrl('CHUSPITA-circulo.png')}
               alt="La Chuspa"
               className="w-6 h-6 rounded-full object-cover border border-amber-600 bg-white"
               onError={(e) => {
@@ -107,6 +109,60 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart, onOpenB2B }) => {
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Admin</span>
             </button>
+          </div>
+
+          {/* Open Independent Window Dropdown Button */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowWindowMenu(!showWindowMenu)}
+              className="bg-amber-100 hover:bg-amber-200 text-purple-950 border border-amber-300 px-2.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 transition cursor-pointer shadow-xs"
+              title="Abrir en ventana o pestaña independiente"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-purple-900" />
+              <span className="hidden sm:inline">Ventanas</span>
+            </button>
+
+            {showWindowMenu && (
+              <div
+                className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in"
+                onMouseLeave={() => setShowWindowMenu(false)}
+              >
+                <div className="px-3 py-1.5 text-[11px] font-black uppercase text-slate-400 border-b border-slate-100">
+                  Abrir Ventana Separada ↗
+                </div>
+                <a
+                  href={getPageUrl('index.html')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-900 transition"
+                  onClick={() => setShowWindowMenu(false)}
+                >
+                  <User className="w-4 h-4 text-purple-700" />
+                  <span>Ventana Cliente (index.html)</span>
+                </a>
+                <a
+                  href={getPageUrl('repartidor.html')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-900 transition"
+                  onClick={() => setShowWindowMenu(false)}
+                >
+                  <Truck className="w-4 h-4 text-purple-700" />
+                  <span>Ventana Repartidor (repartidor.html)</span>
+                </a>
+                <a
+                  href={getPageUrl('admin.html')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-900 transition"
+                  onClick={() => setShowWindowMenu(false)}
+                >
+                  <ShieldCheck className="w-4 h-4 text-purple-700" />
+                  <span>Ventana Admin (admin.html)</span>
+                </a>
+              </div>
+            )}
           </div>
 
           {activePortal === 'cliente' && (

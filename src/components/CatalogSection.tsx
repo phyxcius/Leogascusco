@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Plus, Check, Flame, Wrench } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 interface CatalogSectionProps {
   onOpenCart: () => void;
@@ -44,11 +45,11 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({ onOpenCart }) =>
                 {/* Image & Tag */}
                 <div className="relative h-44 bg-slate-100 flex items-center justify-center overflow-hidden">
                   <img
-                    src={item.imagen || '/1791513590376.jpg'}
+                    src={getAssetUrl(item.imagen || '1791513590376.jpg')}
                     alt={item.nombre}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                      (e.target as HTMLImageElement).src = getAssetUrl('1791513590376.jpg');
                     }}
                   />
                   {item.tag && (
@@ -133,11 +134,11 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({ onOpenCart }) =>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
                       <img
-                        src={acc.imagen || '/1791513590376.jpg'}
+                        src={getAssetUrl(acc.imagen || '1791513590376.jpg')}
                         alt={acc.nombre}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                          (e.target as HTMLImageElement).src = getAssetUrl('1791513590376.jpg');
                         }}
                       />
                     </div>

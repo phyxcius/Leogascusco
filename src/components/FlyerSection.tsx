@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Phone, MessageCircle } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 export const FlyerSection: React.FC = () => {
   const { telefonos } = useApp();
@@ -11,7 +12,7 @@ export const FlyerSection: React.FC = () => {
         {/* Flyer Image */}
         <div className="w-full md:w-1/3 max-w-[280px]">
           <img
-            src="/1791513590376.jpg"
+            src={getAssetUrl('1791513590376.jpg')}
             alt="Flyer LeoGas Cusco"
             className="w-full h-auto rounded-xl shadow-md border border-slate-200 object-cover"
           />
