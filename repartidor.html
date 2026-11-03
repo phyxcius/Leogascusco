@@ -12,7 +12,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
     body, html { width: 100%; height: 100%; overflow: hidden; background: #f8fafc; color: #1e1b4b; }
 
-    /* PANTALLA DE LOGIN PARA REPATIDORES */
+    /* PANTALLA DE LOGIN PARA REPARTIDORES */
     #pantallaLoginRepartidor {
       position: fixed;
       top: 0;
@@ -54,10 +54,9 @@
       text-align: left;
     }
 
-    /* CONTENEDOR PRINCIPAL CUANDO YA ESTÁ LOGUEADO */
     #panelRepartidorApp { display: none; width: 100%; height: 100%; position: relative; }
 
-    /* MAPA DE FONDO SOLO PARA LA VISTA DE RUTA */
+    /* MAPA DE FONDO (EXCLUSIVO PARA LA VISTA DE RUTA) */
     #mapaRepartidor {
       width: 100%;
       height: 100vh;
@@ -65,6 +64,7 @@
       top: 0;
       left: 0;
       z-index: 1;
+      display: none; /* Oculto por defecto, se muestra solo al activar la pestaña Ruta */
     }
 
     /* BARRA SUPERIOR FLOTANTE */
@@ -73,7 +73,7 @@
       top: 16px;
       left: 16px;
       right: 16px;
-      z-index: 10;
+      z-index: 40;
       background: #ffffff;
       padding: 12px 16px;
       border-radius: 14px;
@@ -83,25 +83,24 @@
       align-items: center;
     }
 
-    /* VISTAS PRINCIPALES */
+    /* CONTENEDORES DE VISTAS */
     .vista-panel {
       position: absolute;
-      top: 80px;
+      top: 85px;
       bottom: 75px;
       left: 0;
       width: 100%;
-      z-index: 10;
+      z-index: 30;
       padding: 0 16px;
       display: none;
       overflow-y: auto;
     }
     .vista-panel.activo { display: block; }
 
-    /* VISTA MIS SOLICITUDES (FONDO BLANCO SÓLIDO SIN MAPA) */
+    /* VISTA SOLICITUDES: FONDO SÓLIDO LIMPIO SIN MAPA */
     #vistaSolicitudes {
       background: #f8fafc;
-      z-index: 25; /* Encima del mapa para que se vea limpio tipo InDriver */
-      top: 75px;
+      z-index: 35;
     }
 
     /* TARJETA INFERIOR TIPO ITINERARIO RUTA */
@@ -214,7 +213,7 @@
       background: #ffffff;
       border-top: 1.5px solid #e2e8f0;
       display: flex;
-      z-index: 30;
+      z-index: 50;
       box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
     }
     .nav-tab-btn {
@@ -263,7 +262,7 @@
   <!-- APLICACIÓN PRINCIPAL DE REPARTIDOR -->
   <div id="panelRepartidorApp">
 
-    <!-- 1. MAPA INTERACTIVO SUPERIOR (SOLO PARA VISTA RUTA) -->
+    <!-- 1. MAPA INTERACTIVO SUPERIOR (VISIBLE EN VISTA RUTA) -->
     <div id="mapaRepartidor"></div>
 
     <!-- 2. ESTADO SUPERIOR FLOTANTE -->
@@ -278,7 +277,7 @@
       <button type="button" class="btn" style="background:#fee2e2; color:#dc2626; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:8px; border:none;" onclick="cerrarSesionRepartidor()">Desconectarse</button>
     </div>
 
-    <!-- 3. VISTA A: MIS SOLICITUDES (LISTA DE ENTRADAS TIPO INDRIVER - ACTIVA POR DEFECTO) -->
+    <!-- 3. VISTA A: MIS SOLICITUDES (LISTA LIMPIA SIN MAPA - ACTIVA POR DEFECTO) -->
     <div class="vista-panel activo" id="vistaSolicitudes">
       <div style="font-size:14px; font-weight:900; color:#1e1b4b; margin-bottom:10px;">📋 Solicitudes Entrantes / Disponibles:</div>
       <div id="contenedorListaSolicitudes">
@@ -421,7 +420,14 @@
       document.getElementById('vistaSolicitudes').classList.toggle('activo', vista === 'solicitudes');
       document.getElementById('vistaMapaRuta').classList.toggle('activo', vista === 'ruta');
 
-      setTimeout(() => { if (mapRepartidor) mapRepartidor.invalidateSize(); }, 200);
+      // Mostrar u ocultar el mapa según la pestaña activa
+      const mapaEl = document.getElementById('mapaRepartidor');
+      if (vista === 'ruta') {
+        mapaEl.style.display = 'block';
+        setTimeout(() => { if (mapRepartidor) mapRepartidor.invalidateSize(); }, 200);
+      } else {
+        mapaEl.style.display = 'none';
+      }
     }
 
     function inicializarMapaRepartidor() {
@@ -462,7 +468,7 @@
 
         const ordenes = Object.values(pedidos);
         
-        // 1. Órdenes pendientes o sin asignar para "Mis Solicitudes"
+        // 1. Órdenes pendientes para "Mis Solicitudes"
         renderizarSolicitudesEntrantes(pedidos);
 
         // 2. Órdenes asignadas y activas o completadas para este repartidor ("Mapa en Ruta" / Itinerario)
@@ -577,14 +583,13 @@
 
         if (esCompletado) {
           estiloFondo = "background:#f0fdf4; border-color:#86efac; opacity:0.8;";
-          etapaIcono = "✔";
           etiquetaEstado += " (FINALIZADO)";
         } else if (esActual) {
           estiloFondo = "border: 2px solid #16a34a; background:#f0fdf4;";
           etiquetaEstado += " ⭐ (EN CURSO)";
         } else {
           estiloFondo = "background:#f8fafc;";
-          etiquetaEstado += " (EN RUTA)";
+          etiquetaEstado += " (ACTIVO EN RUTA)";
         }
 
         contItinerario.innerHTML += `
