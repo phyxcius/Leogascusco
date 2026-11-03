@@ -16,7 +16,7 @@ import { ShoppingCart, Bell } from 'lucide-react';
 import { playChimeSound } from './utils/audio';
 
 const MainApp: React.FC = () => {
-  const { activePortal, cartCount } = useApp();
+  const { activePortal, cartCount, negocio } = useApp();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isB2BOpen, setIsB2BOpen] = useState(false);
   const [isTicketOpen, setIsTicketOpen] = useState(false);
@@ -28,7 +28,7 @@ const MainApp: React.FC = () => {
     if ('Notification' in window) {
       Notification.requestPermission().then((perm) => {
         if (perm === 'granted') {
-          new Notification('🦁 LeoGas Cusco', {
+          new Notification(`🦁 ${negocio.nombre}`, {
             body: '¡Alertas sonoras y notificaciones activadas con éxito!'
           });
         }
@@ -39,8 +39,10 @@ const MainApp: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#fafaf9] flex flex-col justify-between selection:bg-purple-200">
       <div>
-        {/* Navigation Bar */}
-        <Navbar onOpenCart={() => setIsCartOpen(true)} onOpenB2B={() => setIsB2BOpen(true)} />
+        {/* Navigation Bar (Solo en portal Cliente) */}
+        {activePortal === 'cliente' && (
+          <Navbar onOpenCart={() => setIsCartOpen(true)} onOpenB2B={() => setIsB2BOpen(true)} />
+        )}
 
         {/* Live Order Tracking Banner (Customer) */}
         {activePortal === 'cliente' && (
@@ -117,21 +119,21 @@ const MainApp: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="text-xl">🦁</span>
             <div>
-              <p className="font-bold text-white">LeoGas Cusco • Distribuidor Oficial Llamagas</p>
+              <p className="font-bold text-white">{negocio.nombre} • {negocio.slogan}</p>
               <p className="text-[11px] text-slate-500">
-                Balones de Gas GLP a Domicilio y Empresas B2B en todo Cusco
+                Balones de Gas GLP a Domicilio y Empresas B2B en {negocio.direccion || 'todo Cusco'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
             <a
-              href="https://lachuspaanuncios.com/"
+              href={negocio.enlaceChuspa || 'https://www.lachuspaanuncios.com'}
               target="_blank"
               rel="noopener noreferrer"
               className="text-yellow-400 hover:underline font-bold"
             >
-              La Chuspa Tech by La Chuspa Anuncios
+              La Chuspa Tech • www.lachusoaanuncios.com
             </a>
             <span>•</span>
             <span>Atención 24/7</span>

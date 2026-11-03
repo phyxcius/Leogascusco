@@ -1,4 +1,4 @@
-import { Producto, Accesorio, TelefonosConfig, Repartidor, EmpresaB2B, ClienteVIP, VentaRegistro, Pedido } from '../types/index';
+import { Producto, Accesorio, TelefonosConfig, NegocioIdentidad, Repartidor, EmpresaB2B, ClienteVIP, VentaRegistro, Pedido } from '../types/index';
 
 export const INITIAL_PRODUCTOS: Producto[] = [
   {
@@ -66,6 +66,18 @@ export const INITIAL_TELEFONOS: TelefonosConfig = {
   tel1: "950 727 212",
   tel2: "984 285 500",
   tel3: "(084) 501111"
+};
+
+export const INITIAL_NEGOCIO: NegocioIdentidad = {
+  nombre: "LeoGas Cusco",
+  slogan: "Llamagas • El Moradito Rendidor",
+  logoUrl: "/1791513590376.jpg",
+  whatsapp: "51969773064",
+  telPrincipal: "950 727 212",
+  telSecundario: "984 285 500",
+  telFijo: "(084) 501111",
+  direccion: "Av. El Sol 450, Cusco",
+  enlaceChuspa: "https://www.lachuspaanuncios.com"
 };
 
 export const INITIAL_REPARTIDORES: Repartidor[] = [

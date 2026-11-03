@@ -4,7 +4,7 @@ import { Phone, MessageCircle } from 'lucide-react';
 import { getAssetUrl } from '../utils/assets';
 
 export const FlyerSection: React.FC = () => {
-  const { telefonos } = useApp();
+  const { telefonos, negocio } = useApp();
 
   return (
     <section className="max-w-6xl mx-auto my-6 px-4">
@@ -13,7 +13,7 @@ export const FlyerSection: React.FC = () => {
         <div className="w-full md:w-1/3 max-w-[280px]">
           <img
             src={getAssetUrl('1791513590376.jpg')}
-            alt="Flyer LeoGas Cusco"
+            alt={`Flyer ${negocio.nombre}`}
             className="w-full h-auto rounded-xl shadow-md border border-slate-200 object-cover"
           />
         </div>
@@ -24,10 +24,10 @@ export const FlyerSection: React.FC = () => {
             Atención Rápida a Domicilio
           </span>
           <h3 className="text-xl sm:text-2xl font-black text-purple-900 mt-0.5 mb-1">
-            Central de Pedidos LeoGas Cusco
+            Central de Pedidos {negocio.nombre}
           </h3>
           <p className="text-sm font-bold text-amber-800 mb-3">
-            El Moradito Rendidor • Calidad, Seguridad y Peso Exacto
+            {negocio.slogan} • Calidad, Seguridad y Peso Exacto
           </p>
           <p className="text-xs sm:text-sm text-slate-600 mb-5 leading-relaxed">
             Llegamos a todo Cusco, San Sebastián, San Jerónimo, Wanchaq, Santiago y Centro Histórico. Llámanos directamente o pide por WhatsApp con un solo clic.

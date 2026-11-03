@@ -23,6 +23,18 @@ export interface TelefonosConfig {
   tel3?: string;
 }
 
+export interface NegocioIdentidad {
+  nombre: string;
+  slogan: string;
+  logoUrl: string;
+  whatsapp: string;
+  telPrincipal: string;
+  telSecundario: string;
+  telFijo?: string;
+  direccion: string;
+  enlaceChuspa: string;
+}
+
 export interface Repartidor {
   id: string;
   nombre: string;

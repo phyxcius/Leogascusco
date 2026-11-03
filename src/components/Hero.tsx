@@ -1,12 +1,15 @@
 import React from 'react';
+import { useApp } from '../context/AppContext';
 import { Zap, ShieldCheck, CreditCard, Navigation } from 'lucide-react';
 
 export const Hero: React.FC = () => {
+  const { negocio } = useApp();
+
   return (
     <section className="bg-gradient-to-br from-yellow-200 via-yellow-300 to-amber-300 py-10 px-4 text-center border-b-2 border-yellow-400">
       <div className="max-w-4xl mx-auto">
         <span className="inline-block bg-purple-800 text-white font-extrabold text-[11px] px-3.5 py-1 rounded-full uppercase tracking-wider mb-3 shadow-xs">
-          🦁 LeoGas Cusco • Distribuidor Oficial Llamagas
+          🦁 {negocio.nombre} • {negocio.slogan}
         </span>
 
         <h2 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight mb-3">

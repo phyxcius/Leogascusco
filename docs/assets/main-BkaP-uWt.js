@@ -1,0 +1,1 @@
+import{R as a,j as e,a as t,A as m}from"./index-Dh6kZPS2.js";a.createRoot(document.getElementById("root")).render(e.jsxDEV(t.StrictMode,{children:e.jsxDEV(m,{},void 0,!1,{fileName:"/app/applet/src/main.tsx",lineNumber:8,columnNumber:5},void 0)},void 0,!1,{fileName:"/app/applet/src/main.tsx",lineNumber:7,columnNumber:3},void 0));

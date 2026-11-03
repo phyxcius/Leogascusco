@@ -12,7 +12,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import L from 'leaflet';
-import { getPageUrl } from '../utils/assets';
+import { BrandBadge } from './BrandBadge';
 
 export const RepartidorPanel: React.FC = () => {
   const {
@@ -146,15 +146,21 @@ export const RepartidorPanel: React.FC = () => {
   if (!currentRepartidor) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 max-w-sm w-full border border-slate-200 shadow-xl text-center">
-          <div className="text-4xl mb-2">🛵</div>
-          <h3 className="text-xl font-black text-purple-950 mb-1">Acceso a Repartidores</h3>
-          <p className="text-xs text-slate-500 mb-6">LeoGas Cusco • Flota en Ruta</p>
+        <div className="bg-white rounded-3xl p-8 max-w-sm w-full border border-slate-200 shadow-xl text-center space-y-5">
+          {/* Business Brand & Chuspa Tech Badge */}
+          <div className="flex justify-center pb-2 border-b border-slate-100">
+            <BrandBadge size="md" showChuspa={true} centered={true} />
+          </div>
 
-          <form onSubmit={handleLogin} className="space-y-3 text-left">
+          <div className="text-left">
+            <h3 className="text-lg font-black text-purple-950">Acceso de Repartidor</h3>
+            <p className="text-xs text-slate-500">Ingresa con tus credenciales de chofer en ruta</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-3.5 text-left">
             <div>
               <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">
-                Usuario de Repartidor:
+                Usuario de Chofer / Repartidor:
               </label>
               <input
                 type="text"
@@ -181,7 +187,7 @@ export const RepartidorPanel: React.FC = () => {
             </div>
 
             {loginError && (
-              <p className="text-xs text-red-600 font-bold">
+              <p className="text-xs text-red-600 font-bold bg-red-50 p-2 rounded-lg border border-red-200">
                 Usuario o contraseña incorrectos.
               </p>
             )}
@@ -190,50 +196,9 @@ export const RepartidorPanel: React.FC = () => {
               type="submit"
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-xs transition shadow-md cursor-pointer mt-2"
             >
-              Iniciar Sesión en Flota
+              Iniciar Turno en Flota
             </button>
           </form>
-
-          {/* Quick chooser for easy demonstration */}
-          <div className="mt-5 pt-4 border-t border-slate-100 text-left">
-            <span className="text-[10px] font-bold uppercase text-slate-400 block mb-2">
-              O seleccionar directamente:
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {repartidores.map((rep) => (
-                <button
-                  key={rep.id}
-                  type="button"
-                  onClick={() => repartidorLogin(rep.usuario || rep.nombre.toLowerCase(), '123')}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold px-3 py-1.5 rounded-lg cursor-pointer"
-                >
-                  🛵 {rep.nombre}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-center gap-2">
-            <a
-              href={getPageUrl('index.html')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] font-bold text-purple-800 hover:underline flex items-center gap-1"
-            >
-              <ExternalLink className="w-3 h-3" />
-              <span>Ventana Cliente ↗</span>
-            </a>
-            <span className="text-slate-300">•</span>
-            <a
-              href={getPageUrl('admin.html')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] font-bold text-slate-700 hover:underline flex items-center gap-1"
-            >
-              <ExternalLink className="w-3 h-3" />
-              <span>Ventana Admin ↗</span>
-            </a>
-          </div>
         </div>
       </div>
     );
@@ -256,27 +221,14 @@ export const RepartidorPanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <a
-            href={getPageUrl('index.html')}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1"
-            title="Abrir ventana de cliente"
-          >
-            <ExternalLink className="w-3 h-3" />
-            <span>Cliente ↗</span>
-          </a>
-
-          <button
-            type="button"
-            onClick={repartidorLogout}
-            className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Salir</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={repartidorLogout}
+          className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Cerrar Sesión</span>
+        </button>
       </div>
 
       {/* Main Panel Views */}

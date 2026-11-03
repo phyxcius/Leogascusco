@@ -19,11 +19,17 @@ import {
   Menu,
   X,
   PhoneCall,
-  ExternalLink
+  ExternalLink,
+  Store,
+  Upload,
+  RotateCcw,
+  Save,
+  Image as ImageIcon
 } from 'lucide-react';
 import L from 'leaflet';
 import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP } from '../types/index';
-import { getPageUrl } from '../utils/assets';
+import { getPageUrl, getAssetUrl } from '../utils/assets';
+import { BrandBadge } from './BrandBadge';
 
 export const AdminPanel: React.FC = () => {
   const {
@@ -53,6 +59,9 @@ export const AdminPanel: React.FC = () => {
     deleteAccesorio,
     telefonos,
     updateTelefonos,
+    negocio,
+    updateNegocio,
+    resetNegocio,
     ventas,
     createPedido
   } = useApp();
@@ -64,10 +73,35 @@ export const AdminPanel: React.FC = () => {
 
   // Current tab
   const [activeTab, setActiveTab] = useState<
-    'pedidos' | 'b2b' | 'liquidacion' | 'clientes' | 'accesorios' | 'productos' | 'telefonos' | 'gps' | 'reportes'
+    'pedidos' | 'identidad' | 'b2b' | 'liquidacion' | 'clientes' | 'accesorios' | 'productos' | 'telefonos' | 'gps' | 'reportes'
   >('pedidos');
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Business Identity Form State
+  const [identidadNombre, setIdentidadNombre] = useState(negocio.nombre);
+  const [identidadSlogan, setIdentidadSlogan] = useState(negocio.slogan);
+  const [identidadLogoUrl, setIdentidadLogoUrl] = useState(negocio.logoUrl);
+  const [identidadWhatsapp, setIdentidadWhatsapp] = useState(negocio.whatsapp);
+  const [identidadTel1, setIdentidadTel1] = useState(negocio.telPrincipal);
+  const [identidadTel2, setIdentidadTel2] = useState(negocio.telSecundario);
+  const [identidadTelFijo, setIdentidadTelFijo] = useState(negocio.telFijo || '');
+  const [identidadDireccion, setIdentidadDireccion] = useState(negocio.direccion);
+  const [identidadChuspa, setIdentidadChuspa] = useState(negocio.enlaceChuspa);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+
+  // Keep local form in sync if negocio updates in another tab
+  useEffect(() => {
+    setIdentidadNombre(negocio.nombre);
+    setIdentidadSlogan(negocio.slogan);
+    setIdentidadLogoUrl(negocio.logoUrl);
+    setIdentidadWhatsapp(negocio.whatsapp);
+    setIdentidadTel1(negocio.telPrincipal);
+    setIdentidadTel2(negocio.telSecundario);
+    setIdentidadTelFijo(negocio.telFijo || '');
+    setIdentidadDireccion(negocio.direccion);
+    setIdentidadChuspa(negocio.enlaceChuspa);
+  }, [negocio]);
 
   // Phone order modal
   const [showPhoneOrderModal, setShowPhoneOrderModal] = useState(false);
@@ -107,6 +141,42 @@ export const AdminPanel: React.FC = () => {
   // Leaflet map reference for Pedidos tab
   const adminMapContainerRef = useRef<HTMLDivElement>(null);
   const adminMapInstanceRef = useRef<L.Map | null>(null);
+
+  // Logo file upload handler (converts to base64)
+  const handleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert('La imagen seleccionada supera los 2MB. Por favor elige una imagen más ligera.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (base64) {
+        setIdentidadLogoUrl(base64);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Business Identity save handler
+  const handleSaveIdentidad = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateNegocio({
+      nombre: identidadNombre.trim() || 'LeoGas Cusco',
+      slogan: identidadSlogan.trim() || 'Llamagas • El Moradito Rendidor',
+      logoUrl: identidadLogoUrl.trim() || '/1791513590376.jpg',
+      whatsapp: identidadWhatsapp.trim() || '51969773064',
+      telPrincipal: identidadTel1.trim() || '950 727 212',
+      telSecundario: identidadTel2.trim() || '984 285 500',
+      telFijo: identidadTelFijo.trim(),
+      direccion: identidadDireccion.trim() || 'Cusco, Perú',
+      enlaceChuspa: identidadChuspa.trim() || 'https://www.lachuspaanuncios.com'
+    });
+    setSaveSuccessMsg(true);
+    setTimeout(() => setSaveSuccessMsg(false), 4500);
+  };
 
   // Handle Login
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -158,12 +228,18 @@ export const AdminPanel: React.FC = () => {
   if (!isAdminLogged) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 max-w-sm w-full border border-slate-200 shadow-xl text-center">
-          <div className="text-4xl mb-2">🦁</div>
-          <h3 className="text-xl font-black text-purple-950 mb-1">Acceso Administrador</h3>
-          <p className="text-xs text-slate-500 mb-6">LeoGas Cusco • Panel de Gestión Integral</p>
+        <div className="bg-white rounded-3xl p-8 max-w-sm w-full border border-slate-200 shadow-xl text-center space-y-5">
+          {/* Business Brand & Chuspa Tech Badge */}
+          <div className="flex justify-center pb-2 border-b border-slate-100">
+            <BrandBadge size="md" showChuspa={true} centered={true} />
+          </div>
 
-          <form onSubmit={handleLoginSubmit} className="space-y-3 text-left">
+          <div className="text-left">
+            <h3 className="text-lg font-black text-purple-950">Acceso Administrador</h3>
+            <p className="text-xs text-slate-500">Panel de Control & Gestión Integral</p>
+          </div>
+
+          <form onSubmit={handleLoginSubmit} className="space-y-3.5 text-left">
             <div>
               <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">
                 Usuario
@@ -285,15 +361,7 @@ export const AdminPanel: React.FC = () => {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div>
-            <h2 className="text-xl font-black text-purple-900 flex items-center gap-2">
-              <span>🦁</span>
-              <span>Panel de Control LeoGas Cusco</span>
-            </h2>
-            <p className="text-xs text-slate-500">
-              Gestión de pedidos, flota, clientes B2B y balance contable
-            </p>
-          </div>
+          <BrandBadge size="sm" showChuspa={true} />
         </div>
 
         <div className="flex items-center flex-wrap gap-2">
@@ -343,6 +411,7 @@ export const AdminPanel: React.FC = () => {
 
           {[
             { id: 'pedidos', label: 'Pedidos y Flota', icon: Boxes },
+            { id: 'identidad', label: 'Identidad del Negocio', icon: Store },
             { id: 'b2b', label: 'Cartera B2B / Empresas', icon: Building2 },
             { id: 'liquidacion', label: 'Cierre de Caja & Créditos', icon: Receipt },
             { id: 'clientes', label: 'Clientes VIP', icon: Star },
@@ -540,6 +609,296 @@ export const AdminPanel: React.FC = () => {
                   className="w-full h-80 rounded-xl border border-slate-200 overflow-hidden"
                 />
               </div>
+            </div>
+          )}
+
+          {/* TAB: IDENTIDAD DEL NEGOCIO */}
+          {activeTab === 'identidad' && (
+            <div className="space-y-6">
+              {/* Info Card */}
+              <div className="bg-gradient-to-r from-purple-900 to-indigo-900 text-white rounded-2xl p-6 shadow-sm border border-purple-800">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="bg-amber-400 text-purple-950 font-black text-[10px] uppercase px-2.5 py-0.5 rounded-full inline-block mb-1">
+                      Módulo de Marca e Identidad
+                    </span>
+                    <h3 className="text-xl font-black">Identidad Comercial del Negocio</h3>
+                    <p className="text-xs text-purple-200 mt-1 max-w-xl">
+                      Personaliza el nombre, logo, números de contacto y datos oficiales. Todos los cambios se sincronizan en tiempo real con el portal Cliente (index), el inicio de sesión de Repartidores y este Panel de Control.
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <BrandBadge size="md" showChuspa={true} />
+                  </div>
+                </div>
+              </div>
+
+              {saveSuccessMsg && (
+                <div className="bg-emerald-50 border-2 border-emerald-400 text-emerald-900 px-4 py-3 rounded-2xl font-black text-xs flex items-center justify-between animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-emerald-600" />
+                    <span>¡Identidad del negocio y logotipo guardados y sincronizados con éxito en todos los portales!</span>
+                  </div>
+                  <button onClick={() => setSaveSuccessMsg(false)} className="text-emerald-700 hover:text-emerald-900 font-bold text-xs cursor-pointer">
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Main Form Card */}
+              <form onSubmit={handleSaveIdentidad} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Left Column: Business Names & Slogan */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                      <Store className="w-4 h-4 text-purple-700" />
+                      <span>Datos Principales del Negocio</span>
+                    </h4>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Nombre Comercial del Negocio:
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadNombre}
+                        onChange={(e) => setIdentidadNombre(e.target.value)}
+                        placeholder="LeoGas Cusco"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Slogan o Lema Comercial:
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadSlogan}
+                        onChange={(e) => setIdentidadSlogan(e.target.value)}
+                        placeholder="Llamagas • El Moradito Rendidor"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Dirección o Ubicación Central:
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadDireccion}
+                        onChange={(e) => setIdentidadDireccion(e.target.value)}
+                        placeholder="Av. El Sol 450, Cusco"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Enlace de Redirección La Chuspa Tech:
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadChuspa}
+                        onChange={(e) => setIdentidadChuspa(e.target.value)}
+                        placeholder="https://www.lachuspaanuncios.com"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        A este sitio web se redirige al hacer clic en el logo de La Chuspa Tech (www.lachusoaanuncios.com).
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Logo Management & Presets */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
+                      <ImageIcon className="w-4 h-4 text-purple-700" />
+                      <span>Logotipo del Negocio</span>
+                    </h4>
+
+                    {/* Logo Preview */}
+                    <div className="flex items-center gap-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                      <div className="w-16 h-16 rounded-2xl border-2 border-amber-400 overflow-hidden bg-white flex items-center justify-center shadow-sm flex-shrink-0">
+                        {identidadLogoUrl ? (
+                          <img
+                            src={
+                              identidadLogoUrl.startsWith('data:') || identidadLogoUrl.startsWith('http')
+                                ? identidadLogoUrl
+                                : getAssetUrl(identidadLogoUrl)
+                            }
+                            alt="Logo preview"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <span className="text-3xl">🦁</span>
+                        )}
+                      </div>
+                      <div>
+                        <strong className="text-xs text-slate-800 block">Vista Previa del Logotipo</strong>
+                        <p className="text-[11px] text-slate-500">
+                          Este logo se mostrará junto al logo de La Chuspa Tech en Cliente, Repartidor y Admin.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* File Upload input */}
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Subir Imagen desde tu Equipo / Móvil:
+                      </label>
+                      <label className="flex items-center justify-center gap-2 w-full p-3 bg-purple-50 hover:bg-purple-100 border-2 border-dashed border-purple-300 rounded-xl cursor-pointer text-xs font-bold text-purple-900 transition">
+                        <Upload className="w-4 h-4 text-purple-700" />
+                        <span>Seleccionar archivo de imagen (PNG, JPG o WebP)</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+
+                    {/* Image URL input */}
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        O ingresar URL directa del Logotipo:
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadLogoUrl}
+                        onChange={(e) => setIdentidadLogoUrl(e.target.value)}
+                        placeholder="https://misitio.com/logo.png o /1791513590376.jpg"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+
+                    {/* Preset Badges */}
+                    <div>
+                      <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">
+                        Logos Predeterminados Disponibles:
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setIdentidadLogoUrl('/1791513590376.jpg')}
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer"
+                        >
+                          🟣 Balón Moradito
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIdentidadLogoUrl('/CHUSPITA-circulo.png')}
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer"
+                        >
+                          🟡 Círculo Chuspa
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIdentidadLogoUrl('/medidas-de-balon-de-gas-de-10-Kg (1).png')}
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer"
+                        >
+                          🔵 Balón Gas 10kg
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Second Section: Phones & Contacts */}
+                <div className="pt-4 border-t border-slate-100">
+                  <h4 className="text-sm font-black text-slate-900 flex items-center gap-2 mb-4">
+                    <Phone className="w-4 h-4 text-purple-700" />
+                    <span>Teléfonos y Canales de Contacto Sincronizados</span>
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        WhatsApp (con código país):
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadWhatsapp}
+                        onChange={(e) => setIdentidadWhatsapp(e.target.value)}
+                        placeholder="51969773064"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Teléfono de Pedidos 1 (Principal):
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadTel1}
+                        onChange={(e) => setIdentidadTel1(e.target.value)}
+                        placeholder="950 727 212"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Teléfono de Pedidos 2 (Secundario):
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadTel2}
+                        onChange={(e) => setIdentidadTel2(e.target.value)}
+                        placeholder="984 285 500"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Central Fija Cusco (Opcional):
+                      </label>
+                      <input
+                        type="text"
+                        value={identidadTelFijo}
+                        onChange={(e) => setIdentidadTelFijo(e.target.value)}
+                        placeholder="(084) 501111"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm('¿Deseas restaurar la identidad comercial a los valores por defecto?')) {
+                        resetNegocio();
+                        alert('✔ Identidad restablecida a valores por defecto');
+                      }
+                    }}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer transition"
+                  >
+                    <RotateCcw className="w-4 h-4 text-slate-500" />
+                    <span>Restaurar Valores por Defecto</span>
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="bg-purple-800 hover:bg-purple-900 text-white px-6 py-3 rounded-xl text-xs font-black flex items-center gap-2 shadow-md cursor-pointer transition"
+                  >
+                    <Save className="w-4 h-4 text-amber-400" />
+                    <span>Guardar Cambios de Identidad</span>
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 

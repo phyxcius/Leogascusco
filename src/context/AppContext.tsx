@@ -3,6 +3,7 @@ import {
   Producto,
   Accesorio,
   TelefonosConfig,
+  NegocioIdentidad,
   Repartidor,
   EmpresaB2B,
   ClienteVIP,
@@ -14,6 +15,7 @@ import {
   INITIAL_PRODUCTOS,
   INITIAL_ACCESORIOS,
   INITIAL_TELEFONOS,
+  INITIAL_NEGOCIO,
   INITIAL_REPARTIDORES,
   INITIAL_EMPRESAS_B2B,
   INITIAL_CLIENTES_VIP,
@@ -40,6 +42,11 @@ interface AppContextType {
 
   telefonos: TelefonosConfig;
   updateTelefonos: (t: TelefonosConfig) => void;
+
+  // Business Identity
+  negocio: NegocioIdentidad;
+  updateNegocio: (n: Partial<NegocioIdentidad>) => void;
+  resetNegocio: () => void;
 
   // Fleet
   repartidores: Repartidor[];
@@ -132,6 +139,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [productos, setProductos] = useState<Producto[]>(() => getStored('leogas_productos', INITIAL_PRODUCTOS));
   const [accesorios, setAccesorios] = useState<Accesorio[]>(() => getStored('leogas_accesorios', INITIAL_ACCESORIOS));
   const [telefonos, setTelefonos] = useState<TelefonosConfig>(() => getStored('leogas_telefonos', INITIAL_TELEFONOS));
+  const [negocio, setNegocio] = useState<NegocioIdentidad>(() => getStored('leogas_negocio', INITIAL_NEGOCIO));
   const [repartidores, setRepartidores] = useState<Repartidor[]>(() => getStored('leogas_repartidores', INITIAL_REPARTIDORES));
   const [empresasB2B, setEmpresasB2B] = useState<EmpresaB2B[]>(() => getStored('leogas_empresas_b2b', INITIAL_EMPRESAS_B2B));
   const [clientesVIP, setClientesVIP] = useState<ClienteVIP[]>(() => getStored('leogas_clientes_vip', INITIAL_CLIENTES_VIP));
@@ -155,6 +163,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         if (e.key === 'leogas_productos') setProductos(JSON.parse(e.newValue));
         if (e.key === 'leogas_accesorios') setAccesorios(JSON.parse(e.newValue));
         if (e.key === 'leogas_telefonos') setTelefonos(JSON.parse(e.newValue));
+        if (e.key === 'leogas_negocio') setNegocio(JSON.parse(e.newValue));
         if (e.key === 'leogas_empresas_b2b') setEmpresasB2B(JSON.parse(e.newValue));
         if (e.key === 'leogas_clientes_vip') setClientesVIP(JSON.parse(e.newValue));
         if (e.key === 'leogas_ventas') setVentas(JSON.parse(e.newValue));
@@ -173,6 +182,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   useEffect(() => { localStorage.setItem('leogas_productos', JSON.stringify(productos)); }, [productos]);
   useEffect(() => { localStorage.setItem('leogas_accesorios', JSON.stringify(accesorios)); }, [accesorios]);
   useEffect(() => { localStorage.setItem('leogas_telefonos', JSON.stringify(telefonos)); }, [telefonos]);
+  useEffect(() => { localStorage.setItem('leogas_negocio', JSON.stringify(negocio)); }, [negocio]);
   useEffect(() => { localStorage.setItem('leogas_repartidores', JSON.stringify(repartidores)); }, [repartidores]);
   useEffect(() => { localStorage.setItem('leogas_empresas_b2b', JSON.stringify(empresasB2B)); }, [empresasB2B]);
   useEffect(() => { localStorage.setItem('leogas_clientes_vip', JSON.stringify(clientesVIP)); }, [clientesVIP]);
@@ -231,6 +241,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   // Phones
   const updateTelefonos = (t: TelefonosConfig) => {
     setTelefonos(t);
+  };
+
+  // Business Identity
+  const updateNegocio = (n: Partial<NegocioIdentidad>) => {
+    setNegocio(prev => {
+      const updated = { ...prev, ...n };
+      // Keep telefonos synchronized as well
+      setTelefonos(old => ({
+        ...old,
+        whatsapp: updated.whatsapp || old.whatsapp,
+        tel1: updated.telPrincipal || old.tel1,
+        tel2: updated.telSecundario || old.tel2,
+        tel3: updated.telFijo || old.tel3
+      }));
+      return updated;
+    });
+  };
+
+  const resetNegocio = () => {
+    setNegocio(INITIAL_NEGOCIO);
+    setTelefonos(INITIAL_TELEFONOS);
   };
 
   // Fleet
@@ -467,6 +498,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         deleteAccesorio,
         telefonos,
         updateTelefonos,
+        negocio,
+        updateNegocio,
+        resetNegocio,
         repartidores,
         addRepartidor,
         updateRepartidor,
