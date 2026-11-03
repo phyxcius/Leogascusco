@@ -1,0 +1,8 @@
+{
+  "name": "LeoGas Cusco",
+  "description": "Sistema integral de balones de gas a domicilio en Cusco, pedidos minoristas y B2B, seguimiento en vivo de flota por GPS y panel administrativo.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "permissions": []
+}
