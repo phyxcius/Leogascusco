@@ -56,7 +56,7 @@
 
     #panelRepartidorApp { display: none; width: 100%; height: 100%; position: relative; }
 
-    /* MAPA DE FONDO (SOLO PARA LA VISTA DE RUTA) */
+    /* MAPA DE FONDO (EXCLUSIVO PARA LA VISTA DE RUTA - ZONA BAJA) */
     #mapaRepartidor {
       width: 100%;
       height: 100vh;
@@ -97,7 +97,7 @@
     }
     .vista-panel.activo { display: block; }
 
-    /* VISTA MIS SOLICITUDES: FONDO SÓLIDO LIMPIO SIN MAPA */
+    /* VISTA MIS SOLICITUDES: FONDO SÓLIDO LIMPIO SIN MAPA DEBAJO */
     #vistaSolicitudes {
       background: #f8fafc;
       z-index: 35;
@@ -277,7 +277,7 @@
       <button type="button" class="btn" style="background:#fee2e2; color:#dc2626; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:8px; border:none;" onclick="cerrarSesionRepartidor()">Desconectarse</button>
     </div>
 
-    <!-- 3. VISTA A: MIS SOLICITUDES (SOLO LISTA DE ENTRANTES DE LA CENTRAL - ACTIVA POR DEFECTO) -->
+    <!-- 3. VISTA A: MIS SOLICITUDES (LISTA DE ENTRADAS DE LA CENTRAL - ACTIVA POR DEFECTO) -->
     <div class="vista-panel activo" id="vistaSolicitudes">
       <div style="font-size:14px; font-weight:900; color:#1e1b4b; margin-bottom:10px;">📋 Solicitudes Entrantes / Disponibles:</div>
       <div id="contenedorListaSolicitudes">
@@ -467,10 +467,10 @@
 
         const ordenes = Object.values(pedidos);
         
-        // 1. Órdenes pendientes exclusivas para "Mis Solicitudes"
+        // 1. Órdenes pendientes exclusivas para la pestaña "Mis Solicitudes"
         renderizarSolicitudesEntrantes(pedidos);
 
-        // 2. Órdenes asignadas a este repartidor para "Mapa en Ruta"
+        // 2. Órdenes asignadas a este repartidor para la pestaña "Mapa en Ruta"
         const rutaChofer = ordenes.filter(p => p.repartidorId === miRepartidorId);
         const rutaActivaChofer = rutaChofer.filter(p => p.estado !== 'completado');
 
@@ -629,7 +629,7 @@
           });
           markerDestino = L.marker([orden.lat, orden.lng], { icon: iconoDestino }).addTo(mapRepartidor);
         } else {
-          markerDestino.setLatLng([orden.lat, lng]);
+          markerDestino.setLatLng([orden.lat, orden.lng]);
         }
         mapRepartidor.setView([orden.lat, orden.lng], 15);
       }
