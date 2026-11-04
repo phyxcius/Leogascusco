@@ -90,8 +90,13 @@ export const INITIAL_NEGOCIO: NegocioIdentidad = {
   telFijo: "(084) 501111",
   direccion: "Av. El Sol 450, Cusco",
   enlaceChuspa: "https://www.lachuspaanuncios.com",
-  igvPorcentaje: 18
+  igvPorcentaje: 18,
+  facebookUrl: "https://facebook.com/leogascusco",
+  instagramUrl: "https://instagram.com/leogascusco",
+  tiktokUrl: "https://tiktok.com/@leogascusco",
+  googleReviewUrl: "https://maps.google.com/?cid=leogascusco"
 };
+
 
 export const INITIAL_REPARTIDORES: Repartidor[] = [
   {

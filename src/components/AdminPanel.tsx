@@ -42,7 +42,7 @@ import L from 'leaflet';
 import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido, CotizacionCRM } from '../types/index';
 import { getPageUrl, getAssetUrl } from '../utils/assets';
 import { BrandBadge } from './BrandBadge';
-import { playChimeSound } from '../utils/audio';
+import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
 
 export const AdminPanel: React.FC = () => {
   const {
@@ -108,6 +108,10 @@ export const AdminPanel: React.FC = () => {
   const [identidadTelFijo, setIdentidadTelFijo] = useState(negocio.telFijo || '');
   const [identidadDireccion, setIdentidadDireccion] = useState(negocio.direccion);
   const [identidadIgv, setIdentidadIgv] = useState<number | string>(negocio.igvPorcentaje || 18);
+  const [identidadFacebook, setIdentidadFacebook] = useState(negocio.facebookUrl || '');
+  const [identidadInstagram, setIdentidadInstagram] = useState(negocio.instagramUrl || '');
+  const [identidadTiktok, setIdentidadTiktok] = useState(negocio.tiktokUrl || '');
+  const [identidadGoogleReview, setIdentidadGoogleReview] = useState(negocio.googleReviewUrl || '');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
 
   // Map Fullscreen
@@ -189,6 +193,10 @@ export const AdminPanel: React.FC = () => {
     setIdentidadTelFijo(negocio.telFijo || '');
     setIdentidadDireccion(negocio.direccion);
     setIdentidadIgv(negocio.igvPorcentaje || 18);
+    setIdentidadFacebook(negocio.facebookUrl || '');
+    setIdentidadInstagram(negocio.instagramUrl || '');
+    setIdentidadTiktok(negocio.tiktokUrl || '');
+    setIdentidadGoogleReview(negocio.googleReviewUrl || '');
   }, [negocio]);
 
   // Detect incoming orders in real time to show central alert modal
@@ -202,7 +210,7 @@ export const AdminPanel: React.FC = () => {
     if (latest.id !== lastKnownOrderIdRef.current && latest.estado === 'pendiente_asignacion') {
       lastKnownOrderIdRef.current = latest.id;
       setIncomingOrderModal(latest);
-      playChimeSound();
+      playAndSpeak(`¡Nuevo pedido recibido! Cliente ${latest.cliente || 'particular'}, producto ${latest.producto || latest.tipoBalon}, total ${latest.montoCobro} soles.`);
     }
   }, [pedidos]);
 
@@ -272,10 +280,29 @@ export const AdminPanel: React.FC = () => {
       telFijo: identidadTelFijo.trim(),
       direccion: identidadDireccion.trim() || 'Cusco, Perú',
       enlaceChuspa: 'https://www.lachuspaanuncios.com',
-      igvPorcentaje: parsedIgv
+      igvPorcentaje: parsedIgv,
+      facebookUrl: identidadFacebook.trim(),
+      instagramUrl: identidadInstagram.trim(),
+      tiktokUrl: identidadTiktok.trim(),
+      googleReviewUrl: identidadGoogleReview.trim()
     });
     setSaveSuccessMsg(true);
+    playAndSpeak('Configuración e identidad del negocio guardadas exitosamente.', true);
     setTimeout(() => setSaveSuccessMsg(false), 4500);
+  };
+
+  // Assign driver to incoming order modal
+  const handleAssignIncomingDriver = () => {
+    if (!incomingOrderModal) return;
+    if (!assignedDriverForIncoming) {
+      alert('Por favor selecciona un repartidor para despachar la orden.');
+      return;
+    }
+    const chofer = repartidores.find((r) => r.id === assignedDriverForIncoming);
+    assignPedido(incomingOrderModal.id, assignedDriverForIncoming);
+    playAndSpeak(`Repartidor ${chofer?.nombre || 'de turno'} asignado con éxito. Notificación enviada al cliente y a la moto en ruta.`);
+    setIncomingOrderModal(null);
+    setAssignedDriverForIncoming('');
   };
 
   // SUNAT / RENIEC Query Simulation with realistic taxpayer data
@@ -1258,6 +1285,71 @@ export const AdminPanel: React.FC = () => {
                         value={identidadTelFijo}
                         onChange={(e) => setIdentidadTelFijo(e.target.value)}
                         placeholder="(084) 501111"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Third Section: Social Media & Google Review Link */}
+                <div className="pt-4 border-t border-slate-100">
+                  <h4 className="text-sm font-black text-slate-900 flex items-center gap-2 mb-1.5">
+                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span>Redes Sociales y Enlace de Reseña en Google Maps</span>
+                  </h4>
+                  <p className="text-xs text-slate-500 mb-4">
+                    Estos enlaces y botones de redes se sincronizan con la pantalla de entrega del cliente para solicitarle su calificación de 5 estrellas en Google y aumentar los seguidores de la empresa.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        ⭐⭐⭐⭐⭐ Enlace directo a Reseña en Google Maps:
+                      </label>
+                      <input
+                        type="url"
+                        value={identidadGoogleReview}
+                        onChange={(e) => setIdentidadGoogleReview(e.target.value)}
+                        placeholder="https://g.page/r/leogas-cusco/review"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Facebook del Negocio:
+                      </label>
+                      <input
+                        type="url"
+                        value={identidadFacebook}
+                        onChange={(e) => setIdentidadFacebook(e.target.value)}
+                        placeholder="https://facebook.com/leogascusco"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        Instagram Oficial:
+                      </label>
+                      <input
+                        type="url"
+                        value={identidadInstagram}
+                        onChange={(e) => setIdentidadInstagram(e.target.value)}
+                        placeholder="https://instagram.com/leogascusco"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                        TikTok de la Empresa:
+                      </label>
+                      <input
+                        type="url"
+                        value={identidadTiktok}
+                        onChange={(e) => setIdentidadTiktok(e.target.value)}
+                        placeholder="https://tiktok.com/@leogascusco"
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
                       />
                     </div>
@@ -3194,6 +3286,93 @@ export const AdminPanel: React.FC = () => {
           )}
         </main>
       </div>
+
+      {/* CENTRAL INCOMING ORDER ALERT MODAL */}
+      {incomingOrderModal && (
+        <div className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white max-w-sm sm:max-w-md w-full rounded-3xl p-6 shadow-2xl border-2 border-yellow-400 text-center animate-in zoom-in-95 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-yellow-100 text-amber-600 flex items-center justify-center text-3xl mx-auto shadow-inner animate-bounce">
+              🔔🛵
+            </div>
+
+            <div>
+              <span className="bg-yellow-100 text-yellow-900 font-black text-[10px] uppercase px-3 py-1 rounded-full inline-block mb-1">
+                ¡Nuevo Pedido en Tiempo Real!
+              </span>
+              <h3 className="text-lg font-black text-slate-900 leading-tight">
+                Orden Recibida de {incomingOrderModal.cliente}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                📍 {incomingOrderModal.direccion || 'Cusco'} • Hora: {incomingOrderModal.hora}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-left text-xs space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Producto:</span>
+                <strong className="text-purple-950 font-black">{incomingOrderModal.producto || incomingOrderModal.tipoBalon}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Cantidad:</span>
+                <strong className="text-slate-900">{incomingOrderModal.cantidad || 1} balón(es)</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Total a Cobrar:</span>
+                <strong className="text-emerald-700 font-black text-sm">S/ {Number(incomingOrderModal.montoCobro).toFixed(2)}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Forma de Pago:</span>
+                <span className="bg-purple-100 text-purple-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  {incomingOrderModal.metodoPago}
+                </span>
+              </div>
+              {incomingOrderModal.telefono && (
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold">Teléfono:</span>
+                  <a href={`tel:${incomingOrderModal.telefono}`} className="text-blue-600 font-bold hover:underline">
+                    📞 {incomingOrderModal.telefono}
+                  </a>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2 text-left">
+              <label className="text-[10px] font-black uppercase text-slate-600 block">
+                Asignar Repartidor de Flota:
+              </label>
+              <select
+                value={assignedDriverForIncoming}
+                onChange={(e) => setAssignedDriverForIncoming(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-700 cursor-pointer"
+              >
+                <option value="">-- Selecciona qué repartidor despacha --</option>
+                {repartidores.map((rep) => (
+                  <option key={rep.id} value={rep.id}>
+                    🛵 {rep.nombre} ({rep.online ? 'En Ruta / En Línea' : 'Offline'})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setIncomingOrderModal(null)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs cursor-pointer transition"
+              >
+                Cerrar / Ver en Lista
+              </button>
+              <button
+                type="button"
+                onClick={handleAssignIncomingDriver}
+                className="flex-2 bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-900 hover:to-indigo-900 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>🛵 Asignar y Despachar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Phone order modal */}
       {showPhoneOrderModal && (

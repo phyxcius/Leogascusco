@@ -26,7 +26,21 @@ import {
   INITIAL_CRM_PLANTILLAS,
   INITIAL_COTIZACIONES
 } from '../data/initialData';
-import { playChimeSound, playSuccessChime } from '../utils/audio';
+import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
+
+export function broadcastLiveEvent(payload: Record<string, any>) {
+  try {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      const bc = new BroadcastChannel('leogas_realtime_sync');
+      bc.postMessage(payload);
+      bc.close();
+    }
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('leogas_live_tick', JSON.stringify({ ...payload, _t: Date.now() }));
+    }
+  } catch {}
+}
+
 
 interface AppContextType {
   activePortal: 'cliente' | 'admin' | 'repartidor';
@@ -172,8 +186,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [isAdminLogged, setIsAdminLogged] = useState<boolean>(() => localStorage.getItem('leogas_admin_logged') === 'true');
   const [currentRepartidorId, setCurrentRepartidorId] = useState<string | null>(() => localStorage.getItem('leogas_rep_id'));
 
-  // Listen to cross-window storage events so independent windows sync state automatically
+  // Realtime BroadcastChannel & Storage Sync between Index, Repartidor and Admin
   useEffect(() => {
+    let bc: BroadcastChannel | null = null;
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        bc = new BroadcastChannel('leogas_realtime_sync');
+        bc.onmessage = (e) => {
+          const data = e.data;
+          if (!data || !data.type) return;
+
+          if (data.type === 'ETAPA_CHANGED' || data.type === 'PEDIDOS_SYNC') {
+            if (data.pedidos) {
+              setPedidos(data.pedidos);
+            }
+            const myOrderId = localStorage.getItem('leogas_mi_pedido_id');
+            if (myOrderId && myOrderId === data.pedidoId) {
+              if (data.nextEtapa === 1) {
+                setAlertModal('en_camino');
+                playAndSpeak("¡Atención! Su balón de gas está en camino. Su repartidor va hacia su domicilio.");
+              } else if (data.nextEtapa === 2) {
+                setAlertModal('en_puerta');
+                playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
+              } else if (data.nextEtapa >= 3) {
+                setAlertModal('completado');
+                playAndSpeak("¡Muchas gracias por su compra en LeoGas Cusco! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.", true);
+              }
+            }
+          } else if (data.type === 'CLIENTE_SALIENDO') {
+            setPedidos((prev) =>
+              prev.map((p) => (p.id === data.pedidoId ? { ...p, clienteSaliendo: true } : p))
+            );
+          } else if (data.type === 'NEW_PEDIDO' && data.pedido) {
+            setPedidos((prev) => [data.pedido, ...prev.filter((p) => p.id !== data.pedido.id)]);
+          }
+        };
+      } catch {}
+    }
+
     const handleStorageChange = (e: StorageEvent) => {
       if (!e.key || !e.newValue) return;
       try {
@@ -197,13 +247,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     };
     window.addEventListener('storage', handleStorageChange);
 
-    // Polling fallback to guarantee instant updates between windows/tabs
+    // Fast Polling (250ms) to guarantee zero latency between independent tabs
     const pollInterval = setInterval(() => {
       try {
         const storedPedidos = localStorage.getItem('leogas_pedidos');
         if (storedPedidos) {
           const parsed = JSON.parse(storedPedidos);
-          setPedidos(prev => {
+          setPedidos((prev) => {
             if (JSON.stringify(prev) !== storedPedidos) return parsed;
             return prev;
           });
@@ -211,7 +261,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         const storedReps = localStorage.getItem('leogas_repartidores');
         if (storedReps) {
           const parsed = JSON.parse(storedReps);
-          setRepartidores(prev => {
+          setRepartidores((prev) => {
             if (JSON.stringify(prev) !== storedReps) return parsed;
             return prev;
           });
@@ -219,21 +269,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         const storedNegocio = localStorage.getItem('leogas_negocio');
         if (storedNegocio) {
           const parsed = JSON.parse(storedNegocio);
-          setNegocio(prev => {
+          setNegocio((prev) => {
             if (JSON.stringify(prev) !== storedNegocio) return parsed;
             return prev;
           });
         }
         const storedOrder = localStorage.getItem('leogas_mi_pedido_id');
         if (storedOrder) {
-          setActiveCustomerOrderId(prev => prev !== storedOrder ? storedOrder : prev);
+          setActiveCustomerOrderId((prev) => (prev !== storedOrder ? storedOrder : prev));
         }
       } catch (err) {
         // ignore
       }
-    }, 1500);
+    }, 250);
 
     return () => {
+      if (bc) bc.close();
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(pollInterval);
     };
@@ -254,30 +305,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
   // Active customer order
   const activeCustomerOrder = activeCustomerOrderId
-    ? pedidos.find(p => p.id === activeCustomerOrderId) || null
+    ? pedidos.find((p) => p.id === activeCustomerOrderId) || null
     : null;
 
-  // Watch for active customer order stage changes to trigger sound & alert modals
+  // Watch for active customer order stage changes to trigger sound, voice agent & central alert modals
   useEffect(() => {
     if (!activeCustomerOrder) return;
     const stageKey = `leogas_last_seen_stage_${activeCustomerOrder.id}`;
     const lastSeen = localStorage.getItem(stageKey);
     const currentEtapa = activeCustomerOrder.etapa;
 
-    if ((activeCustomerOrder.estado === 'completado' || currentEtapa === 3) && lastSeen !== '3') {
+    if ((activeCustomerOrder.estado === 'completado' || currentEtapa >= 3) && lastSeen !== '3') {
       localStorage.setItem(stageKey, '3');
-      playSuccessChime();
       setAlertModal('completado');
+      playAndSpeak(
+        "¡Muchas gracias por su compra en LeoGas Cusco! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.",
+        true
+      );
     } else if (currentEtapa === 1 && lastSeen !== '1') {
       localStorage.setItem(stageKey, '1');
-      playChimeSound();
       setAlertModal('en_camino');
+      playAndSpeak("¡Atención! Su balón de gas está en camino. Su repartidor va hacia su domicilio.");
     } else if (currentEtapa === 2 && lastSeen !== '2') {
       localStorage.setItem(stageKey, '2');
-      playChimeSound();
       setAlertModal('en_puerta');
+      playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
     }
   }, [activeCustomerOrder?.etapa, activeCustomerOrder?.estado, activeCustomerOrder?.id]);
+
 
   // Product CRUD
   const updateProducto = (p: Producto) => {
@@ -398,7 +453,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       horaAsignacion: newP.repartidorId ? hora : undefined
     };
 
-    setPedidos(prev => [fullPedido, ...prev]);
+    setPedidos((prev) => {
+      const updated = [fullPedido, ...prev];
+      try {
+        localStorage.setItem('leogas_pedidos', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
 
     // Track active order for customer
     setActiveCustomerOrderId(id);
@@ -406,103 +467,170 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     localStorage.setItem(`leogas_last_seen_stage_${id}`, '0');
     setAlertModal('asignando');
 
-    playChimeSound();
+    broadcastLiveEvent({
+      type: 'NEW_PEDIDO',
+      pedido: fullPedido
+    });
+
+    playAndSpeak('Su pedido de balón de gas ha sido registrado con éxito. Estamos asignando a su repartidor.');
     return id;
   };
 
   const assignPedido = (pedidoId: string, repartidorId: string) => {
-    const rep = repartidores.find(r => r.id === repartidorId);
+    const rep = repartidores.find((r) => r.id === repartidorId);
     const hora = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-    setPedidos(prev => prev.map(p => {
-      if (p.id === pedidoId) {
-        return {
-          ...p,
-          repartidorId,
-          repartidorNombre: rep?.nombre || '',
-          estado: 'en_proceso',
-          etapa: 1,
-          horaAsignacion: hora,
-          horaActualizacion: hora
-        };
-      }
-      return p;
-    }));
-    // Also update driver's sequence
+    setPedidos((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === pedidoId) {
+          return {
+            ...p,
+            repartidorId,
+            repartidorNombre: rep?.nombre || '',
+            estado: 'en_proceso' as const,
+            etapa: 1,
+            horaAsignacion: hora,
+            horaActualizacion: hora
+          };
+        }
+        return p;
+      });
+
+      try {
+        localStorage.setItem('leogas_pedidos', JSON.stringify(updated));
+      } catch {}
+
+      broadcastLiveEvent({
+        type: 'ETAPA_CHANGED',
+        pedidoId,
+        nextEtapa: 1,
+        pedidos: updated
+      });
+
+      return updated;
+    });
+
     if (rep) {
-      setRepartidores(prev => prev.map(r => r.id === repartidorId ? { ...r, etapaSecuencia: 1, ultimaActualizacionSecuencia: hora } : r));
+      setRepartidores((prev) =>
+        prev.map((r) =>
+          r.id === repartidorId ? { ...r, etapaSecuencia: 1, ultimaActualizacionSecuencia: hora } : r
+        )
+      );
     }
-    playChimeSound();
+    playAndSpeak(`Pedido asignado al repartidor ${rep?.nombre || ''}.`);
   };
 
   const notificarClienteSaliendo = (pedidoId: string) => {
     const hora = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-    setPedidos(prev => prev.map(p => {
-      if (p.id === pedidoId) {
-        return {
-          ...p,
-          clienteSaliendo: true,
-          clienteSaliendoHora: hora
-        };
-      }
-      return p;
-    }));
-    try {
-      localStorage.setItem('leogas_cliente_saliendo_notif', JSON.stringify({ pedidoId, timestamp: Date.now() }));
-    } catch {}
+    let clienteName = 'El cliente';
+    setPedidos((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === pedidoId) {
+          clienteName = p.cliente;
+          return {
+            ...p,
+            clienteSaliendo: true,
+            clienteSaliendoHora: hora
+          };
+        }
+        return p;
+      });
+
+      try {
+        localStorage.setItem('leogas_pedidos', JSON.stringify(updated));
+        localStorage.setItem('leogas_cliente_saliendo_notif', JSON.stringify({ pedidoId, timestamp: Date.now() }));
+      } catch {}
+
+      broadcastLiveEvent({
+        type: 'CLIENTE_SALIENDO',
+        pedidoId,
+        clienteNombre: clienteName,
+        pedidos: updated
+      });
+
+      return updated;
+    });
+
+    playAndSpeak('Aviso enviado. Su repartidor lo está esperando en la puerta con su balón de gas.');
     closeAlertModal();
   };
 
   const advancePedidoEtapa = (pedidoId: string) => {
     const hora = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-    setPedidos(prev => prev.map(p => {
-      if (p.id === pedidoId) {
-        const nextEtapa = (p.etapa || 0) + 1;
-        if (nextEtapa === 1) {
-          // 1. Salir en camino (Cliente recibe notificación en camino)
-          return {
-            ...p,
-            etapa: 1,
-            horaActualizacion: hora
-          };
-        } else if (nextEtapa === 2) {
-          // 2. Ya estoy en tu puerta (Cliente recibe notificación en puerta)
-          return {
-            ...p,
-            etapa: 2,
-            horaActualizacion: hora
-          };
-        } else if (nextEtapa === 3) {
-          // 3. Entregado (Cliente recibe notificación de agradecimiento)
-          return {
-            ...p,
-            etapa: 3,
-            horaActualizacion: hora
-          };
-        } else {
-          // 4. Finalizado en Base (Orden completada y registrada en ventas)
-          const totalNum = typeof p.montoCobro === 'number' ? p.montoCobro : parseFloat(p.montoCobro) || 0;
-          addVenta({
-            fecha: new Date().toISOString().split('T')[0],
-            cliente: p.cliente,
-            productos: p.tipoBalon,
-            total: totalNum,
-            pago: p.metodoPago,
-            repartidorId: p.repartidorId,
-            repartidorNombre: p.repartidorNombre,
-            comprobante: p.tipoComprobante || 'B001-000455'
-          });
-          return {
-            ...p,
-            etapa: 4,
-            estado: 'completado',
-            horaActualizacion: hora
-          };
+    let calculatedNextEtapa = 1;
+    let targetCliente = '';
+
+    setPedidos((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === pedidoId) {
+          targetCliente = p.cliente;
+          const nextEtapa = (p.etapa || 0) + 1;
+          calculatedNextEtapa = nextEtapa;
+          if (nextEtapa === 1) {
+            return {
+              ...p,
+              etapa: 1,
+              horaActualizacion: hora
+            };
+          } else if (nextEtapa === 2) {
+            return {
+              ...p,
+              etapa: 2,
+              horaActualizacion: hora
+            };
+          } else if (nextEtapa === 3) {
+            return {
+              ...p,
+              etapa: 3,
+              horaActualizacion: hora
+            };
+          } else {
+            const totalNum = typeof p.montoCobro === 'number' ? p.montoCobro : parseFloat(p.montoCobro) || 0;
+            addVenta({
+              fecha: new Date().toISOString().split('T')[0],
+              cliente: p.cliente,
+              productos: p.tipoBalon,
+              total: totalNum,
+              pago: p.metodoPago,
+              repartidorId: p.repartidorId,
+              repartidorNombre: p.repartidorNombre,
+              comprobante: p.tipoComprobante || 'B001-000455'
+            });
+            return {
+              ...p,
+              etapa: 4,
+              estado: 'completado' as const,
+              horaActualizacion: hora
+            };
+          }
         }
-      }
-      return p;
-    }));
-    playChimeSound();
+        return p;
+      });
+
+      try {
+        localStorage.setItem('leogas_pedidos', JSON.stringify(updated));
+      } catch {}
+
+      broadcastLiveEvent({
+        type: 'ETAPA_CHANGED',
+        pedidoId,
+        nextEtapa: calculatedNextEtapa,
+        pedidos: updated
+      });
+
+      return updated;
+    });
+
+    if (calculatedNextEtapa === 1) {
+      playAndSpeak(`Iniciando ruta hacia el domicilio de ${targetCliente || 'el cliente'}.`);
+    } else if (calculatedNextEtapa === 2) {
+      playAndSpeak('Ha llegado a su destino. Proceda a avisar al cliente.');
+    } else if (calculatedNextEtapa === 3) {
+      playAndSpeak('Balón de gas entregado con éxito. Muchas gracias por su servicio.');
+    } else if (calculatedNextEtapa >= 4) {
+      playAndSpeak('Pedido finalizado y registrado en caja. Ha vuelto a estar libre en base.');
+    }
   };
+
 
   const completePedido = (pedidoId: string) => {
     advancePedidoEtapa(pedidoId);

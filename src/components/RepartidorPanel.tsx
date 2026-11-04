@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import L from 'leaflet';
 import { BrandBadge } from './BrandBadge';
-import { playChimeSound, playSuccessChime, speakVoice } from '../utils/audio';
+import { playChimeSound, playSuccessChime, speakVoice, playAndSpeak } from '../utils/audio';
 import { getAssetUrl } from '../utils/assets';
 import { Pedido, VentaRegistro } from '../types/index';
 
@@ -120,13 +120,21 @@ export const RepartidorPanel: React.FC = () => {
     };
   }, [currentRepartidor?.id, setRepartidorCoords]);
 
-  // Audio trigger when client clicks "Salir a Recibir"
+  // Realtime check if any of the driver's orders has clienteSaliendo active
+  const orderConClienteSaliendo = useMemo(() => {
+    return (
+      myAssignedOrders.find((p) => p.clienteSaliendo && dismissedClienteSaliendo !== p.id) ||
+      (activeOrder?.clienteSaliendo && dismissedClienteSaliendo !== activeOrder.id ? activeOrder : null)
+    );
+  }, [myAssignedOrders, activeOrder, dismissedClienteSaliendo]);
+
+  // Audio & Voice trigger when client clicks "Salir a Recibir"
   useEffect(() => {
-    if (!activeOrder) return;
-    if (activeOrder.clienteSaliendo && dismissedClienteSaliendo !== activeOrder.id) {
-      playChimeSound();
-    }
-  }, [activeOrder?.clienteSaliendo, activeOrder?.id, dismissedClienteSaliendo]);
+    if (!orderConClienteSaliendo) return;
+    playAndSpeak(
+      `¡Atención! ${orderConClienteSaliendo.cliente || 'El cliente'} ya está saliendo a la puerta a recibir su pedido de gas.`
+    );
+  }, [orderConClienteSaliendo?.id, orderConClienteSaliendo?.clienteSaliendo]);
 
   // Generate realistic Cusco street network waypoints (fallback if offline/OSRM slow)
   const generateCuscoStreetRoute = (startLat: number, startLng: number, destLat: number, destLng: number): [number, number][] => {
@@ -431,7 +439,7 @@ export const RepartidorPanel: React.FC = () => {
       setLoginError(true);
     } else {
       setLoginError(false);
-      playSuccessChime();
+      playAndSpeak(`Bienvenido a su turno, ${chofer.nombre}. Sistema de navegación y GPS activo en Cusco.`, true);
     }
   };
 
@@ -447,24 +455,21 @@ export const RepartidorPanel: React.FC = () => {
   // Advance step sequence & Voice Audio announcement
   const handleAdvanceStep = () => {
     if (!activeOrder) return;
+    const currentEtapa = activeOrder.etapa;
     advancePedidoEtapa(activeOrder.id);
-    if (activeOrder.etapa === 0) {
+    if (currentEtapa === 0) {
       // Salió en camino
-      playChimeSound();
-      speakVoice(`Iniciando ruta hacia el domicilio de ${activeOrder.cliente}.`);
-    } else if (activeOrder.etapa === 1) {
+      playAndSpeak(`Iniciando ruta hacia el domicilio de ${activeOrder.cliente}. Siga por la ruta trazada en las calles de Cusco.`);
+    } else if (currentEtapa === 1) {
       // Llegó a la puerta
-      playChimeSound();
       setHasArrived(true);
-      speakVoice("Ha llegado a su destino. Proceda a avisar al cliente.");
-    } else if (activeOrder.etapa === 2) {
+      playAndSpeak(`Ha llegado a la puerta del cliente ${activeOrder.cliente}. Notificación en tiempo real enviada.`);
+    } else if (currentEtapa === 2) {
       // Entregado
-      playSuccessChime();
-      speakVoice("Balón entregado con éxito. Gracias por su servicio.");
-    } else if (activeOrder.etapa >= 3) {
+      playAndSpeak(`Balón entregado con éxito a ${activeOrder.cliente}. Agradecimiento y solicitud de reseña enviados al cliente.`);
+    } else if (currentEtapa >= 3) {
       // Finalizado en base
-      playSuccessChime();
-      speakVoice("Ruta finalizada. Regresando a la base.");
+      playAndSpeak(`Ruta finalizada. Registrado en caja de LeoGas Cusco.`);
       alert('✔ Pedido finalizado y registrado en caja. Has vuelto a estar libre en base.');
     }
   };
@@ -612,7 +617,7 @@ export const RepartidorPanel: React.FC = () => {
       </header>
 
       {/* DRIVER ALERT POPUP: CLIENT IS COMING OUT */}
-      {activeOrder?.clienteSaliendo && dismissedClienteSaliendo !== activeOrder.id && (
+      {orderConClienteSaliendo && (
         <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border-2 border-emerald-400 text-center animate-in zoom-in-95 space-y-3">
             <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-inner animate-bounce">
@@ -625,12 +630,12 @@ export const RepartidorPanel: React.FC = () => {
               ¡El Cliente ya está Saliendo a la Puerta!
             </h3>
             <p className="text-xs text-slate-600">
-              <strong>{activeOrder.cliente}</strong> presionó <em>"Salir a Recibir ✔️"</em>. Por favor ten listo el balón de gas y su vuelto correspondiente.
+              <strong>{orderConClienteSaliendo.cliente}</strong> presionó <em>"Salir a Recibir ✔️"</em>. Por favor ten listo el balón de gas (<strong>{orderConClienteSaliendo.producto || orderConClienteSaliendo.tipoBalon}</strong>) y su vuelto correspondiente (Monto: <strong>S/ {Number(orderConClienteSaliendo.montoCobro).toFixed(2)}</strong> - Pago: {orderConClienteSaliendo.metodoPago}).
             </p>
             <button
               type="button"
               onClick={() => {
-                setDismissedClienteSaliendo(activeOrder.id);
+                setDismissedClienteSaliendo(orderConClienteSaliendo.id);
                 playSuccessChime();
               }}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs shadow-md transition cursor-pointer"

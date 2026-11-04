@@ -35,7 +35,12 @@ export interface NegocioIdentidad {
   direccion: string;
   enlaceChuspa: string;
   igvPorcentaje: number; // default 18
+  facebookUrl?: string;
+  instagramUrl?: string;
+  tiktokUrl?: string;
+  googleReviewUrl?: string;
 }
+
 
 export interface Repartidor {
   id: string;
@@ -62,6 +67,9 @@ export interface Pedido {
   tipoVenta?: 'minorista' | 'mayorista_b2b';
   cliente: string;
   tipoBalon: string;
+  producto?: string;
+  cantidad?: number;
+  telefono?: string;
   montoCobro: string | number;
   metodoPago: string;
   tipoComprobante?: string;

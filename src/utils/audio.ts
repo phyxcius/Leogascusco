@@ -55,11 +55,14 @@ export function speakVoice(text: string) {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-ES';
-      utterance.rate = 1.0;
+      utterance.lang = 'es-PE';
+      utterance.rate = 1.02;
       utterance.pitch = 1.0;
       const voices = window.speechSynthesis.getVoices();
-      const esVoice = voices.find((v) => v.lang.startsWith('es'));
+      const esVoice =
+        voices.find((v) => v.lang === 'es-PE') ||
+        voices.find((v) => v.lang === 'es-419') ||
+        voices.find((v) => v.lang.startsWith('es'));
       if (esVoice) {
         utterance.voice = esVoice;
       }
@@ -69,4 +72,16 @@ export function speakVoice(text: string) {
     // Ignore speech errors
   }
 }
+
+export function playAndSpeak(text: string, isSuccess = false) {
+  if (isSuccess) {
+    playSuccessChime();
+  } else {
+    playChimeSound();
+  }
+  setTimeout(() => {
+    speakVoice(text);
+  }, 220);
+}
+
 
