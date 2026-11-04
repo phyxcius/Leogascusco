@@ -83,17 +83,31 @@ export const CuscoMap: React.FC = () => {
     });
   }, [repartidores]);
 
-  // Handle Fullscreen resize
+  // Handle Fullscreen resize and body overflow lock
   useEffect(() => {
-    const timer1 = setTimeout(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    const t1 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 50);
+    const t2 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 180);
+    const t3 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 350);
+    const t4 = setTimeout(() => mapInstanceRef.current?.invalidateSize(), 650);
+
+    const handleResize = () => {
       mapInstanceRef.current?.invalidateSize();
-    }, 100);
-    const timer2 = setTimeout(() => {
-      mapInstanceRef.current?.invalidateSize();
-    }, 350);
+    };
+    window.addEventListener('resize', handleResize);
+
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+      document.body.style.overflow = '';
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+      window.removeEventListener('resize', handleResize);
     };
   }, [isFullscreen]);
 
@@ -190,44 +204,44 @@ export const CuscoMap: React.FC = () => {
 
         {/* Map Container - Fullscreen or inline */}
         <div
-          className={`relative overflow-hidden transition-all duration-300 ${
+          className={`transition-all duration-300 ${
             isFullscreen
-              ? 'fixed inset-0 z-[99999] h-screen w-screen bg-slate-900 flex flex-col'
-              : 'h-[360px] sm:h-[420px] rounded-xl border border-slate-200 shadow-inner'
+              ? 'fixed inset-0 z-[999999] w-full h-[100dvh] bg-slate-900 flex flex-col m-0 p-0 overflow-hidden'
+              : 'relative overflow-hidden h-[360px] sm:h-[420px] rounded-xl border border-slate-200 shadow-inner'
           }`}
         >
-          {/* Top Bar for Fullscreen mode */}
+          {/* Top Bar for Fullscreen mode (Mobile Adaptive) */}
           {isFullscreen && (
-            <div className="bg-purple-950 text-white px-4 py-3 flex items-center justify-between z-[100000] shadow-md border-b border-purple-800">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🛵</span>
-                <div>
-                  <h4 className="font-black text-sm">Flota de Reparto en Tiempo Real - Cusco</h4>
-                  <p className="text-[11px] text-purple-200">Monitoreo activo de unidades y rutas</p>
+            <div className="bg-purple-950 text-white px-3 sm:px-4 py-2.5 flex items-center justify-between z-[1000000] shadow-md border-b border-purple-800 flex-shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-lg sm:text-xl flex-shrink-0">🛵</span>
+                <div className="min-w-0">
+                  <h4 className="font-black text-xs sm:text-sm truncate">Flota en Ruta - Cusco</h4>
+                  <p className="text-[10px] sm:text-[11px] text-purple-200 hidden xs:block truncate">Monitoreo activo de unidades</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"
                   onClick={handleCenterUser}
-                  className={`px-3 py-1.5 rounded-full text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-md ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-md ${
                     isGpsActive
                       ? 'bg-emerald-500 text-white ring-2 ring-emerald-300 animate-pulse'
                       : isGpsLoading
-                      ? 'bg-amber-500 text-white animate-spin'
+                      ? 'bg-amber-500 text-white'
                       : 'bg-white text-slate-800 hover:bg-slate-100'
                   }`}
                 >
-                  <Crosshair className="w-3.5 h-3.5" />
-                  <span>{isGpsLoading ? 'Buscando GPS...' : isGpsActive ? '📍 GPS Activo' : 'Mi Ubicación'}</span>
+                  <Crosshair className={`w-3.5 h-3.5 ${isGpsActive ? 'text-white' : 'text-purple-700'}`} />
+                  <span>{isGpsLoading ? 'Buscando...' : isGpsActive ? '📍 GPS Activo' : 'Mi Ubicación'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleToggleFullscreen}
-                  className="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-md cursor-pointer transition"
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-black flex items-center gap-1 shadow-md cursor-pointer transition"
                 >
                   <Minimize2 className="w-3.5 h-3.5" />
-                  <span>Cerrar / Reducir</span>
+                  <span>Cerrar</span>
                 </button>
               </div>
             </div>

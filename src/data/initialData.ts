@@ -1,4 +1,16 @@
-import { Producto, Accesorio, TelefonosConfig, NegocioIdentidad, Repartidor, EmpresaB2B, ClienteVIP, VentaRegistro, Pedido } from '../types/index';
+import {
+  Producto,
+  Accesorio,
+  TelefonosConfig,
+  NegocioIdentidad,
+  Repartidor,
+  EmpresaB2B,
+  ClienteVIP,
+  VentaRegistro,
+  Pedido,
+  CRMPlantilla,
+  CotizacionCRM
+} from '../types/index';
 
 export const INITIAL_PRODUCTOS: Producto[] = [
   {
@@ -77,7 +89,8 @@ export const INITIAL_NEGOCIO: NegocioIdentidad = {
   telSecundario: "984 285 500",
   telFijo: "(084) 501111",
   direccion: "Av. El Sol 450, Cusco",
-  enlaceChuspa: "https://www.lachuspaanuncios.com"
+  enlaceChuspa: "https://www.lachuspaanuncios.com",
+  igvPorcentaje: 18
 };
 
 export const INITIAL_REPARTIDORES: Repartidor[] = [
@@ -245,7 +258,13 @@ export const INITIAL_VENTAS: VentaRegistro[] = [
     pago: "Yape",
     repartidorId: "rep-1",
     repartidorNombre: "Edwin",
-    comprobante: "B001-000450"
+    comprobante: "B001-000450",
+    documento: "23984512",
+    tipoDoc: "DNI",
+    direccion: "Urb. Magisterio 1ra Etapa",
+    subtotal: 46.61,
+    igv: 8.39,
+    sunatEstado: "ACEPTADO"
   },
   {
     fecha: "Hoy, 11:15 a.m.",
@@ -255,7 +274,13 @@ export const INITIAL_VENTAS: VentaRegistro[] = [
     pago: "Efectivo",
     repartidorId: "rep-2",
     repartidorNombre: "Carlos",
-    comprobante: "B001-000451"
+    comprobante: "B001-000451",
+    documento: "45127890",
+    tipoDoc: "DNI",
+    direccion: "Av. De la Cultura 720",
+    subtotal: 42.37,
+    igv: 7.63,
+    sunatEstado: "ACEPTADO"
   },
   {
     fecha: "Hoy, 11:45 a.m.",
@@ -265,7 +290,13 @@ export const INITIAL_VENTAS: VentaRegistro[] = [
     pago: "Plin",
     repartidorId: "rep-1",
     repartidorNombre: "Edwin",
-    comprobante: "B001-000452"
+    comprobante: "B001-000452",
+    documento: "23891045",
+    tipoDoc: "DNI",
+    direccion: "Calle Garcilaso 210",
+    subtotal: 101.69,
+    igv: 18.31,
+    sunatEstado: "ACEPTADO"
   },
   {
     fecha: "Ayer, 04:20 p.m.",
@@ -275,6 +306,180 @@ export const INITIAL_VENTAS: VentaRegistro[] = [
     pago: "Crédito B2B",
     repartidorId: "rep-3",
     repartidorNombre: "Jorge",
-    comprobante: "F001-000123"
+    comprobante: "F001-000123",
+    documento: "20509876543",
+    tipoDoc: "RUC",
+    direccion: "Calle Maruri 220",
+    subtotal: 288.14,
+    igv: 51.86,
+    sunatEstado: "ACEPTADO"
   }
 ];
+
+export const INITIAL_CRM_PLANTILLAS: CRMPlantilla[] = [
+  // 1. MARKETING (cupones, lanzamientos, recordatorios)
+  {
+    id: "crm-mkt-1",
+    categoria: "MARKETING",
+    subtipo: "cupones",
+    titulo: "Cupón Descuento Recarga de Gas S/ 3.00",
+    descripcion: "Envía cupón promocional a clientes del mes para incentivar su recompra.",
+    icono: "📢",
+    plantillaTexto: "¡Hola {cliente}! 🦁 En LeoGas Cusco premiamos tu fidelidad. Presenta este mensaje y obtén S/ 3.00 de descuento en tu próximo Balón Moradito de 10kg con delivery express gratis a tu puerta. Válido hasta fin de mes. Pídelo al 950 727 212 o WhatsApp."
+  },
+  {
+    id: "crm-mkt-2",
+    categoria: "MARKETING",
+    subtipo: "lanzamientos",
+    titulo: "Lanzamiento Balón Premium Alto Rendimiento",
+    descripcion: "Notifica sobre nuevos balones con válvula ultra-sellada y mayor pureza GLP.",
+    icono: "🔥",
+    plantillaTexto: "¡Novedad para tu cocina, {cliente}! 🔥 Llegó el nuevo Balón LeoGas Premium de máxima llama azul y duración prolongada. Olvídate del hollín y ahorra hasta 15% más de gas. ¡Pídelo hoy y te lo llevamos en 15 minutos en Cusco!"
+  },
+  {
+    id: "crm-mkt-3",
+    categoria: "MARKETING",
+    subtipo: "recordatorios",
+    titulo: "Recordatorio Recurrente de Recarga (25 a 30 Días)",
+    descripcion: "Aviso preventivo para que el hogar o restaurante no se quede sin gas.",
+    icono: "⏰",
+    plantillaTexto: "Estimado(a) {cliente}, hace aproximadamente 25 días que llevamos tu último balón de gas. 🦁 Para que nunca te falte gas en casa a la hora de cocinar, ¿deseas que te programemos una recarga preventiva hoy? Responde 'SÍ' y un repartidor saldrá a tu domicilio."
+  },
+
+  // 2. UTILIDAD (actualización, confirmación, recordatorios de pago)
+  {
+    id: "crm-ut-1",
+    categoria: "UTILIDAD",
+    subtipo: "actualización",
+    titulo: "Actualización de Estado de Entrega en Ruta",
+    descripcion: "Informar al cliente que la unidad motorizada ya partió con su balón.",
+    icono: "🛵",
+    plantillaTexto: "¡Hola {cliente}! Tu pedido #{pedidoId} ya fue asignado al repartidor {repartidor}. Se encuentra en camino hacia {direccion}. Puedes rastrearlo en vivo en nuestro portal web o esperar nuestro aviso en puerta."
+  },
+  {
+    id: "crm-ut-2",
+    categoria: "UTILIDAD",
+    subtipo: "confirmación",
+    titulo: "Confirmación de Pedido Recibido y Registrado",
+    descripcion: "Confirmación inmediata de recepción de pedido para mayor tranquilidad.",
+    icono: "✅",
+    plantillaTexto: "¡Pedido confirmado! {cliente}, hemos registrado tu solicitud de {producto} por S/ {monto}. Forma de pago seleccionada: {pago}. Nuestro despacho en Cusco ya prepara tu balón sellado."
+  },
+  {
+    id: "crm-ut-3",
+    categoria: "UTILIDAD",
+    subtipo: "recordatorios de pago",
+    titulo: "Recordatorio de Pago de Crédito B2B",
+    descripcion: "Aviso cordial sobre fecha de vencimiento de facturas a cuenta 15/30 días.",
+    icono: "💳",
+    plantillaTexto: "Estimados amigos de {empresa}, un saludo cordial de LeoGas Cusco. Les recordamos que la Factura {factura} por el monto de S/ {monto} vence el próximo {fechaVencimiento}. Agradecemos coordinar la transferencia vía BCP / Interbank o con nuestro cobrador autorizado."
+  },
+
+  // 3. AUTENTICACIÓN (OTP, verificaciones)
+  {
+    id: "crm-auth-1",
+    categoria: "AUTENTICACION",
+    subtipo: "OTP",
+    titulo: "Código OTP de Seguridad para Pedido Web",
+    descripcion: "Código temporal para validar el número de teléfono del cliente.",
+    icono: "📱",
+    plantillaTexto: "LeoGas Cusco: Tu código de verificación de seguridad es: {otp}. No compartas este código con nadie. Validez de 5 minutos."
+  },
+  {
+    id: "crm-auth-2",
+    categoria: "AUTENTICACION",
+    subtipo: "verificaciones",
+    titulo: "Verificación de Dirección y Ubicación GPS",
+    descripcion: "Confirmación del punto exacto de entrega para el chofer.",
+    icono: "📍",
+    plantillaTexto: "¡Hola {cliente}! Para que nuestro chofer llegue con exactitud a {direccion}, por favor envíanos tu ubicación actual por WhatsApp tocando el ícono de clip > Ubicación en tiempo real. ¡Muchas gracias!"
+  },
+
+  // 4. SERVICIO (gratis durante 72hrs, garantía fugas)
+  {
+    id: "crm-serv-1",
+    categoria: "SERVICIO",
+    subtipo: "gratis durante 72hrs",
+    titulo: "Revisión Técnica de Fugas GRATIS (72 Horas)",
+    descripcion: "Inspección gratuita de válvula, manguera y seguridad tras la instalación.",
+    icono: "🛡️",
+    plantillaTexto: "Estimado(a) {cliente}, en LeoGas tu seguridad es primero. Recuerda que tu compra incluye REVISIÓN TÉCNICA DE FUGAS GRATIS durante las primeras 72 horas. Si notas olor a gas o llama amarilla, escríbenos de inmediato y un técnico acudirá sin costo alguno."
+  },
+  {
+    id: "crm-serv-2",
+    categoria: "SERVICIO",
+    subtipo: "garantía",
+    titulo: "Certificado de Garantía de Peso Exacto y Precinto",
+    descripcion: "Garantía de calidad del GLP Llamagas en Cusco.",
+    icono: "🦁",
+    plantillaTexto: "🦁 LeoGas Cusco Garantizado: Tu balón cuenta con precinto termocontraíble intacto de Llamagas y prueba hidráulica vigente. Cualquier consulta de instalación de regulador premium, estamos a tu servicio al 950 727 212."
+  }
+];
+
+export const INITIAL_COTIZACIONES: CotizacionCRM[] = [
+  {
+    id: "cot-101",
+    codigo: "COT-2026-001",
+    cliente: "Pollería El Tablón Cusco",
+    tipoDoc: "RUC",
+    numDoc: "20601234567",
+    telefono: "984 112 233",
+    direccion: "Av. El Sol 450, Wanchaq",
+    fechaEmision: "2026-11-03",
+    fechaProgramada: "2026-11-05",
+    horaProgramada: "09:00 a.m.",
+    items: [
+      { descripcion: "Balón Industrial 45kg GLP", cantidad: 4, precioUnitario: 175.0, total: 700.0 },
+      { descripcion: "Regulador de Presión Industrial Alta", cantidad: 1, precioUnitario: 65.0, total: 65.0 }
+    ],
+    subtotal: 648.31,
+    igv: 116.69,
+    total: 765.0,
+    estado: "programado",
+    repartidorAsignado: "Jorge",
+    notas: "Entrega a primera hora antes de encender hornos."
+  },
+  {
+    id: "cot-102",
+    codigo: "COT-2026-002",
+    cliente: "Chifa Hong Kong Imperial",
+    tipoDoc: "RUC",
+    numDoc: "20509876543",
+    telefono: "984 334 455",
+    direccion: "Calle Maruri 220, Cusco",
+    fechaEmision: "2026-11-02",
+    fechaProgramada: "2026-11-06",
+    horaProgramada: "10:30 a.m.",
+    items: [
+      { descripcion: "Balón Industrial 45kg GLP", cantidad: 3, precioUnitario: 170.0, total: 510.0 }
+    ],
+    subtotal: 432.20,
+    igv: 77.80,
+    total: 510.0,
+    estado: "aprobado",
+    repartidorAsignado: "Carlos",
+    notas: "Crédito a 30 días según convenio B2B."
+  },
+  {
+    id: "cot-103",
+    codigo: "COT-2026-003",
+    cliente: "Condominio Huancaro Residencial",
+    tipoDoc: "DNI",
+    numDoc: "45892110",
+    telefono: "950 889 123",
+    direccion: "Urb. Huancaro Mz D Lote 12",
+    fechaEmision: "2026-11-03",
+    fechaProgramada: "2026-11-04",
+    horaProgramada: "03:00 p.m.",
+    items: [
+      { descripcion: "Balón LeoGas 10kg Normal", cantidad: 6, precioUnitario: 50.0, total: 300.0 },
+      { descripcion: "Válvula Premium Anti-Fugas", cantidad: 2, precioUnitario: 35.0, total: 70.0 }
+    ],
+    subtotal: 313.56,
+    igv: 56.44,
+    total: 370.0,
+    estado: "cotizado",
+    notas: "Vecinos agrupados para compra comunitaria con descuento."
+  }
+];
+

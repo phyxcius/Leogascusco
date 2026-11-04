@@ -34,6 +34,7 @@ export interface NegocioIdentidad {
   telFijo?: string;
   direccion: string;
   enlaceChuspa: string;
+  igvPorcentaje: number; // default 18
 }
 
 export interface Repartidor {
@@ -44,6 +45,7 @@ export interface Repartidor {
   online: boolean;
   lat: number;
   lng: number;
+  vehiculo?: string;
   etapaSecuencia?: number; // 1: En camino, 2: En puerta, 3: Entregado
   ultimaActualizacionSecuencia?: string;
 }
@@ -106,5 +108,49 @@ export interface VentaRegistro {
   pago: string;
   repartidorId?: string;
   repartidorNombre?: string;
-  comprobante?: string;
+  comprobante: string;
+  documento?: string;
+  tipoDoc?: 'DNI' | 'RUC';
+  direccion?: string;
+  subtotal?: number;
+  igv?: number;
+  sunatEstado?: 'ACEPTADO' | 'PENDIENTE';
+}
+
+// CRM Category Types based on screenshot
+export type CRMCategoria = 'MARKETING' | 'UTILIDAD' | 'AUTENTICACION' | 'SERVICIO';
+
+export interface CRMPlantilla {
+  id: string;
+  categoria: CRMCategoria;
+  titulo: string;
+  subtipo: string;
+  descripcion: string;
+  icono: string;
+  plantillaTexto: string;
+}
+
+export interface CotizacionCRM {
+  id: string;
+  codigo: string;
+  cliente: string;
+  tipoDoc: 'DNI' | 'RUC';
+  numDoc: string;
+  telefono: string;
+  direccion: string;
+  fechaEmision: string;
+  fechaProgramada: string;
+  horaProgramada?: string;
+  items: {
+    descripcion: string;
+    cantidad: number;
+    precioUnitario: number;
+    total: number;
+  }[];
+  subtotal: number;
+  igv: number;
+  total: number;
+  estado: 'cotizado' | 'aprobado' | 'programado' | 'facturado';
+  repartidorAsignado?: string;
+  notas?: string;
 }

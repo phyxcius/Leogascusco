@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { playChimeSound, playSuccessChime } from '../utils/audio';
 
 export const AlertPopups: React.FC = () => {
   const { alertModal, closeAlertModal, activeCustomerOrder, negocio } = useApp();
+
+  useEffect(() => {
+    if (alertModal === 'completado') {
+      playSuccessChime();
+    } else if (alertModal) {
+      playChimeSound();
+    }
+  }, [alertModal]);
 
   if (!alertModal) return null;
 
@@ -10,8 +19,8 @@ export const AlertPopups: React.FC = () => {
   const nombreNegocio = negocio.nombre || 'LeoGas Cusco';
 
   return (
-    <div className="fixed inset-0 z-[4000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white max-w-sm w-full rounded-3xl p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200 border-2 border-purple-200">
+    <div className="fixed inset-0 z-[9999999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white max-w-sm w-full rounded-3xl p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200 border-2 border-purple-300">
         {alertModal === 'en_camino' && (
           <div>
             <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl mx-auto mb-3 shadow-inner animate-bounce">

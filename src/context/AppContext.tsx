@@ -9,7 +9,9 @@ import {
   ClienteVIP,
   VentaRegistro,
   Pedido,
-  ItemPedido
+  ItemPedido,
+  CRMPlantilla,
+  CotizacionCRM
 } from '../types/index';
 import {
   INITIAL_PRODUCTOS,
@@ -20,7 +22,9 @@ import {
   INITIAL_EMPRESAS_B2B,
   INITIAL_CLIENTES_VIP,
   INITIAL_PEDIDOS,
-  INITIAL_VENTAS
+  INITIAL_VENTAS,
+  INITIAL_CRM_PLANTILLAS,
+  INITIAL_COTIZACIONES
 } from '../data/initialData';
 import { playChimeSound, playSuccessChime } from '../utils/audio';
 
@@ -93,6 +97,14 @@ interface AppContextType {
   alertModal: 'en_camino' | 'en_puerta' | 'completado' | null;
   closeAlertModal: () => void;
 
+  // CRM & Cotizaciones
+  crmPlantillas: CRMPlantilla[];
+  updateCRMPlantilla: (p: CRMPlantilla) => void;
+  cotizaciones: CotizacionCRM[];
+  addCotizacion: (c: CotizacionCRM) => void;
+  updateCotizacion: (c: CotizacionCRM) => void;
+  deleteCotizacion: (id: string) => void;
+
   // Authentication
   isAdminLogged: boolean;
   adminLogin: (u: string, p: string) => boolean;
@@ -139,12 +151,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [productos, setProductos] = useState<Producto[]>(() => getStored('leogas_productos', INITIAL_PRODUCTOS));
   const [accesorios, setAccesorios] = useState<Accesorio[]>(() => getStored('leogas_accesorios', INITIAL_ACCESORIOS));
   const [telefonos, setTelefonos] = useState<TelefonosConfig>(() => getStored('leogas_telefonos', INITIAL_TELEFONOS));
-  const [negocio, setNegocio] = useState<NegocioIdentidad>(() => getStored('leogas_negocio', INITIAL_NEGOCIO));
+  const [negocio, setNegocio] = useState<NegocioIdentidad>(() => {
+    const stored = getStored<NegocioIdentidad>('leogas_negocio', INITIAL_NEGOCIO);
+    return { ...INITIAL_NEGOCIO, ...stored, igvPorcentaje: stored.igvPorcentaje || 18 };
+  });
   const [repartidores, setRepartidores] = useState<Repartidor[]>(() => getStored('leogas_repartidores', INITIAL_REPARTIDORES));
   const [empresasB2B, setEmpresasB2B] = useState<EmpresaB2B[]>(() => getStored('leogas_empresas_b2b', INITIAL_EMPRESAS_B2B));
   const [clientesVIP, setClientesVIP] = useState<ClienteVIP[]>(() => getStored('leogas_clientes_vip', INITIAL_CLIENTES_VIP));
   const [pedidos, setPedidos] = useState<Pedido[]>(() => getStored('leogas_pedidos', INITIAL_PEDIDOS));
   const [ventas, setVentas] = useState<VentaRegistro[]>(() => getStored('leogas_ventas', INITIAL_VENTAS));
+  const [crmPlantillas, setCrmPlantillas] = useState<CRMPlantilla[]>(() => getStored('leogas_crm_plantillas', INITIAL_CRM_PLANTILLAS));
+  const [cotizaciones, setCotizaciones] = useState<CotizacionCRM[]>(() => getStored('leogas_cotizaciones', INITIAL_COTIZACIONES));
 
   const [carrito, setCarrito] = useState<Record<string, ItemPedido>>({});
   const [activeCustomerOrderId, setActiveCustomerOrderId] = useState<string | null>(() => localStorage.getItem('leogas_mi_pedido_id'));
@@ -167,6 +184,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         if (e.key === 'leogas_empresas_b2b') setEmpresasB2B(JSON.parse(e.newValue));
         if (e.key === 'leogas_clientes_vip') setClientesVIP(JSON.parse(e.newValue));
         if (e.key === 'leogas_ventas') setVentas(JSON.parse(e.newValue));
+        if (e.key === 'leogas_crm_plantillas') setCrmPlantillas(JSON.parse(e.newValue));
+        if (e.key === 'leogas_cotizaciones') setCotizaciones(JSON.parse(e.newValue));
         if (e.key === 'leogas_mi_pedido_id') setActiveCustomerOrderId(e.newValue);
         if (e.key === 'leogas_admin_logged') setIsAdminLogged(e.newValue === 'true');
         if (e.key === 'leogas_rep_id') setCurrentRepartidorId(e.newValue);
@@ -228,6 +247,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   useEffect(() => { localStorage.setItem('leogas_clientes_vip', JSON.stringify(clientesVIP)); }, [clientesVIP]);
   useEffect(() => { localStorage.setItem('leogas_pedidos', JSON.stringify(pedidos)); }, [pedidos]);
   useEffect(() => { localStorage.setItem('leogas_ventas', JSON.stringify(ventas)); }, [ventas]);
+  useEffect(() => { localStorage.setItem('leogas_crm_plantillas', JSON.stringify(crmPlantillas)); }, [crmPlantillas]);
+  useEffect(() => { localStorage.setItem('leogas_cotizaciones', JSON.stringify(cotizaciones)); }, [cotizaciones]);
 
   // Active customer order
   const activeCustomerOrder = activeCustomerOrderId
@@ -340,6 +361,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   };
   const deleteClienteVIP = (id: string) => {
     setClientesVIP(prev => prev.filter(c => c.id !== id));
+  };
+
+  // CRM & Cotizaciones CRUD
+  const updateCRMPlantilla = (p: CRMPlantilla) => {
+    setCrmPlantillas(prev => prev.map(item => item.id === p.id ? p : item));
+  };
+
+  const addCotizacion = (c: CotizacionCRM) => {
+    setCotizaciones(prev => [c, ...prev]);
+  };
+
+  const updateCotizacion = (c: CotizacionCRM) => {
+    setCotizaciones(prev => prev.map(item => item.id === c.id ? c : item));
+  };
+
+  const deleteCotizacion = (id: string) => {
+    setCotizaciones(prev => prev.filter(item => item.id !== id));
   };
 
   // Orders
@@ -572,6 +610,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         setActiveCustomerOrderId,
         alertModal,
         closeAlertModal,
+        crmPlantillas,
+        updateCRMPlantilla,
+        cotizaciones,
+        addCotizacion,
+        updateCotizacion,
+        deleteCotizacion,
         isAdminLogged,
         adminLogin,
         adminLogout,
