@@ -49,3 +49,24 @@ export function playSuccessChime() {
     // Ignore
   }
 }
+
+export function speakVoice(text: string) {
+  try {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-ES';
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      const voices = window.speechSynthesis.getVoices();
+      const esVoice = voices.find((v) => v.lang.startsWith('es'));
+      if (esVoice) {
+        utterance.voice = esVoice;
+      }
+      window.speechSynthesis.speak(utterance);
+    }
+  } catch {
+    // Ignore speech errors
+  }
+}
+

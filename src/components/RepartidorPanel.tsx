@@ -20,11 +20,14 @@ import {
   UserCheck,
   Building2,
   ShieldCheck,
+  Volume2,
+  Play,
+  Square,
   X
 } from 'lucide-react';
 import L from 'leaflet';
 import { BrandBadge } from './BrandBadge';
-import { playChimeSound, playSuccessChime } from '../utils/audio';
+import { playChimeSound, playSuccessChime, speakVoice } from '../utils/audio';
 import { getAssetUrl } from '../utils/assets';
 import { Pedido, VentaRegistro } from '../types/index';
 
@@ -61,7 +64,18 @@ export const RepartidorPanel: React.FC = () => {
   const repMapContainerRef = useRef<HTMLDivElement>(null);
   const repMapInstanceRef = useRef<L.Map | null>(null);
   const routeLineRef = useRef<L.Polyline | null>(null);
+  const routeCasingRef = useRef<L.Polyline | null>(null);
   const driverMarkerRef = useRef<L.Marker | null>(null);
+  const navIntervalRef = useRef<any>(null);
+
+  // Street Cartography & Turn-by-Turn Navigation State
+  const [streetWaypoints, setStreetWaypoints] = useState<[number, number][]>([]);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navStepIndex, setNavStepIndex] = useState(0);
+  const [navDistanceKm, setNavDistanceKm] = useState(2.4);
+  const [navEtaMin, setNavEtaMin] = useState(12);
+  const [navInstruction, setNavInstruction] = useState('⬆️ Iniciar ruta por calles de Cusco');
+  const [hasArrived, setHasArrived] = useState(false);
 
   // Filter assigned orders
   const myAssignedOrders = useMemo(() => {
@@ -114,7 +128,79 @@ export const RepartidorPanel: React.FC = () => {
     }
   }, [activeOrder?.clienteSaliendo, activeOrder?.id, dismissedClienteSaliendo]);
 
-  // Leaflet Map with Google Maps streets tiles
+  // Generate realistic Cusco street network waypoints (fallback if offline/OSRM slow)
+  const generateCuscoStreetRoute = (startLat: number, startLng: number, destLat: number, destLng: number): [number, number][] => {
+    const pts: [number, number][] = [[startLat, startLng]];
+    // Real street intersections in Cusco: Av. El Sol, Tullumayo, Garcilaso
+    pts.push([-13.5235, -71.9745]); // Av. El Sol & Almagro
+    pts.push([-13.5242, -71.9725]); // Av. Tullumayo
+    pts.push([-13.5265, -71.9705]); // Cruce Av. Garcilaso
+    if (destLat < -13.528 || destLng > -71.968) {
+      pts.push([-13.5290, -71.9675]); // Av. Huayruropata
+    }
+    pts.push([destLat, (-71.9705 + destLng) / 2]);
+    pts.push([destLat, destLng]);
+
+    // Subdivide segments into smooth 35 steps
+    const interpolated: [number, number][] = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [lat1, lng1] = pts[i];
+      const [lat2, lng2] = pts[i + 1];
+      const steps = 6;
+      for (let s = 0; s < steps; s++) {
+        const frac = s / steps;
+        interpolated.push([lat1 + (lat2 - lat1) * frac, lng1 + (lng2 - lng1) * frac]);
+      }
+    }
+    interpolated.push([destLat, destLng]);
+    return interpolated;
+  };
+
+  // Fetch real street-by-street cartography from OSRM or Cusco street fallback
+  useEffect(() => {
+    if (!activeOrder || !currentRepartidor) return;
+    const startLat = currentRepartidor.lat || -13.525;
+    const startLng = currentRepartidor.lng || -71.975;
+    const destLat = activeOrder.lat || -13.535;
+    const destLng = activeOrder.lng || -71.972;
+
+    const fallback = generateCuscoStreetRoute(startLat, startLng, destLat, destLng);
+    setStreetWaypoints(fallback);
+    setNavStepIndex(0);
+    setHasArrived(false);
+
+    let active = true;
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${destLng},${destLat}?overview=full&geometries=geojson`;
+    fetch(osrmUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error('OSRM error');
+        return res.json();
+      })
+      .then((data) => {
+        if (!active) return;
+        if (data.routes && data.routes[0]?.geometry?.coordinates?.length > 2) {
+          const coords: [number, number][] = data.routes[0].geometry.coordinates.map(
+            (c: [number, number]) => [c[1], c[0]]
+          );
+          setStreetWaypoints(coords);
+          if (data.routes[0].distance) {
+            setNavDistanceKm(parseFloat((data.routes[0].distance / 1000).toFixed(1)));
+          }
+          if (data.routes[0].duration) {
+            setNavEtaMin(Math.max(1, Math.round(data.routes[0].duration / 60)));
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback already assigned
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [activeOrder?.id, currentRepartidor?.id]);
+
+  // Leaflet Map with Google Maps streets tiles & Street Cartography Route
   useEffect(() => {
     if (!currentRepartidor || activeTab !== 'ruta') return;
     if (!repMapContainerRef.current) return;
@@ -129,6 +215,7 @@ export const RepartidorPanel: React.FC = () => {
       repMapInstanceRef.current = null;
       driverMarkerRef.current = null;
       routeLineRef.current = null;
+      routeCasingRef.current = null;
     }
 
     if ((repMapContainerRef.current as any)._leaflet_id) {
@@ -187,7 +274,7 @@ export const RepartidorPanel: React.FC = () => {
       .addTo(map)
       .bindPopup(`<b>🛵 Mi Posición: ${currentRepartidor.nombre}</b>`);
 
-    // Add Destination Marker (Point B) & Polyline if order active
+    // Add Destination Marker (Point B) & Real Street Cartography Polyline if order active
     if (activeOrder) {
       const destIcon = L.divIcon({
         html: `
@@ -203,20 +290,35 @@ export const RepartidorPanel: React.FC = () => {
         .addTo(map)
         .bindPopup(`<b>Destino B: ${activeOrder.cliente}</b><br>${activeOrder.direccion || 'Cusco'}`);
 
-      // Polyline route
-      routeLineRef.current = L.polyline(
-        [
-          [-13.525, -71.975],
-          [driverLat, driverLng],
-          [destLat, destLng]
-        ],
-        { color: '#7e22ce', weight: 5, opacity: 0.85, dashArray: '8, 8' }
-      ).addTo(map);
+      // Use street cartography waypoints (Google Maps / Waze style following real roads)
+      const routePoints: L.LatLngTuple[] = (
+        streetWaypoints.length > 1
+          ? streetWaypoints
+          : [
+              [driverLat, driverLng],
+              [destLat, destLng]
+            ]
+      ) as L.LatLngTuple[];
 
-      map.fitBounds([
-        [driverLat, driverLng],
-        [destLat, destLng]
-      ], { padding: [50, 50] });
+      // 1. Dark casing outer road border
+      routeCasingRef.current = L.polyline(routePoints, {
+        color: '#2e1065',
+        weight: 9,
+        opacity: 0.75,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(map);
+
+      // 2. Vibrant neon purple street path
+      routeLineRef.current = L.polyline(routePoints, {
+        color: '#9333ea',
+        weight: 5,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round'
+      }).addTo(map);
+
+      map.fitBounds(L.latLngBounds(routePoints), { padding: [40, 40] });
     }
 
     repMapInstanceRef.current = map;
@@ -238,8 +340,80 @@ export const RepartidorPanel: React.FC = () => {
       }
       driverMarkerRef.current = null;
       routeLineRef.current = null;
+      routeCasingRef.current = null;
     };
-  }, [currentRepartidor?.id, activeTab, activeOrder?.id]);
+  }, [currentRepartidor?.id, activeTab, activeOrder?.id, streetWaypoints]);
+
+  // Turn-by-Turn Navigation Interval & Audio Announcement on Arrival
+  useEffect(() => {
+    if (!isNavigating) {
+      if (navIntervalRef.current) clearInterval(navIntervalRef.current);
+      return;
+    }
+
+    if (streetWaypoints.length < 2) return;
+
+    navIntervalRef.current = setInterval(() => {
+      setNavStepIndex((prev) => {
+        const nextIdx = prev + 1;
+        if (nextIdx >= streetWaypoints.length) {
+          // Reached destination!
+          clearInterval(navIntervalRef.current);
+          setIsNavigating(false);
+          setHasArrived(true);
+          playSuccessChime();
+          speakVoice("Ha llegado a su destino. Proceda a avisar al cliente.");
+          return streetWaypoints.length - 1;
+        }
+
+        const currentCoord = streetWaypoints[nextIdx];
+        if (driverMarkerRef.current) {
+          driverMarkerRef.current.setLatLng(currentCoord);
+        }
+        if (repMapInstanceRef.current && nextIdx % 2 === 0) {
+          repMapInstanceRef.current.panTo(currentCoord, { animate: true });
+        }
+
+        // Calculate progress & ETA
+        const pctRemaining = 1 - nextIdx / streetWaypoints.length;
+        const km = (2.4 * pctRemaining).toFixed(1);
+        const mins = Math.max(1, Math.round(12 * pctRemaining));
+        setNavDistanceKm(parseFloat(km));
+        setNavEtaMin(mins);
+
+        // Turn instruction update
+        if (pctRemaining > 0.75) {
+          setNavInstruction('⬆️ Continúe recto por Av. El Sol (350 m)');
+        } else if (pctRemaining > 0.45) {
+          setNavInstruction('↗️ Gire a la derecha hacia Av. Tullumayo (500 m)');
+        } else if (pctRemaining > 0.15) {
+          setNavInstruction(`📍 Acercándose a ${activeOrder?.direccion || 'domicilio'} (150 m)`);
+        } else {
+          setNavInstruction(`🏁 Llegando a destino: ${activeOrder?.cliente}`);
+        }
+
+        return nextIdx;
+      });
+    }, 600);
+
+    return () => {
+      if (navIntervalRef.current) clearInterval(navIntervalRef.current);
+    };
+  }, [isNavigating, streetWaypoints, activeOrder?.cliente, activeOrder?.direccion]);
+
+  // Start / Stop Navigation Handler
+  const handleToggleNavigation = () => {
+    if (isNavigating) {
+      setIsNavigating(false);
+      return;
+    }
+    if (!activeOrder) return;
+    setIsNavigating(true);
+    setHasArrived(false);
+    setNavStepIndex(0);
+    playChimeSound();
+    speakVoice(`Iniciando navegación guiada hacia el cliente ${activeOrder.cliente}. Siga por la ruta trazada en las calles de Cusco.`);
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -270,22 +444,27 @@ export const RepartidorPanel: React.FC = () => {
     });
   };
 
-  // Advance step sequence
+  // Advance step sequence & Voice Audio announcement
   const handleAdvanceStep = () => {
     if (!activeOrder) return;
     advancePedidoEtapa(activeOrder.id);
     if (activeOrder.etapa === 0) {
       // Salió en camino
       playChimeSound();
+      speakVoice(`Iniciando ruta hacia el domicilio de ${activeOrder.cliente}.`);
     } else if (activeOrder.etapa === 1) {
       // Llegó a la puerta
       playChimeSound();
+      setHasArrived(true);
+      speakVoice("Ha llegado a su destino. Proceda a avisar al cliente.");
     } else if (activeOrder.etapa === 2) {
       // Entregado
       playSuccessChime();
+      speakVoice("Balón entregado con éxito. Gracias por su servicio.");
     } else if (activeOrder.etapa >= 3) {
       // Finalizado en base
       playSuccessChime();
+      speakVoice("Ruta finalizada. Regresando a la base.");
       alert('✔ Pedido finalizado y registrado en caja. Has vuelto a estar libre en base.');
     }
   };
@@ -565,14 +744,38 @@ export const RepartidorPanel: React.FC = () => {
                     style={{ minHeight: '300px' }}
                   />
 
-                  {/* Floating Top Controls (ETA + GPS buttons) */}
-                  <div className="absolute top-3 left-3 right-3 z-[1000] flex items-center justify-between pointer-events-none">
-                    <div className="bg-purple-950/90 backdrop-blur-md text-white px-3.5 py-1.5 rounded-full shadow-lg border border-purple-700 pointer-events-auto flex items-center gap-2 text-xs font-black">
+                  {/* Floating Top Controls (ETA + Iniciar + GPS buttons) */}
+                  <div className="absolute top-3 left-3 right-3 z-[1000] flex items-center justify-between pointer-events-none gap-1.5 flex-wrap">
+                    <div className="bg-purple-950/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full shadow-lg border border-purple-700 pointer-events-auto flex items-center gap-1.5 text-xs font-black">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                      <span>⏱️ 10 - 15 min (2.4 km)</span>
+                      <span>⏱️ {navEtaMin} min ({navDistanceKm} km)</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 pointer-events-auto">
+                      {/* BOTÓN INICIAR NAVEGACIÓN EN CALLES */}
+                      <button
+                        type="button"
+                        onClick={handleToggleNavigation}
+                        className={`px-3 py-1.5 rounded-full shadow-lg text-xs font-black flex items-center gap-1.5 cursor-pointer transition border pointer-events-auto ${
+                          isNavigating
+                            ? 'bg-red-600 hover:bg-red-700 text-white border-red-400 animate-pulse'
+                            : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-400'
+                        }`}
+                        title="Iniciar navegación por calles con agente de voz"
+                      >
+                        {isNavigating ? (
+                          <>
+                            <Square className="w-3.5 h-3.5 text-white fill-white" />
+                            <span>Detener</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
+                            <span>Iniciar</span>
+                          </>
+                        )}
+                      </button>
+
                       <button
                         type="button"
                         onClick={handleCenterOnVehicle}
@@ -598,6 +801,59 @@ export const RepartidorPanel: React.FC = () => {
                       </a>
                     </div>
                   </div>
+
+                  {/* WAZE / GOOGLE MAPS TURN-BY-TURN TOP BANNER */}
+                  {isNavigating && (
+                    <div className="absolute top-14 left-3 right-3 z-[1000] bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-2xl border-2 border-emerald-500 shadow-2xl animate-in slide-in-from-top duration-200 pointer-events-auto">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-lg flex-shrink-0 animate-pulse">
+                            🧭
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-black text-white truncate">
+                              {navInstruction}
+                            </p>
+                            <p className="text-[10px] text-emerald-300 font-bold">
+                              Restante: {navDistanceKm} km • {navEtaMin} min • Siguiendo calles en Cusco
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-[10px] font-black uppercase text-yellow-300 bg-purple-950 px-2 py-0.5 rounded-full border border-purple-700">
+                            En Ruta GPS
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ARRIVAL NOTICE BANNER (AUDIO ANNOUNCEMENT) */}
+                  {hasArrived && (
+                    <div className="absolute top-14 left-3 right-3 z-[1000] bg-emerald-900/95 backdrop-blur-md text-white p-3.5 rounded-2xl border-2 border-yellow-400 shadow-2xl animate-in bounce-in duration-300 pointer-events-auto">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-2xl animate-bounce">📍</span>
+                          <div>
+                            <p className="text-xs font-black text-yellow-300 flex items-center gap-1.5">
+                              <Volume2 className="w-3.5 h-3.5 text-yellow-300" />
+                              <span>¡Ha llegado a su destino!</span>
+                            </p>
+                            <p className="text-[10px] text-emerald-100 mt-0.5">
+                              Presione abajo <strong>"Ya estoy en tu Puerta"</strong> para avisar a {activeOrder.cliente}.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setHasArrived(false)}
+                          className="text-white hover:text-slate-300 p-1 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* BOTTOM HALF: Floating Delivery Card */}

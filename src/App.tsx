@@ -113,7 +113,7 @@ const MainApp: React.FC = () => {
 
           <TicketModal isOpen={isTicketOpen} onClose={() => setIsTicketOpen(false)} />
 
-          <AlertPopups />
+          <AlertPopups onOpenTicket={() => setIsTicketOpen(true)} />
 
           {/* Footer */}
           <footer className="bg-slate-900 text-slate-400 text-xs py-8 px-4 border-t border-slate-800 no-print">

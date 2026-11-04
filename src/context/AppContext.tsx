@@ -94,7 +94,8 @@ interface AppContextType {
   setActiveCustomerOrderId: (id: string | null) => void;
 
   // Alert Modals
-  alertModal: 'en_camino' | 'en_puerta' | 'completado' | null;
+  alertModal: 'en_camino' | 'en_puerta' | 'completado' | 'asignando' | null;
+  openAlertModal: (type?: 'en_camino' | 'en_puerta' | 'completado' | 'asignando') => void;
   closeAlertModal: () => void;
   notificarClienteSaliendo: (pedidoId: string) => void;
 
@@ -166,7 +167,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
   const [carrito, setCarrito] = useState<Record<string, ItemPedido>>({});
   const [activeCustomerOrderId, setActiveCustomerOrderId] = useState<string | null>(() => localStorage.getItem('leogas_mi_pedido_id'));
-  const [alertModal, setAlertModal] = useState<'en_camino' | 'en_puerta' | 'completado' | null>(null);
+  const [alertModal, setAlertModal] = useState<'en_camino' | 'en_puerta' | 'completado' | 'asignando' | null>(null);
 
   const [isAdminLogged, setIsAdminLogged] = useState<boolean>(() => localStorage.getItem('leogas_admin_logged') === 'true');
   const [currentRepartidorId, setCurrentRepartidorId] = useState<string | null>(() => localStorage.getItem('leogas_rep_id'));
@@ -403,6 +404,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setActiveCustomerOrderId(id);
     localStorage.setItem('leogas_mi_pedido_id', id);
     localStorage.setItem(`leogas_last_seen_stage_${id}`, '0');
+    setAlertModal('asignando');
 
     playChimeSound();
     return id;
@@ -592,6 +594,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     localStorage.removeItem('leogas_rep_id');
   };
 
+  const openAlertModal = (type?: 'en_camino' | 'en_puerta' | 'completado' | 'asignando') => {
+    if (type) {
+      setAlertModal(type);
+      return;
+    }
+    if (!activeCustomerOrder) {
+      setAlertModal('asignando');
+      return;
+    }
+    if (activeCustomerOrder.estado === 'completado' || activeCustomerOrder.etapa >= 3) {
+      setAlertModal('completado');
+    } else if (activeCustomerOrder.etapa === 2) {
+      setAlertModal('en_puerta');
+    } else if (activeCustomerOrder.etapa === 1) {
+      setAlertModal('en_camino');
+    } else {
+      setAlertModal('asignando');
+    }
+  };
+
   const closeAlertModal = () => setAlertModal(null);
 
   return (
@@ -643,6 +665,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         activeCustomerOrder,
         setActiveCustomerOrderId,
         alertModal,
+        openAlertModal,
         closeAlertModal,
         notificarClienteSaliendo,
         crmPlantillas,
