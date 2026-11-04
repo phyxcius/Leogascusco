@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { playChimeSound, playSuccessChime } from '../utils/audio';
 
 export const AlertPopups: React.FC = () => {
-  const { alertModal, closeAlertModal, activeCustomerOrder, negocio } = useApp();
+  const { alertModal, closeAlertModal, notificarClienteSaliendo, activeCustomerOrder, negocio } = useApp();
 
   useEffect(() => {
     if (alertModal === 'completado') {
@@ -67,7 +67,13 @@ export const AlertPopups: React.FC = () => {
             </p>
             <button
               type="button"
-              onClick={closeAlertModal}
+              onClick={() => {
+                if (activeCustomerOrder?.id) {
+                  notificarClienteSaliendo(activeCustomerOrder.id);
+                } else {
+                  closeAlertModal();
+                }
+              }}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-sm transition cursor-pointer shadow-md"
             >
               Salir a Recibir ✔️

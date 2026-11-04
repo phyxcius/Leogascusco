@@ -15,7 +15,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({ onOpenCart }) =>
   };
 
   return (
-    <section id="menu" className="max-w-6xl mx-auto my-8 px-4">
+    <section id="catalogo" className="max-w-6xl mx-auto my-8 px-4 scroll-mt-24">
       {/* 1. Balones de Gas */}
       <div className="mb-10">
         <div className="flex items-center justify-between gap-3 mb-6 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">

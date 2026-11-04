@@ -96,6 +96,7 @@ interface AppContextType {
   // Alert Modals
   alertModal: 'en_camino' | 'en_puerta' | 'completado' | null;
   closeAlertModal: () => void;
+  notificarClienteSaliendo: (pedidoId: string) => void;
 
   // CRM & Cotizaciones
   crmPlantillas: CRMPlantilla[];
@@ -262,7 +263,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     const lastSeen = localStorage.getItem(stageKey);
     const currentEtapa = activeCustomerOrder.etapa;
 
-    if (activeCustomerOrder.estado === 'completado' && lastSeen !== '3') {
+    if ((activeCustomerOrder.estado === 'completado' || currentEtapa === 3) && lastSeen !== '3') {
       localStorage.setItem(stageKey, '3');
       playSuccessChime();
       setAlertModal('completado');
@@ -431,16 +432,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     playChimeSound();
   };
 
+  const notificarClienteSaliendo = (pedidoId: string) => {
+    const hora = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    setPedidos(prev => prev.map(p => {
+      if (p.id === pedidoId) {
+        return {
+          ...p,
+          clienteSaliendo: true,
+          clienteSaliendoHora: hora
+        };
+      }
+      return p;
+    }));
+    try {
+      localStorage.setItem('leogas_cliente_saliendo_notif', JSON.stringify({ pedidoId, timestamp: Date.now() }));
+    } catch {}
+    closeAlertModal();
+  };
+
   const advancePedidoEtapa = (pedidoId: string) => {
     const hora = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
     setPedidos(prev => prev.map(p => {
       if (p.id === pedidoId) {
         const nextEtapa = (p.etapa || 0) + 1;
-        if (nextEtapa >= 3) {
-          // Completed
+        if (nextEtapa === 1) {
+          // 1. Salir en camino (Cliente recibe notificación en camino)
+          return {
+            ...p,
+            etapa: 1,
+            horaActualizacion: hora
+          };
+        } else if (nextEtapa === 2) {
+          // 2. Ya estoy en tu puerta (Cliente recibe notificación en puerta)
+          return {
+            ...p,
+            etapa: 2,
+            horaActualizacion: hora
+          };
+        } else if (nextEtapa === 3) {
+          // 3. Entregado (Cliente recibe notificación de agradecimiento)
+          return {
+            ...p,
+            etapa: 3,
+            horaActualizacion: hora
+          };
+        } else {
+          // 4. Finalizado en Base (Orden completada y registrada en ventas)
           const totalNum = typeof p.montoCobro === 'number' ? p.montoCobro : parseFloat(p.montoCobro) || 0;
           addVenta({
-            fecha: `Hoy, ${hora}`,
+            fecha: new Date().toISOString().split('T')[0],
             cliente: p.cliente,
             productos: p.tipoBalon,
             total: totalNum,
@@ -451,14 +491,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
           });
           return {
             ...p,
-            etapa: 3,
+            etapa: 4,
             estado: 'completado',
-            horaActualizacion: hora
-          };
-        } else {
-          return {
-            ...p,
-            etapa: nextEtapa,
             horaActualizacion: hora
           };
         }
@@ -610,6 +644,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         setActiveCustomerOrderId,
         alertModal,
         closeAlertModal,
+        notificarClienteSaliendo,
         crmPlantillas,
         updateCRMPlantilla,
         cotizaciones,

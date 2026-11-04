@@ -72,7 +72,9 @@ export interface Pedido {
   lat?: number;
   lng?: number;
   estado: 'pendiente_asignacion' | 'en_proceso' | 'completado' | 'cancelado';
-  etapa: number; // 0: asignado, 1: en camino, 2: en puerta, 3: completado
+  etapa: number; // 0: asignado, 1: en camino, 2: en puerta, 3: entregado, 4: finalizado en base
+  clienteSaliendo?: boolean;
+  clienteSaliendoHora?: string;
   timestamp: number;
   hora: string;
   fecha?: string;

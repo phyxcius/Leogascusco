@@ -25,6 +25,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart, onOpenB2B }) => {
     }
   };
 
+  const handleScrollToCatalogo = () => {
+    const el = document.getElementById('catalogo') || document.getElementById('menu');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.location.hash = '#catalogo';
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
@@ -53,10 +62,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart, onOpenB2B }) => {
             <Bell className="w-4 h-4 text-purple-700" />
           </button>
 
-          {/* Cart Button */}
+          {/* Pedir Gas Anchor Button (Direct Scroll to Catalog, NO popup) */}
           <button
             type="button"
-            onClick={onOpenCart}
+            onClick={handleScrollToCatalogo}
             className="bg-purple-800 hover:bg-purple-900 text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-2 shadow-sm transition cursor-pointer"
           >
             <div className="relative">

@@ -97,49 +97,53 @@ const MainApp: React.FC = () => {
         {activePortal === 'admin' && <AdminPanel />}
       </div>
 
-      {/* Modals & Popups */}
-      <CartModal
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        onOpenTicket={() => {
-          setIsCartOpen(false);
-          setIsTicketOpen(true);
-        }}
-      />
+      {/* Client Modals & Popups (Strictly scoped to client portal) */}
+      {activePortal === 'cliente' && (
+        <>
+          <CartModal
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            onOpenTicket={() => {
+              setIsCartOpen(false);
+              setIsTicketOpen(true);
+            }}
+          />
 
-      <B2BModal isOpen={isB2BOpen} onClose={() => setIsB2BOpen(false)} />
+          <B2BModal isOpen={isB2BOpen} onClose={() => setIsB2BOpen(false)} />
 
-      <TicketModal isOpen={isTicketOpen} onClose={() => setIsTicketOpen(false)} />
+          <TicketModal isOpen={isTicketOpen} onClose={() => setIsTicketOpen(false)} />
 
-      <AlertPopups />
+          <AlertPopups />
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 text-xs py-8 px-4 border-t border-slate-800 no-print">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🦁</span>
-            <div>
-              <p className="font-bold text-white">{negocio.nombre} • {negocio.slogan}</p>
-              <p className="text-[11px] text-slate-500">
-                Balones de Gas GLP a Domicilio y Empresas B2B en {negocio.direccion || 'todo Cusco'}
-              </p>
+          {/* Footer */}
+          <footer className="bg-slate-900 text-slate-400 text-xs py-8 px-4 border-t border-slate-800 no-print">
+            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🦁</span>
+                <div>
+                  <p className="font-bold text-white">{negocio.nombre} • {negocio.slogan}</p>
+                  <p className="text-[11px] text-slate-500">
+                    Balones de Gas GLP a Domicilio y Empresas B2B en {negocio.direccion || 'todo Cusco'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-[11px]">
+                <a
+                  href={negocio.enlaceChuspa || 'https://www.lachuspaanuncios.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-yellow-400 hover:underline font-bold"
+                >
+                  La Chuspa Tech • www.lachusoaanuncios.com
+                </a>
+                <span>•</span>
+                <span>Atención 24/7</span>
+              </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px]">
-            <a
-              href={negocio.enlaceChuspa || 'https://www.lachuspaanuncios.com'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-yellow-400 hover:underline font-bold"
-            >
-              La Chuspa Tech • www.lachusoaanuncios.com
-            </a>
-            <span>•</span>
-            <span>Atención 24/7</span>
-          </div>
-        </div>
-      </footer>
+          </footer>
+        </>
+      )}
     </div>
   );
 };
