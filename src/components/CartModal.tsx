@@ -43,6 +43,8 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
 
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isSearchingDoc, setIsSearchingDoc] = useState<boolean>(false);
+  const [showResendPrompt, setShowResendPrompt] = useState<boolean>(false);
+  const [lastSentMinutes, setLastSentMinutes] = useState<number>(0);
 
   if (!isOpen) return null;
 
@@ -68,7 +70,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGpsCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        alert('✔ Ubicación GPS capturada exitosamente');
+        alert('✔ Ubicación GPS capturada exitosamente.');
       },
       () => {
         alert('No se pudo acceder al GPS.');
@@ -144,12 +146,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     }
   };
 
-  const handleSubmitOrderWhatsApp = () => {
-    if (items.length === 0) {
-      alert('Tu carrito está vacío. Agrega al menos un balón de gas.');
-      return;
-    }
-
+  const executeOrderSubmission = () => {
     const clienteName = nombreCliente.trim() || 'Particular';
     const detalleProductos = items.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
     const comprobanteDetalle =
@@ -177,6 +174,21 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
       lng: gpsCoords?.lng
     });
 
+    // Save submission log to localStorage for double-submission detection
+    try {
+      localStorage.setItem(
+        'leogas_last_order_sent_info',
+        JSON.stringify({
+          time: Date.now(),
+          cliente: clienteName,
+          total: cartTotal.toFixed(2),
+          detalle: detalleProductos
+        })
+      );
+    } catch (e) {
+      console.warn('Storage log error:', e);
+    }
+
     // Generate WhatsApp Text
     let msg = `*🦁 ¡HOLA LEOGAS CUSCO! DESEO HACER UN PEDIDO:*\n\n`;
     msg += `*👤 Cliente:* ${clienteName}\n`;
@@ -194,11 +206,76 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     const targetUrl = `https://wa.me/${telefonos.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
     window.open(targetUrl, '_blank');
 
+    // RESET CART TO ZERO
+    clearCart();
+    setShowResendPrompt(false);
     onClose();
+  };
+
+  const handleSubmitOrderWhatsApp = () => {
+    if (items.length === 0) {
+      alert('Tu carrito está vacío. Agrega al menos un balón de gas.');
+      return;
+    }
+
+    // Check if the user already sent an order recently (e.g., within 15 minutes)
+    try {
+      const stored = localStorage.getItem('leogas_last_order_sent_info');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const diffMs = Date.now() - (parsed.time || 0);
+        const diffMins = Math.floor(diffMs / 60000);
+
+        if (diffMins < 15) {
+          setLastSentMinutes(diffMins);
+          setShowResendPrompt(true);
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    executeOrderSubmission();
   };
 
   return (
     <div className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      {/* Re-send confirmation prompt modal */}
+      {showResendPrompt && (
+        <div className="fixed inset-0 z-[3000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border-2 border-amber-400 text-center animate-in zoom-in-95">
+            <div className="w-14 h-14 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">
+              ⚠️
+            </div>
+            <h4 className="font-black text-base text-slate-900 mb-1">
+              Tu pedido ya fue enviado anteriormente
+            </h4>
+            <p className="text-xs text-slate-600 mb-4 leading-relaxed">
+              Registramos que ya enviaste un pedido por WhatsApp hace {lastSentMinutes === 0 ? 'unos momentos' : `${lastSentMinutes} minuto(s)`}. 
+              <br /><br />
+              <strong>¿Deseas enviar por segunda vez este pedido?</strong>
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowResendPrompt(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-2.5 rounded-xl text-xs transition cursor-pointer"
+              >
+                No, Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => executeOrderSubmission()}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer"
+              >
+                Sí, Enviar por 2da vez
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in duration-200">
         {/* Header */}
         <div className="bg-purple-900 text-white p-4 flex items-center justify-between">

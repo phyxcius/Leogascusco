@@ -13,6 +13,7 @@ export interface Accesorio {
   nombre: string;
   precio: number;
   disponible: boolean;
+  descripcion?: string;
   imagen?: string;
 }
 

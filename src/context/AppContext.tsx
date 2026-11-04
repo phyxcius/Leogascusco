@@ -175,7 +175,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       }
     };
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+
+    // Polling fallback to guarantee instant updates between windows/tabs
+    const pollInterval = setInterval(() => {
+      try {
+        const storedPedidos = localStorage.getItem('leogas_pedidos');
+        if (storedPedidos) {
+          const parsed = JSON.parse(storedPedidos);
+          setPedidos(prev => {
+            if (JSON.stringify(prev) !== storedPedidos) return parsed;
+            return prev;
+          });
+        }
+        const storedReps = localStorage.getItem('leogas_repartidores');
+        if (storedReps) {
+          const parsed = JSON.parse(storedReps);
+          setRepartidores(prev => {
+            if (JSON.stringify(prev) !== storedReps) return parsed;
+            return prev;
+          });
+        }
+        const storedNegocio = localStorage.getItem('leogas_negocio');
+        if (storedNegocio) {
+          const parsed = JSON.parse(storedNegocio);
+          setNegocio(prev => {
+            if (JSON.stringify(prev) !== storedNegocio) return parsed;
+            return prev;
+          });
+        }
+        const storedOrder = localStorage.getItem('leogas_mi_pedido_id');
+        if (storedOrder) {
+          setActiveCustomerOrderId(prev => prev !== storedOrder ? storedOrder : prev);
+        }
+      } catch (err) {
+        // ignore
+      }
+    }, 1500);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   // Sync state to localStorage

@@ -24,12 +24,24 @@ import {
   Upload,
   RotateCcw,
   Save,
-  Image as ImageIcon
+  Image as ImageIcon,
+  FileText,
+  Calendar,
+  Search,
+  Edit,
+  Eye,
+  CheckCircle2,
+  AlertCircle,
+  Maximize2,
+  Minimize2,
+  Bell,
+  Tag
 } from 'lucide-react';
 import L from 'leaflet';
-import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP } from '../types/index';
+import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido } from '../types/index';
 import { getPageUrl, getAssetUrl } from '../utils/assets';
 import { BrandBadge } from './BrandBadge';
+import { playChimeSound } from '../utils/audio';
 
 export const AdminPanel: React.FC = () => {
   const {
@@ -63,6 +75,7 @@ export const AdminPanel: React.FC = () => {
     updateNegocio,
     resetNegocio,
     ventas,
+    addVenta,
     createPedido
   } = useApp();
 
@@ -73,7 +86,7 @@ export const AdminPanel: React.FC = () => {
 
   // Current tab
   const [activeTab, setActiveTab] = useState<
-    'pedidos' | 'identidad' | 'b2b' | 'liquidacion' | 'clientes' | 'accesorios' | 'productos' | 'telefonos' | 'gps' | 'reportes'
+    'pedidos' | 'identidad' | 'facturacion' | 'b2b' | 'liquidacion' | 'clientes' | 'accesorios' | 'productos' | 'telefonos' | 'gps' | 'reportes'
   >('pedidos');
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -87,8 +100,37 @@ export const AdminPanel: React.FC = () => {
   const [identidadTel2, setIdentidadTel2] = useState(negocio.telSecundario);
   const [identidadTelFijo, setIdentidadTelFijo] = useState(negocio.telFijo || '');
   const [identidadDireccion, setIdentidadDireccion] = useState(negocio.direccion);
-  const [identidadChuspa, setIdentidadChuspa] = useState(negocio.enlaceChuspa);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+
+  // Map Fullscreen
+  const [isAdminMapFullscreen, setIsAdminMapFullscreen] = useState(false);
+
+  // Central Incoming Order Modal & Realtime Alerts
+  const [incomingOrderModal, setIncomingOrderModal] = useState<Pedido | null>(null);
+  const [assignedDriverForIncoming, setAssignedDriverForIncoming] = useState<string>('');
+  const lastKnownOrderIdRef = useRef<string | null>(null);
+
+  // Accessories CRUD Modals
+  const [showAddAccModal, setShowAddAccModal] = useState(false);
+  const [editAccModal, setEditAccModal] = useState<Accesorio | null>(null);
+  const [newAccNombre, setNewAccNombre] = useState('');
+  const [newAccPrecio, setNewAccPrecio] = useState('');
+  const [newAccDesc, setNewAccDesc] = useState('');
+
+  // Gas Cylinders CRUD Modals
+  const [showAddProdModal, setShowAddProdModal] = useState(false);
+  const [editProdModal, setEditProdModal] = useState<Producto | null>(null);
+  const [newProdNombre, setNewProdNombre] = useState('');
+  const [newProdTag, setNewProdTag] = useState('10kg');
+  const [newProdPrecio, setNewProdPrecio] = useState('');
+  const [newProdDesc, setNewProdDesc] = useState('');
+
+  // Facturación y Comprobantes State
+  const [facturaFilterDate, setFacturaFilterDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [facturaFilterRepartidor, setFacturaFilterRepartidor] = useState<string>('todos');
+  const [facturaFilterTipo, setFacturaFilterTipo] = useState<string>('todos');
+  const [facturaSearch, setFacturaSearch] = useState<string>('');
+  const [previewComprobante, setPreviewComprobante] = useState<any | null>(null);
 
   // Keep local form in sync if negocio updates in another tab
   useEffect(() => {
@@ -100,8 +142,22 @@ export const AdminPanel: React.FC = () => {
     setIdentidadTel2(negocio.telSecundario);
     setIdentidadTelFijo(negocio.telFijo || '');
     setIdentidadDireccion(negocio.direccion);
-    setIdentidadChuspa(negocio.enlaceChuspa);
   }, [negocio]);
+
+  // Detect incoming orders in real time to show central alert modal
+  useEffect(() => {
+    if (!pedidos || pedidos.length === 0) return;
+    const latest = pedidos[0];
+    if (lastKnownOrderIdRef.current === null) {
+      lastKnownOrderIdRef.current = latest.id;
+      return;
+    }
+    if (latest.id !== lastKnownOrderIdRef.current && latest.estado === 'pendiente_asignacion') {
+      lastKnownOrderIdRef.current = latest.id;
+      setIncomingOrderModal(latest);
+      playChimeSound();
+    }
+  }, [pedidos]);
 
   // Phone order modal
   const [showPhoneOrderModal, setShowPhoneOrderModal] = useState(false);
@@ -123,11 +179,6 @@ export const AdminPanel: React.FC = () => {
   const [newVipDoc, setNewVipDoc] = useState('');
   const [newVipTel, setNewVipTel] = useState('');
   const [newVipDir, setNewVipDir] = useState('');
-
-  // New Product form
-  const [newProdNombre, setNewProdNombre] = useState('');
-  const [newProdPrecio, setNewProdPrecio] = useState('');
-  const [newProdTag, setNewProdTag] = useState('');
 
   // New Driver form
   const [newRepNombre, setNewRepNombre] = useState('');
@@ -172,7 +223,7 @@ export const AdminPanel: React.FC = () => {
       telSecundario: identidadTel2.trim() || '984 285 500',
       telFijo: identidadTelFijo.trim(),
       direccion: identidadDireccion.trim() || 'Cusco, Perú',
-      enlaceChuspa: identidadChuspa.trim() || 'https://www.lachuspaanuncios.com'
+      enlaceChuspa: 'https://www.lachuspaanuncios.com'
     });
     setSaveSuccessMsg(true);
     setTimeout(() => setSaveSuccessMsg(false), 4500);
@@ -261,7 +312,7 @@ export const AdminPanel: React.FC = () => {
                 type="password"
                 value={loginPass}
                 onChange={(e) => setLoginPass(e.target.value)}
-                placeholder="admin123"
+                placeholder="••••••••"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold focus:outline-purple-800"
                 required
               />
@@ -269,7 +320,7 @@ export const AdminPanel: React.FC = () => {
 
             {loginError && (
               <p className="text-xs text-red-600 font-bold">
-                Usuario o contraseña incorrectos. (Prueba admin / admin123)
+                Usuario o contraseña incorrectos. Verifica tus credenciales.
               </p>
             )}
 
@@ -280,10 +331,6 @@ export const AdminPanel: React.FC = () => {
               Ingresar al Panel
             </button>
           </form>
-
-          <div className="mt-5 text-[11px] text-slate-400">
-            Credenciales de prueba: <strong>admin</strong> / <strong>admin123</strong>
-          </div>
         </div>
       </div>
     );
@@ -398,6 +445,127 @@ export const AdminPanel: React.FC = () => {
         </div>
       </div>
 
+      {/* Central Modal for Incoming Orders */}
+      {incomingOrderModal && (
+        <div className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border-4 border-yellow-400 text-left animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="w-10 h-10 rounded-full bg-yellow-100 text-yellow-800 flex items-center justify-center text-xl animate-bounce">
+                  🔔
+                </span>
+                <div>
+                  <h3 className="text-base font-black text-purple-950 leading-tight">
+                    ¡NUEVO PEDIDO ENTRANTE!
+                  </h3>
+                  <span className="text-[10px] bg-red-600 text-white font-black px-2 py-0.5 rounded-full uppercase">
+                    Atención Inmediata
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIncomingOrderModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="my-4 space-y-2.5 text-xs">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold">Cliente:</span>
+                  <strong className="text-slate-900">{incomingOrderModal.cliente}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold">Producto:</span>
+                  <strong className="text-purple-900 font-black">{incomingOrderModal.tipoBalon}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold">Total a Cobrar:</span>
+                  <strong className="text-emerald-700 font-black text-sm">S/ {incomingOrderModal.montoCobro}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold">Método Pago:</span>
+                  <span className="font-bold text-slate-700">{incomingOrderModal.metodoPago}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-bold">Dirección:</span>
+                  <span className="font-bold text-slate-800 text-right max-w-[220px]">{incomingOrderModal.direccion}</span>
+                </div>
+              </div>
+
+              {/* Assign Driver Immediately */}
+              <div>
+                <label className="text-[10px] font-black uppercase text-slate-500 block mb-1">
+                  🛵 Asignar Repartidor de Flota:
+                </label>
+                <select
+                  value={assignedDriverForIncoming}
+                  onChange={(e) => setAssignedDriverForIncoming(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800"
+                >
+                  <option value="">-- Seleccionar Repartidor Disponible --</option>
+                  {repartidores.map(r => (
+                    <option key={r.id} value={r.id}>
+                      {r.nombre} ({r.online ? 'En Ruta' : 'Desconectado'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIncomingOrderModal(null)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-2.5 rounded-xl text-xs transition cursor-pointer"
+              >
+                Ver en Bandeja
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (assignedDriverForIncoming) {
+                    assignPedido(incomingOrderModal.id, assignedDriverForIncoming);
+                    alert(`✔ Pedido asignado exitosamente al repartidor.`);
+                    setIncomingOrderModal(null);
+                    setAssignedDriverForIncoming('');
+                  } else {
+                    alert('Por favor selecciona un repartidor para despachar el pedido.');
+                  }
+                }}
+                className="flex-1 bg-purple-800 hover:bg-purple-900 text-white font-black py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Truck className="w-4 h-4 text-amber-300" />
+                <span>Asignar y Despachar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Realtime Status Alert Bar */}
+      <div className="bg-gradient-to-r from-purple-900 via-indigo-950 to-purple-900 text-white px-4 py-2.5 rounded-2xl flex items-center justify-between gap-3 shadow-sm border border-purple-800 mb-4 animate-in fade-in no-print">
+        <div className="flex items-center gap-2 text-xs overflow-hidden">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping flex-shrink-0"></span>
+          <span className="font-black text-yellow-300 uppercase tracking-wide flex-shrink-0">Alerta de Flota:</span>
+          <span className="font-bold truncate text-purple-100">
+            {pedidos.find(p => p.estado === 'en_proceso' && p.etapa === 1)
+              ? `🛵 ${pedidos.find(p => p.estado === 'en_proceso' && p.etapa === 1)?.repartidorNombre || 'Repartidor'} salió en camino hacia ${pedidos.find(p => p.estado === 'en_proceso' && p.etapa === 1)?.cliente} (${pedidos.find(p => p.estado === 'en_proceso' && p.etapa === 1)?.direccion})`
+              : pedidos.find(p => p.estado === 'en_proceso' && p.etapa === 2)
+              ? `🚪 ${pedidos.find(p => p.estado === 'en_proceso' && p.etapa === 2)?.repartidorNombre || 'Repartidor'} ya está en la puerta del cliente ${pedidos.find(p => p.estado === 'en_proceso' && p.etapa === 2)?.cliente}`
+              : pedidos.find(p => p.estado === 'completado')
+              ? `✅ Último pedido entregado: ${pedidos.find(p => p.estado === 'completado')?.cliente} (S/ ${pedidos.find(p => p.estado === 'completado')?.montoCobro}) por ${pedidos.find(p => p.estado === 'completado')?.repartidorNombre || 'Repartidor'}`
+              : 'Flota operativa y monitoreo satelital en vivo activo.'}
+          </span>
+        </div>
+        <span className="text-[10px] text-purple-300 font-bold hidden sm:inline flex-shrink-0">
+          En vivo • Cusco
+        </span>
+      </div>
+
       <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar Menu */}
         <aside
@@ -412,6 +580,7 @@ export const AdminPanel: React.FC = () => {
           {[
             { id: 'pedidos', label: 'Pedidos y Flota', icon: Boxes },
             { id: 'identidad', label: 'Identidad del Negocio', icon: Store },
+            { id: 'facturacion', label: 'Facturación y Comprobantes', icon: FileText },
             { id: 'b2b', label: 'Cartera B2B / Empresas', icon: Building2 },
             { id: 'liquidacion', label: 'Cierre de Caja & Créditos', icon: Receipt },
             { id: 'clientes', label: 'Clientes VIP', icon: Star },
@@ -601,13 +770,60 @@ export const AdminPanel: React.FC = () => {
                   ))}
                 </div>
 
-                <h4 className="font-bold text-xs text-slate-700 mb-2">
-                  📍 Monitoreo Satelital de Repartidores en Cusco:
-                </h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-bold text-xs text-slate-700">
+                    📍 Monitoreo Satelital de Repartidores en Cusco:
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAdminMapFullscreen(!isAdminMapFullscreen);
+                      setTimeout(() => adminMapInstanceRef.current?.invalidateSize(), 150);
+                      setTimeout(() => adminMapInstanceRef.current?.invalidateSize(), 350);
+                    }}
+                    className="bg-purple-800 hover:bg-purple-900 text-white px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                  >
+                    {isAdminMapFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5 text-amber-300" />}
+                    <span>{isAdminMapFullscreen ? 'Reducir Mapa' : 'Ampliar Mapa de Ruta'}</span>
+                  </button>
+                </div>
+
                 <div
-                  ref={adminMapContainerRef}
-                  className="w-full h-80 rounded-xl border border-slate-200 overflow-hidden"
-                />
+                  className={`transition-all duration-300 ${
+                    isAdminMapFullscreen
+                      ? 'fixed inset-0 z-[99999] bg-white p-4 flex flex-col'
+                      : 'w-full h-80 rounded-xl border border-slate-200 overflow-hidden relative'
+                  }`}
+                >
+                  {isAdminMapFullscreen && (
+                    <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🗺️</span>
+                        <div>
+                          <h4 className="font-black text-sm text-purple-950">
+                            Monitoreo Satelital de Rutas y Flota en Tiempo Real
+                          </h4>
+                          <p className="text-[11px] text-slate-500">Vista ampliada de reparto y geolocalización Cusco</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAdminMapFullscreen(false);
+                          setTimeout(() => adminMapInstanceRef.current?.invalidateSize(), 150);
+                        }}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      >
+                        <Minimize2 className="w-4 h-4" />
+                        <span>Cerrar / Reducir</span>
+                      </button>
+                    </div>
+                  )}
+                  <div
+                    ref={adminMapContainerRef}
+                    className="w-full flex-1 min-h-[300px]"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -623,9 +839,6 @@ export const AdminPanel: React.FC = () => {
                       Módulo de Marca e Identidad
                     </span>
                     <h3 className="text-xl font-black">Identidad Comercial del Negocio</h3>
-                    <p className="text-xs text-purple-200 mt-1 max-w-xl">
-                      Personaliza el nombre, logo, números de contacto y datos oficiales. Todos los cambios se sincronizan en tiempo real con el portal Cliente (index), el inicio de sesión de Repartidores y este Panel de Control.
-                    </p>
                   </div>
                   <div className="flex-shrink-0">
                     <BrandBadge size="md" showChuspa={true} />
@@ -637,7 +850,7 @@ export const AdminPanel: React.FC = () => {
                 <div className="bg-emerald-50 border-2 border-emerald-400 text-emerald-900 px-4 py-3 rounded-2xl font-black text-xs flex items-center justify-between animate-in fade-in">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-emerald-600" />
-                    <span>¡Identidad del negocio y logotipo guardados y sincronizados con éxito en todos los portales!</span>
+                    <span>✔ Datos guardados exitosamente</span>
                   </div>
                   <button onClick={() => setSaveSuccessMsg(false)} className="text-emerald-700 hover:text-emerald-900 font-bold text-xs cursor-pointer">
                     ✕
@@ -695,20 +908,24 @@ export const AdminPanel: React.FC = () => {
                       />
                     </div>
 
-                    <div>
-                      <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
-                        Enlace de Redirección La Chuspa Tech:
-                      </label>
-                      <input
-                        type="text"
-                        value={identidadChuspa}
-                        onChange={(e) => setIdentidadChuspa(e.target.value)}
-                        placeholder="https://www.lachuspaanuncios.com"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-purple-800"
-                      />
-                      <p className="text-[10px] text-slate-400 mt-1">
-                        A este sitio web se redirige al hacer clic en el logo de La Chuspa Tech (www.lachusoaanuncios.com).
-                      </p>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-purple-900 block">
+                          Enlace Oficial La Chuspa Tech
+                        </span>
+                        <a
+                          href="https://www.lachuspaanuncios.com"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1"
+                        >
+                          <span>https://www.lachuspaanuncios.com</span>
+                          <ExternalLink className="w-3 h-3 inline" />
+                        </a>
+                      </div>
+                      <span className="bg-purple-100 text-purple-900 text-[10px] font-black px-2.5 py-1 rounded-full">
+                        Por defecto
+                      </span>
                     </div>
                   </div>
 
@@ -902,6 +1119,201 @@ export const AdminPanel: React.FC = () => {
             </div>
           )}
 
+          {/* TAB: FACTURACIÓN Y COMPROBANTES */}
+          {activeTab === 'facturacion' && (
+            <div className="space-y-6">
+              {/* Header card */}
+              <div className="bg-gradient-to-r from-blue-900 to-indigo-950 text-white rounded-2xl p-6 shadow-sm border border-blue-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <span className="bg-amber-400 text-blue-950 font-black text-[10px] uppercase px-2.5 py-0.5 rounded-full inline-block mb-1">
+                    Gestión Tributaria SUNAT
+                  </span>
+                  <h3 className="text-xl font-black">Facturación y Boletas Electrónicas</h3>
+                  <p className="text-xs text-blue-200 mt-1 max-w-xl">
+                    Control e impresión de comprobantes oficiales filtrados por calendario (día, mes, año) y usuario de repartidor.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nuevo = {
+                      numero: `B001-000${Math.floor(100 + Math.random() * 900)}`,
+                      tipo: 'Boleta de Venta Electrónica',
+                      fecha: new Date().toLocaleDateString('es-PE'),
+                      hora: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+                      cliente: 'Consumidor Final (Particular)',
+                      documento: '45678912',
+                      tipoDoc: 'DNI',
+                      direccion: negocio.direccion || 'Cusco Central',
+                      repartidor: repartidores[0]?.nombre || 'Administración LeoGas',
+                      items: [{ cantidad: 1, descripcion: 'Balón Llamagas 10kg Normal', precio: 50.0 }],
+                      total: 50.0,
+                      metodoPago: 'Efectivo'
+                    };
+                    setPreviewComprobante(nuevo);
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Emitir Comprobante Rápido</span>
+                </button>
+              </div>
+
+              {/* Filters Bar: Calendar, Driver, Type, Search */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">
+                    📅 Filtrar por Fecha Calendario:
+                  </label>
+                  <input
+                    type="date"
+                    value={facturaFilterDate}
+                    onChange={(e) => setFacturaFilterDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">
+                    🛵 Filtrar por Repartidor:
+                  </label>
+                  <select
+                    value={facturaFilterRepartidor}
+                    onChange={(e) => setFacturaFilterRepartidor(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800"
+                  >
+                    <option value="todos">Todos los Repartidores</option>
+                    {repartidores.map(r => (
+                      <option key={r.id} value={r.nombre}>{r.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">
+                    🧾 Tipo de Comprobante:
+                  </label>
+                  <select
+                    value={facturaFilterTipo}
+                    onChange={(e) => setFacturaFilterTipo(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800"
+                  >
+                    <option value="todos">Todos (Facturas y Boletas)</option>
+                    <option value="factura">Solo Facturas (RUC)</option>
+                    <option value="boleta">Solo Boletas (DNI)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">
+                    🔍 Buscar por Cliente o Nro:
+                  </label>
+                  <input
+                    type="text"
+                    value={facturaSearch}
+                    onChange={(e) => setFacturaSearch(e.target.value)}
+                    placeholder="Buscar cliente, RUC, serie..."
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800"
+                  />
+                </div>
+              </div>
+
+              {/* Invoices and Receipts Table */}
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                  <h4 className="text-xs font-black uppercase text-slate-700">
+                    Comprobantes Emitidos y Registrados en Cusco
+                  </h4>
+                  <span className="text-[11px] text-slate-500 font-bold">
+                    Total Registros: {ventas.length}
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-100 text-slate-600 uppercase text-[10px]">
+                      <tr>
+                        <th className="p-3">N° Serie</th>
+                        <th className="p-3">Tipo</th>
+                        <th className="p-3">Fecha</th>
+                        <th className="p-3">Cliente / Razón Social</th>
+                        <th className="p-3">Repartidor</th>
+                        <th className="p-3">Pago</th>
+                        <th className="p-3 text-right">Total</th>
+                        <th className="p-3 text-center">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {ventas.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="p-6 text-center text-slate-400 font-bold">
+                            No hay comprobantes emitidos en el periodo seleccionado.
+                          </td>
+                        </tr>
+                      ) : (
+                        ventas
+                          .filter(v => {
+                            if (facturaFilterRepartidor !== 'todos' && v.repartidorNombre !== facturaFilterRepartidor) return false;
+                            if (facturaFilterTipo === 'factura' && !v.comprobante.toLowerCase().includes('f')) return false;
+                            if (facturaFilterTipo === 'boleta' && !v.comprobante.toLowerCase().includes('b')) return false;
+                            if (facturaSearch && !v.cliente.toLowerCase().includes(facturaSearch.toLowerCase()) && !v.comprobante.toLowerCase().includes(facturaSearch.toLowerCase())) return false;
+                            return true;
+                          })
+                          .map((v, idx) => {
+                            const isFactura = v.comprobante.toUpperCase().startsWith('F');
+                            return (
+                              <tr key={idx} className="hover:bg-slate-50 transition">
+                                <td className="p-3 font-mono font-bold text-purple-950">
+                                  {v.comprobante}
+                                </td>
+                                <td className="p-3">
+                                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                    isFactura ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
+                                  }`}>
+                                    {isFactura ? 'Factura' : 'Boleta'}
+                                  </span>
+                                </td>
+                                <td className="p-3 text-slate-600 font-semibold">{v.fecha}</td>
+                                <td className="p-3 font-extrabold text-slate-900">{v.cliente}</td>
+                                <td className="p-3 font-bold text-slate-600">🛵 {v.repartidorNombre || 'Por asignar'}</td>
+                                <td className="p-3 text-slate-600">{v.pago}</td>
+                                <td className="p-3 text-right font-black text-purple-900">S/ {v.total.toFixed(2)}</td>
+                                <td className="p-3 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setPreviewComprobante({
+                                        numero: v.comprobante,
+                                        tipo: isFactura ? 'Factura Electrónica' : 'Boleta de Venta Electrónica',
+                                        fecha: v.fecha,
+                                        hora: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+                                        cliente: v.cliente,
+                                        documento: isFactura ? '20608933211' : '45892134',
+                                        tipoDoc: isFactura ? 'RUC' : 'DNI',
+                                        direccion: 'Cusco, Perú',
+                                        repartidor: v.repartidorNombre || 'Repartidor de turno',
+                                        items: [{ cantidad: 1, descripcion: v.productos, precio: v.total }],
+                                        total: v.total,
+                                        metodoPago: v.pago
+                                      });
+                                    }}
+                                    className="bg-purple-800 hover:bg-purple-900 text-white font-extrabold px-3 py-1.5 rounded-lg text-[11px] flex items-center gap-1 mx-auto transition cursor-pointer shadow-xs"
+                                  >
+                                    <Printer className="w-3.5 h-3.5 text-amber-300" />
+                                    <span>Imprimir</span>
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB 2: CARTERA B2B */}
           {activeTab === 'b2b' && (
             <div className="space-y-6">
@@ -1038,20 +1450,57 @@ export const AdminPanel: React.FC = () => {
 
           {/* TAB 3: CIERRE DE CAJA / LIQUIDACION */}
           {activeTab === 'liquidacion' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-6 printable-area">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-6 printable-area">
+              {/* Printable Header with Company Logo, Chuspa Tech logo, and Contacts */}
+              <div className="border-b-2 border-purple-900 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <img
+                    src={getAssetUrl(negocio.logoUrl)}
+                    alt={negocio.nombre}
+                    className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-sm"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                    }}
+                  />
+                  <div>
+                    <h2 className="text-xl font-black text-purple-950 uppercase tracking-tight">{negocio.nombre}</h2>
+                    <p className="text-xs text-purple-800 font-extrabold">{negocio.slogan}</p>
+                    <p className="text-[11px] text-slate-600 mt-0.5">📍 {negocio.direccion}</p>
+                    <p className="text-[11px] text-slate-500 font-bold">
+                      📞 Teléfonos: {negocio.telPrincipal} • {negocio.telSecundario} | WA: +{negocio.whatsapp}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center sm:items-end gap-2">
+                  <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl">
+                    <img src="/CHUSPITA-circulo.png" alt="La Chuspa Tech" className="w-8 h-8 rounded-full shadow-xs" />
+                    <div className="text-left">
+                      <span className="text-[10px] font-black text-purple-900 block leading-tight">Respaldado por La Chuspa Tech</span>
+                      <a href="https://www.lachuspaanuncios.com" target="_blank" rel="noreferrer" className="text-[9px] text-blue-700 font-bold hover:underline">
+                        www.lachuspaanuncios.com
+                      </a>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-bold">
+                    Fecha de Impresión: {new Date().toLocaleDateString('es-PE')} - {new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
                   <h3 className="text-lg font-black text-purple-950">
-                    💵 Cierre de Caja, Créditos y Liquidación del Día
+                    💵 Liquidación y Cierre de Caja Diario
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Control de dinero físico a rendir por repartidores y cuentas por cobrar
+                    Arqueo de fondos, efectivo a rendir por repartidores y cobranzas en Cusco
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center gap-1.5 transition no-print cursor-pointer"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 transition no-print cursor-pointer shadow-md"
                 >
                   <Printer className="w-4 h-4" />
                   <span>Imprimir Liquidación</span>
@@ -1247,81 +1696,497 @@ export const AdminPanel: React.FC = () => {
           {/* TAB 5: ACCESORIOS */}
           {activeTab === 'accesorios' && (
             <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-                <h3 className="font-black text-slate-900 text-base mb-3">
-                  🔧 Catálogo de Válvulas y Mangueras
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {accesorios.map((acc) => (
-                    <div
-                      key={acc.id}
-                      className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex items-center justify-between gap-3 text-xs"
-                    >
-                      <div>
-                        <strong className="text-slate-900 text-xs block">{acc.nombre}</strong>
-                        <span className="text-purple-800 font-black">S/ {acc.precio.toFixed(2)}</span>
+              {/* Header card with Add button */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
+                    <Wrench className="w-5 h-5 text-purple-700" />
+                    <span>Catálogo de Válvulas, Mangueras y Accesorios de Gas</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Tarjetas informativas de repuestos y accesorios disponibles para delivery en Cusco
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewAccNombre('');
+                    setNewAccPrecio('');
+                    setNewAccDesc('');
+                    setShowAddAccModal(true);
+                  }}
+                  className="bg-purple-800 hover:bg-purple-900 text-white font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 text-amber-300" />
+                  <span>➕ Agregar Nuevo Accesorio</span>
+                </button>
+              </div>
+
+              {/* Informative Cards Catalog */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {accesorios.map((acc) => (
+                  <div
+                    key={acc.id}
+                    className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:shadow-md transition relative group"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="bg-purple-50 text-purple-800 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-purple-200">
+                          ⚙️ Repuesto Certificado
+                        </span>
+                        <span className="text-base font-black text-purple-950">
+                          S/ {acc.precio.toFixed(2)}
+                        </span>
                       </div>
+
+                      <h4 className="font-black text-slate-900 text-sm leading-snug">
+                        {acc.nombre}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                        {acc.descripcion || 'Accesorio y válvula homologada de alta seguridad para balones de gas residencial y comercial. Cumple normativa Osinergmin.'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-3 mt-3 border-t border-slate-100">
                       <button
                         type="button"
                         onClick={() => {
-                          const nuevo = prompt(`Nuevo precio para ${acc.nombre}:`, acc.precio.toString());
-                          if (nuevo && !isNaN(parseFloat(nuevo))) {
-                            updateAccesorio({ ...acc, precio: parseFloat(nuevo) });
+                          setEditAccModal(acc);
+                        }}
+                        className="flex-1 bg-slate-50 hover:bg-purple-50 text-purple-900 border border-slate-200 hover:border-purple-300 font-extrabold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      >
+                        <Edit className="w-3.5 h-3.5 text-purple-700" />
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`¿Deseas eliminar el accesorio "${acc.nombre}"?`)) {
+                            deleteAccesorio(acc.id);
+                            alert('✔ Accesorio eliminado correctamente.');
                           }
                         }}
-                        className="bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1.5 rounded-lg font-bold text-xs cursor-pointer"
+                        className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 p-2 rounded-xl transition cursor-pointer"
+                        title="Eliminar Accesorio"
                       >
-                        Editar
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
+
+              {/* Add Accessory Modal */}
+              {showAddAccModal && (
+                <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95">
+                    <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                      <h4 className="font-black text-base text-purple-950 flex items-center gap-2">
+                        <Wrench className="w-4 h-4 text-purple-700" />
+                        <span>Agregar Nuevo Accesorio</span>
+                      </h4>
+                      <button onClick={() => setShowAddAccModal(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                    </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!newAccNombre || !newAccPrecio) return alert('Por favor ingresa nombre y precio.');
+                        addAccesorio({
+                          id: `acc-${Date.now()}`,
+                          nombre: newAccNombre.trim(),
+                          precio: parseFloat(newAccPrecio) || 0,
+                          disponible: true,
+                          descripcion: newAccDesc.trim() || 'Accesorio certificado para instalaciones de gas GLP.'
+                        });
+                        setShowAddAccModal(false);
+                        alert('✔ Accesorio agregado exitosamente.');
+                      }}
+                      className="space-y-3.5 text-xs"
+                    >
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Nombre del Accesorio:</label>
+                        <input
+                          type="text"
+                          required
+                          value={newAccNombre}
+                          onChange={(e) => setNewAccNombre(e.target.value)}
+                          placeholder="Ej: Manguera Reforzada Naranja 1.5m"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Precio de Venta (S/):</label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          required
+                          value={newAccPrecio}
+                          onChange={(e) => setNewAccPrecio(e.target.value)}
+                          placeholder="25.00"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Descripción / Características:</label>
+                        <textarea
+                          rows={3}
+                          value={newAccDesc}
+                          onChange={(e) => setNewAccDesc(e.target.value)}
+                          placeholder="Detalles técnicos, longitud, compatibilidad con balones..."
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-semibold"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddAccModal(false)}
+                          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 bg-purple-800 hover:bg-purple-900 text-white font-black py-2.5 rounded-xl shadow-md cursor-pointer"
+                        >
+                          Guardar Accesorio
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* Edit Accessory Modal */}
+              {editAccModal && (
+                <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95">
+                    <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                      <h4 className="font-black text-base text-purple-950 flex items-center gap-2">
+                        <Edit className="w-4 h-4 text-purple-700" />
+                        <span>Editar Accesorio</span>
+                      </h4>
+                      <button onClick={() => setEditAccModal(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                    </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        updateAccesorio(editAccModal);
+                        setEditAccModal(null);
+                        alert('✔ Accesorio modificado exitosamente.');
+                      }}
+                      className="space-y-3.5 text-xs"
+                    >
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Nombre del Producto:</label>
+                        <input
+                          type="text"
+                          required
+                          value={editAccModal.nombre}
+                          onChange={(e) => setEditAccModal({ ...editAccModal, nombre: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Precio (S/):</label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          required
+                          value={editAccModal.precio}
+                          onChange={(e) => setEditAccModal({ ...editAccModal, precio: parseFloat(e.target.value) || 0 })}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Descripción Informativa:</label>
+                        <textarea
+                          rows={3}
+                          value={editAccModal.descripcion || ''}
+                          onChange={(e) => setEditAccModal({ ...editAccModal, descripcion: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-semibold"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditAccModal(null)}
+                          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 bg-purple-800 hover:bg-purple-900 text-white font-black py-2.5 rounded-xl shadow-md cursor-pointer"
+                        >
+                          Guardar Cambios
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           {/* TAB 6: BALONES Y PRECIOS */}
           {activeTab === 'productos' && (
             <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-                <h3 className="font-black text-slate-900 text-base mb-3">
-                  📝 Catálogo Oficial de Balones Llamagas
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {productos.map((prod) => (
-                    <div
-                      key={prod.id}
-                      className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col justify-between text-xs space-y-2"
-                    >
-                      <div>
-                        <span className="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mb-1">
+              {/* Header card with Add button */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
+                    <Flame className="w-5 h-5 text-purple-700" />
+                    <span>Catálogo Oficial de Balones de Gas (Tarifas Cusco)</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Tarjetas de productos de gas GLP para pedidos residenciales, restaurantes y comercios
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewProdNombre('');
+                    setNewProdTag('10kg');
+                    setNewProdPrecio('');
+                    setNewProdDesc('');
+                    setShowAddProdModal(true);
+                  }}
+                  className="bg-purple-800 hover:bg-purple-900 text-white font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 text-amber-300" />
+                  <span>➕ Agregar Nuevo Balón de Gas</span>
+                </button>
+              </div>
+
+              {/* Informative Cards Catalog for Gas Cylinders */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {productos.map((prod) => (
+                  <div
+                    key={prod.id}
+                    className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:shadow-md transition relative group"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="bg-purple-100 text-purple-900 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-purple-200">
                           {prod.tag}
                         </span>
-                        <h4 className="font-black text-slate-900 text-sm">{prod.nombre}</h4>
-                        <p className="text-[11px] text-slate-500 mt-1">{prod.descripcion}</p>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-200">
-                        <span className="text-base font-black text-purple-900">
+                        <span className="text-lg font-black text-purple-950">
                           S/ {prod.precio.toFixed(2)}
                         </span>
+                      </div>
+
+                      <h4 className="font-black text-slate-900 text-sm leading-snug">
+                        {prod.nombre}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                        {prod.descripcion}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-3 mt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditProdModal(prod);
+                        }}
+                        className="flex-1 bg-slate-50 hover:bg-purple-50 text-purple-900 border border-slate-200 hover:border-purple-300 font-extrabold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      >
+                        <Edit className="w-3.5 h-3.5 text-purple-700" />
+                        <span>Modificar Tarifa</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`¿Deseas eliminar el producto "${prod.nombre}" del catálogo?`)) {
+                            deleteProducto(prod.id);
+                            alert('✔ Balón eliminado del catálogo.');
+                          }
+                        }}
+                        className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 p-2 rounded-xl transition cursor-pointer"
+                        title="Eliminar Balón"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add Product Modal */}
+              {showAddProdModal && (
+                <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95">
+                    <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                      <h4 className="font-black text-base text-purple-950 flex items-center gap-2">
+                        <Flame className="w-4 h-4 text-purple-700" />
+                        <span>Registrar Nuevo Balón de Gas</span>
+                      </h4>
+                      <button onClick={() => setShowAddProdModal(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                    </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!newProdNombre || !newProdPrecio) return alert('Por favor ingresa nombre y precio.');
+                        addProducto({
+                          id: `prod-${Date.now()}`,
+                          nombre: newProdNombre.trim(),
+                          tag: newProdTag.trim() || '10kg',
+                          precio: parseFloat(newProdPrecio) || 0,
+                          disponible: true,
+                          descripcion: newProdDesc.trim() || 'Balón de gas doméstico e industrial garantizado por Llamagas.'
+                        });
+                        setShowAddProdModal(false);
+                        alert('✔ Balón registrado en el catálogo exitosamente.');
+                      }}
+                      className="space-y-3.5 text-xs"
+                    >
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Nombre del Balón:</label>
+                        <input
+                          type="text"
+                          required
+                          value={newProdNombre}
+                          onChange={(e) => setNewProdNombre(e.target.value)}
+                          placeholder="Ej: Balón Llamagas 15kg Especial"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Capacidad / Tag:</label>
+                          <input
+                            type="text"
+                            required
+                            value={newProdTag}
+                            onChange={(e) => setNewProdTag(e.target.value)}
+                            placeholder="10kg, 45kg, 5kg"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Precio de Venta (S/):</label>
+                          <input
+                            type="number"
+                            step="0.5"
+                            required
+                            value={newProdPrecio}
+                            onChange={(e) => setNewProdPrecio(e.target.value)}
+                            placeholder="50.00"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Descripción y Características:</label>
+                        <textarea
+                          rows={3}
+                          value={newProdDesc}
+                          onChange={(e) => setNewProdDesc(e.target.value)}
+                          placeholder="Detalles sobre uso residencial, tipo de válvula, rendimiento..."
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-semibold"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-2">
                         <button
                           type="button"
-                          onClick={() => {
-                            const nuevo = prompt(`Nuevo precio para ${prod.nombre}:`, prod.precio.toString());
-                            if (nuevo && !isNaN(parseFloat(nuevo))) {
-                              updateProducto({ ...prod, precio: parseFloat(nuevo) });
-                            }
-                          }}
-                          className="bg-purple-800 hover:bg-purple-900 text-white px-3 py-1.5 rounded-lg font-bold text-xs cursor-pointer"
+                          onClick={() => setShowAddProdModal(false)}
+                          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl cursor-pointer"
                         >
-                          Modificar Tarifa
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 bg-purple-800 hover:bg-purple-900 text-white font-black py-2.5 rounded-xl shadow-md cursor-pointer"
+                        >
+                          Guardar Balón
                         </button>
                       </div>
-                    </div>
-                  ))}
+                    </form>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Edit Product Modal */}
+              {editProdModal && (
+                <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95">
+                    <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                      <h4 className="font-black text-base text-purple-950 flex items-center gap-2">
+                        <Edit className="w-4 h-4 text-purple-700" />
+                        <span>Modificar Tarifa y Datos de Balón</span>
+                      </h4>
+                      <button onClick={() => setEditProdModal(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                    </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        updateProducto(editProdModal);
+                        setEditProdModal(null);
+                        alert('✔ Producto actualizado correctamente.');
+                      }}
+                      className="space-y-3.5 text-xs"
+                    >
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Nombre del Balón:</label>
+                        <input
+                          type="text"
+                          required
+                          value={editProdModal.nombre}
+                          onChange={(e) => setEditProdModal({ ...editProdModal, nombre: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Capacidad / Tag:</label>
+                          <input
+                            type="text"
+                            required
+                            value={editProdModal.tag}
+                            onChange={(e) => setEditProdModal({ ...editProdModal, tag: e.target.value })}
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Precio (S/):</label>
+                          <input
+                            type="number"
+                            step="0.5"
+                            required
+                            value={editProdModal.precio}
+                            onChange={(e) => setEditProdModal({ ...editProdModal, precio: parseFloat(e.target.value) || 0 })}
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Descripción:</label>
+                        <textarea
+                          rows={3}
+                          value={editProdModal.descripcion}
+                          onChange={(e) => setEditProdModal({ ...editProdModal, descripcion: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-semibold"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditProdModal(null)}
+                          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 bg-purple-800 hover:bg-purple-900 text-white font-black py-2.5 rounded-xl shadow-md cursor-pointer"
+                        >
+                          Guardar Cambios
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1503,7 +2368,44 @@ export const AdminPanel: React.FC = () => {
 
           {/* TAB 9: REPORTE CONTABLE */}
           {activeTab === 'reportes' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-6 printable-area">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-6 printable-area">
+              {/* Printable Header with Company Logo, Chuspa Tech logo, and Contacts */}
+              <div className="border-b-2 border-purple-900 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <img
+                    src={getAssetUrl(negocio.logoUrl)}
+                    alt={negocio.nombre}
+                    className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-sm"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                    }}
+                  />
+                  <div>
+                    <h2 className="text-xl font-black text-purple-950 uppercase tracking-tight">{negocio.nombre}</h2>
+                    <p className="text-xs text-purple-800 font-extrabold">{negocio.slogan}</p>
+                    <p className="text-[11px] text-slate-600 mt-0.5">📍 {negocio.direccion}</p>
+                    <p className="text-[11px] text-slate-500 font-bold">
+                      📞 Teléfonos: {negocio.telPrincipal} • {negocio.telSecundario} | WA: +{negocio.whatsapp}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center sm:items-end gap-2">
+                  <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-xl">
+                    <img src="/CHUSPITA-circulo.png" alt="La Chuspa Tech" className="w-8 h-8 rounded-full shadow-xs" />
+                    <div className="text-left">
+                      <span className="text-[10px] font-black text-purple-900 block leading-tight">Respaldado por La Chuspa Tech</span>
+                      <a href="https://www.lachuspaanuncios.com" target="_blank" rel="noreferrer" className="text-[9px] text-blue-700 font-bold hover:underline">
+                        www.lachuspaanuncios.com
+                      </a>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-bold">
+                    Fecha de Emisión: {new Date().toLocaleDateString('es-PE')} - {new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="text-lg font-black text-purple-950">
@@ -1526,7 +2428,7 @@ export const AdminPanel: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => window.print()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-black py-2 px-3.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md"
                   >
                     <Printer className="w-4 h-4" />
                     <span>Imprimir Reporte</span>
@@ -1722,6 +2624,147 @@ export const AdminPanel: React.FC = () => {
                 Registrar y Notificar Flota
               </button>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Modal for Previewing and Printing Factura / Boleta */}
+      {previewComprobante && (
+        <div className="fixed inset-0 z-[100000] bg-black/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl printable-area border border-slate-300 animate-in zoom-in-95 my-auto">
+            {/* Action Bar (Hidden on print) */}
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200 mb-4 no-print">
+              <span className="font-black text-purple-950 text-xs">
+                📄 Comprobante Electrónico SUNAT
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-black px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-sm"
+                >
+                  <Printer className="w-4 h-4 text-amber-300" />
+                  <span>Imprimir</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewComprobante(null)}
+                  className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Document Header */}
+            <div className="border border-slate-300 rounded-2xl p-4 mb-4 text-center">
+              <div className="flex justify-center mb-2">
+                <img
+                  src={getAssetUrl(negocio.logoUrl)}
+                  alt={negocio.nombre}
+                  className="w-14 h-14 rounded-xl object-cover border border-amber-400 shadow-xs"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                  }}
+                />
+              </div>
+              <h3 className="font-black text-base text-purple-950 uppercase leading-tight">
+                {negocio.nombre}
+              </h3>
+              <p className="text-[11px] text-slate-600 font-bold">{negocio.slogan}</p>
+              <p className="text-[10px] text-slate-500">📍 {negocio.direccion}</p>
+              <p className="text-[10px] text-slate-500">Tel: {negocio.telPrincipal} • WA: +{negocio.whatsapp}</p>
+
+              <div className="mt-3 py-2 px-3 bg-purple-50 border border-purple-200 rounded-xl">
+                <span className="text-[10px] font-black text-purple-900 block">R.U.C. 20608933211</span>
+                <span className="text-xs font-black text-purple-950 uppercase block">
+                  {previewComprobante.tipo}
+                </span>
+                <span className="text-xs font-mono font-black text-purple-800 block">
+                  {previewComprobante.numero}
+                </span>
+              </div>
+            </div>
+
+            {/* Customer Details */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] space-y-1 mb-4">
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Cliente / Razón Social:</span>
+                <strong className="text-slate-900">{previewComprobante.cliente}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">{previewComprobante.tipoDoc || 'DNI/RUC'}:</span>
+                <strong className="text-slate-900 font-mono">{previewComprobante.documento}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Dirección:</span>
+                <span className="text-slate-700">{previewComprobante.direccion}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Fecha / Hora:</span>
+                <span className="text-slate-700 font-semibold">{previewComprobante.fecha} - {previewComprobante.hora}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Repartidor de Entrega:</span>
+                <strong className="text-purple-900">🛵 {previewComprobante.repartidor}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Forma de Pago:</span>
+                <span className="text-slate-700 font-bold">{previewComprobante.metodoPago}</span>
+              </div>
+            </div>
+
+            {/* Products Table */}
+            <div className="border border-slate-200 rounded-xl overflow-hidden mb-4 text-xs">
+              <table className="w-full text-left">
+                <thead className="bg-slate-100 text-[10px] font-black uppercase text-slate-600">
+                  <tr>
+                    <th className="p-2">Cant.</th>
+                    <th className="p-2">Descripción</th>
+                    <th className="p-2 text-right">P. Unit</th>
+                    <th className="p-2 text-right">Importe</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-[11px]">
+                  {previewComprobante.items?.map((it: any, i: number) => (
+                    <tr key={i}>
+                      <td className="p-2 font-bold">{it.cantidad}</td>
+                      <td className="p-2 font-bold text-slate-800">{it.descripcion}</td>
+                      <td className="p-2 text-right">S/ {(it.precio / (it.cantidad || 1)).toFixed(2)}</td>
+                      <td className="p-2 text-right font-black text-slate-900">S/ {it.precio.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totals Breakdown */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1 mb-4">
+              <div className="flex justify-between text-slate-600">
+                <span>Op. Gravada:</span>
+                <span className="font-mono">S/ {(previewComprobante.total / 1.18).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>I.G.V. (18%):</span>
+                <span className="font-mono">S/ {(previewComprobante.total - (previewComprobante.total / 1.18)).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-base font-black text-purple-950 pt-1.5 border-t border-slate-200">
+                <span>IMPORTE TOTAL:</span>
+                <span className="font-mono text-purple-900">S/ {previewComprobante.total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Chuspa Tech Brand & Legal Footer */}
+            <div className="border-t border-slate-200 pt-3 text-center space-y-2">
+              <div className="flex items-center justify-center gap-2">
+                <img src="/CHUSPITA-circulo.png" alt="La Chuspa Tech" className="w-6 h-6 rounded-full" />
+                <span className="text-[10px] font-bold text-slate-500">
+                  Desarrollado y respaldado por <strong>La Chuspa Tech</strong> (<a href="https://www.lachuspaanuncios.com" target="_blank" rel="noreferrer" className="text-blue-600 underline">www.lachuspaanuncios.com</a>)
+                </span>
+              </div>
+              <p className="text-[9px] text-slate-400">
+                Representación impresa autorizada del comprobante electrónico. Consulte su validez en el portal oficial de SUNAT.
+              </p>
+            </div>
           </div>
         </div>
       )}

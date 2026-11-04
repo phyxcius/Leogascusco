@@ -2,49 +2,64 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 
 export const AlertPopups: React.FC = () => {
-  const { alertModal, closeAlertModal } = useApp();
+  const { alertModal, closeAlertModal, activeCustomerOrder, negocio } = useApp();
 
   if (!alertModal) return null;
 
+  const repartidorNombre = activeCustomerOrder?.repartidorNombre || 'Tu repartidor asignado';
+  const nombreNegocio = negocio.nombre || 'LeoGas Cusco';
+
   return (
-    <div className="fixed inset-0 z-[4000] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white max-w-sm w-full rounded-3xl p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[4000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white max-w-sm w-full rounded-3xl p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200 border-2 border-purple-200">
         {alertModal === 'en_camino' && (
           <div>
-            <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl mx-auto mb-3 shadow-inner">
+            <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl mx-auto mb-3 shadow-inner animate-bounce">
               🛵🔥
             </div>
-            <h3 className="text-xl font-black text-red-700 mb-1">
+            <span className="bg-red-100 text-red-700 font-black text-[10px] uppercase px-3 py-1 rounded-full inline-block mb-2">
+              Etapa 1: En Camino
+            </span>
+            <h3 className="text-xl font-black text-red-700 mb-1 leading-tight">
               ¡Tu Balón está en Camino!
             </h3>
-            <p className="text-xs text-slate-600 mb-5">
-              El repartidor de LeoGas Cusco ya salió de la base con tu pedido hacia tu dirección.
+            <p className="text-xs text-slate-700 mb-2 leading-relaxed">
+              <strong>{repartidorNombre}</strong> de <strong>{nombreNegocio}</strong> ya salió de la base hacia tu domicilio con tu pedido.
+            </p>
+            <p className="text-[11px] text-slate-400 mb-5">
+              Ten listo tu método de pago y el balón vacío si es con canje.
             </p>
             <button
               type="button"
               onClick={closeAlertModal}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 rounded-xl text-sm transition cursor-pointer shadow-md"
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-sm transition cursor-pointer shadow-md"
             >
-              Entendido 🗺️
+              ¡Excelente, estaré atento! 🗺️
             </button>
           </div>
         )}
 
         {alertModal === 'en_puerta' && (
           <div>
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto mb-3 shadow-inner">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto mb-3 shadow-inner animate-pulse">
               🚪🦁
             </div>
-            <h3 className="text-xl font-black text-emerald-700 mb-1">
+            <span className="bg-emerald-100 text-emerald-700 font-black text-[10px] uppercase px-3 py-1 rounded-full inline-block mb-2">
+              Etapa 2: Repartidor en Puerta
+            </span>
+            <h3 className="text-xl font-black text-emerald-700 mb-1 leading-tight">
               ¡Repartidor en tu Puerta!
             </h3>
-            <p className="text-xs text-slate-600 mb-5">
-              El repartidor de LeoGas Cusco ya llegó afuera de tu domicilio con tu balón de gas.
+            <p className="text-xs text-slate-700 mb-2 leading-relaxed">
+              ¡Tu repartidor <strong>{repartidorNombre}</strong> acaba de llegar afuera de tu domicilio con tu balón de gas!
+            </p>
+            <p className="text-[11px] text-emerald-600 font-bold mb-5">
+              🔔 Por favor sal a recibir tu balón. ¡Estamos listos para atenderte!
             </p>
             <button
               type="button"
               onClick={closeAlertModal}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-sm transition cursor-pointer shadow-md"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-sm transition cursor-pointer shadow-md"
             >
               Salir a Recibir ✔️
             </button>
@@ -56,16 +71,22 @@ export const AlertPopups: React.FC = () => {
             <div className="w-16 h-16 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-3xl mx-auto mb-3 shadow-inner">
               🦁✨
             </div>
-            <h3 className="text-xl font-black text-purple-900 mb-1">
-              ¡Pedido Finalizado con Éxito!
+            <span className="bg-purple-100 text-purple-800 font-black text-[10px] uppercase px-3 py-1 rounded-full inline-block mb-2">
+              Etapa 3: Entrega Exitosa
+            </span>
+            <h3 className="text-xl font-black text-purple-900 mb-1 leading-tight">
+              ¡Muchas Gracias por tu Compra!
             </h3>
-            <p className="text-xs text-slate-600 mb-5">
-              Tu pedido ha sido entregado correctamente. ¡Muchas gracias por confiar en LeoGas Cusco (Llamagas)!
+            <p className="text-xs text-slate-700 mb-3 leading-relaxed">
+              Tu pedido ha sido entregado exitosamente por <strong>{repartidorNombre}</strong>.
             </p>
+            <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3 text-xs text-purple-950 font-bold mb-5">
+              ❤️ En <strong>{nombreNegocio}</strong> te agradecemos por tu preferencia. ¡Que disfrutes de una cocina segura y rendidora!
+            </div>
             <button
               type="button"
               onClick={closeAlertModal}
-              className="w-full bg-purple-800 hover:bg-purple-900 text-white font-extrabold py-3 rounded-xl text-sm transition cursor-pointer shadow-md"
+              className="w-full bg-purple-800 hover:bg-purple-900 text-white font-black py-3 rounded-xl text-sm transition cursor-pointer shadow-md"
             >
               ¡Muchas Gracias! ✨
             </button>

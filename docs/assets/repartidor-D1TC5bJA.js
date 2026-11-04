@@ -1,0 +1,1 @@
+import{R as r,j as e,a,A as t}from"./index-B36ZgLjC.js";r.createRoot(document.getElementById("root")).render(e.jsxDEV(a.StrictMode,{children:e.jsxDEV(t,{initialPortal:"repartidor"},void 0,!1,{fileName:"/app/applet/src/pages/repartidor.tsx",lineNumber:8,columnNumber:5},void 0)},void 0,!1,{fileName:"/app/applet/src/pages/repartidor.tsx",lineNumber:7,columnNumber:3},void 0));
