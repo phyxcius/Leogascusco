@@ -116,8 +116,8 @@ export const B2BModal: React.FC<B2BModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[2000] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-y-auto">
+      <div className="bg-white w-full max-w-[94vw] xs:max-w-md sm:max-w-lg rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in fade-in duration-200 my-auto max-h-[88dvh] flex flex-col">
         {/* Header */}
         <div className="bg-slate-900 text-yellow-300 p-4 flex items-center justify-between border-b-2 border-yellow-500">
           <div className="flex items-center gap-2">

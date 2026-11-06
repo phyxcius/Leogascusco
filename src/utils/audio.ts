@@ -58,15 +58,34 @@ export function speakVoice(text: string) {
       utterance.lang = 'es-PE';
       utterance.rate = 1.02;
       utterance.pitch = 1.0;
+
+      const assignVoiceAndSpeak = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const esVoice =
+          voices.find((v) => v.lang === 'es-PE') ||
+          voices.find((v) => v.lang === 'es-419') ||
+          voices.find((v) => v.lang.startsWith('es'));
+        if (esVoice) {
+          utterance.voice = esVoice;
+        }
+        window.speechSynthesis.speak(utterance);
+      };
+
       const voices = window.speechSynthesis.getVoices();
-      const esVoice =
-        voices.find((v) => v.lang === 'es-PE') ||
-        voices.find((v) => v.lang === 'es-419') ||
-        voices.find((v) => v.lang.startsWith('es'));
-      if (esVoice) {
-        utterance.voice = esVoice;
+      if (voices.length > 0) {
+        assignVoiceAndSpeak();
+      } else {
+        // Mobile browsers load voices asynchronously
+        window.speechSynthesis.onvoiceschanged = () => {
+          assignVoiceAndSpeak();
+        };
+        // Fallback call in case onvoiceschanged does not fire
+        setTimeout(() => {
+          if (!window.speechSynthesis.speaking) {
+            assignVoiceAndSpeak();
+          }
+        }, 300);
       }
-      window.speechSynthesis.speak(utterance);
     }
   } catch {
     // Ignore speech errors

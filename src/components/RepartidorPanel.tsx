@@ -616,31 +616,83 @@ export const RepartidorPanel: React.FC = () => {
         </button>
       </header>
 
-      {/* DRIVER ALERT POPUP: CLIENT IS COMING OUT */}
+      {/* DRIVER ALERT POPUP: CLIENT IS COMING OUT - RESPONSIVE FOR CELULAR, TABLET, PC */}
       {orderConClienteSaliendo && (
-        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border-2 border-emerald-400 text-center animate-in zoom-in-95 space-y-3">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-inner animate-bounce">
-              🚶🚪
-            </div>
-            <span className="bg-emerald-100 text-emerald-800 font-black text-[10px] uppercase px-3 py-1 rounded-full inline-block">
-              ¡Aviso en Tiempo Real!
-            </span>
-            <h3 className="text-lg font-black text-slate-900 leading-tight">
-              ¡El Cliente ya está Saliendo a la Puerta!
-            </h3>
-            <p className="text-xs text-slate-600">
-              <strong>{orderConClienteSaliendo.cliente}</strong> presionó <em>"Salir a Recibir ✔️"</em>. Por favor ten listo el balón de gas (<strong>{orderConClienteSaliendo.producto || orderConClienteSaliendo.tipoBalon}</strong>) y su vuelto correspondiente (Monto: <strong>S/ {Number(orderConClienteSaliendo.montoCobro).toFixed(2)}</strong> - Pago: {orderConClienteSaliendo.metodoPago}).
-            </p>
+        <div className="fixed inset-0 z-[99999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-y-auto">
+          <div className="w-full max-w-[94vw] xs:max-w-md sm:max-w-lg md:max-w-xl bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl border-2 sm:border-4 border-emerald-400 text-center animate-in zoom-in-95 space-y-3.5 sm:space-y-4 relative my-auto max-h-[88dvh] sm:max-h-[86vh] overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+            {/* Close button */}
             <button
               type="button"
               onClick={() => {
                 setDismissedClienteSaliendo(orderConClienteSaliendo.id);
                 playSuccessChime();
               }}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs shadow-md transition cursor-pointer"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 sm:p-2.5 rounded-full transition cursor-pointer z-10 shadow-xs"
+              title="Cerrar notificación"
+              aria-label="Cerrar"
             >
-              👍 ¡Entendido, esperando en puerta!
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+
+            {/* Voice Agent Badge Indicator */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 text-[10px] sm:text-xs font-black shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+              <span>🎙️ LeoGas Agente de Voz Sincronizado</span>
+            </div>
+
+            <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl sm:text-4xl mx-auto shadow-inner animate-bounce">
+              🚶🚪
+            </div>
+
+            <span className="bg-emerald-100 text-emerald-800 font-black text-[10px] sm:text-xs uppercase px-3.5 py-1 rounded-full inline-block">
+              ¡Aviso Inmediato en Puerta!
+            </span>
+
+            <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 leading-tight">
+              ¡El Cliente ya está Saliendo a la Puerta!
+            </h3>
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-md mx-auto">
+              <strong>{orderConClienteSaliendo.cliente}</strong> presionó <em>"Salir a Recibir ✔️"</em>. Por favor ten listo el balón de gas y su comprobante.
+            </p>
+
+            {/* Structured Order Information Card */}
+            <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-left space-y-1.5 text-xs sm:text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600 font-bold">Cliente:</span>
+                <strong className="text-slate-900">{orderConClienteSaliendo.cliente}</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600 font-bold">Producto:</span>
+                <strong className="text-purple-950 font-black">{orderConClienteSaliendo.producto || orderConClienteSaliendo.tipoBalon}</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600 font-bold">Total a Cobrar:</span>
+                <strong className="text-emerald-700 font-black text-sm sm:text-base">S/ {Number(orderConClienteSaliendo.montoCobro).toFixed(2)}</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-600 font-bold">Método Pago:</span>
+                <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200 text-[11px] sm:text-xs">
+                  {orderConClienteSaliendo.metodoPago}
+                </span>
+              </div>
+              {orderConClienteSaliendo.direccion && (
+                <div className="flex justify-between items-start pt-1 border-t border-emerald-200 text-[11px] sm:text-xs">
+                  <span className="text-slate-600 font-bold">Dirección:</span>
+                  <span className="font-bold text-slate-800 text-right max-w-[220px]">{orderConClienteSaliendo.direccion}</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setDismissedClienteSaliendo(orderConClienteSaliendo.id);
+                playSuccessChime();
+              }}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 sm:py-4 px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base shadow-lg transition cursor-pointer min-h-[46px] flex items-center justify-center gap-2"
+            >
+              👍 ¡Entendido, esperando en la puerta!
             </button>
           </div>
         </div>

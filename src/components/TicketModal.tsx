@@ -47,8 +47,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-[3000] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white max-w-sm w-full rounded-2xl shadow-2xl p-5 font-mono text-xs text-slate-800 printable-area max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[3000] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-y-auto">
+      <div className="w-full max-w-[94vw] xs:max-w-sm sm:max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 font-mono text-xs text-slate-800 printable-area my-auto max-h-[88dvh] sm:max-h-[86vh] overflow-y-auto overscroll-contain">
         {/* Printable Ticket Box */}
         <div className="text-center border-b border-dashed border-slate-300 pb-3 mb-3">
           <div className="text-2xl mb-1">🦁</div>

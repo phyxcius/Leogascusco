@@ -243,8 +243,8 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     <div className="fixed inset-0 z-[2000] bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Re-send confirmation prompt modal */}
       {showResendPrompt && (
-        <div className="fixed inset-0 z-[3000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border-2 border-amber-400 text-center animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[3000] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white max-w-[94vw] xs:max-w-sm w-full rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border-2 border-amber-400 text-center animate-in zoom-in-95">
             <div className="w-14 h-14 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">
               ⚠️
             </div>

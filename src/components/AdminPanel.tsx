@@ -623,107 +623,6 @@ export const AdminPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Central Modal for Incoming Orders */}
-      {incomingOrderModal && (
-        <div className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border-4 border-yellow-400 text-left animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="w-10 h-10 rounded-full bg-yellow-100 text-yellow-800 flex items-center justify-center text-xl animate-bounce">
-                  🔔
-                </span>
-                <div>
-                  <h3 className="text-base font-black text-purple-950 leading-tight">
-                    ¡NUEVO PEDIDO ENTRANTE!
-                  </h3>
-                  <span className="text-[10px] bg-red-600 text-white font-black px-2 py-0.5 rounded-full uppercase">
-                    Atención Inmediata
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIncomingOrderModal(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="my-4 space-y-2.5 text-xs">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-bold">Cliente:</span>
-                  <strong className="text-slate-900">{incomingOrderModal.cliente}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-bold">Producto:</span>
-                  <strong className="text-purple-900 font-black">{incomingOrderModal.tipoBalon}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-bold">Total a Cobrar:</span>
-                  <strong className="text-emerald-700 font-black text-sm">S/ {incomingOrderModal.montoCobro}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-bold">Método Pago:</span>
-                  <span className="font-bold text-slate-700">{incomingOrderModal.metodoPago}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-bold">Dirección:</span>
-                  <span className="font-bold text-slate-800 text-right max-w-[220px]">{incomingOrderModal.direccion}</span>
-                </div>
-              </div>
-
-              {/* Assign Driver Immediately */}
-              <div>
-                <label className="text-[10px] font-black uppercase text-slate-500 block mb-1">
-                  🛵 Asignar Repartidor de Flota:
-                </label>
-                <select
-                  value={assignedDriverForIncoming}
-                  onChange={(e) => setAssignedDriverForIncoming(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800"
-                >
-                  <option value="">-- Seleccionar Repartidor Disponible --</option>
-                  {repartidores.map(r => (
-                    <option key={r.id} value={r.id}>
-                      {r.nombre} ({r.online ? 'En Ruta' : 'Desconectado'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setIncomingOrderModal(null)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-2.5 rounded-xl text-xs transition cursor-pointer"
-              >
-                Ver en Bandeja
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (assignedDriverForIncoming) {
-                    assignPedido(incomingOrderModal.id, assignedDriverForIncoming);
-                    alert(`✔ Pedido asignado exitosamente al repartidor.`);
-                    setIncomingOrderModal(null);
-                    setAssignedDriverForIncoming('');
-                  } else {
-                    alert('Por favor selecciona un repartidor para despachar el pedido.');
-                  }
-                }}
-                className="flex-1 bg-purple-800 hover:bg-purple-900 text-white font-black py-2.5 rounded-xl text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <Truck className="w-4 h-4 text-amber-300" />
-                <span>Asignar y Despachar</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Top Realtime Status Alert Bar */}
       <div className="bg-gradient-to-r from-purple-900 via-indigo-950 to-purple-900 text-white px-4 py-2.5 rounded-2xl flex items-center justify-between gap-3 shadow-sm border border-purple-800 mb-4 animate-in fade-in no-print">
         <div className="flex items-center gap-2 text-xs overflow-hidden">
@@ -3287,47 +3186,64 @@ export const AdminPanel: React.FC = () => {
         </main>
       </div>
 
-      {/* CENTRAL INCOMING ORDER ALERT MODAL */}
+      {/* CENTRAL INCOMING ORDER ALERT MODAL - RESPONSIVE FOR CELULAR, TABLET, PC */}
       {incomingOrderModal && (
-        <div className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white max-w-sm sm:max-w-md w-full rounded-3xl p-6 shadow-2xl border-2 border-yellow-400 text-center animate-in zoom-in-95 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-yellow-100 text-amber-600 flex items-center justify-center text-3xl mx-auto shadow-inner animate-bounce">
+        <div className="fixed inset-0 z-[99999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-y-auto">
+          <div className="w-full max-w-[94vw] xs:max-w-md sm:max-w-lg md:max-w-xl bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl border-2 sm:border-4 border-yellow-400 text-center animate-in zoom-in-95 space-y-3.5 sm:space-y-4 relative my-auto max-h-[88dvh] sm:max-h-[86vh] overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setIncomingOrderModal(null)}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 sm:p-2.5 rounded-full transition cursor-pointer z-10 shadow-xs"
+              title="Cerrar modal"
+              aria-label="Cerrar"
+            >
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+
+            {/* Voice Agent Badge Indicator */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-900 text-[10px] sm:text-xs font-black shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+              <span>🎙️ LeoGas Agente de Voz Sincronizado</span>
+            </div>
+
+            <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-yellow-100 text-amber-600 flex items-center justify-center text-3xl sm:text-4xl mx-auto shadow-inner animate-bounce">
               🔔🛵
             </div>
 
             <div>
-              <span className="bg-yellow-100 text-yellow-900 font-black text-[10px] uppercase px-3 py-1 rounded-full inline-block mb-1">
+              <span className="bg-yellow-100 text-yellow-900 font-black text-[10px] sm:text-xs uppercase px-3.5 py-1 rounded-full inline-block mb-1">
                 ¡Nuevo Pedido en Tiempo Real!
               </span>
-              <h3 className="text-lg font-black text-slate-900 leading-tight">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 leading-tight">
                 Orden Recibida de {incomingOrderModal.cliente}
               </h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
                 📍 {incomingOrderModal.direccion || 'Cusco'} • Hora: {incomingOrderModal.hora}
               </p>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-left text-xs space-y-1.5">
-              <div className="flex justify-between">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-left text-xs sm:text-sm space-y-1.5">
+              <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-bold">Producto:</span>
                 <strong className="text-purple-950 font-black">{incomingOrderModal.producto || incomingOrderModal.tipoBalon}</strong>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-bold">Cantidad:</span>
                 <strong className="text-slate-900">{incomingOrderModal.cantidad || 1} balón(es)</strong>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-bold">Total a Cobrar:</span>
-                <strong className="text-emerald-700 font-black text-sm">S/ {Number(incomingOrderModal.montoCobro).toFixed(2)}</strong>
+                <strong className="text-emerald-700 font-black text-sm sm:text-base">S/ {Number(incomingOrderModal.montoCobro).toFixed(2)}</strong>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-slate-500 font-bold">Forma de Pago:</span>
-                <span className="bg-purple-100 text-purple-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-purple-100 text-purple-900 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full">
                   {incomingOrderModal.metodoPago}
                 </span>
               </div>
               {incomingOrderModal.telefono && (
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200">
                   <span className="text-slate-500 font-bold">Teléfono:</span>
                   <a href={`tel:${incomingOrderModal.telefono}`} className="text-blue-600 font-bold hover:underline">
                     📞 {incomingOrderModal.telefono}
@@ -3336,14 +3252,14 @@ export const AdminPanel: React.FC = () => {
               )}
             </div>
 
-            <div className="space-y-2 text-left">
-              <label className="text-[10px] font-black uppercase text-slate-600 block">
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] sm:text-xs font-black uppercase text-slate-600 block">
                 Asignar Repartidor de Flota:
               </label>
               <select
                 value={assignedDriverForIncoming}
                 onChange={(e) => setAssignedDriverForIncoming(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-700 cursor-pointer"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 sm:p-3 text-xs sm:text-sm font-bold text-slate-800 focus:outline-purple-700 cursor-pointer min-h-[44px]"
               >
                 <option value="">-- Selecciona qué repartidor despacha --</option>
                 {repartidores.map((rep) => (
@@ -3354,18 +3270,18 @@ export const AdminPanel: React.FC = () => {
               </select>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setIncomingOrderModal(null)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs cursor-pointer transition"
+                className="w-full sm:flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 sm:py-3.5 px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm cursor-pointer transition min-h-[44px] flex items-center justify-center"
               >
                 Cerrar / Ver en Lista
               </button>
               <button
                 type="button"
                 onClick={handleAssignIncomingDriver}
-                className="flex-2 bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-900 hover:to-indigo-900 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full sm:flex-2 bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-900 hover:to-indigo-900 text-white font-black py-3 sm:py-3.5 px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm shadow-md transition cursor-pointer flex items-center justify-center gap-1.5 min-h-[44px]"
               >
                 <span>🛵 Asignar y Despachar</span>
               </button>
