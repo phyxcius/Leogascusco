@@ -10,14 +10,14 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCart, onOpenB2B }) => {
-  const { cartCount } = useApp();
+  const { cartCount, negocio } = useApp();
 
   const handleNotificationClick = () => {
     playChimeSound();
     if ('Notification' in window) {
       Notification.requestPermission().then((perm) => {
         if (perm === 'granted') {
-          new Notification('🦁 LeoGas Cusco', {
+          new Notification(`🦁 ${negocio.nombre || 'La Chuspa Tech'}`, {
             body: '¡Alertas sonoras y notificaciones activadas con éxito!'
           });
         }

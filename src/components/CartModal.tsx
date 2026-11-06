@@ -27,7 +27,8 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     clearCart,
     cartTotal,
     createPedido,
-    telefonos
+    telefonos,
+    negocio
   } = useApp();
 
   const [metodoPago, setMetodoPago] = useState<string>('Efectivo');
@@ -190,7 +191,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     }
 
     // Generate WhatsApp Text
-    let msg = `*🦁 ¡HOLA LEOGAS CUSCO! DESEO HACER UN PEDIDO:*\n\n`;
+    let msg = `*🚀 ¡HOLA ${(negocio.nombre || 'LA CHUSPA TECH').toUpperCase()}! DESEO HACER UN PEDIDO:*\n\n`;
     msg += `*👤 Cliente:* ${clienteName}\n`;
     msg += `*🛢️ Detalle:* ${detalleProductos}\n`;
     msg += `*💰 Total a Pagar:* S/ ${cartTotal.toFixed(2)}\n`;
@@ -201,7 +202,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     msg += `*⏰ Horario:* ${horarioEntrega}\n`;
     msg += `*🧾 Comprobante:* ${comprobanteDetalle}\n`;
     msg += `*📍 Dirección / GPS:* ${gpsUrl}\n\n`;
-    msg += `_Pedido registrado en el sistema LeoGas Cusco (Llamagas)._`;
+    msg += `_Pedido registrado en el sistema ${negocio.nombre || 'La Chuspa Tech'}._`;
 
     const targetUrl = `https://wa.me/${telefonos.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
     window.open(targetUrl, '_blank');
@@ -280,11 +281,15 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
         {/* Header */}
         <div className="bg-purple-900 text-white p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🦁</span>
+            <img
+              src={negocio.logoUrl || '/CHUSPITA-circulo.png'}
+              alt={negocio.nombre}
+              className="w-8 h-8 rounded-full object-cover bg-white p-0.5"
+            />
             <div>
-              <h3 className="font-black text-base leading-tight">Mi Pedido LeoGas Cusco</h3>
+              <h3 className="font-black text-base leading-tight">Mi Pedido {negocio.nombre || 'La Chuspa Tech'}</h3>
               <p className="text-[11px] text-yellow-300 font-bold">
-                Entrega rápida a domicilio en Cusco
+                {negocio.slogan || 'Entrega rápida a domicilio en Cusco'}
               </p>
             </div>
           </div>

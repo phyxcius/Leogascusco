@@ -8,7 +8,7 @@ interface TicketModalProps {
 }
 
 export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => {
-  const { activeCustomerOrder, carrito, cartTotal } = useApp();
+  const { activeCustomerOrder, carrito, cartTotal, negocio, telefonos } = useApp();
 
   if (!isOpen) return null;
 
@@ -37,12 +37,12 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
   };
 
   const handleShareWhatsApp = () => {
-    let msg = `*LEOGAS CUSCO - COMPROBANTE ELECTRÓNICO*\n`;
+    let msg = `*${(negocio.nombre || 'LA CHUSPA TECH').toUpperCase()} - COMPROBANTE ELECTRÓNICO*\n`;
     msg += `Serie: ${serie}\n`;
     msg += `Cliente: ${clienteNombre}\n`;
     msg += `Total Pagado: S/ ${total.toFixed(2)}\n`;
     msg += `Forma de Pago: ${metodoPago}\n`;
-    msg += `¡Gracias por su preferencia con LeoGas Cusco (Llamagas)!`;
+    msg += `¡Gracias por su preferencia con ${negocio.nombre || 'La Chuspa Tech'}!`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -51,18 +51,27 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
       <div className="w-full max-w-[94vw] xs:max-w-sm sm:max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 font-mono text-xs text-slate-800 printable-area my-auto max-h-[88dvh] sm:max-h-[86vh] overflow-y-auto overscroll-contain">
         {/* Printable Ticket Box */}
         <div className="text-center border-b border-dashed border-slate-300 pb-3 mb-3">
-          <div className="text-2xl mb-1">🦁</div>
+          <div className="flex justify-center mb-1.5">
+            <img
+              src={negocio.logoUrl || '/CHUSPITA-circulo.png'}
+              alt={negocio.nombre}
+              className="w-10 h-10 rounded-full object-cover border border-amber-400 bg-white"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/CHUSPITA-circulo.png';
+              }}
+            />
+          </div>
           <h2 className="font-black text-sm tracking-widest text-purple-950 uppercase">
-            LEOGAS CUSCO
+            {negocio.nombre || 'LA CHUSPA TECH'}
           </h2>
-          <p className="text-[10px] text-slate-600 font-bold">
-            DISTRIBUIDOR AUTORIZADO LLAMAGAS
+          <p className="text-[10px] text-slate-600 font-bold uppercase">
+            {negocio.slogan || 'PUBLICIDAD, TECNOLOGÍA & GAS'}
           </p>
           <p className="text-[10px] text-slate-500">R.U.C. N° 20601894521</p>
           <p className="text-[10px] text-slate-500">
-            Calle Garcilaso 210, Cusco - Perú
+            {negocio.direccion || 'Cusco - Perú'}
           </p>
-          <p className="text-[10px] text-slate-500">Central: (084) 501111 / 950 727 212</p>
+          <p className="text-[10px] text-slate-500">Central / WhatsApp: {telefonos.whatsapp || '969773064'}</p>
 
           <div className="mt-2 py-1 bg-slate-100 rounded text-[11px] font-black tracking-wider text-purple-900">
             *** {isFactura ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA ELECTRÓNICA'} ***
@@ -130,7 +139,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
         <div className="text-center text-[9px] text-slate-400 leading-tight mb-4">
           Autorizado mediante Resolución de Superintendencia SUNAT<br />
           Representación impresa del Comprobante Electrónico<br />
-          <strong>¡Gracias por su preferencia con LeoGas Cusco!</strong>
+          <strong>¡Gracias por su preferencia con {negocio.nombre || 'La Chuspa Tech'}!</strong>
         </div>
 
         {/* Non-print Buttons */}

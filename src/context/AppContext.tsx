@@ -168,9 +168,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
   const [productos, setProductos] = useState<Producto[]>(() => getStored('leogas_productos', INITIAL_PRODUCTOS));
   const [accesorios, setAccesorios] = useState<Accesorio[]>(() => getStored('leogas_accesorios', INITIAL_ACCESORIOS));
-  const [telefonos, setTelefonos] = useState<TelefonosConfig>(() => getStored('leogas_telefonos', INITIAL_TELEFONOS));
+  const [telefonos, setTelefonos] = useState<TelefonosConfig>(() => {
+    const stored = getStored<TelefonosConfig>('leogas_telefonos', INITIAL_TELEFONOS);
+    if (!stored || stored.tel1 === '950 727 212' || stored.whatsapp === '51969773064') {
+      return INITIAL_TELEFONOS;
+    }
+    return stored;
+  });
   const [negocio, setNegocio] = useState<NegocioIdentidad>(() => {
     const stored = getStored<NegocioIdentidad>('leogas_negocio', INITIAL_NEGOCIO);
+    if (!stored || stored.nombre === 'LeoGas Cusco' || !stored.nombre) {
+      return INITIAL_NEGOCIO;
+    }
     return { ...INITIAL_NEGOCIO, ...stored, igvPorcentaje: stored.igvPorcentaje || 18 };
   });
   const [repartidores, setRepartidores] = useState<Repartidor[]>(() => getStored('leogas_repartidores', INITIAL_REPARTIDORES));
@@ -212,7 +221,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
                 playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
               } else if (data.nextEtapa >= 3) {
                 setAlertModal('completado');
-                playAndSpeak("¡Muchas gracias por su compra en LeoGas Cusco! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.", true);
+                playAndSpeak(`¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`, true);
               }
             }
           } else if (data.type === 'CLIENTE_SALIENDO') {
@@ -321,7 +330,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       localStorage.setItem(stageKey, '3');
       setAlertModal('completado');
       playAndSpeak(
-        "¡Muchas gracias por su compra en LeoGas Cusco! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.",
+        `¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`,
         true
       );
     } else if (currentEtapa === 1 && lastSeen !== '1') {
@@ -382,6 +391,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const resetNegocio = () => {
     setNegocio(INITIAL_NEGOCIO);
     setTelefonos(INITIAL_TELEFONOS);
+    localStorage.setItem('leogas_negocio', JSON.stringify(INITIAL_NEGOCIO));
+    localStorage.setItem('leogas_telefonos', JSON.stringify(INITIAL_TELEFONOS));
   };
 
   const resetDesarrollador = () => {

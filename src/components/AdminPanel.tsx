@@ -157,7 +157,7 @@ export const AdminPanel: React.FC = () => {
   const [emitirRepartidor, setEmitirRepartidor] = useState('');
   const [emitirFormaPago, setEmitirFormaPago] = useState('Contado / Efectivo');
   const [emitirItems, setEmitirItems] = useState<{ descripcion: string; cantidad: number; precioUnitario: number }[]>([
-    { descripcion: 'Balón LeoGas 10kg Normal o Regular', cantidad: 1, precioUnitario: 50.0 }
+    { descripcion: 'Balón La Chuspa Tech 10kg Normal o Regular', cantidad: 1, precioUnitario: 50.0 }
   ]);
 
   // CRM State
@@ -273,14 +273,14 @@ export const AdminPanel: React.FC = () => {
     e.preventDefault();
     const parsedIgv = parseFloat(identidadIgv.toString()) || 18;
     updateNegocio({
-      nombre: identidadNombre.trim() || 'LeoGas Cusco',
-      slogan: identidadSlogan.trim() || 'Llamagas • El Moradito Rendidor',
-      logoUrl: identidadLogoUrl.trim() || '/1791513590376.jpg',
-      whatsapp: identidadWhatsapp.trim() || '51969773064',
-      telPrincipal: identidadTel1.trim() || '950 727 212',
-      telSecundario: identidadTel2.trim() || '984 285 500',
-      telFijo: identidadTelFijo.trim(),
-      direccion: identidadDireccion.trim() || 'Cusco, Perú',
+      nombre: identidadNombre.trim() || 'La Chuspa Tech',
+      slogan: identidadSlogan.trim() || 'Publicidad, Tecnología & Balones de Gas en Cusco',
+      logoUrl: identidadLogoUrl.trim() || '/CHUSPITA-circulo.png',
+      whatsapp: identidadWhatsapp.trim() || '969773064',
+      telPrincipal: identidadTel1.trim() || '969773064',
+      telSecundario: identidadTel2.trim() || '969773064',
+      telFijo: identidadTelFijo.trim() || '969773064',
+      direccion: identidadDireccion.trim() || 'Cusco - Perú',
       enlaceChuspa: 'https://www.lachuspaanuncios.com',
       igvPorcentaje: parsedIgv,
       facebookUrl: identidadFacebook.trim(),
@@ -307,43 +307,113 @@ export const AdminPanel: React.FC = () => {
     setAssignedDriverForIncoming('');
   };
 
-  // SUNAT / RENIEC Query Simulation with realistic taxpayer data
-  const handleConsultarSunatReniec = () => {
-    if (!emitirNumDoc.trim()) {
+  // SUNAT / RENIEC Query in Real Time via Official APIs
+  const handleConsultarSunatReniec = async () => {
+    const numDoc = emitirNumDoc.trim();
+    if (!numDoc) {
       alert('Ingresa el número de RUC (11 dígitos) o DNI (8 dígitos).');
       return;
     }
     setEmitirConsultando(true);
-    setTimeout(() => {
-      setEmitirConsultando(false);
+
+    const apiToken =
+      'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVkd2lub2JsaXRhc3ViYWxkZUBnbWFpbC5jb20iLCJqdGkiOiIxNzExZGRjNTc5M2ZhYjQ0In0.h1PcqQHzHBK6abr7ZGVkMeSTOSN49BWOWHzB7wpIDw8';
+
+    try {
       if (emitirTipo === 'FACTURA') {
-        const foundB2B = empresasB2B.find((e) => e.ruc === emitirNumDoc.trim());
+        if (numDoc.length !== 11) {
+          alert('El RUC de la empresa debe tener exactamente 11 dígitos.');
+          setEmitirConsultando(false);
+          return;
+        }
+
+        // 1. First check if already in local B2B database
+        const foundB2B = empresasB2B.find((e) => e.ruc === numDoc);
         if (foundB2B) {
           setEmitirRazonSocial(foundB2B.razonSocial);
           setEmitirDireccionFiscal(foundB2B.direccion || 'Av. El Sol 450, Cusco');
-          setEmitirEstadoSunat('ACTIVO - HABIDO');
-        } else if (emitirNumDoc.trim().length === 11) {
-          setEmitirRazonSocial('GASTRONOMÍA & SERVICIOS CUSCO S.A.C.');
-          setEmitirDireccionFiscal('Av. De La Cultura 1420, Wanchaq, Cusco');
-          setEmitirEstadoSunat('ACTIVO - HABIDO');
+          setEmitirEstadoSunat('ACTIVO - HABIDO (Padrón Local)');
+          setEmitirConsultando(false);
+          return;
+        }
+
+        // 2. Real query to SUNAT API
+        const res = await fetch(`https://api.apis.net.pe/v2/sunat/ruc?numero=${numDoc}`, {
+          headers: {
+            Authorization: apiToken,
+            Accept: 'application/json'
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.razonSocial) {
+            setEmitirRazonSocial(data.razonSocial);
+            if (data.direccion) setEmitirDireccionFiscal(data.direccion);
+            const estado = data.estado ? `${data.estado} - ${data.condicion || 'HABIDO'}` : 'ACTIVO - HABIDO';
+            setEmitirEstadoSunat(estado);
+            playSuccessChime();
+            alert(`✔ RUC verificado en SUNAT en tiempo real:\n${data.razonSocial}\nEstado: ${estado}`);
+          } else {
+            throw new Error('RUC no encontrado en padrón SUNAT');
+          }
         } else {
-          alert('Por favor verifica el número: el RUC de empresa debe constar de 11 dígitos.');
+          throw new Error('Error al consultar SUNAT');
         }
       } else {
-        const foundVip = clientesVIP.find((c) => c.documento === emitirNumDoc.trim());
+        // DNI - RENIEC
+        if (numDoc.length !== 8) {
+          alert('El DNI debe tener exactamente 8 dígitos numéricos.');
+          setEmitirConsultando(false);
+          return;
+        }
+
+        // 1. Check local VIP database
+        const foundVip = clientesVIP.find((c) => c.documento === numDoc);
         if (foundVip) {
           setEmitirRazonSocial(foundVip.nombre);
           setEmitirDireccionFiscal(foundVip.direccion || 'Cusco, Perú');
-          setEmitirEstadoSunat('DNI VÁLIDO (RENIEC)');
-        } else if (emitirNumDoc.trim().length === 8) {
-          setEmitirRazonSocial('QUISPE MAMANI JUAN CARLOS');
-          setEmitirDireccionFiscal('Calle Garcilaso 210, Cusco');
-          setEmitirEstadoSunat('DNI VÁLIDO (RENIEC)');
+          setEmitirEstadoSunat('DNI VÁLIDO (Padrón Local)');
+          setEmitirConsultando(false);
+          return;
+        }
+
+        // 2. Real query to RENIEC API
+        const res = await fetch(`https://api.apis.net.pe/v2/reniec/dni?numero=${numDoc}`, {
+          headers: {
+            Authorization: apiToken,
+            Accept: 'application/json'
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && (data.nombres || data.nombre)) {
+            const nombreCompleto =
+              data.nombre || `${data.nombres} ${data.apellidoPaterno || ''} ${data.apellidoMaterno || ''}`.trim();
+            setEmitirRazonSocial(nombreCompleto);
+            setEmitirEstadoSunat('DNI VÁLIDO (RENIEC EN VIVO)');
+            playSuccessChime();
+            alert(`✔ DNI verificado en RENIEC en tiempo real:\n${nombreCompleto}`);
+          } else {
+            throw new Error('DNI no encontrado en RENIEC');
+          }
         } else {
-          alert('El DNI debe tener 8 dígitos numéricos.');
+          throw new Error('Error al consultar RENIEC');
         }
       }
-    }, 600);
+    } catch (err: any) {
+      console.warn('Fallo consulta API:', err);
+      const manual = prompt(
+        'No se pudo conectar a la base de datos en línea. Ingresa el nombre o Razón Social manualmente:'
+      );
+      if (manual && manual.trim()) {
+        setEmitirRazonSocial(manual.trim());
+        setEmitirEstadoSunat('REGISTRADO MANUALMENTE');
+      }
+    } finally {
+      setEmitirConsultando(false);
+    }
   };
 
   // Emit Electronic Voucher connecting to SUNAT
@@ -353,14 +423,15 @@ export const AdminPanel: React.FC = () => {
       return;
     }
 
-    const currentTotal = emitirItems.reduce((acc, it) => acc + (it.cantidad * it.precioUnitario), 0);
+    const currentTotal = emitirItems.reduce((acc, it) => acc + it.cantidad * it.precioUnitario, 0);
     const igvTasa = (negocio.igvPorcentaje || 18) / 100;
     const subtotalCalc = currentTotal / (1 + igvTasa);
     const igvCalc = currentTotal - subtotalCalc;
 
-    const serieCorrelativo = emitirTipo === 'FACTURA'
-      ? `F001-000${Math.floor(100 + Math.random() * 900)}`
-      : `B001-000${Math.floor(100 + Math.random() * 900)}`;
+    const serieCorrelativo =
+      emitirTipo === 'FACTURA'
+        ? `F001-000${Math.floor(100 + Math.random() * 900)}`
+        : `B001-000${Math.floor(100 + Math.random() * 900)}`;
 
     const hora = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
     const fecha = new Date().toLocaleDateString('es-PE');
@@ -368,10 +439,10 @@ export const AdminPanel: React.FC = () => {
     const nuevoVenta = {
       fecha: `Hoy, ${hora}`,
       cliente: emitirRazonSocial,
-      productos: emitirItems.map(it => `${it.cantidad}x ${it.descripcion}`).join(', '),
+      productos: emitirItems.map((it) => `${it.cantidad}x ${it.descripcion}`).join(', '),
       total: currentTotal,
       pago: emitirFormaPago,
-      repartidorNombre: emitirRepartidor || 'Administración LeoGas',
+      repartidorNombre: emitirRepartidor || `Administración ${negocio.nombre || 'La Chuspa Tech'}`,
       comprobante: serieCorrelativo,
       documento: emitirNumDoc,
       tipoDoc: emitirTipo === 'FACTURA' ? ('RUC' as const) : ('DNI' as const),
@@ -392,8 +463,8 @@ export const AdminPanel: React.FC = () => {
       documento: emitirNumDoc,
       tipoDoc: emitirTipo === 'FACTURA' ? 'RUC' : 'DNI',
       direccion: emitirDireccionFiscal,
-      repartidor: emitirRepartidor || 'Administración LeoGas',
-      items: emitirItems.map(it => ({
+      repartidor: emitirRepartidor || `Administración ${negocio.nombre || 'La Chuspa Tech'}`,
+      items: emitirItems.map((it) => ({
         cantidad: it.cantidad,
         descripcion: it.descripcion,
         precio: it.cantidad * it.precioUnitario
@@ -955,7 +1026,7 @@ export const AdminPanel: React.FC = () => {
                         type="text"
                         value={identidadNombre}
                         onChange={(e) => setIdentidadNombre(e.target.value)}
-                        placeholder="LeoGas Cusco"
+                        placeholder="La Chuspa Tech"
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-purple-800"
                         required
                       />
@@ -1318,7 +1389,7 @@ export const AdminPanel: React.FC = () => {
                       setEmitirDireccionFiscal(pending.direccion || 'Cusco');
                     } else {
                       setEmitirItems([{
-                        descripcion: productos[0]?.nombre || 'Balón LeoGas 10kg Normal',
+                        descripcion: productos[0]?.nombre || 'Balón La Chuspa Tech 10kg Normal',
                         cantidad: 1,
                         precioUnitario: productos[0]?.precio || 50
                       }]);
@@ -1871,7 +1942,7 @@ export const AdminPanel: React.FC = () => {
                                       documento: cot.numDoc,
                                       tipoDoc: cot.tipoDoc,
                                       direccion: cot.direccion,
-                                      repartidor: cot.repartidorAsignado || 'Flota LeoGas Cusco',
+                                      repartidor: cot.repartidorAsignado || 'Flota La Chuspa Tech',
                                       items: cot.items.map(it => ({
                                         cantidad: it.cantidad,
                                         descripcion: it.descripcion,
@@ -3229,7 +3300,7 @@ export const AdminPanel: React.FC = () => {
             {/* Voice Agent Badge Indicator */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-900 text-[10px] sm:text-xs font-black shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-              <span>🎙️ LeoGas Agente de Voz Sincronizado</span>
+              <span>🎙️ {negocio.nombre || 'La Chuspa Tech'} Agente de Voz Sincronizado</span>
             </div>
 
             <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-yellow-100 text-amber-600 flex items-center justify-center text-3xl sm:text-4xl mx-auto shadow-inner animate-bounce">
@@ -3656,7 +3727,7 @@ export const AdminPanel: React.FC = () => {
                     onChange={(e) => setEmitirRepartidor(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 font-bold text-slate-700"
                   >
-                    <option value="">🛵 Administración LeoGas (Directo)</option>
+                    <option value="">🛵 Administración {negocio.nombre || 'La Chuspa Tech'} (Directo)</option>
                     {repartidores.map((r) => (
                       <option key={r.id} value={r.nombre}>
                         🛵 {r.nombre} ({r.vehiculo || 'Moto'})
@@ -3860,8 +3931,8 @@ export const AdminPanel: React.FC = () => {
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 font-bold"
                 >
                   <option value="Balón Industrial 45kg GLP">Balón Industrial 45kg GLP (S/ 175)</option>
-                  <option value="Balón LeoGas 10kg Normal">Balón LeoGas 10kg Normal (S/ 50)</option>
-                  <option value="Balón LeoGas 10kg Premium">Balón LeoGas 10kg Premium (S/ 52)</option>
+                  <option value="Balón La Chuspa Tech 10kg Normal">Balón La Chuspa Tech 10kg Normal (S/ 50)</option>
+                  <option value="Balón La Chuspa Tech 10kg Premium">Balón La Chuspa Tech 10kg Premium (S/ 52)</option>
                   <option value="Regulador Premium + Manguera Reforzada">Regulador Premium + Manguera (S/ 48)</option>
                 </select>
               </div>

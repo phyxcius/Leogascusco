@@ -15,16 +15,16 @@ import {
 export const INITIAL_PRODUCTOS: Producto[] = [
   {
     id: "gas-1",
-    nombre: "Balón LeoGas 10kg Normal o Regular",
+    nombre: "Balón La Chuspa Tech 10kg Normal o Regular",
     tag: "El Moradito Rendidor",
-    descripcion: "Balón sellado Llamagas de 10kg con precinto de seguridad garantizado y peso exacto.",
+    descripcion: "Balón sellado de 10kg con precinto de seguridad garantizado y peso exacto.",
     precio: 50,
     disponible: true,
     imagen: "/1791513590376.jpg"
   },
   {
     id: "gas-2",
-    nombre: "Balón Gas Premium 10kg",
+    nombre: "Balón Gas Premium 10kg La Chuspa Tech",
     tag: "Máximo Rendimiento",
     descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
     precio: 55,
@@ -33,7 +33,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
   },
   {
     id: "gas-3",
-    nombre: "Balón LeoGas 45kg Industrial",
+    nombre: "Balón La Chuspa Tech 45kg Industrial",
     tag: "Comercial / B2B",
     descripcion: "Balón industrial de 45kg ideal para pollerías, chifas, restaurantes, panaderías y hoteles.",
     precio: 175,
@@ -74,27 +74,27 @@ export const INITIAL_ACCESORIOS: Accesorio[] = [
 ];
 
 export const INITIAL_TELEFONOS: TelefonosConfig = {
-  whatsapp: "51969773064",
-  tel1: "950 727 212",
-  tel2: "984 285 500",
-  tel3: "(084) 501111"
+  whatsapp: "969773064",
+  tel1: "969773064",
+  tel2: "969773064",
+  tel3: "969773064"
 };
 
 export const INITIAL_NEGOCIO: NegocioIdentidad = {
-  nombre: "LeoGas Cusco",
-  slogan: "Llamagas • El Moradito Rendidor",
-  logoUrl: "/1791513590376.jpg",
-  whatsapp: "51969773064",
-  telPrincipal: "950 727 212",
-  telSecundario: "984 285 500",
-  telFijo: "(084) 501111",
-  direccion: "Av. El Sol 450, Cusco",
+  nombre: "La Chuspa Tech",
+  slogan: "Publicidad, Tecnología & Balones de Gas en Cusco",
+  logoUrl: "/CHUSPITA-circulo.png",
+  whatsapp: "969773064",
+  telPrincipal: "969773064",
+  telSecundario: "969773064",
+  telFijo: "969773064",
+  direccion: "Cusco - Perú",
   enlaceChuspa: "https://www.lachuspaanuncios.com",
   igvPorcentaje: 18,
-  facebookUrl: "https://facebook.com/leogascusco",
-  instagramUrl: "https://instagram.com/leogascusco",
-  tiktokUrl: "https://tiktok.com/@leogascusco",
-  googleReviewUrl: "https://maps.google.com/?cid=leogascusco"
+  facebookUrl: "https://facebook.com/lachuspaanuncios",
+  instagramUrl: "https://instagram.com/lachuspaanuncios",
+  tiktokUrl: "https://tiktok.com/@lachuspaanuncios",
+  googleReviewUrl: "https://www.lachuspaanuncios.com"
 };
 
 
@@ -187,7 +187,7 @@ export const INITIAL_CLIENTES_VIP: ClienteVIP[] = [
     telefono: "984 285 500",
     direccion: "Calle Garcilaso 210, Cusco",
     pedidosTotales: 22,
-    notas: "Cliente preferencial LeoGas Cusco."
+    notas: "Cliente preferencial La Chuspa Tech."
   }
 ];
 
@@ -216,7 +216,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
     id: "cmd-1792599166780",
     repartidorId: "rep-2",
     repartidorNombre: "Carlos",
-    tipoBalon: "Balón LeoGas 10kg Normal",
+    tipoBalon: "Balón La Chuspa Tech 10kg Normal",
     montoCobro: "50.00",
     metodoPago: "Efectivo",
     tipoComprobante: "Boleta",
@@ -236,7 +236,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
     id: "cmd-1792600533663",
     repartidorId: "rep-3",
     repartidorNombre: "Jorge",
-    tipoBalon: "Balón LeoGas 45kg Industrial (x2)",
+    tipoBalon: "Balón La Chuspa Tech 45kg Industrial (x2)",
     montoCobro: "350.00",
     metodoPago: "Crédito B2B (15 días)",
     tipoComprobante: "Factura",
@@ -274,7 +274,7 @@ export const INITIAL_VENTAS: VentaRegistro[] = [
   {
     fecha: "Hoy, 11:15 a.m.",
     cliente: "Carmen Delgado",
-    productos: "Balón LeoGas 10kg Normal",
+    productos: "Balón La Chuspa Tech 10kg Normal",
     total: 50,
     pago: "Efectivo",
     repartidorId: "rep-2",
@@ -306,7 +306,7 @@ export const INITIAL_VENTAS: VentaRegistro[] = [
   {
     fecha: "Ayer, 04:20 p.m.",
     cliente: "Chifa Hong Kong",
-    productos: "Balón LeoGas 45kg Industrial (x2)",
+    productos: "Balón La Chuspa Tech 45kg Industrial (x2)",
     total: 340,
     pago: "Crédito B2B",
     repartidorId: "rep-3",
@@ -330,7 +330,7 @@ export const INITIAL_CRM_PLANTILLAS: CRMPlantilla[] = [
     titulo: "Cupón Descuento Recarga de Gas S/ 3.00",
     descripcion: "Envía cupón promocional a clientes del mes para incentivar su recompra.",
     icono: "📢",
-    plantillaTexto: "¡Hola {cliente}! 🦁 En LeoGas Cusco premiamos tu fidelidad. Presenta este mensaje y obtén S/ 3.00 de descuento en tu próximo Balón Moradito de 10kg con delivery express gratis a tu puerta. Válido hasta fin de mes. Pídelo al 950 727 212 o WhatsApp."
+    plantillaTexto: "¡Hola {cliente}! 🦁 En La Chuspa Tech premiamos tu fidelidad. Presenta este mensaje y obtén S/ 3.00 de descuento en tu próximo balón de gas con delivery express gratis a tu puerta. Válido hasta fin de mes. Pídelo al 969773064 o WhatsApp."
   },
   {
     id: "crm-mkt-2",
@@ -339,7 +339,7 @@ export const INITIAL_CRM_PLANTILLAS: CRMPlantilla[] = [
     titulo: "Lanzamiento Balón Premium Alto Rendimiento",
     descripcion: "Notifica sobre nuevos balones con válvula ultra-sellada y mayor pureza GLP.",
     icono: "🔥",
-    plantillaTexto: "¡Novedad para tu cocina, {cliente}! 🔥 Llegó el nuevo Balón LeoGas Premium de máxima llama azul y duración prolongada. Olvídate del hollín y ahorra hasta 15% más de gas. ¡Pídelo hoy y te lo llevamos en 15 minutos en Cusco!"
+    plantillaTexto: "¡Novedad para tu cocina, {cliente}! 🔥 Llegó el nuevo Balón La Chuspa Tech Premium de máxima llama azul y duración prolongada. Olvídate del hollín y ahorra hasta 15% más de gas. ¡Pídelo hoy y te lo llevamos en 15 minutos en Cusco!"
   },
   {
     id: "crm-mkt-3",
@@ -348,7 +348,7 @@ export const INITIAL_CRM_PLANTILLAS: CRMPlantilla[] = [
     titulo: "Recordatorio Recurrente de Recarga (25 a 30 Días)",
     descripcion: "Aviso preventivo para que el hogar o restaurante no se quede sin gas.",
     icono: "⏰",
-    plantillaTexto: "Estimado(a) {cliente}, hace aproximadamente 25 días que llevamos tu último balón de gas. 🦁 Para que nunca te falte gas en casa a la hora de cocinar, ¿deseas que te programemos una recarga preventiva hoy? Responde 'SÍ' y un repartidor saldrá a tu domicilio."
+    plantillaTexto: "Estimado(a) {cliente}, hace aproximadamente 25 días que llevamos tu último balón de gas. 🦁 Para que nunca te falte gas en casa a la hora de cocinar, ¿deseas que te programemos una recarga preventiva hoy? Responde 'SÍ' al 969773064 y un repartidor saldrá a tu domicilio."
   },
 
   // 2. UTILIDAD (actualización, confirmación, recordatorios de pago)
@@ -377,7 +377,7 @@ export const INITIAL_CRM_PLANTILLAS: CRMPlantilla[] = [
     titulo: "Recordatorio de Pago de Crédito B2B",
     descripcion: "Aviso cordial sobre fecha de vencimiento de facturas a cuenta 15/30 días.",
     icono: "💳",
-    plantillaTexto: "Estimados amigos de {empresa}, un saludo cordial de LeoGas Cusco. Les recordamos que la Factura {factura} por el monto de S/ {monto} vence el próximo {fechaVencimiento}. Agradecemos coordinar la transferencia vía BCP / Interbank o con nuestro cobrador autorizado."
+    plantillaTexto: "Estimados amigos de {empresa}, un saludo cordial de La Chuspa Tech. Les recordamos que la Factura {factura} por el monto de S/ {monto} vence el próximo {fechaVencimiento}. Agradecemos coordinar la transferencia vía BCP / Interbank o al 969773064."
   },
 
   // 3. AUTENTICACIÓN (OTP, verificaciones)
@@ -388,7 +388,7 @@ export const INITIAL_CRM_PLANTILLAS: CRMPlantilla[] = [
     titulo: "Código OTP de Seguridad para Pedido Web",
     descripcion: "Código temporal para validar el número de teléfono del cliente.",
     icono: "📱",
-    plantillaTexto: "LeoGas Cusco: Tu código de verificación de seguridad es: {otp}. No compartas este código con nadie. Validez de 5 minutos."
+    plantillaTexto: "La Chuspa Tech: Tu código de verificación de seguridad es: {otp}. No compartas este código con nadie. Validez de 5 minutos."
   },
   {
     id: "crm-auth-2",
@@ -408,16 +408,16 @@ export const INITIAL_CRM_PLANTILLAS: CRMPlantilla[] = [
     titulo: "Revisión Técnica de Fugas GRATIS (72 Horas)",
     descripcion: "Inspección gratuita de válvula, manguera y seguridad tras la instalación.",
     icono: "🛡️",
-    plantillaTexto: "Estimado(a) {cliente}, en LeoGas tu seguridad es primero. Recuerda que tu compra incluye REVISIÓN TÉCNICA DE FUGAS GRATIS durante las primeras 72 horas. Si notas olor a gas o llama amarilla, escríbenos de inmediato y un técnico acudirá sin costo alguno."
+    plantillaTexto: "Estimado(a) {cliente}, en La Chuspa Tech tu seguridad es primero. Recuerda que tu compra incluye REVISIÓN TÉCNICA DE FUGAS GRATIS durante las primeras 72 horas. Si notas olor a gas o llama amarilla, escríbenos de inmediato al 969773064 y un técnico acudirá sin costo alguno."
   },
   {
     id: "crm-serv-2",
     categoria: "SERVICIO",
     subtipo: "garantía",
     titulo: "Certificado de Garantía de Peso Exacto y Precinto",
-    descripcion: "Garantía de calidad del GLP Llamagas en Cusco.",
+    descripcion: "Garantía de calidad de La Chuspa Tech en Cusco.",
     icono: "🦁",
-    plantillaTexto: "🦁 LeoGas Cusco Garantizado: Tu balón cuenta con precinto termocontraíble intacto de Llamagas y prueba hidráulica vigente. Cualquier consulta de instalación de regulador premium, estamos a tu servicio al 950 727 212."
+    plantillaTexto: "🦁 La Chuspa Tech Garantizado: Tu balón cuenta con precinto de seguridad intacto y prueba hidráulica vigente. Cualquier consulta de instalación de regulador premium, estamos a tu servicio al 969773064."
   }
 ];
 
@@ -477,7 +477,7 @@ export const INITIAL_COTIZACIONES: CotizacionCRM[] = [
     fechaProgramada: "2026-11-04",
     horaProgramada: "03:00 p.m.",
     items: [
-      { descripcion: "Balón LeoGas 10kg Normal", cantidad: 6, precioUnitario: 50.0, total: 300.0 },
+      { descripcion: "Balón La Chuspa Tech 10kg Normal", cantidad: 6, precioUnitario: 50.0, total: 300.0 },
       { descripcion: "Válvula Premium Anti-Fugas", cantidad: 2, precioUnitario: 35.0, total: 70.0 }
     ],
     subtotal: 313.56,

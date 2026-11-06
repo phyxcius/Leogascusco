@@ -8,7 +8,7 @@ interface B2BModalProps {
 }
 
 export const B2BModal: React.FC<B2BModalProps> = ({ isOpen, onClose }) => {
-  const { empresasB2B, addEmpresaB2B, createPedido, telefonos } = useApp();
+  const { empresasB2B, addEmpresaB2B, createPedido, telefonos, negocio } = useApp();
 
   const [ruc, setRuc] = useState<string>('');
   const [razonSocial, setRazonSocial] = useState<string>('');
@@ -90,7 +90,7 @@ export const B2BModal: React.FC<B2BModalProps> = ({ isOpen, onClose }) => {
     createPedido({
       tipoVenta: 'mayorista_b2b',
       cliente: empresaNombre,
-      tipoBalon: `${cantidad45}x Balón LeoGas 45kg Industrial (B2B)`,
+      tipoBalon: `${cantidad45}x Balón ${negocio.nombre || 'La Chuspa Tech'} 45kg Industrial (B2B)`,
       montoCobro: totalB2B.toFixed(2),
       metodoPago: condicionPago,
       tipoComprobante: `Factura Electrónica (RUC: ${ruc})`,
@@ -98,7 +98,7 @@ export const B2BModal: React.FC<B2BModalProps> = ({ isOpen, onClose }) => {
     });
 
     // WhatsApp format
-    let msg = `*🏢 ¡PEDIDO B2B / EMPRESAS - LEOGAS CUSCO!*\n\n`;
+    let msg = `*🏢 ¡PEDIDO B2B / EMPRESAS - ${(negocio.nombre || 'LA CHUSPA TECH').toUpperCase()}!*\n\n`;
     msg += `*🏢 Empresa:* ${empresaNombre}\n`;
     msg += `*📄 RUC:* ${ruc}\n`;
     msg += `*🛢️ Detalle:* ${cantidad45} Balones de 45kg Industrial\n`;
@@ -107,7 +107,7 @@ export const B2BModal: React.FC<B2BModalProps> = ({ isOpen, onClose }) => {
     msg += `*📋 Condición de Pago:* ${condicionPago}\n`;
     msg += `*📍 Dirección de Despacho:* ${direccion || 'Coordinar con planta'}\n`;
     if (telefono) msg += `*📞 Contacto:* ${telefono}\n`;
-    msg += `\n_Despacho prioritario comercial LeoGas Cusco (Llamagas)._`;
+    msg += `\n_Despacho prioritario comercial ${negocio.nombre || 'La Chuspa Tech'}._`;
 
     const targetUrl = `https://wa.me/${telefonos.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
     window.open(targetUrl, '_blank');
@@ -185,7 +185,7 @@ export const B2BModal: React.FC<B2BModalProps> = ({ isOpen, onClose }) => {
           <div className="bg-yellow-50 border border-yellow-300 p-3.5 rounded-2xl flex items-center justify-between">
             <div>
               <span className="font-black text-slate-900 text-sm block">
-                Balón LeoGas 45kg Industrial
+                Balón {negocio.nombre || 'La Chuspa Tech'} 45kg Industrial
               </span>
               <span className="text-[11px] text-amber-800 font-bold">
                 Tarifa corporativa pactada: S/ {precio45.toFixed(2)} c/u

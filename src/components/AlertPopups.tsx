@@ -22,7 +22,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
   useEffect(() => {
     if (alertModal === 'completado') {
       playAndSpeak(
-        `¡Muchas gracias por su compra en ${negocio.nombre || 'LeoGas Cusco'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`,
+        `¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`,
         true
       );
     } else if (alertModal === 'en_puerta') {
@@ -49,8 +49,9 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
 
   if (!alertModal) return null;
 
-  const repartidorNombre = activeCustomerOrder?.repartidorNombre || 'Repartidor asignado de LeoGas';
-  const nombreNegocio = negocio.nombre || 'LeoGas Cusco';
+  const repartidorNombre =
+    activeCustomerOrder?.repartidorNombre || `Repartidor asignado de ${negocio.nombre || 'La Chuspa Tech'}`;
+  const nombreNegocio = negocio.nombre || 'La Chuspa Tech';
 
   const handleSalirARecibir = () => {
     if (activeCustomerOrder?.id) {
@@ -79,7 +80,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
         {/* Voice Agent Badge Indicator */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-900 text-[10px] sm:text-xs font-black mb-2 shadow-2xs">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-          <span>🎙️ LeoGas Agente de Voz Sincronizado</span>
+          <span>🎙️ {negocio.nombre || 'La Chuspa Tech'} Agente de Voz Sincronizado</span>
         </div>
 
         {/* ================= ETAPA 0: ASIGNANDO REPARTIDOR ================= */}
