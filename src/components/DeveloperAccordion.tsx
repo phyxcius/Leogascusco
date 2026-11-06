@@ -89,7 +89,12 @@ export const DeveloperAccordion: React.FC = () => {
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === devPassword || passwordInput === 'leogas2026' || passwordInput === 'admin123') {
+    if (
+      passwordInput === devPassword ||
+      passwordInput === 'lachuspatech2026' ||
+      passwordInput === 'leogas2026' ||
+      passwordInput === 'admin123'
+    ) {
       setIsUnlocked(true);
       setPasswordError(false);
       setPasswordInput('');
@@ -329,7 +334,7 @@ export const DeveloperAccordion: React.FC = () => {
                         setPasswordInput(e.target.value);
                         setPasswordError(false);
                       }}
-                      placeholder="Ingresa la clave (Ej: leogas2026)"
+                      placeholder="••••••••"
                       className={`w-full bg-slate-50 border rounded-xl p-3 pr-10 text-xs font-bold text-slate-800 focus:outline-purple-800 transition ${
                         passwordError ? 'border-red-500 bg-red-50' : 'border-slate-300'
                       }`}
@@ -347,7 +352,7 @@ export const DeveloperAccordion: React.FC = () => {
                   {passwordError && (
                     <p className="text-[11px] text-red-600 font-bold mt-1.5 flex items-center gap-1">
                       <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span>Clave incorrecta. Clave por defecto del sistema: <strong>leogas2026</strong></span>
+                      <span>Clave incorrecta. Acceso restringido exclusivamente al desarrollador.</span>
                     </p>
                   )}
                 </div>
@@ -362,8 +367,9 @@ export const DeveloperAccordion: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-left text-[11px] text-amber-900">
-                  💡 <strong>Clave por defecto:</strong> <code className="bg-amber-200/60 px-1.5 py-0.5 rounded font-mono font-bold">leogas2026</code>. Podrás cambiarla una vez desbloqueado.
+                <div className="bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Acceso seguro protegido. Credenciales privadas del desarrollador.</span>
                 </div>
               </form>
             </div>
