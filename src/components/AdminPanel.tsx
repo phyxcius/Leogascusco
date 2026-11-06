@@ -36,13 +36,15 @@ import {
   Minimize2,
   Bell,
   Tag,
-  Package
+  Package,
+  Code
 } from 'lucide-react';
 import L from 'leaflet';
 import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido, CotizacionCRM } from '../types/index';
 import { getPageUrl, getAssetUrl } from '../utils/assets';
 import { BrandBadge } from './BrandBadge';
 import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
+import { DeveloperAccordion } from './DeveloperAccordion';
 
 export const AdminPanel: React.FC = () => {
   const {
@@ -93,7 +95,7 @@ export const AdminPanel: React.FC = () => {
 
   // Current tab
   const [activeTab, setActiveTab] = useState<
-    'pedidos' | 'identidad' | 'facturacion' | 'crm' | 'b2b' | 'liquidacion' | 'clientes' | 'accesorios' | 'productos' | 'telefonos' | 'gps' | 'reportes'
+    'pedidos' | 'identidad' | 'facturacion' | 'crm' | 'b2b' | 'liquidacion' | 'clientes' | 'accesorios' | 'productos' | 'telefonos' | 'gps' | 'reportes' | 'desarrollador'
   >('pedidos');
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -666,7 +668,8 @@ export const AdminPanel: React.FC = () => {
             { id: 'productos', label: 'Balones y Precios', icon: Flame },
             { id: 'telefonos', label: 'Teléfonos de Contacto', icon: Phone },
             { id: 'gps', label: 'Repartidores & Flota', icon: Truck },
-            { id: 'reportes', label: 'Reporte Contable', icon: BarChart3 }
+            { id: 'reportes', label: 'Reporte Contable', icon: BarChart3 },
+            { id: 'desarrollador', label: '🛠️ Zona Desarrollador', icon: Code }
           ].map((tab) => {
             const Icon = tab.icon;
             const isSel = activeTab === tab.id;
@@ -1280,6 +1283,9 @@ export const AdminPanel: React.FC = () => {
                   </button>
                 </div>
               </form>
+
+              {/* DEVELOPER ACCORDION (GITHUB TOKEN & SYSTEM FACTORY RESET) */}
+              <DeveloperAccordion />
             </div>
           )}
 
@@ -3181,6 +3187,25 @@ export const AdminPanel: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* TAB: ZONA DESARROLLADOR */}
+          {activeTab === 'desarrollador' && (
+            <div className="space-y-4">
+              <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-sm border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <span className="bg-amber-400 text-slate-950 font-black text-[10px] uppercase px-2.5 py-0.5 rounded-full inline-block mb-1">
+                    Panel Técnico & GitHub
+                  </span>
+                  <h3 className="text-xl font-black">Zona del Desarrollador</h3>
+                  <p className="text-xs text-slate-300 mt-1">
+                    Gestión del Token Personal de GitHub, sincronización con GitHub Pages y reseteo general del sistema protegido por clave.
+                  </p>
+                </div>
+              </div>
+
+              <DeveloperAccordion />
             </div>
           )}
         </main>

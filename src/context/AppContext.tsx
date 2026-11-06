@@ -65,6 +65,8 @@ interface AppContextType {
   negocio: NegocioIdentidad;
   updateNegocio: (n: Partial<NegocioIdentidad>) => void;
   resetNegocio: () => void;
+  resetDesarrollador: () => void;
+  resetPedidosYVentas: () => void;
 
   // Fleet
   repartidores: Repartidor[];
@@ -380,6 +382,64 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const resetNegocio = () => {
     setNegocio(INITIAL_NEGOCIO);
     setTelefonos(INITIAL_TELEFONOS);
+  };
+
+  const resetDesarrollador = () => {
+    setProductos(INITIAL_PRODUCTOS);
+    setAccesorios(INITIAL_ACCESORIOS);
+    setTelefonos(INITIAL_TELEFONOS);
+    setNegocio(INITIAL_NEGOCIO);
+    setRepartidores(INITIAL_REPARTIDORES);
+    setEmpresasB2B(INITIAL_EMPRESAS_B2B);
+    setClientesVIP(INITIAL_CLIENTES_VIP);
+    setPedidos(INITIAL_PEDIDOS);
+    setVentas(INITIAL_VENTAS);
+    setCrmPlantillas(INITIAL_CRM_PLANTILLAS);
+    setCotizaciones(INITIAL_COTIZACIONES);
+    setCarrito({});
+    setActiveCustomerOrderId(null);
+    setAlertModal(null);
+
+    localStorage.setItem('leogas_productos', JSON.stringify(INITIAL_PRODUCTOS));
+    localStorage.setItem('leogas_accesorios', JSON.stringify(INITIAL_ACCESORIOS));
+    localStorage.setItem('leogas_telefonos', JSON.stringify(INITIAL_TELEFONOS));
+    localStorage.setItem('leogas_negocio', JSON.stringify(INITIAL_NEGOCIO));
+    localStorage.setItem('leogas_repartidores', JSON.stringify(INITIAL_REPARTIDORES));
+    localStorage.setItem('leogas_empresas_b2b', JSON.stringify(INITIAL_EMPRESAS_B2B));
+    localStorage.setItem('leogas_clientes_vip', JSON.stringify(INITIAL_CLIENTES_VIP));
+    localStorage.setItem('leogas_pedidos', JSON.stringify(INITIAL_PEDIDOS));
+    localStorage.setItem('leogas_ventas', JSON.stringify(INITIAL_VENTAS));
+    localStorage.setItem('leogas_crm_plantillas', JSON.stringify(INITIAL_CRM_PLANTILLAS));
+    localStorage.setItem('leogas_cotizaciones', JSON.stringify(INITIAL_COTIZACIONES));
+    localStorage.removeItem('leogas_mi_pedido_id');
+
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        const bc = new BroadcastChannel('leogas_realtime_sync');
+        bc.postMessage({ type: 'PEDIDOS_SYNC', pedidos: INITIAL_PEDIDOS });
+        bc.close();
+      } catch {}
+    }
+  };
+
+  const resetPedidosYVentas = () => {
+    setPedidos([]);
+    setVentas([]);
+    setCarrito({});
+    setActiveCustomerOrderId(null);
+    setAlertModal(null);
+
+    localStorage.setItem('leogas_pedidos', JSON.stringify([]));
+    localStorage.setItem('leogas_ventas', JSON.stringify([]));
+    localStorage.removeItem('leogas_mi_pedido_id');
+
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        const bc = new BroadcastChannel('leogas_realtime_sync');
+        bc.postMessage({ type: 'PEDIDOS_SYNC', pedidos: [] });
+        bc.close();
+      } catch {}
+    }
   };
 
   // Fleet
@@ -763,6 +823,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         negocio,
         updateNegocio,
         resetNegocio,
+        resetDesarrollador,
+        resetPedidosYVentas,
         repartidores,
         addRepartidor,
         updateRepartidor,
