@@ -20,7 +20,11 @@ import {
   Database,
   GitBranch,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Cloud,
+  Smartphone,
+  UploadCloud,
+  Globe
 } from 'lucide-react';
 
 export const DeveloperAccordion: React.FC = () => {
@@ -38,7 +42,11 @@ export const DeveloperAccordion: React.FC = () => {
     pedidos,
     ventas,
     crmPlantillas,
-    cotizaciones
+    cotizaciones,
+    isSyncingCloud,
+    cloudSyncStatus,
+    publicarCambiosEnLaNube,
+    cargarDatosDeLaNube
   } = useApp();
 
   // Accordion & Authentication State
@@ -60,7 +68,9 @@ export const DeveloperAccordion: React.FC = () => {
     return localStorage.getItem('leogas_github_token') || '';
   });
   const [githubRepo, setGithubRepo] = useState<string>(() => {
-    return localStorage.getItem('leogas_github_repo') || 'phyxcius/Leogas';
+    const stored = localStorage.getItem('leogas_github_repo');
+    if (stored && stored !== 'phyxcius/Leogas') return stored;
+    return 'phyxcius/Leogascusco';
   });
   const [githubBranch, setGithubBranch] = useState<string>(() => {
     return localStorage.getItem('leogas_github_branch') || 'main';
@@ -428,6 +438,107 @@ export const DeveloperAccordion: React.FC = () => {
                   <Lock className="w-3.5 h-3.5 text-amber-300" />
                   <span>Volver a Bloquear</span>
                 </button>
+              </div>
+
+              {/* GLOBAL CLOUD SYNC CARD (CROSS-DEVICE SYNC FOR ALL CELLPHONES) */}
+              <div className="bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-purple-800/80 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-800/60 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center font-black shadow-md">
+                      <Cloud className="w-5 h-5 text-slate-950" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm sm:text-base font-black text-white">
+                          Sincronización Global de Catálogo (Nube GitHub)
+                        </h4>
+                        <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                          Todos los Celulares
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-purple-200/90 leading-tight">
+                        Publica precios, fotos de balones, accesorios e identidad en el repositorio para que se vean en cualquier celular Android, iPhone, tablet o PC.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const res = await publicarCambiosEnLaNube();
+                        if (res.ok) {
+                          alert('✅ ¡Publicado en la nube con éxito! Todos los celulares verán los cambios actualizados.');
+                        } else {
+                          alert(`⚠️ Atención: ${res.msg}`);
+                        }
+                      }}
+                      disabled={isSyncingCloud}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md disabled:opacity-50"
+                    >
+                      <UploadCloud className={`w-4 h-4 ${isSyncingCloud ? 'animate-bounce' : ''}`} />
+                      <span>{isSyncingCloud ? 'Subiendo a GitHub...' : '🚀 Publicar Catálogo en la Nube'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const ok = await cargarDatosDeLaNube();
+                        if (ok) {
+                          playSuccessChime();
+                          alert('✔ Datos descargados y sincronizados desde la nube de GitHub.');
+                        } else {
+                          alert('No se encontraron cambios pendientes en la nube o no hay conexión.');
+                        }
+                      }}
+                      className="bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-700/60 font-bold px-3 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer"
+                      title="Forzar lectura del archivo store.json desde GitHub"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Recargar de Nube</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cloud Sync Status Feedback */}
+                {cloudSyncStatus && (
+                  <div
+                    className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+                      cloudSyncStatus.ok
+                        ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-200'
+                        : 'bg-red-950/60 border-red-500/50 text-red-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {cloudSyncStatus.ok ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                      )}
+                      <span className="font-semibold">{cloudSyncStatus.msg}</span>
+                    </div>
+                    {cloudSyncStatus.time && (
+                      <span className="text-[10px] text-purple-300 font-mono whitespace-nowrap">
+                        Hora: {cloudSyncStatus.time}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] bg-purple-950/40 p-3 rounded-2xl border border-purple-800/40 text-purple-200">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span><strong>Repositorio:</strong> {githubRepo || 'phyxcius/Leogascusco'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                    <span><strong>Archivo central:</strong> public/data/store.json</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Smartphone className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                    <span><strong>Alcance:</strong> Android, iPhone, PC y Tablets</span>
+                  </div>
+                </div>
               </div>
 
               {/* GRID 2 COLUMNS: GITHUB TOKEN & FACTORY RESET */}

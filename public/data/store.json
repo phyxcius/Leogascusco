@@ -1,0 +1,139 @@
+{
+  "version": "2.1.0",
+  "updatedAt": "2026-11-08T08:50:00.000Z",
+  "negocio": {
+    "nombre": "La Chuspa Tech",
+    "slogan": "Publicidad, Tecnología & Balones de Gas en Cusco",
+    "logoUrl": "/CHUSPITA-circulo.png",
+    "imagenPresentacion": "/1791513590376.jpg",
+    "whatsapp": "969773064",
+    "telPrincipal": "969773064",
+    "telSecundario": "969773064",
+    "telFijo": "969773064",
+    "direccion": "Cusco - Perú",
+    "enlaceChuspa": "https://www.lachuspaanuncios.com",
+    "igvPorcentaje": 18,
+    "facebookUrl": "https://facebook.com/lachuspaanuncios",
+    "instagramUrl": "https://instagram.com/lachuspaanuncios",
+    "tiktokUrl": "https://tiktok.com/@lachuspaanuncios",
+    "googleReviewUrl": "https://www.lachuspaanuncios.com"
+  },
+  "telefonos": {
+    "whatsapp": "969773064",
+    "tel1": "969773064",
+    "tel2": "969773064",
+    "tel3": "969773064"
+  },
+  "productos": [
+    {
+      "id": "gas-1",
+      "nombre": "Balón La Chuspa Tech 10kg Normal o Regular",
+      "tag": "El Moradito Rendidor",
+      "descripcion": "Balón sellado de 10kg con precinto de seguridad garantizado y peso exacto.",
+      "precio": 50,
+      "disponible": true,
+      "imagen": "/1791513590376.jpg"
+    },
+    {
+      "id": "gas-2",
+      "nombre": "Balón Gas Premium 10kg La Chuspa Tech",
+      "tag": "Máximo Rendimiento",
+      "descripcion": "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
+      "precio": 55,
+      "disponible": true,
+      "imagen": "/1791513590376.jpg"
+    },
+    {
+      "id": "gas-3",
+      "nombre": "Balón La Chuspa Tech 45kg Industrial",
+      "tag": "Comercial / B2B",
+      "descripcion": "Balón industrial de 45kg ideal para pollerías, chifas, restaurantes, panaderías y hoteles.",
+      "precio": 175,
+      "disponible": true,
+      "imagen": "/medidas-de-balon-de-gas-de-10-Kg (1).png"
+    }
+  ],
+  "accesorios": [
+    {
+      "id": "acc-1",
+      "nombre": "Válvula Premium Anti-Fugas",
+      "precio": 35,
+      "disponible": true,
+      "imagen": "/1791513590376.jpg"
+    },
+    {
+      "id": "acc-2",
+      "nombre": "Manguera Reforzada Flexible 1.5m",
+      "precio": 20,
+      "disponible": true,
+      "imagen": "/1791513590376.jpg"
+    },
+    {
+      "id": "acc-3",
+      "nombre": "Abrazaderas de Seguridad (Par)",
+      "precio": 8,
+      "disponible": true,
+      "imagen": "/1791513590376.jpg"
+    },
+    {
+      "id": "acc-4",
+      "nombre": "Regulador de Presión Industrial",
+      "precio": 65,
+      "disponible": true,
+      "imagen": "/medidas-de-balon-de-gas-de-10-Kg (1).png"
+    }
+  ],
+  "clubFidelidad": [
+    {
+      "id": "fid-1",
+      "dni": "23984512",
+      "nombre": "Edwin Oblitas",
+      "telefono": "969773064",
+      "sellos": 9,
+      "totalConsumos": 19,
+      "premiosCanjeados": 1,
+      "ultimoConsumo": "07/11/2026",
+      "historial": [
+        {
+          "fecha": "07/11/2026",
+          "tipo": "consumo",
+          "detalle": "Consumo de Balón 10kg Normal (+1 Sello)",
+          "sellos": 1
+        }
+      ]
+    },
+    {
+      "id": "fid-2",
+      "dni": "45127890",
+      "nombre": "Carmen Delgado",
+      "telefono": "984285500",
+      "sellos": 7,
+      "totalConsumos": 7,
+      "premiosCanjeados": 0,
+      "ultimoConsumo": "06/11/2026",
+      "historial": []
+    },
+    {
+      "id": "fid-3",
+      "dni": "70123456",
+      "nombre": "Rosa Quispe",
+      "telefono": "950727212",
+      "sellos": 10,
+      "totalConsumos": 20,
+      "premiosCanjeados": 1,
+      "ultimoConsumo": "07/11/2026",
+      "historial": []
+    },
+    {
+      "id": "fid-4",
+      "dni": "10456789",
+      "nombre": "Juan Carlos Mendoza",
+      "telefono": "984112233",
+      "sellos": 3,
+      "totalConsumos": 3,
+      "premiosCanjeados": 0,
+      "ultimoConsumo": "05/11/2026",
+      "historial": []
+    }
+  ]
+}

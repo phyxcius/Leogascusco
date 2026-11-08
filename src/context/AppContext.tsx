@@ -29,6 +29,7 @@ import {
   INITIAL_CLUB_FIDELIDAD
 } from '../data/initialData';
 import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
+import { fetchStoreFromCloud, pushStoreToGitHub, CloudStorePayload } from '../utils/cloudSync';
 
 export function broadcastLiveEvent(payload: Record<string, any>) {
   try {
@@ -148,6 +149,12 @@ interface AppContextType {
   currentRepartidor: Repartidor | null;
   repartidorLogin: (u: string, p: string) => boolean;
   repartidorLogout: () => void;
+
+  // Cloud Sync (Cross-Device Global Sync)
+  isSyncingCloud: boolean;
+  cloudSyncStatus: { ok: boolean; msg: string; time?: string } | null;
+  publicarCambiosEnLaNube: () => Promise<{ ok: boolean; msg: string }>;
+  cargarDatosDeLaNube: () => Promise<boolean>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -431,8 +438,95 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       setAlertModal('en_puerta');
       playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
     }
-  }, [activeCustomerOrder?.etapa, activeCustomerOrder?.estado, activeCustomerOrder?.id]);
+  }, [activeCustomerOrder, negocio.nombre]);
 
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<{ ok: boolean; msg: string; time?: string } | null>(null);
+
+  // Cloud Auto-Fetch: on startup, check if cloud has updated store.json (for Android, iPhone, PC)
+  const cargarDatosDeLaNube = async (): Promise<boolean> => {
+    try {
+      const repo = localStorage.getItem('leogas_github_repo') || 'phyxcius/Leogascusco';
+      const branch = localStorage.getItem('leogas_github_branch') || 'main';
+      const cloudData = await fetchStoreFromCloud(repo, branch);
+      if (cloudData && cloudData.negocio && Array.isArray(cloudData.productos)) {
+        if (cloudData.negocio) {
+          setNegocio(cloudData.negocio);
+          localStorage.setItem('leogas_negocio', JSON.stringify(cloudData.negocio));
+        }
+        if (cloudData.telefonos) {
+          setTelefonos(cloudData.telefonos);
+          localStorage.setItem('leogas_telefonos', JSON.stringify(cloudData.telefonos));
+        }
+        if (Array.isArray(cloudData.productos) && cloudData.productos.length > 0) {
+          setProductos(cloudData.productos);
+          localStorage.setItem('leogas_productos', JSON.stringify(cloudData.productos));
+        }
+        if (Array.isArray(cloudData.accesorios) && cloudData.accesorios.length > 0) {
+          setAccesorios(cloudData.accesorios);
+          localStorage.setItem('leogas_accesorios', JSON.stringify(cloudData.accesorios));
+        }
+        if (Array.isArray(cloudData.clubFidelidad) && cloudData.clubFidelidad.length > 0) {
+          setClubFidelidad(cloudData.clubFidelidad);
+          localStorage.setItem('leogas_club_fidelidad', JSON.stringify(cloudData.clubFidelidad));
+        }
+        return true;
+      }
+    } catch {
+      // ignore
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    cargarDatosDeLaNube();
+  }, []);
+
+  // Publish to GitHub Cloud (Cross-Device Global Sync)
+  const publicarCambiosEnLaNube = async (): Promise<{ ok: boolean; msg: string }> => {
+    setIsSyncingCloud(true);
+    setCloudSyncStatus(null);
+    try {
+      const token = localStorage.getItem('leogas_github_token') || '';
+      const repo = localStorage.getItem('leogas_github_repo') || 'phyxcius/Leogascusco';
+      const branch = localStorage.getItem('leogas_github_branch') || 'main';
+
+      const payload: CloudStorePayload = {
+        version: '2.1.0',
+        updatedAt: new Date().toISOString(),
+        negocio,
+        telefonos,
+        productos,
+        accesorios,
+        clubFidelidad
+      };
+
+      const res = await pushStoreToGitHub(payload, token, repo, branch);
+      setCloudSyncStatus({
+        ok: res.ok,
+        msg: res.msg,
+        time: new Date().toLocaleTimeString('es-PE')
+      });
+      if (res.ok) {
+        playSuccessChime();
+        playAndSpeak('Catálogo e identidad publicados globalmente en la nube de GitHub con éxito.');
+      } else {
+        playChimeSound();
+      }
+      return res;
+    } catch (err: any) {
+      const errorMsg = `Error al publicar en la nube: ${err.message || 'Sin conexión'}`;
+      setCloudSyncStatus({
+        ok: false,
+        msg: errorMsg,
+        time: new Date().toLocaleTimeString('es-PE')
+      });
+      playChimeSound();
+      return { ok: false, msg: errorMsg };
+    } finally {
+      setIsSyncingCloud(false);
+    }
+  };
 
   // Helper to broadcast changes across all open tabs
   const broadcastSync = (type: string, payload: Record<string, any>) => {
@@ -1196,7 +1290,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         adminLogout,
         currentRepartidor,
         repartidorLogin,
-        repartidorLogout
+        repartidorLogout,
+        isSyncingCloud,
+        cloudSyncStatus,
+        publicarCambiosEnLaNube,
+        cargarDatosDeLaNube
       }}
     >
       {children}

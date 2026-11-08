@@ -40,7 +40,10 @@ import {
   Code,
   Gift,
   Award,
-  Sparkles
+  Sparkles,
+  Cloud,
+  RefreshCw,
+  Smartphone
 } from 'lucide-react';
 import L from 'leaflet';
 import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido, CotizacionCRM, ClienteFidelidad } from '../types/index';
@@ -95,7 +98,11 @@ export const AdminPanel: React.FC = () => {
     canjearPremioFidelidad,
     setSellosManual,
     registrarNuevoClienteFidelidad,
-    deleteClienteFidelidad
+    deleteClienteFidelidad,
+    isSyncingCloud,
+    cloudSyncStatus,
+    publicarCambiosEnLaNube,
+    cargarDatosDeLaNube
   } = useApp();
 
   // Login form state
@@ -752,6 +759,25 @@ export const AdminPanel: React.FC = () => {
         </div>
 
         <div className="flex items-center flex-wrap gap-2">
+          {/* Botón de Publicación Global en la Nube para todos los celulares */}
+          <button
+            type="button"
+            onClick={async () => {
+              const res = await publicarCambiosEnLaNube();
+              if (res.ok) {
+                alert('✅ ¡Sincronizado con éxito!\n\nLos cambios de catálogo, precios, fotos e identidad han sido subidos a GitHub. Ahora cualquier celular (Android, iPhone, tablet o PC) verá la información actualizada.');
+              } else {
+                alert(`⚠️ Atención al publicar en la nube:\n\n${res.msg}\n\nSi aún no has configurado tu Token de GitHub, abre la pestaña "Identidad del Negocio" -> "Zona del Desarrollador" e ingresa tu Personal Access Token (PAT).`);
+              }
+            }}
+            disabled={isSyncingCloud}
+            className="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-md px-3.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+            title="Publicar catálogo, precios, fotos e identidad en GitHub Pages para que se actualice en todos los celulares (iPhone, Android, PC)"
+          >
+            <Cloud className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-bounce' : ''}`} />
+            <span>{isSyncingCloud ? 'Publicando en Nube...' : '☁️ Publicar en la Nube (Todos los Celulares)'}</span>
+          </button>
+
           <a
             href={getPageUrl('index.html')}
             target="_blank"
