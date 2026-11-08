@@ -1,7 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { playAndSpeak, playSuccessChime } from '../utils/audio';
-import { MapPin, CheckCircle, Clock, Truck, ShieldCheck, X, FileText, ChevronRight, Star, ExternalLink, MessageCircle } from 'lucide-react';
+import { playAndSpeak, playSuccessChime, playChimeSound } from '../utils/audio';
+import {
+  MapPin,
+  CheckCircle,
+  Clock,
+  Truck,
+  ShieldCheck,
+  X,
+  FileText,
+  ChevronRight,
+  Star,
+  ExternalLink,
+  MessageCircle,
+  Gift,
+  Award,
+  Sparkles,
+  Search,
+  CheckCircle2,
+  Flame,
+  Check
+} from 'lucide-react';
+import { ClienteFidelidad } from '../types/index';
 
 interface AlertPopupsProps {
   onOpenTicket?: () => void;
@@ -13,10 +33,21 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
     closeAlertModal,
     notificarClienteSaliendo,
     activeCustomerOrder,
-    negocio
+    negocio,
+    telefonos,
+    clubFidelidad,
+    consultarSellos,
+    sumarSelloFidelidad
   } = useApp();
 
   const [clienteAvisoEnviado, setClienteAvisoEnviado] = useState(false);
+
+  // Club de Fidelidad state
+  const [fidelidadDni, setFidelidadDni] = useState('');
+  const [fidelidadCliente, setFidelidadCliente] = useState<ClienteFidelidad | null>(null);
+  const [hasQueriedDni, setHasQueriedDni] = useState(false);
+  const [alreadyStampedOrder, setAlreadyStampedOrder] = useState<string | null>(null);
+  const [justStampedAlert, setJustStampedAlert] = useState<string | null>(null);
 
   // Read notification aloud via the voice agent when modal opens
   useEffect(() => {
@@ -60,6 +91,87 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
       playSuccessChime();
     } else {
       closeAlertModal();
+    }
+  };
+
+  // Auto-fill DNI when completado modal opens
+  useEffect(() => {
+    if (alertModal === 'completado') {
+      const orderDni =
+        (activeCustomerOrder?.tipoComprobante?.match(/\d{8}/) || [])[0] ||
+        (activeCustomerOrder?.cliente && /^\d{8}$/.test(activeCustomerOrder.cliente.trim())
+          ? activeCustomerOrder.cliente.trim()
+          : '') ||
+        localStorage.getItem('leogas_last_dni') ||
+        '';
+
+      if (orderDni && !fidelidadDni) {
+        setFidelidadDni(orderDni);
+        const found = consultarSellos(orderDni);
+        if (found) {
+          setFidelidadCliente(found);
+          setHasQueriedDni(true);
+        }
+      }
+    }
+  }, [alertModal, activeCustomerOrder?.id]);
+
+  // Keep fidelidadCliente in sync with clubFidelidad
+  useEffect(() => {
+    if (fidelidadDni) {
+      const found = consultarSellos(fidelidadDni);
+      if (found) setFidelidadCliente(found);
+    }
+  }, [clubFidelidad]);
+
+  const handleConsultarFidelidad = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const clean = fidelidadDni.trim().replace(/\D/g, '');
+    if (clean.length < 8) {
+      alert('Por favor ingresa un número de DNI válido (8 dígitos).');
+      return;
+    }
+    localStorage.setItem('leogas_last_dni', clean);
+    const found = consultarSellos(clean);
+    setFidelidadCliente(found);
+    setHasQueriedDni(true);
+    if (found) {
+      playSuccessChime();
+    } else {
+      playChimeSound();
+    }
+  };
+
+  const handleSellarCompra = () => {
+    const clean = fidelidadDni.trim().replace(/\D/g, '');
+    if (clean.length < 8) {
+      alert('Ingresa primero tu número de DNI (8 dígitos) para estampar tu sello.');
+      return;
+    }
+    const orderId = activeCustomerOrder?.id || `pedido-${Date.now()}`;
+    const result = sumarSelloFidelidad(
+      clean,
+      activeCustomerOrder?.cliente || fidelidadCliente?.nombre || `Cliente DNI ${clean}`,
+      telefonos.whatsapp || '',
+      `Consumo: ${activeCustomerOrder?.tipoBalon || 'Balón de Gas'}`,
+      1
+    );
+    setFidelidadCliente(result.cliente);
+    setHasQueriedDni(true);
+    setAlreadyStampedOrder(orderId);
+    playSuccessChime();
+
+    if (result.premioDesbloqueado) {
+      setJustStampedAlert(`🎉 ¡Felicidades! Has completado 10 sellos. ¡Tu regalito sorpresa está listo para reclamar!`);
+      playAndSpeak(
+        `¡Felicitaciones! Has completado tus diez sellos en el Club de Fidelidad de ${negocio.nombre || 'La Chuspa Tech'}. Ya puedes reclamar tu regalito.`,
+        true
+      );
+    } else {
+      setJustStampedAlert(
+        `✔ ¡Sello estampado! Tienes ${result.cliente.sellos} de 10 sellos. Te faltan ${10 - result.cliente.sellos} para tu regalito.`
+      );
+      playAndSpeak(`¡Sello registrado! Tienes ${result.cliente.sellos} de diez sellos.`);
     }
   };
 
@@ -309,6 +421,195 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
               </p>
             </div>
 
+            {/* ================= CLUB DE FIDELIDAD • TARJETA DIGITAL DE 10 SELLOS ================= */}
+            <div className="bg-gradient-to-br from-indigo-950 via-purple-900 to-slate-900 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 border-amber-400 shadow-xl space-y-3.5 text-left relative overflow-hidden">
+              {/* Background badge watermark */}
+              <div className="absolute -right-4 -bottom-4 text-purple-800/30 text-8xl pointer-events-none select-none">
+                🎁
+              </div>
+
+              {/* Title & Badge */}
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-amber-400 text-purple-950 flex items-center justify-center font-black text-base shadow-sm">
+                    🎁
+                  </span>
+                  <div>
+                    <h4 className="text-sm sm:text-base font-black text-amber-300 leading-tight">
+                      Club de Fidelidad {nombreNegocio}
+                    </h4>
+                    <p className="text-[10px] sm:text-xs text-purple-200 font-semibold">
+                      ¡10 sellos = 1 Regalito sorpresa o recarga bonificada!
+                    </p>
+                  </div>
+                </div>
+                <span className="bg-amber-400/20 text-amber-300 border border-amber-400/50 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
+                  Tarjeta Digital
+                </span>
+              </div>
+
+              {/* DNI Query Box */}
+              <div className="bg-white/10 backdrop-blur-xs p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-white/15 space-y-2">
+                <label className="text-[10px] font-bold uppercase text-purple-200 block">
+                  Consulta o Sella con tu DNI:
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    maxLength={8}
+                    value={fidelidadDni}
+                    onChange={(e) => {
+                      setFidelidadDni(e.target.value.replace(/\D/g, ''));
+                      setHasQueriedDni(false);
+                      setJustStampedAlert(null);
+                    }}
+                    placeholder="Ingresa tu DNI (8 dígitos)"
+                    className="flex-1 bg-white text-slate-900 font-bold text-xs p-2 sm:p-2.5 rounded-xl border border-purple-300 focus:outline-amber-400 placeholder:text-slate-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleConsultarFidelidad()}
+                    className="bg-amber-400 hover:bg-amber-500 text-purple-950 font-black text-xs px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition shadow-sm flex items-center gap-1.5 cursor-pointer flex-shrink-0"
+                  >
+                    <Search className="w-3.5 h-3.5" />
+                    <span>Consultar</span>
+                  </button>
+                </div>
+
+                {/* Stamping Button for Current Purchase */}
+                {fidelidadDni.length === 8 && (
+                  <button
+                    type="button"
+                    onClick={handleSellarCompra}
+                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md cursor-pointer animate-pulse"
+                  >
+                    <Sparkles className="w-4 h-4 text-yellow-200" />
+                    <span>🏷️ ¡Sellar Mi Compra de Hoy! (+1 Sello)</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Success Notification Alert */}
+              {justStampedAlert && (
+                <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-400 text-emerald-200 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-300 flex-shrink-0" />
+                  <span>{justStampedAlert}</span>
+                </div>
+              )}
+
+              {/* Stamp Grid (10 Slots) */}
+              <div>
+                <div className="flex justify-between items-center mb-1.5 text-xs">
+                  <span className="font-extrabold text-purple-200 text-[11px] uppercase">
+                    Tus Sellos Acumulados:
+                  </span>
+                  <span className="font-black text-amber-300 text-xs sm:text-sm">
+                    {fidelidadCliente ? `${fidelidadCliente.sellos} / 10 Sellos` : '0 / 10 Sellos'}
+                  </span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-purple-950/80 rounded-full h-2.5 mb-3 overflow-hidden border border-purple-700/50">
+                  <div
+                    className="bg-gradient-to-r from-amber-400 to-yellow-300 h-2.5 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min(100, ((fidelidadCliente?.sellos || 0) / 10) * 100)}%`
+                    }}
+                  />
+                </div>
+
+                {/* 10 Stamps Display */}
+                <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 sm:gap-2">
+                  {[...Array(10)].map((_, i) => {
+                    const slotNum = i + 1;
+                    const isStamped = (fidelidadCliente?.sellos || 0) >= slotNum;
+                    const isPrizeSlot = slotNum === 10;
+
+                    return (
+                      <div
+                        key={slotNum}
+                        className={`relative rounded-xl p-2 flex flex-col items-center justify-center transition-all aspect-square border ${
+                          isStamped
+                            ? 'bg-gradient-to-br from-amber-400 to-yellow-500 text-purple-950 border-amber-300 shadow-md scale-[1.02]'
+                            : isPrizeSlot
+                            ? 'bg-amber-400/10 border-dashed border-amber-400/60 text-amber-300 animate-pulse'
+                            : 'bg-white/5 border-dashed border-white/20 text-purple-300'
+                        }`}
+                        title={
+                          isStamped
+                            ? `Sello #${slotNum} validado ✔️`
+                            : isPrizeSlot
+                            ? '¡Espacio #10: Regalito al completar!'
+                            : `Espacio de Sello #${slotNum}`
+                        }
+                      >
+                        <span className="text-[9px] font-black absolute top-1 left-1 opacity-75">
+                          {slotNum}
+                        </span>
+
+                        <div className="text-base sm:text-lg my-auto">
+                          {isStamped ? (
+                            '✔️'
+                          ) : isPrizeSlot ? (
+                            '🎁'
+                          ) : (
+                            '🛢️'
+                          )}
+                        </div>
+
+                        <span className="text-[7px] font-black uppercase tracking-tight block">
+                          {isStamped ? 'Sellado' : isPrizeSlot ? 'Regalo' : 'Gas'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Status and Claim Reward Banner */}
+              {fidelidadCliente && fidelidadCliente.sellos >= 10 ? (
+                <div className="bg-gradient-to-r from-amber-400 to-yellow-400 text-purple-950 rounded-xl p-3 text-center space-y-1.5 shadow-lg border border-yellow-200">
+                  <div className="text-2xl animate-bounce">🎉🎁🥳</div>
+                  <strong className="text-sm sm:text-base font-black block">
+                    ¡FELICITACIONES, {fidelidadCliente.nombre.toUpperCase()}!
+                  </strong>
+                  <p className="text-[11px] sm:text-xs font-bold leading-tight">
+                    Has acumulado 10 sellos oficiales. Tienes un <strong>REGALITO</strong> listo para entrega.
+                  </p>
+                  <a
+                    href={`https://wa.me/${telefonos.whatsapp ? telefonos.whatsapp.replace(/\D/g, '') : '969773064'}?text=${encodeURIComponent(
+                      `¡Hola ${nombreNegocio}! 🎉 He completado mis 10 sellos en el Club de Fidelidad con mi DNI ${fidelidadCliente.dni} (${fidelidadCliente.nombre}). Deseo coordinar la entrega de mi regalito del club 🎁`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 w-full bg-purple-950 hover:bg-black text-amber-300 font-black py-2.5 px-3 rounded-xl text-xs transition shadow-md cursor-pointer mt-1"
+                  >
+                    <Gift className="w-4 h-4 text-amber-300" />
+                    <span>Reclamar mi Regalito por WhatsApp 🎁</span>
+                  </a>
+                </div>
+              ) : fidelidadCliente ? (
+                <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs text-purple-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-purple-300 block">Titular de la tarjeta:</span>
+                    <strong className="text-white text-xs block">{fidelidadCliente.nombre}</strong>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-amber-300 block font-bold">
+                      Faltan {10 - fidelidadCliente.sellos} sellos
+                    </span>
+                    <span className="text-[10px] text-purple-300">
+                      Total consumos: {fidelidadCliente.totalConsumos}
+                    </span>
+                  </div>
+                </div>
+              ) : hasQueriedDni ? (
+                <div className="bg-purple-900/60 border border-purple-700/60 rounded-xl p-2.5 text-xs text-purple-200 text-center">
+                  <span>DNI no registrado aún en el Club. Haz clic en <strong>"Sellar Mi Compra de Hoy"</strong> para abrir tu tarjeta digital gratis.</span>
+                </div>
+              ) : null}
+            </div>
+
             {/* SECCIÓN GOOGLE MAPS REVIEW (RESEÑA 5 ESTRELLAS) */}
             <div className="bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-yellow-400 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 space-y-2 text-center shadow-xs">
               <div className="flex justify-center items-center gap-1.5 text-amber-500">
@@ -323,7 +624,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
                 Tu calificación nos ayuda a seguir brindando la entrega más rápida de Cusco.
               </p>
               <a
-                href={negocio.googleReviewUrl || 'https://maps.google.com/?cid=leogascusco'}
+                href={negocio.googleReviewUrl || 'https://www.lachuspaanuncios.com'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-black py-3 sm:py-3.5 px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base flex items-center justify-center gap-2 transition shadow-sm min-h-[44px]"
@@ -342,7 +643,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
                 {/* Facebook */}
                 <a
-                  href={negocio.facebookUrl || 'https://facebook.com/leogascusco'}
+                  href={negocio.facebookUrl || 'https://facebook.com/lachuspaanuncios'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition min-h-[54px]"
@@ -353,7 +654,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
 
                 {/* Instagram */}
                 <a
-                  href={negocio.instagramUrl || 'https://instagram.com/leogascusco'}
+                  href={negocio.instagramUrl || 'https://instagram.com/lachuspaanuncios'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition min-h-[54px]"
@@ -364,7 +665,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
 
                 {/* TikTok */}
                 <a
-                  href={negocio.tiktokUrl || 'https://tiktok.com/@leogascusco'}
+                  href={negocio.tiktokUrl || 'https://tiktok.com/@lachuspaanuncios'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition min-h-[54px]"

@@ -126,17 +126,32 @@ export const DeveloperAccordion: React.FC = () => {
   // Save GitHub Token & Test Connection
   const handleSaveAndTestGitHub = async () => {
     const cleanToken = githubToken.trim();
-    const cleanRepo = githubRepo.trim();
-    const cleanBranch = githubBranch.trim();
+    // Normalize repo: handles https://github.com/owner/repo or owner/repo/
+    const normalizedRepo = githubRepo
+      .trim()
+      .replace(/^https?:\/\/github\.com\//i, '')
+      .replace(/\/+$/, '');
+    const cleanBranch = githubBranch.trim() || 'main';
 
     localStorage.setItem('leogas_github_token', cleanToken);
-    localStorage.setItem('leogas_github_repo', cleanRepo);
+    localStorage.setItem('leogas_github_repo', normalizedRepo);
     localStorage.setItem('leogas_github_branch', cleanBranch);
+    setGithubRepo(normalizedRepo);
+    setGithubBranch(cleanBranch);
 
     if (!cleanToken) {
       setGitHubStatus({
         ok: false,
-        msg: 'Token de GitHub guardado como vacío. Ingresa un Personal Access Token para validar la conexión.'
+        msg: 'Token de GitHub guardado como vacío. Ingresa un Personal Access Token (PAT) de GitHub para validar la conexión con el repositorio.'
+      });
+      playChimeSound();
+      return;
+    }
+
+    if (!normalizedRepo.includes('/')) {
+      setGitHubStatus({
+        ok: false,
+        msg: 'El formato del repositorio debe ser "usuario/repositorio" (ejemplo: phyxcius/Leogas).'
       });
       playChimeSound();
       return;
@@ -146,18 +161,29 @@ export const DeveloperAccordion: React.FC = () => {
     setGitHubStatus(null);
 
     try {
-      const res = await fetch(`https://api.github.com/repos/${cleanRepo}`, {
+      // First try with appropriate prefix (classic ghp_ vs fine-grained github_pat_)
+      let res = await fetch(`https://api.github.com/repos/${normalizedRepo}`, {
         headers: {
-          Authorization: `Bearer ${cleanToken}`,
+          Authorization: cleanToken.startsWith('ghp_') ? `token ${cleanToken}` : `Bearer ${cleanToken}`,
           Accept: 'application/vnd.github+json'
         }
       });
+
+      // If 401, retry with alternative token header prefix
+      if (res.status === 401 && !cleanToken.startsWith('ghp_')) {
+        res = await fetch(`https://api.github.com/repos/${normalizedRepo}`, {
+          headers: {
+            Authorization: `token ${cleanToken}`,
+            Accept: 'application/vnd.github+json'
+          }
+        });
+      }
 
       if (res.ok) {
         const data = await res.json();
         setGitHubStatus({
           ok: true,
-          msg: `Conexión exitosa con el repositorio ${data.full_name}`,
+          msg: `¡Conexión verificada con éxito con el repositorio ${data.full_name}!`,
           repoInfo: {
             name: data.full_name,
             stars: data.stargazers_count,
@@ -166,19 +192,25 @@ export const DeveloperAccordion: React.FC = () => {
           }
         });
         playSuccessChime();
-        playAndSpeak(`Token de GitHub verificado exitosamente con el repositorio ${cleanRepo}.`);
+        playAndSpeak(`Token de GitHub verificado exitosamente con el repositorio ${normalizedRepo}.`);
       } else {
         const errData = await res.json().catch(() => ({}));
+        let humanMsg = errData.message || 'Error al conectar con la API de GitHub.';
+        if (res.status === 401) {
+          humanMsg = 'Credenciales no válidas. El Token PAT ha expirado o no tiene permisos suficientes.';
+        } else if (res.status === 404) {
+          humanMsg = `Repositorio "${normalizedRepo}" no encontrado o el token no tiene permisos para acceder a repositorios privados.`;
+        }
         setGitHubStatus({
           ok: false,
-          msg: `Error (${res.status}): ${errData.message || 'Verifica el token o permisos de acceso al repositorio.'}`
+          msg: `Error (${res.status}): ${humanMsg}`
         });
         playChimeSound();
       }
     } catch (err: any) {
       setGitHubStatus({
         ok: false,
-        msg: `Error de conexión: ${err.message || 'No se pudo conectar a api.github.com'}`
+        msg: `Error de red: ${err.message || 'No se pudo conectar a api.github.com. Revisa tu conexión.'}`
       });
       playChimeSound();
     } finally {

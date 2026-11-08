@@ -11,7 +11,8 @@ import {
   Pedido,
   ItemPedido,
   CRMPlantilla,
-  CotizacionCRM
+  CotizacionCRM,
+  ClienteFidelidad
 } from '../types/index';
 import {
   INITIAL_PRODUCTOS,
@@ -24,7 +25,8 @@ import {
   INITIAL_PEDIDOS,
   INITIAL_VENTAS,
   INITIAL_CRM_PLANTILLAS,
-  INITIAL_COTIZACIONES
+  INITIAL_COTIZACIONES,
+  INITIAL_CLUB_FIDELIDAD
 } from '../data/initialData';
 import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
 
@@ -123,6 +125,21 @@ interface AppContextType {
   updateCotizacion: (c: CotizacionCRM) => void;
   deleteCotizacion: (id: string) => void;
 
+  // Club de Fidelidad (Sellos por Consumo)
+  clubFidelidad: ClienteFidelidad[];
+  consultarSellos: (dni: string) => ClienteFidelidad | null;
+  sumarSelloFidelidad: (
+    dni: string,
+    nombre?: string,
+    telefono?: string,
+    detalle?: string,
+    cantidad?: number
+  ) => { cliente: ClienteFidelidad; premioDesbloqueado: boolean };
+  canjearPremioFidelidad: (dni: string) => boolean;
+  setSellosManual: (dni: string, sellos: number) => void;
+  registrarNuevoClienteFidelidad: (cliente: Omit<ClienteFidelidad, 'id'>) => void;
+  deleteClienteFidelidad: (id: string) => void;
+
   // Authentication
   isAdminLogged: boolean;
   adminLogin: (u: string, p: string) => boolean;
@@ -189,6 +206,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [ventas, setVentas] = useState<VentaRegistro[]>(() => getStored('leogas_ventas', INITIAL_VENTAS));
   const [crmPlantillas, setCrmPlantillas] = useState<CRMPlantilla[]>(() => getStored('leogas_crm_plantillas', INITIAL_CRM_PLANTILLAS));
   const [cotizaciones, setCotizaciones] = useState<CotizacionCRM[]>(() => getStored('leogas_cotizaciones', INITIAL_COTIZACIONES));
+  const [clubFidelidad, setClubFidelidad] = useState<ClienteFidelidad[]>(() => getStored('leogas_club_fidelidad', INITIAL_CLUB_FIDELIDAD));
 
   const [carrito, setCarrito] = useState<Record<string, ItemPedido>>({});
   const [activeCustomerOrderId, setActiveCustomerOrderId] = useState<string | null>(() => localStorage.getItem('leogas_mi_pedido_id'));
@@ -230,6 +248,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
             );
           } else if (data.type === 'NEW_PEDIDO' && data.pedido) {
             setPedidos((prev) => [data.pedido, ...prev.filter((p) => p.id !== data.pedido.id)]);
+          } else if (data.type === 'CLUB_FIDELIDAD_UPDATE' && data.clubFidelidad) {
+            setClubFidelidad(data.clubFidelidad);
+          } else if (data.type === 'NEGOCIO_SYNC' && data.negocio) {
+            setNegocio(data.negocio);
+            if (data.negocio.whatsapp || data.negocio.telPrincipal) {
+              setTelefonos((prev) => ({
+                ...prev,
+                whatsapp: data.negocio.whatsapp || prev.whatsapp,
+                tel1: data.negocio.telPrincipal || prev.tel1,
+                tel2: data.negocio.telSecundario || prev.tel2,
+                tel3: data.negocio.telFijo || prev.tel3
+              }));
+            }
+          } else if (data.type === 'PRODUCTOS_SYNC' && data.productos) {
+            setProductos(data.productos);
+          } else if (data.type === 'ACCESORIOS_SYNC' && data.accesorios) {
+            setAccesorios(data.accesorios);
+          } else if (data.type === 'TELEFONOS_SYNC' && data.telefonos) {
+            setTelefonos(data.telefonos);
+          } else if (data.type === 'REPARTIDORES_SYNC' && data.repartidores) {
+            setRepartidores(data.repartidores);
+          } else if (data.type === 'FULL_RESET_SYNC') {
+            if (data.productos) setProductos(data.productos);
+            if (data.accesorios) setAccesorios(data.accesorios);
+            if (data.telefonos) setTelefonos(data.telefonos);
+            if (data.negocio) setNegocio(data.negocio);
+            if (data.repartidores) setRepartidores(data.repartidores);
+            if (data.empresasB2B) setEmpresasB2B(data.empresasB2B);
+            if (data.clientesVIP) setClientesVIP(data.clientesVIP);
+            if (data.pedidos) setPedidos(data.pedidos);
+            if (data.ventas) setVentas(data.ventas);
+            if (data.crmPlantillas) setCrmPlantillas(data.crmPlantillas);
+            if (data.cotizaciones) setCotizaciones(data.cotizaciones);
+            if (data.clubFidelidad) setClubFidelidad(data.clubFidelidad);
+            setCarrito({});
+            setActiveCustomerOrderId(null);
+            setAlertModal(null);
           }
         };
       } catch {}
@@ -249,6 +304,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         if (e.key === 'leogas_ventas') setVentas(JSON.parse(e.newValue));
         if (e.key === 'leogas_crm_plantillas') setCrmPlantillas(JSON.parse(e.newValue));
         if (e.key === 'leogas_cotizaciones') setCotizaciones(JSON.parse(e.newValue));
+        if (e.key === 'leogas_club_fidelidad') setClubFidelidad(JSON.parse(e.newValue));
         if (e.key === 'leogas_mi_pedido_id') setActiveCustomerOrderId(e.newValue);
         if (e.key === 'leogas_admin_logged') setIsAdminLogged(e.newValue === 'true');
         if (e.key === 'leogas_rep_id') setCurrentRepartidorId(e.newValue);
@@ -285,6 +341,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
             return prev;
           });
         }
+        const storedProds = localStorage.getItem('leogas_productos');
+        if (storedProds) {
+          const parsed = JSON.parse(storedProds);
+          setProductos((prev) => {
+            if (JSON.stringify(prev) !== storedProds) return parsed;
+            return prev;
+          });
+        }
+        const storedAccs = localStorage.getItem('leogas_accesorios');
+        if (storedAccs) {
+          const parsed = JSON.parse(storedAccs);
+          setAccesorios((prev) => {
+            if (JSON.stringify(prev) !== storedAccs) return parsed;
+            return prev;
+          });
+        }
+        const storedTels = localStorage.getItem('leogas_telefonos');
+        if (storedTels) {
+          const parsed = JSON.parse(storedTels);
+          setTelefonos((prev) => {
+            if (JSON.stringify(prev) !== storedTels) return parsed;
+            return prev;
+          });
+        }
+        const storedClub = localStorage.getItem('leogas_club_fidelidad');
+        if (storedClub) {
+          const parsed = JSON.parse(storedClub);
+          setClubFidelidad((prev) => {
+            if (JSON.stringify(prev) !== storedClub) return parsed;
+            return prev;
+          });
+        }
         const storedOrder = localStorage.getItem('leogas_mi_pedido_id');
         if (storedOrder) {
           setActiveCustomerOrderId((prev) => (prev !== storedOrder ? storedOrder : prev));
@@ -313,6 +401,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   useEffect(() => { localStorage.setItem('leogas_ventas', JSON.stringify(ventas)); }, [ventas]);
   useEffect(() => { localStorage.setItem('leogas_crm_plantillas', JSON.stringify(crmPlantillas)); }, [crmPlantillas]);
   useEffect(() => { localStorage.setItem('leogas_cotizaciones', JSON.stringify(cotizaciones)); }, [cotizaciones]);
+  useEffect(() => { localStorage.setItem('leogas_club_fidelidad', JSON.stringify(clubFidelidad)); }, [clubFidelidad]);
 
   // Active customer order
   const activeCustomerOrder = activeCustomerOrderId
@@ -345,45 +434,94 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   }, [activeCustomerOrder?.etapa, activeCustomerOrder?.estado, activeCustomerOrder?.id]);
 
 
+  // Helper to broadcast changes across all open tabs
+  const broadcastSync = (type: string, payload: Record<string, any>) => {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        const bc = new BroadcastChannel('leogas_realtime_sync');
+        bc.postMessage({ type, ...payload });
+        bc.close();
+      } catch {}
+    }
+  };
+
   // Product CRUD
   const updateProducto = (p: Producto) => {
-    setProductos(prev => prev.map(item => item.id === p.id ? p : item));
+    setProductos(prev => {
+      const updated = prev.map(item => item.id === p.id ? p : item);
+      localStorage.setItem('leogas_productos', JSON.stringify(updated));
+      broadcastSync('PRODUCTOS_SYNC', { productos: updated });
+      return updated;
+    });
   };
   const addProducto = (p: Producto) => {
-    setProductos(prev => [...prev, p]);
+    setProductos(prev => {
+      const updated = [...prev, p];
+      localStorage.setItem('leogas_productos', JSON.stringify(updated));
+      broadcastSync('PRODUCTOS_SYNC', { productos: updated });
+      return updated;
+    });
   };
   const deleteProducto = (id: string) => {
-    setProductos(prev => prev.filter(p => p.id !== id));
+    setProductos(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      localStorage.setItem('leogas_productos', JSON.stringify(updated));
+      broadcastSync('PRODUCTOS_SYNC', { productos: updated });
+      return updated;
+    });
   };
 
   // Accessories CRUD
   const updateAccesorio = (a: Accesorio) => {
-    setAccesorios(prev => prev.map(item => item.id === a.id ? a : item));
+    setAccesorios(prev => {
+      const updated = prev.map(item => item.id === a.id ? a : item);
+      localStorage.setItem('leogas_accesorios', JSON.stringify(updated));
+      broadcastSync('ACCESORIOS_SYNC', { accesorios: updated });
+      return updated;
+    });
   };
   const addAccesorio = (a: Accesorio) => {
-    setAccesorios(prev => [...prev, a]);
+    setAccesorios(prev => {
+      const updated = [...prev, a];
+      localStorage.setItem('leogas_accesorios', JSON.stringify(updated));
+      broadcastSync('ACCESORIOS_SYNC', { accesorios: updated });
+      return updated;
+    });
   };
   const deleteAccesorio = (id: string) => {
-    setAccesorios(prev => prev.filter(a => a.id !== id));
+    setAccesorios(prev => {
+      const updated = prev.filter(a => a.id !== id);
+      localStorage.setItem('leogas_accesorios', JSON.stringify(updated));
+      broadcastSync('ACCESORIOS_SYNC', { accesorios: updated });
+      return updated;
+    });
   };
 
   // Phones
   const updateTelefonos = (t: TelefonosConfig) => {
     setTelefonos(t);
+    localStorage.setItem('leogas_telefonos', JSON.stringify(t));
+    broadcastSync('TELEFONOS_SYNC', { telefonos: t });
   };
 
   // Business Identity
   const updateNegocio = (n: Partial<NegocioIdentidad>) => {
     setNegocio(prev => {
       const updated = { ...prev, ...n };
-      // Keep telefonos synchronized as well
-      setTelefonos(old => ({
-        ...old,
-        whatsapp: updated.whatsapp || old.whatsapp,
-        tel1: updated.telPrincipal || old.tel1,
-        tel2: updated.telSecundario || old.tel2,
-        tel3: updated.telFijo || old.tel3
-      }));
+      const updatedTels: TelefonosConfig = {
+        ...telefonos,
+        whatsapp: updated.whatsapp || telefonos.whatsapp,
+        tel1: updated.telPrincipal || telefonos.tel1,
+        tel2: updated.telSecundario || telefonos.tel2,
+        tel3: updated.telFijo || telefonos.tel3
+      };
+      setTelefonos(updatedTels);
+
+      localStorage.setItem('leogas_negocio', JSON.stringify(updated));
+      localStorage.setItem('leogas_telefonos', JSON.stringify(updatedTels));
+
+      broadcastSync('NEGOCIO_SYNC', { negocio: updated });
+      broadcastSync('TELEFONOS_SYNC', { telefonos: updatedTels });
       return updated;
     });
   };
@@ -393,6 +531,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setTelefonos(INITIAL_TELEFONOS);
     localStorage.setItem('leogas_negocio', JSON.stringify(INITIAL_NEGOCIO));
     localStorage.setItem('leogas_telefonos', JSON.stringify(INITIAL_TELEFONOS));
+    broadcastSync('NEGOCIO_SYNC', { negocio: INITIAL_NEGOCIO });
+    broadcastSync('TELEFONOS_SYNC', { telefonos: INITIAL_TELEFONOS });
   };
 
   const resetDesarrollador = () => {
@@ -407,6 +547,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setVentas(INITIAL_VENTAS);
     setCrmPlantillas(INITIAL_CRM_PLANTILLAS);
     setCotizaciones(INITIAL_COTIZACIONES);
+    setClubFidelidad(INITIAL_CLUB_FIDELIDAD);
     setCarrito({});
     setActiveCustomerOrderId(null);
     setAlertModal(null);
@@ -422,15 +563,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     localStorage.setItem('leogas_ventas', JSON.stringify(INITIAL_VENTAS));
     localStorage.setItem('leogas_crm_plantillas', JSON.stringify(INITIAL_CRM_PLANTILLAS));
     localStorage.setItem('leogas_cotizaciones', JSON.stringify(INITIAL_COTIZACIONES));
+    localStorage.setItem('leogas_club_fidelidad', JSON.stringify(INITIAL_CLUB_FIDELIDAD));
     localStorage.removeItem('leogas_mi_pedido_id');
 
-    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-      try {
-        const bc = new BroadcastChannel('leogas_realtime_sync');
-        bc.postMessage({ type: 'PEDIDOS_SYNC', pedidos: INITIAL_PEDIDOS });
-        bc.close();
-      } catch {}
-    }
+    broadcastSync('FULL_RESET_SYNC', {
+      productos: INITIAL_PRODUCTOS,
+      accesorios: INITIAL_ACCESORIOS,
+      telefonos: INITIAL_TELEFONOS,
+      negocio: INITIAL_NEGOCIO,
+      repartidores: INITIAL_REPARTIDORES,
+      empresasB2B: INITIAL_EMPRESAS_B2B,
+      clientesVIP: INITIAL_CLIENTES_VIP,
+      pedidos: INITIAL_PEDIDOS,
+      ventas: INITIAL_VENTAS,
+      crmPlantillas: INITIAL_CRM_PLANTILLAS,
+      cotizaciones: INITIAL_COTIZACIONES,
+      clubFidelidad: INITIAL_CLUB_FIDELIDAD
+    });
   };
 
   const resetPedidosYVentas = () => {
@@ -793,6 +942,166 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     localStorage.removeItem('leogas_rep_id');
   };
 
+  // Club de Fidelidad (Sellos)
+  const consultarSellos = (dni: string): ClienteFidelidad | null => {
+    const clean = dni.trim().replace(/\D/g, '');
+    if (!clean) return null;
+    return clubFidelidad.find((c) => c.dni.replace(/\D/g, '') === clean) || null;
+  };
+
+  const sumarSelloFidelidad = (
+    dni: string,
+    nombre?: string,
+    telefono?: string,
+    detalle?: string,
+    cantidad: number = 1
+  ): { cliente: ClienteFidelidad; premioDesbloqueado: boolean } => {
+    const cleanDni = dni.trim().replace(/\D/g, '');
+    const nowStr = new Date().toLocaleDateString('es-PE') + ' ' + new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    let updatedCliente: ClienteFidelidad;
+    let premioDesbloqueado = false;
+
+    setClubFidelidad((prev) => {
+      const idx = prev.findIndex((c) => c.dni.replace(/\D/g, '') === cleanDni);
+      if (idx >= 0) {
+        const cur = prev[idx];
+        const newSellos = cur.sellos + cantidad;
+        premioDesbloqueado = newSellos >= 10;
+        updatedCliente = {
+          ...cur,
+          nombre: nombre || cur.nombre,
+          telefono: telefono || cur.telefono,
+          sellos: newSellos,
+          totalConsumos: cur.totalConsumos + cantidad,
+          ultimoConsumo: nowStr,
+          historial: [
+            {
+              fecha: nowStr,
+              detalle: detalle || 'Consumo de Balón de Gas',
+              sellosSumados: cantidad
+            },
+            ...(cur.historial || [])
+          ]
+        };
+        const nextList = [...prev];
+        nextList[idx] = updatedCliente;
+        try {
+          localStorage.setItem('leogas_club_fidelidad', JSON.stringify(nextList));
+        } catch {}
+        broadcastLiveEvent({ type: 'CLUB_FIDELIDAD_UPDATE', clubFidelidad: nextList });
+        return nextList;
+      } else {
+        const newSellos = cantidad;
+        premioDesbloqueado = newSellos >= 10;
+        updatedCliente = {
+          id: `fid-${Date.now()}`,
+          dni: cleanDni,
+          nombre: nombre || `Cliente ${cleanDni}`,
+          telefono: telefono || '',
+          sellos: newSellos,
+          totalConsumos: cantidad,
+          premiosCanjeados: 0,
+          ultimoConsumo: nowStr,
+          historial: [
+            {
+              fecha: nowStr,
+              detalle: detalle || 'Primer consumo de Balón de Gas',
+              sellosSumados: cantidad
+            }
+          ]
+        };
+        const nextList = [updatedCliente, ...prev];
+        try {
+          localStorage.setItem('leogas_club_fidelidad', JSON.stringify(nextList));
+        } catch {}
+        broadcastLiveEvent({ type: 'CLUB_FIDELIDAD_UPDATE', clubFidelidad: nextList });
+        return nextList;
+      }
+    });
+
+    return { cliente: updatedCliente!, premioDesbloqueado };
+  };
+
+  const canjearPremioFidelidad = (dni: string): boolean => {
+    const cleanDni = dni.trim().replace(/\D/g, '');
+    const nowStr = new Date().toLocaleDateString('es-PE') + ' ' + new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    let success = false;
+
+    setClubFidelidad((prev) => {
+      const idx = prev.findIndex((c) => c.dni.replace(/\D/g, '') === cleanDni);
+      if (idx < 0) return prev;
+      const cur = prev[idx];
+      if (cur.sellos < 10) return prev;
+
+      success = true;
+      const updated: ClienteFidelidad = {
+        ...cur,
+        sellos: Math.max(0, cur.sellos - 10),
+        premiosCanjeados: cur.premiosCanjeados + 1,
+        historial: [
+          {
+            fecha: nowStr,
+            detalle: '🎁 Canje de Regalito Club de Fidelidad (10 sellos)',
+            sellosSumados: -10
+          },
+          ...(cur.historial || [])
+        ]
+      };
+      const nextList = [...prev];
+      nextList[idx] = updated;
+      try {
+        localStorage.setItem('leogas_club_fidelidad', JSON.stringify(nextList));
+      } catch {}
+      broadcastLiveEvent({ type: 'CLUB_FIDELIDAD_UPDATE', clubFidelidad: nextList });
+      return nextList;
+    });
+
+    return success;
+  };
+
+  const setSellosManual = (dni: string, sellos: number) => {
+    const cleanDni = dni.trim().replace(/\D/g, '');
+    setClubFidelidad((prev) => {
+      const nextList = prev.map((c) =>
+        c.dni.replace(/\D/g, '') === cleanDni
+          ? { ...c, sellos: Math.max(0, sellos) }
+          : c
+      );
+      try {
+        localStorage.setItem('leogas_club_fidelidad', JSON.stringify(nextList));
+      } catch {}
+      broadcastLiveEvent({ type: 'CLUB_FIDELIDAD_UPDATE', clubFidelidad: nextList });
+      return nextList;
+    });
+  };
+
+  const registrarNuevoClienteFidelidad = (cliente: Omit<ClienteFidelidad, 'id'>) => {
+    const nuevo: ClienteFidelidad = {
+      ...cliente,
+      id: `fid-${Date.now()}`,
+      dni: cliente.dni.trim().replace(/\D/g, '')
+    };
+    setClubFidelidad((prev) => {
+      const nextList = [nuevo, ...prev.filter((c) => c.dni !== nuevo.dni)];
+      try {
+        localStorage.setItem('leogas_club_fidelidad', JSON.stringify(nextList));
+      } catch {}
+      broadcastLiveEvent({ type: 'CLUB_FIDELIDAD_UPDATE', clubFidelidad: nextList });
+      return nextList;
+    });
+  };
+
+  const deleteClienteFidelidad = (id: string) => {
+    setClubFidelidad((prev) => {
+      const nextList = prev.filter((c) => c.id !== id);
+      try {
+        localStorage.setItem('leogas_club_fidelidad', JSON.stringify(nextList));
+      } catch {}
+      broadcastLiveEvent({ type: 'CLUB_FIDELIDAD_UPDATE', clubFidelidad: nextList });
+      return nextList;
+    });
+  };
+
   const openAlertModal = (type?: 'en_camino' | 'en_puerta' | 'completado' | 'asignando') => {
     if (type) {
       setAlertModal(type);
@@ -849,6 +1158,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         addClienteVIP,
         updateClienteVIP,
         deleteClienteVIP,
+        clubFidelidad,
+        consultarSellos,
+        sumarSelloFidelidad,
+        canjearPremioFidelidad,
+        setSellosManual,
+        registrarNuevoClienteFidelidad,
+        deleteClienteFidelidad,
         pedidos,
         createPedido,
         assignPedido,

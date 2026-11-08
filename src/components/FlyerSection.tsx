@@ -12,9 +12,18 @@ export const FlyerSection: React.FC = () => {
         {/* Flyer Image */}
         <div className="w-full md:w-1/3 max-w-[280px]">
           <img
-            src={getAssetUrl('1791513590376.jpg')}
+            src={
+              negocio.imagenPresentacion
+                ? (negocio.imagenPresentacion.startsWith('data:') || negocio.imagenPresentacion.startsWith('http')
+                    ? negocio.imagenPresentacion
+                    : getAssetUrl(negocio.imagenPresentacion))
+                : getAssetUrl('1791513590376.jpg')
+            }
             alt={`Flyer ${negocio.nombre}`}
             className="w-full h-auto rounded-xl shadow-md border border-slate-200 object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = getAssetUrl('1791513590376.jpg');
+            }}
           />
         </div>
 

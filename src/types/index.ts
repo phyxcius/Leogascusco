@@ -28,6 +28,7 @@ export interface NegocioIdentidad {
   nombre: string;
   slogan: string;
   logoUrl: string;
+  imagenPresentacion?: string; // Imagen de presentación / flyer de superposición en el index
   whatsapp: string;
   telPrincipal: string;
   telSecundario: string;
@@ -163,4 +164,22 @@ export interface CotizacionCRM {
   estado: 'cotizado' | 'aprobado' | 'programado' | 'facturado';
   repartidorAsignado?: string;
   notas?: string;
+}
+
+export interface HistorialSello {
+  fecha: string;
+  detalle: string;
+  sellosSumados: number;
+}
+
+export interface ClienteFidelidad {
+  id: string;
+  dni: string;
+  nombre: string;
+  telefono?: string;
+  sellos: number; // 0 to 10
+  totalConsumos: number;
+  premiosCanjeados: number;
+  ultimoConsumo: string;
+  historial?: HistorialSello[];
 }

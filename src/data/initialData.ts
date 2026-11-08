@@ -9,7 +9,8 @@ import {
   VentaRegistro,
   Pedido,
   CRMPlantilla,
-  CotizacionCRM
+  CotizacionCRM,
+  ClienteFidelidad
 } from '../types/index';
 
 export const INITIAL_PRODUCTOS: Producto[] = [
@@ -84,6 +85,7 @@ export const INITIAL_NEGOCIO: NegocioIdentidad = {
   nombre: "La Chuspa Tech",
   slogan: "Publicidad, Tecnología & Balones de Gas en Cusco",
   logoUrl: "/CHUSPITA-circulo.png",
+  imagenPresentacion: "/1791513590376.jpg",
   whatsapp: "969773064",
   telPrincipal: "969773064",
   telSecundario: "969773064",
@@ -485,6 +487,62 @@ export const INITIAL_COTIZACIONES: CotizacionCRM[] = [
     total: 370.0,
     estado: "cotizado",
     notas: "Vecinos agrupados para compra comunitaria con descuento."
+  }
+];
+
+export const INITIAL_CLUB_FIDELIDAD: ClienteFidelidad[] = [
+  {
+    id: "fid-1",
+    dni: "23891045",
+    nombre: "Edwin Oblitas Ubalde",
+    telefono: "969773064",
+    sellos: 9, // 9 de 10 sellos, ¡a 1 del regalito!
+    totalConsumos: 19,
+    premiosCanjeados: 1,
+    ultimoConsumo: "Hoy, 11:45 a.m.",
+    historial: [
+      { fecha: "Hoy, 11:45 a.m.", detalle: "Balón Gas Premium 10kg", sellosSumados: 1 },
+      { fecha: "Ayer, 04:30 p.m.", detalle: "Balón La Chuspa Tech 10kg", sellosSumados: 1 }
+    ]
+  },
+  {
+    id: "fid-2",
+    dni: "45127890",
+    nombre: "Carmen Luz Delgado",
+    telefono: "950 123 987",
+    sellos: 7, // 7 de 10
+    totalConsumos: 7,
+    premiosCanjeados: 0,
+    ultimoConsumo: "Hoy, 11:15 a.m.",
+    historial: [
+      { fecha: "Hoy, 11:15 a.m.", detalle: "Balón La Chuspa Tech 10kg Normal", sellosSumados: 1 }
+    ]
+  },
+  {
+    id: "fid-3",
+    dni: "23984512",
+    nombre: "Rosa Quispe Huamán",
+    telefono: "984 765 432",
+    sellos: 10, // ¡Completó 10 sellos! Listo para canjear regalito
+    totalConsumos: 20,
+    premiosCanjeados: 1,
+    ultimoConsumo: "Hoy, 09:30 a.m.",
+    historial: [
+      { fecha: "Hoy, 09:30 a.m.", detalle: "Balón Gas Premium 10kg", sellosSumados: 1 }
+    ]
+  },
+  {
+    id: "fid-4",
+    dni: "41982345",
+    nombre: "Juan Carlos Mendoza",
+    telefono: "984 112 233",
+    sellos: 3,
+    totalConsumos: 3,
+    premiosCanjeados: 0,
+    ultimoConsumo: "Ayer, 02:15 p.m.",
+    historial: [
+      { fecha: "Ayer, 02:15 p.m.", detalle: "Balón La Chuspa Tech 10kg", sellosSumados: 1 }
+    ]
   }
 ];
 

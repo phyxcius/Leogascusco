@@ -37,10 +37,13 @@ import {
   Bell,
   Tag,
   Package,
-  Code
+  Code,
+  Gift,
+  Award,
+  Sparkles
 } from 'lucide-react';
 import L from 'leaflet';
-import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido, CotizacionCRM } from '../types/index';
+import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido, CotizacionCRM, ClienteFidelidad } from '../types/index';
 import { getPageUrl, getAssetUrl } from '../utils/assets';
 import { BrandBadge } from './BrandBadge';
 import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
@@ -85,7 +88,14 @@ export const AdminPanel: React.FC = () => {
     cotizaciones,
     addCotizacion,
     updateCotizacion,
-    deleteCotizacion
+    deleteCotizacion,
+    clubFidelidad,
+    consultarSellos,
+    sumarSelloFidelidad,
+    canjearPremioFidelidad,
+    setSellosManual,
+    registrarNuevoClienteFidelidad,
+    deleteClienteFidelidad
   } = useApp();
 
   // Login form state
@@ -95,15 +105,26 @@ export const AdminPanel: React.FC = () => {
 
   // Current tab
   const [activeTab, setActiveTab] = useState<
-    'pedidos' | 'identidad' | 'facturacion' | 'crm' | 'b2b' | 'liquidacion' | 'clientes' | 'accesorios' | 'productos' | 'telefonos' | 'gps' | 'reportes' | 'desarrollador'
+    'pedidos' | 'identidad' | 'facturacion' | 'crm' | 'fidelidad' | 'b2b' | 'liquidacion' | 'clientes' | 'accesorios' | 'productos' | 'telefonos' | 'gps' | 'reportes' | 'desarrollador'
   >('pedidos');
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Club de Fidelidad State in AdminPanel
+  const [fidelidadSearch, setFidelidadSearch] = useState('');
+  const [fidelidadFilterStatus, setFidelidadFilterStatus] = useState<'TODOS' | 'LISTOS' | 'PROGRESO'>('TODOS');
+  const [showAddFidelidadModal, setShowAddFidelidadModal] = useState(false);
+  const [newFidDni, setNewFidDni] = useState('');
+  const [newFidNombre, setNewFidNombre] = useState('');
+  const [newFidTelefono, setNewFidTelefono] = useState('');
+  const [newFidSellos, setNewFidSellos] = useState<number>(1);
+  const [selectedFidHistory, setSelectedFidHistory] = useState<ClienteFidelidad | null>(null);
 
   // Business Identity Form State
   const [identidadNombre, setIdentidadNombre] = useState(negocio.nombre);
   const [identidadSlogan, setIdentidadSlogan] = useState(negocio.slogan);
   const [identidadLogoUrl, setIdentidadLogoUrl] = useState(negocio.logoUrl);
+  const [identidadPresentacionUrl, setIdentidadPresentacionUrl] = useState(negocio.imagenPresentacion || '/1791513590376.jpg');
   const [identidadWhatsapp, setIdentidadWhatsapp] = useState(negocio.whatsapp);
   const [identidadTel1, setIdentidadTel1] = useState(negocio.telPrincipal);
   const [identidadTel2, setIdentidadTel2] = useState(negocio.telSecundario);
@@ -130,6 +151,7 @@ export const AdminPanel: React.FC = () => {
   const [newAccNombre, setNewAccNombre] = useState('');
   const [newAccPrecio, setNewAccPrecio] = useState('');
   const [newAccDesc, setNewAccDesc] = useState('');
+  const [newAccImagen, setNewAccImagen] = useState('/1791513590376.jpg');
 
   // Gas Cylinders CRUD Modals
   const [showAddProdModal, setShowAddProdModal] = useState(false);
@@ -138,6 +160,7 @@ export const AdminPanel: React.FC = () => {
   const [newProdTag, setNewProdTag] = useState('10kg');
   const [newProdPrecio, setNewProdPrecio] = useState('');
   const [newProdDesc, setNewProdDesc] = useState('');
+  const [newProdImagen, setNewProdImagen] = useState('/1791513590376.jpg');
 
   // Facturación y Comprobantes State
   const [facturaFilterDate, setFacturaFilterDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -189,6 +212,7 @@ export const AdminPanel: React.FC = () => {
     setIdentidadNombre(negocio.nombre);
     setIdentidadSlogan(negocio.slogan);
     setIdentidadLogoUrl(negocio.logoUrl);
+    setIdentidadPresentacionUrl(negocio.imagenPresentacion || '/1791513590376.jpg');
     setIdentidadWhatsapp(negocio.whatsapp);
     setIdentidadTel1(negocio.telPrincipal);
     setIdentidadTel2(negocio.telSecundario);
@@ -268,6 +292,70 @@ export const AdminPanel: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  // Flyer / Presentation overlay file upload handler
+  const handlePresentacionFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      alert('La imagen seleccionada supera los 3MB. Por favor elige una imagen más ligera.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (base64) {
+        setIdentidadPresentacionUrl(base64);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Cylinder image file upload handlers
+  const handleNewProdImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (base64) setNewProdImagen(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleEditProdImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editProdModal) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (base64) setEditProdModal({ ...editProdModal, imagen: base64 });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Accessory image file upload handlers
+  const handleNewAccImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (base64) setNewAccImagen(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleEditAccImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editAccModal) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (base64) setEditAccModal({ ...editAccModal, imagen: base64 });
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Business Identity save handler
   const handleSaveIdentidad = (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,6 +364,7 @@ export const AdminPanel: React.FC = () => {
       nombre: identidadNombre.trim() || 'La Chuspa Tech',
       slogan: identidadSlogan.trim() || 'Publicidad, Tecnología & Balones de Gas en Cusco',
       logoUrl: identidadLogoUrl.trim() || '/CHUSPITA-circulo.png',
+      imagenPresentacion: identidadPresentacionUrl.trim() || '/1791513590376.jpg',
       whatsapp: identidadWhatsapp.trim() || '969773064',
       telPrincipal: identidadTel1.trim() || '969773064',
       telSecundario: identidadTel2.trim() || '969773064',
@@ -732,6 +821,7 @@ export const AdminPanel: React.FC = () => {
             { id: 'identidad', label: 'Identidad del Negocio', icon: Store },
             { id: 'facturacion', label: 'Facturación y Comprobantes', icon: FileText },
             { id: 'crm', label: 'CRM & Calendario', icon: Calendar },
+            { id: 'fidelidad', label: 'Club de Fidelidad (Sellos)', icon: Gift },
             { id: 'b2b', label: 'Cartera B2B / Empresas', icon: Building2 },
             { id: 'liquidacion', label: 'Cierre de Caja & Créditos', icon: Receipt },
             { id: 'clientes', label: 'Clientes VIP', icon: Star },
@@ -1195,6 +1285,112 @@ export const AdminPanel: React.FC = () => {
                         >
                           🔵 Balón Gas 10kg
                         </button>
+                      </div>
+                    </div>
+
+                    {/* Imagen de Presentación / Superposición (Flyer del Index) */}
+                    <div className="pt-4 border-t border-slate-100 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                          <ImageIcon className="w-4 h-4 text-purple-700" />
+                          <span>Imagen de Presentación / Superposición (Flyer del Index)</span>
+                        </h4>
+                        <span className="text-[10px] bg-purple-100 text-purple-900 font-bold px-2 py-0.5 rounded-full">
+                          Index Cliente
+                        </span>
+                      </div>
+
+                      <p className="text-[11px] text-slate-500">
+                        Esta imagen se presenta como flyer promocional destacado de superposición en la página principal del cliente.
+                      </p>
+
+                      {/* Presentation Preview */}
+                      <div className="flex flex-col sm:flex-row items-center gap-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div className="w-full sm:w-44 h-36 rounded-2xl border-2 border-purple-400 overflow-hidden bg-white flex items-center justify-center shadow-sm flex-shrink-0">
+                          {identidadPresentacionUrl ? (
+                            <img
+                              src={
+                                identidadPresentacionUrl.startsWith('data:') || identidadPresentacionUrl.startsWith('http')
+                                  ? identidadPresentacionUrl
+                                  : getAssetUrl(identidadPresentacionUrl)
+                              }
+                              alt="Flyer Presentación preview"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                              }}
+                            />
+                          ) : (
+                            <span className="text-3xl">🖼️</span>
+                          )}
+                        </div>
+                        <div className="space-y-1 text-center sm:text-left">
+                          <strong className="text-xs text-slate-800 block">Vista Previa del Flyer Principal</strong>
+                          <p className="text-[11px] text-slate-500">
+                            Recomendado: imagen horizontal o cuadrada en formato JPG, PNG o WebP. Se sincroniza en tiempo real con el portal del cliente.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* File Upload input */}
+                      <div>
+                        <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                          Subir Nueva Imagen de Presentación (PC o Celular):
+                        </label>
+                        <label className="flex items-center justify-center gap-2 w-full p-3 bg-purple-50 hover:bg-purple-100 border-2 border-dashed border-purple-300 rounded-xl cursor-pointer text-xs font-bold text-purple-900 transition">
+                          <Upload className="w-4 h-4 text-purple-700" />
+                          <span>Seleccionar archivo para Flyer de Presentación</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePresentacionFileUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      {/* Image URL input */}
+                      <div>
+                        <label className="text-[11px] font-bold uppercase text-slate-600 block mb-1">
+                          O ingresar URL directa / ruta de imagen:
+                        </label>
+                        <input
+                          type="text"
+                          value={identidadPresentacionUrl}
+                          onChange={(e) => setIdentidadPresentacionUrl(e.target.value)}
+                          placeholder="/1791513590376.jpg o https://misitio.com/banner.jpg"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                        />
+                      </div>
+
+                      {/* Preset Badges */}
+                      <div>
+                        <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">
+                          Imágenes Predeterminadas Rápidas:
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setIdentidadPresentacionUrl('/1791513590376.jpg')}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer"
+                          >
+                            🟣 Flyer Oficial LeoGas Cusco (/1791513590376.jpg)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIdentidadPresentacionUrl('/CHUSPITA-circulo.png')}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer"
+                          >
+                            🟡 Logo La Chuspa Tech
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIdentidadPresentacionUrl('/medidas-de-balon-de-gas-de-10-Kg (1).png')}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold border border-slate-200 cursor-pointer"
+                          >
+                            🔵 Balón Gas Industrial 45kg
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1984,6 +2180,596 @@ export const AdminPanel: React.FC = () => {
             </div>
           )}
 
+          {/* TAB: CLUB DE FIDELIDAD (SELLOS POR CONSUMO) */}
+          {activeTab === 'fidelidad' && (
+            <div className="space-y-6">
+              {/* Header card with metrics */}
+              <div className="bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-900 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-md border-2 border-amber-400 relative overflow-hidden">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <span className="bg-amber-400 text-purple-950 font-black text-[10px] uppercase px-3 py-1 rounded-full inline-block mb-1 shadow-xs">
+                      🎁 Club de Fidelidad • 10 Sellos = 1 Regalito
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-black text-amber-300">
+                      Club de Fidelidad & Tarjetas Digitales de Sellos
+                    </h3>
+                    <p className="text-xs sm:text-sm text-purple-200 max-w-2xl leading-relaxed">
+                      Monitorea y suma sellos digitales a tus clientes por cada consumo de gas. Al alcanzar 10 sellos reciben su regalito de la casa. Consulta y busca por DNI en tiempo real con sincronización automática en el portal del cliente.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewFidDni('');
+                      setNewFidNombre('');
+                      setNewFidTelefono('');
+                      setNewFidSellos(1);
+                      setShowAddFidelidadModal(true);
+                    }}
+                    className="bg-amber-400 hover:bg-amber-500 text-purple-950 font-black px-4 py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md cursor-pointer flex-shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Registrar Cliente en Club</span>
+                  </button>
+                </div>
+
+                {/* Metrics Stats Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mt-5 pt-4 border-t border-purple-800/60">
+                  <div className="bg-white/10 backdrop-blur-xs p-3 rounded-xl border border-white/15">
+                    <span className="text-[10px] uppercase font-bold text-purple-200 block">Total Clientes en Club</span>
+                    <strong className="text-xl sm:text-2xl font-black text-white">{clubFidelidad.length}</strong>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-xs p-3 rounded-xl border border-white/15">
+                    <span className="text-[10px] uppercase font-bold text-purple-200 block">Sellos Activos</span>
+                    <strong className="text-xl sm:text-2xl font-black text-amber-300">
+                      {clubFidelidad.reduce((acc, c) => acc + c.sellos, 0)}
+                    </strong>
+                  </div>
+
+                  <div className="bg-amber-400/20 backdrop-blur-xs p-3 rounded-xl border border-amber-400/40">
+                    <span className="text-[10px] uppercase font-bold text-amber-300 block">🎁 Listos para Regalito</span>
+                    <strong className="text-xl sm:text-2xl font-black text-amber-300">
+                      {clubFidelidad.filter((c) => c.sellos >= 10).length}
+                    </strong>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-xs p-3 rounded-xl border border-white/15">
+                    <span className="text-[10px] uppercase font-bold text-purple-200 block">Premios Canjeados</span>
+                    <strong className="text-xl sm:text-2xl font-black text-emerald-300">
+                      {clubFidelidad.reduce((acc, c) => acc + c.premiosCanjeados, 0)}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Toolbar & Status Filters */}
+              <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
+                {/* Search by DNI or Name */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={fidelidadSearch}
+                    onChange={(e) => setFidelidadSearch(e.target.value)}
+                    placeholder="Buscar por DNI (8 dígitos) o Nombre del cliente..."
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-purple-800"
+                  />
+                  {fidelidadSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setFidelidadSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter Pills */}
+                <div className="flex gap-1.5 flex-wrap">
+                  {[
+                    { id: 'TODOS', label: `Todos (${clubFidelidad.length})` },
+                    {
+                      id: 'LISTOS',
+                      label: `🎁 Listos para Regalito (${clubFidelidad.filter((c) => c.sellos >= 10).length})`
+                    },
+                    {
+                      id: 'PROGRESO',
+                      label: `⚡ En Progreso (${clubFidelidad.filter((c) => c.sellos > 0 && c.sellos < 10).length})`
+                    }
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setFidelidadFilterStatus(f.id as typeof fidelidadFilterStatus)}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                        fidelidadFilterStatus === f.id
+                          ? 'bg-purple-800 text-white border-purple-800 shadow-xs'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Members Grid / List */}
+              {(() => {
+                const filtered = clubFidelidad.filter((c) => {
+                  const query = fidelidadSearch.trim().toLowerCase();
+                  const matchesQuery =
+                    !query ||
+                    c.dni.includes(query) ||
+                    c.nombre.toLowerCase().includes(query) ||
+                    (c.telefono && c.telefono.includes(query));
+
+                  if (!matchesQuery) return false;
+
+                  if (fidelidadFilterStatus === 'LISTOS') return c.sellos >= 10;
+                  if (fidelidadFilterStatus === 'PROGRESO') return c.sellos > 0 && c.sellos < 10;
+                  return true;
+                });
+
+                if (filtered.length === 0) {
+                  return (
+                    <div className="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-500 space-y-2">
+                      <div className="w-12 h-12 bg-purple-50 text-purple-700 rounded-full flex items-center justify-center text-xl mx-auto">
+                        🔍
+                      </div>
+                      <h4 className="font-black text-slate-800 text-sm">No se encontraron clientes en el Club</h4>
+                      <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                        {fidelidadSearch
+                          ? `No hay coincidencias para "${fidelidadSearch}". Intenta con otro número de DNI o agrega el cliente.`
+                          : 'Aún no hay clientes registrados con este filtro.'}
+                      </p>
+                      {fidelidadSearch && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewFidDni(/^\d+$/.test(fidelidadSearch) ? fidelidadSearch : '');
+                            setNewFidNombre(!/^\d+$/.test(fidelidadSearch) ? fidelidadSearch : '');
+                            setShowAddFidelidadModal(true);
+                          }}
+                          className="bg-purple-800 hover:bg-purple-900 text-white font-bold text-xs px-4 py-2 rounded-xl mt-2 inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Registrar "{fidelidadSearch}" en el Club</span>
+                        </button>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filtered.map((client) => {
+                      const isComplete = client.sellos >= 10;
+                      return (
+                        <div
+                          key={client.id}
+                          className={`bg-white rounded-2xl p-5 border-2 shadow-xs transition-all space-y-4 ${
+                            isComplete
+                              ? 'border-amber-400 bg-gradient-to-b from-amber-50/40 via-white to-white ring-2 ring-amber-300/40'
+                              : 'border-slate-200 hover:border-purple-300'
+                          }`}
+                        >
+                          {/* Card Header */}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-sm flex-shrink-0 shadow-inner ${
+                                  isComplete ? 'bg-amber-400 text-purple-950 text-xl animate-bounce' : 'bg-purple-100 text-purple-900'
+                                }`}
+                              >
+                                {isComplete ? '🎁' : '🛢️'}
+                              </div>
+                              <div>
+                                <h4 className="font-black text-slate-900 text-sm leading-tight flex items-center gap-1.5">
+                                  <span>{client.nombre}</span>
+                                </h4>
+                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                  <span className="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-0.5 rounded-md text-[10px] font-black font-mono">
+                                    DNI: {client.dni}
+                                  </span>
+                                  {client.telefono && (
+                                    <a
+                                      href={`https://wa.me/${client.telefono.replace(/\D/g, '')}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-emerald-700 font-bold text-[10px] hover:underline flex items-center gap-1"
+                                      title="Chatear por WhatsApp"
+                                    >
+                                      📱 {client.telefono}
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <span
+                              className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full flex-shrink-0 ${
+                                isComplete
+                                  ? 'bg-amber-400 text-purple-950 animate-pulse border border-amber-500 shadow-xs'
+                                  : 'bg-purple-100 text-purple-900'
+                              }`}
+                            >
+                              {isComplete ? '¡Regalito Listo! 🎁' : `${client.sellos} / 10 Sellos`}
+                            </span>
+                          </div>
+
+                          {/* 10-Stamp Visual Mini Card */}
+                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                            <div className="flex justify-between items-center text-[11px] font-bold">
+                              <span className="text-slate-500 uppercase text-[9px]">Tarjeta de Sellos</span>
+                              <span className={isComplete ? 'text-amber-700 font-black' : 'text-purple-900'}>
+                                {isComplete
+                                  ? '🎉 ¡Tarjeta Completa de 10 Sellos!'
+                                  : `Faltan ${10 - client.sellos} sellos para el regalito`}
+                              </span>
+                            </div>
+
+                            {/* Progress bar */}
+                            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  isComplete
+                                    ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+                                    : 'bg-gradient-to-r from-purple-600 to-indigo-600'
+                                }`}
+                                style={{ width: `${Math.min(100, (client.sellos / 10) * 100)}%` }}
+                              />
+                            </div>
+
+                            {/* 10 Mini-Slots */}
+                            <div className="grid grid-cols-10 gap-1 pt-1">
+                              {[...Array(10)].map((_, i) => {
+                                const slotNum = i + 1;
+                                const isStamped = client.sellos >= slotNum;
+                                const isPrize = slotNum === 10;
+
+                                return (
+                                  <div
+                                    key={slotNum}
+                                    className={`aspect-square rounded-lg flex flex-col items-center justify-center text-[8px] font-black transition-all ${
+                                      isStamped
+                                        ? 'bg-amber-400 text-purple-950 shadow-xs font-black'
+                                        : isPrize
+                                        ? 'bg-amber-100/70 border border-dashed border-amber-400 text-amber-800 animate-pulse'
+                                        : 'bg-white border border-dashed border-slate-300 text-slate-400'
+                                    }`}
+                                    title={`Espacio #${slotNum} ${isStamped ? '(Sellado ✔)' : isPrize ? '(¡Regalito!)' : ''}`}
+                                  >
+                                    <span>{isStamped ? '✔️' : isPrize ? '🎁' : slotNum}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Consumption Stats Info */}
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+                            <span>Consumos totales: <strong>{client.totalConsumos}</strong></span>
+                            <span>Premios canjeados: <strong>{client.premiosCanjeados}</strong></span>
+                            <span className="truncate max-w-[140px] text-right">Último: {client.ultimoConsumo}</span>
+                          </div>
+
+                          {/* Action Buttons Toolbar */}
+                          <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1.5">
+                            {/* Stamp adjustments (+1 / -1) */}
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  sumarSelloFidelidad(
+                                    client.dni,
+                                    client.nombre,
+                                    client.telefono,
+                                    'Sello otorgado por administración',
+                                    1
+                                  );
+                                  playSuccessChime();
+                                }}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 transition shadow-xs cursor-pointer"
+                                title="Sumar 1 sello por consumo"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>+1 Sello</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (client.sellos > 0) {
+                                    setSellosManual(client.dni, client.sellos - 1);
+                                  }
+                                }}
+                                disabled={client.sellos === 0}
+                                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1.5 rounded-lg text-xs transition cursor-pointer disabled:opacity-40"
+                                title="Restar 1 sello"
+                              >
+                                -1
+                              </button>
+                            </div>
+
+                            {/* Prize Redeem Button */}
+                            {isComplete ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (
+                                    confirm(
+                                      `¿Confirmas la entrega del REGALITO a ${client.nombre}?\n\nSe canjearán 10 sellos y la tarjeta digital volverá a 0 sellos.`
+                                    )
+                                  ) {
+                                    canjearPremioFidelidad(client.dni);
+                                    playSuccessChime();
+                                    playAndSpeak(`Regalito entregado y registrado con éxito para ${client.nombre}.`);
+                                    alert(`✔ Regalito registrado con éxito para ${client.nombre}.`);
+                                  }
+                                }}
+                                className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-black px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer animate-pulse"
+                              >
+                                <Gift className="w-3.5 h-3.5" />
+                                <span>Canjear Regalito 🎁</span>
+                              </button>
+                            ) : null}
+
+                            {/* WhatsApp Notification */}
+                            <a
+                              href={`https://wa.me/${(client.telefono || telefonos.whatsapp || '969773064').replace(/\D/g, '')}?text=${encodeURIComponent(
+                                isComplete
+                                  ? `¡Hola ${client.nombre}! 🎉 En ${negocio.nombre || 'La Chuspa Tech'} te felicitamos: ¡has completado tus 10 sellos del Club de Fidelidad con tu DNI ${client.dni}! Ya puedes coordinar la entrega de tu regalito sorpresa 🎁 ¡Gracias por tu preferencia!`
+                                  : `¡Hola ${client.nombre}! 🦁 En ${negocio.nombre || 'La Chuspa Tech'} te recordamos que tienes ${client.sellos} de 10 sellos en tu Club de Fidelidad con tu DNI ${client.dni}. ¡Te faltan solo ${10 - client.sellos} consumos para tu regalito especial! Pídelo al ${telefonos.whatsapp || '969773064'}.`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 transition"
+                              title="Enviar recordatorio de sellos por WhatsApp"
+                            >
+                              <span>📲 WhatsApp</span>
+                            </a>
+
+                            {/* History button */}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedFidHistory(client)}
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold p-1.5 rounded-lg text-xs transition"
+                              title="Ver historial de consumos"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Delete member */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm(`¿Eliminar al cliente ${client.nombre} (DNI ${client.dni}) del Club de Fidelidad?`)) {
+                                  deleteClienteFidelidad(client.id);
+                                }
+                              }}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition"
+                              title="Eliminar cliente"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
+              {/* MODAL: REGISTRAR NUEVO CLIENTE EN CLUB */}
+              {showAddFidelidadModal && (
+                <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                  <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-purple-400 animate-in zoom-in-95 space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center font-black text-sm">
+                          🎁
+                        </span>
+                        <div>
+                          <h4 className="font-black text-slate-900 text-base leading-tight">
+                            Nuevo Cliente en Club de Fidelidad
+                          </h4>
+                          <p className="text-[11px] text-slate-500">Crea su tarjeta digital de sellos</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddFidelidadModal(false)}
+                        className="text-slate-400 hover:text-slate-700 p-1.5 rounded-full"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const cleanDni = newFidDni.trim().replace(/\D/g, '');
+                        if (cleanDni.length !== 8) {
+                          alert('El DNI debe tener exactamente 8 dígitos.');
+                          return;
+                        }
+                        if (!newFidNombre.trim()) {
+                          alert('Por favor ingresa el nombre del cliente.');
+                          return;
+                        }
+
+                        registrarNuevoClienteFidelidad({
+                          dni: cleanDni,
+                          nombre: newFidNombre.trim(),
+                          telefono: newFidTelefono.trim() || '',
+                          sellos: Math.max(0, newFidSellos),
+                          totalConsumos: Math.max(1, newFidSellos),
+                          premiosCanjeados: 0,
+                          ultimoConsumo: 'Hoy, registro manual',
+                          historial: [
+                            {
+                              fecha: 'Hoy, registro inicial',
+                              detalle: `Apertura de tarjeta digital con ${newFidSellos} sello(s)`,
+                              sellosSumados: newFidSellos
+                            }
+                          ]
+                        });
+
+                        setShowAddFidelidadModal(false);
+                        playSuccessChime();
+                        alert(`✔ Cliente ${newFidNombre.trim()} registrado con éxito en el Club de Fidelidad.`);
+                      }}
+                      className="space-y-3.5 text-xs text-left"
+                    >
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-600 block mb-1">
+                          Número de DNI (8 dígitos): *
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={8}
+                          required
+                          value={newFidDni}
+                          onChange={(e) => setNewFidDni(e.target.value.replace(/\D/g, ''))}
+                          placeholder="Ej: 23891045"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-600 block mb-1">
+                          Nombre Completo del Cliente: *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newFidNombre}
+                          onChange={(e) => setNewFidNombre(e.target.value)}
+                          placeholder="Ej: Juan Carlos Pérez"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-600 block mb-1">
+                          Teléfono / WhatsApp de Contacto:
+                        </label>
+                        <input
+                          type="tel"
+                          value={newFidTelefono}
+                          onChange={(e) => setNewFidTelefono(e.target.value)}
+                          placeholder="Ej: 984 123 456"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-slate-600 block mb-1">
+                          Sellos Iniciales por Consumo:
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min={0}
+                            max={10}
+                            value={newFidSellos}
+                            onChange={(e) => setNewFidSellos(parseInt(e.target.value) || 0)}
+                            className="w-24 bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-black text-center text-sm text-purple-900"
+                          />
+                          <span className="text-slate-500 text-[11px]">
+                            {newFidSellos === 10 ? '¡Listo para canjear regalito!' : `Faltarán ${10 - newFidSellos} para regalito`}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddFidelidadModal(false)}
+                          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 bg-purple-800 hover:bg-purple-900 text-white font-black py-2.5 rounded-xl shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Save className="w-4 h-4 text-amber-300" />
+                          <span>Guardar y Sellar</span>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* MODAL: HISTORIAL DE SELLOS DEL CLIENTE */}
+              {selectedFidHistory && (
+                <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                  <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-slate-300 animate-in zoom-in-95 space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                      <div>
+                        <h4 className="font-black text-slate-900 text-base leading-tight">
+                          Historial de Sellos: {selectedFidHistory.nombre}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 font-mono">DNI: {selectedFidHistory.dni} • Saldo: {selectedFidHistory.sellos} / 10 sellos</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFidHistory(null)}
+                        className="text-slate-400 hover:text-slate-700 p-1.5 rounded-full"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs">
+                      {selectedFidHistory.historial && selectedFidHistory.historial.length > 0 ? (
+                        selectedFidHistory.historial.map((h, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl flex items-center justify-between gap-2"
+                          >
+                            <div>
+                              <strong className="text-slate-800 block text-[11px]">{h.detalle}</strong>
+                              <span className="text-[10px] text-slate-400 block">{h.fecha}</span>
+                            </div>
+                            <span
+                              className={`font-black text-xs px-2 py-0.5 rounded-md flex-shrink-0 ${
+                                h.sellosSumados > 0
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {h.sellosSumados > 0 ? `+${h.sellosSumados} sello` : `${h.sellosSumados} sellos`}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-6 text-slate-400">
+                          No hay movimientos registrados para este cliente.
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFidHistory(null)}
+                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 rounded-xl cursor-pointer text-xs"
+                      >
+                        Cerrar Historial
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* TAB 2: CARTERA B2B */}
           {activeTab === 'b2b' && (
             <div className="space-y-6">
@@ -2400,19 +3186,38 @@ export const AdminPanel: React.FC = () => {
                     className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:shadow-md transition relative group"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="bg-purple-50 text-purple-800 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-purple-200">
-                          ⚙️ Repuesto Certificado
-                        </span>
-                        <span className="text-base font-black text-purple-950">
-                          S/ {acc.precio.toFixed(2)}
-                        </span>
+                      <div className="flex items-start gap-3 mb-2">
+                        <div className="w-14 h-14 rounded-xl bg-purple-50 border border-purple-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                          <img
+                            src={
+                              acc.imagen
+                                ? (acc.imagen.startsWith('data:') || acc.imagen.startsWith('http')
+                                    ? acc.imagen
+                                    : getAssetUrl(acc.imagen))
+                                : getAssetUrl('1791513590376.jpg')
+                            }
+                            alt={acc.nombre}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="bg-purple-50 text-purple-800 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-purple-200">
+                              ⚙️ Repuesto Certificado
+                            </span>
+                            <span className="text-base font-black text-purple-950">
+                              S/ {acc.precio.toFixed(2)}
+                            </span>
+                          </div>
+                          <h4 className="font-black text-slate-900 text-xs sm:text-sm leading-snug line-clamp-2">
+                            {acc.nombre}
+                          </h4>
+                        </div>
                       </div>
-
-                      <h4 className="font-black text-slate-900 text-sm leading-snug">
-                        {acc.nombre}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                      <p className="text-[11px] text-slate-500 mt-1 leading-relaxed line-clamp-2">
                         {acc.descripcion || 'Accesorio y válvula homologada de alta seguridad para balones de gas residencial y comercial. Cumple normativa Osinergmin.'}
                       </p>
                     </div>
@@ -2426,7 +3231,7 @@ export const AdminPanel: React.FC = () => {
                         className="flex-1 bg-slate-50 hover:bg-purple-50 text-purple-900 border border-slate-200 hover:border-purple-300 font-extrabold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                       >
                         <Edit className="w-3.5 h-3.5 text-purple-700" />
-                        <span>Editar</span>
+                        <span>Editar / Foto</span>
                       </button>
                       <button
                         type="button"
@@ -2449,7 +3254,7 @@ export const AdminPanel: React.FC = () => {
               {/* Add Accessory Modal */}
               {showAddAccModal && (
                 <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95">
+                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
                     <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
                       <h4 className="font-black text-base text-purple-950 flex items-center gap-2">
                         <Wrench className="w-4 h-4 text-purple-700" />
@@ -2466,6 +3271,7 @@ export const AdminPanel: React.FC = () => {
                           nombre: newAccNombre.trim(),
                           precio: parseFloat(newAccPrecio) || 0,
                           disponible: true,
+                          imagen: newAccImagen.trim() || '/1791513590376.jpg',
                           descripcion: newAccDesc.trim() || 'Accesorio certificado para instalaciones de gas GLP.'
                         });
                         setShowAddAccModal(false);
@@ -2496,10 +3302,76 @@ export const AdminPanel: React.FC = () => {
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
                         />
                       </div>
+
+                      {/* Image section */}
+                      <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-200 space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-purple-900 block">
+                          Foto / Imagen del Accesorio:
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-xl border border-purple-300 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center shadow-2xs">
+                            <img
+                              src={
+                                newAccImagen.startsWith('data:') || newAccImagen.startsWith('http')
+                                  ? newAccImagen
+                                  : getAssetUrl(newAccImagen)
+                              }
+                              alt="Vista previa"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-800 hover:bg-purple-900 text-white font-bold rounded-lg text-[11px] cursor-pointer shadow-xs transition">
+                              <Upload className="w-3.5 h-3.5 text-amber-300" />
+                              <span>Subir Imagen desde Equipo</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleNewAccImageUpload}
+                                className="hidden"
+                              />
+                            </label>
+                            <input
+                              type="text"
+                              value={newAccImagen}
+                              onChange={(e) => setNewAccImagen(e.target.value)}
+                              placeholder="/1791513590376.jpg o URL"
+                              className="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-[11px] font-semibold"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setNewAccImagen('/1791513590376.jpg')}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🟣 Válvula / Accesorio
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setNewAccImagen('/medidas-de-balon-de-gas-de-10-Kg (1).png')}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🔵 Regulador Industrial
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setNewAccImagen('/CHUSPITA-circulo.png')}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🟡 Logo Chuspita
+                          </button>
+                        </div>
+                      </div>
+
                       <div>
                         <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Descripción / Características:</label>
                         <textarea
-                          rows={3}
+                          rows={2}
                           value={newAccDesc}
                           onChange={(e) => setNewAccDesc(e.target.value)}
                           placeholder="Detalles técnicos, longitud, compatibilidad con balones..."
@@ -2529,11 +3401,11 @@ export const AdminPanel: React.FC = () => {
               {/* Edit Accessory Modal */}
               {editAccModal && (
                 <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95">
+                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
                     <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
                       <h4 className="font-black text-base text-purple-950 flex items-center gap-2">
                         <Edit className="w-4 h-4 text-purple-700" />
-                        <span>Editar Accesorio</span>
+                        <span>Editar Accesorio y Foto</span>
                       </h4>
                       <button onClick={() => setEditAccModal(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
                     </div>
@@ -2567,10 +3439,78 @@ export const AdminPanel: React.FC = () => {
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
                         />
                       </div>
+
+                      {/* Image section */}
+                      <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-200 space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-purple-900 block">
+                          Foto / Imagen del Accesorio:
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-xl border border-purple-300 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center shadow-2xs">
+                            <img
+                              src={
+                                editAccModal.imagen
+                                  ? (editAccModal.imagen.startsWith('data:') || editAccModal.imagen.startsWith('http')
+                                      ? editAccModal.imagen
+                                      : getAssetUrl(editAccModal.imagen))
+                                  : getAssetUrl('1791513590376.jpg')
+                              }
+                              alt="Vista previa"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-800 hover:bg-purple-900 text-white font-bold rounded-lg text-[11px] cursor-pointer shadow-xs transition">
+                              <Upload className="w-3.5 h-3.5 text-amber-300" />
+                              <span>Cambiar / Subir Imagen</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleEditAccImageUpload}
+                                className="hidden"
+                              />
+                            </label>
+                            <input
+                              type="text"
+                              value={editAccModal.imagen || ''}
+                              onChange={(e) => setEditAccModal({ ...editAccModal, imagen: e.target.value })}
+                              placeholder="/1791513590376.jpg o URL"
+                              className="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-[11px] font-semibold"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditAccModal({ ...editAccModal, imagen: '/1791513590376.jpg' })}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🟣 Válvula / Accesorio
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditAccModal({ ...editAccModal, imagen: '/medidas-de-balon-de-gas-de-10-Kg (1).png' })}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🔵 Regulador Industrial
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditAccModal({ ...editAccModal, imagen: '/CHUSPITA-circulo.png' })}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🟡 Logo Chuspita
+                          </button>
+                        </div>
+                      </div>
+
                       <div>
                         <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Descripción Informativa:</label>
                         <textarea
-                          rows={3}
+                          rows={2}
                           value={editAccModal.descripcion || ''}
                           onChange={(e) => setEditAccModal({ ...editAccModal, descripcion: e.target.value })}
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-semibold"
@@ -2636,19 +3576,38 @@ export const AdminPanel: React.FC = () => {
                     className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:shadow-md transition relative group"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="bg-purple-100 text-purple-900 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-purple-200">
-                          {prod.tag}
-                        </span>
-                        <span className="text-lg font-black text-purple-950">
-                          S/ {prod.precio.toFixed(2)}
-                        </span>
+                      <div className="flex items-start gap-3 mb-2">
+                        <div className="w-14 h-14 rounded-xl bg-purple-50 border border-purple-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                          <img
+                            src={
+                              prod.imagen
+                                ? (prod.imagen.startsWith('data:') || prod.imagen.startsWith('http')
+                                    ? prod.imagen
+                                    : getAssetUrl(prod.imagen))
+                                : getAssetUrl('1791513590376.jpg')
+                            }
+                            alt={prod.nombre}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="bg-purple-100 text-purple-900 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-purple-200">
+                              {prod.tag}
+                            </span>
+                            <span className="text-base font-black text-purple-950">
+                              S/ {prod.precio.toFixed(2)}
+                            </span>
+                          </div>
+                          <h4 className="font-black text-slate-900 text-xs sm:text-sm leading-snug line-clamp-2">
+                            {prod.nombre}
+                          </h4>
+                        </div>
                       </div>
-
-                      <h4 className="font-black text-slate-900 text-sm leading-snug">
-                        {prod.nombre}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                      <p className="text-[11px] text-slate-500 mt-1 leading-relaxed line-clamp-2">
                         {prod.descripcion}
                       </p>
                     </div>
@@ -2662,7 +3621,7 @@ export const AdminPanel: React.FC = () => {
                         className="flex-1 bg-slate-50 hover:bg-purple-50 text-purple-900 border border-slate-200 hover:border-purple-300 font-extrabold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                       >
                         <Edit className="w-3.5 h-3.5 text-purple-700" />
-                        <span>Modificar Tarifa</span>
+                        <span>Modificar Tarifa / Foto</span>
                       </button>
                       <button
                         type="button"
@@ -2685,7 +3644,7 @@ export const AdminPanel: React.FC = () => {
               {/* Add Product Modal */}
               {showAddProdModal && (
                 <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95">
+                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
                     <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
                       <h4 className="font-black text-base text-purple-950 flex items-center gap-2">
                         <Flame className="w-4 h-4 text-purple-700" />
@@ -2703,7 +3662,8 @@ export const AdminPanel: React.FC = () => {
                           tag: newProdTag.trim() || '10kg',
                           precio: parseFloat(newProdPrecio) || 0,
                           disponible: true,
-                          descripcion: newProdDesc.trim() || 'Balón de gas doméstico e industrial garantizado por Llamagas.'
+                          imagen: newProdImagen.trim() || '/1791513590376.jpg',
+                          descripcion: newProdDesc.trim() || 'Balón de gas doméstico e industrial garantizado por La Chuspa Tech.'
                         });
                         setShowAddProdModal(false);
                         alert('✔ Balón registrado en el catálogo exitosamente.');
@@ -2717,7 +3677,7 @@ export const AdminPanel: React.FC = () => {
                           required
                           value={newProdNombre}
                           onChange={(e) => setNewProdNombre(e.target.value)}
-                          placeholder="Ej: Balón Llamagas 15kg Especial"
+                          placeholder="Ej: Balón La Chuspa Tech 10kg Especial"
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold"
                         />
                       </div>
@@ -2746,10 +3706,76 @@ export const AdminPanel: React.FC = () => {
                           />
                         </div>
                       </div>
+
+                      {/* Image section */}
+                      <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-200 space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-purple-900 block">
+                          Foto / Imagen del Balón:
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-xl border border-purple-300 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center shadow-2xs">
+                            <img
+                              src={
+                                newProdImagen.startsWith('data:') || newProdImagen.startsWith('http')
+                                  ? newProdImagen
+                                  : getAssetUrl(newProdImagen)
+                              }
+                              alt="Vista previa"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-800 hover:bg-purple-900 text-white font-bold rounded-lg text-[11px] cursor-pointer shadow-xs transition">
+                              <Upload className="w-3.5 h-3.5 text-amber-300" />
+                              <span>Subir Imagen desde Equipo</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleNewProdImageUpload}
+                                className="hidden"
+                              />
+                            </label>
+                            <input
+                              type="text"
+                              value={newProdImagen}
+                              onChange={(e) => setNewProdImagen(e.target.value)}
+                              placeholder="/1791513590376.jpg o URL"
+                              className="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-[11px] font-semibold"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setNewProdImagen('/1791513590376.jpg')}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🟣 Balón Morado
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setNewProdImagen('/medidas-de-balon-de-gas-de-10-Kg (1).png')}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🔵 Balón Gas 10kg
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setNewProdImagen('/CHUSPITA-circulo.png')}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🟡 Chuspita Tech
+                          </button>
+                        </div>
+                      </div>
+
                       <div>
                         <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Descripción y Características:</label>
                         <textarea
-                          rows={3}
+                          rows={2}
                           value={newProdDesc}
                           onChange={(e) => setNewProdDesc(e.target.value)}
                           placeholder="Detalles sobre uso residencial, tipo de válvula, rendimiento..."
@@ -2779,11 +3805,11 @@ export const AdminPanel: React.FC = () => {
               {/* Edit Product Modal */}
               {editProdModal && (
                 <div className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95">
+                  <div className="bg-white max-w-md w-full rounded-3xl p-6 shadow-2xl border border-purple-200 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
                     <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
                       <h4 className="font-black text-base text-purple-950 flex items-center gap-2">
                         <Edit className="w-4 h-4 text-purple-700" />
-                        <span>Modificar Tarifa y Datos de Balón</span>
+                        <span>Modificar Tarifa y Foto de Balón</span>
                       </h4>
                       <button onClick={() => setEditProdModal(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
                     </div>
@@ -2829,10 +3855,78 @@ export const AdminPanel: React.FC = () => {
                           />
                         </div>
                       </div>
+
+                      {/* Image section */}
+                      <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-200 space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-purple-900 block">
+                          Foto / Imagen del Balón:
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-xl border border-purple-300 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center shadow-2xs">
+                            <img
+                              src={
+                                editProdModal.imagen
+                                  ? (editProdModal.imagen.startsWith('data:') || editProdModal.imagen.startsWith('http')
+                                      ? editProdModal.imagen
+                                      : getAssetUrl(editProdModal.imagen))
+                                  : getAssetUrl('1791513590376.jpg')
+                              }
+                              alt="Vista previa"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/1791513590376.jpg';
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-800 hover:bg-purple-900 text-white font-bold rounded-lg text-[11px] cursor-pointer shadow-xs transition">
+                              <Upload className="w-3.5 h-3.5 text-amber-300" />
+                              <span>Cambiar / Subir Imagen</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleEditProdImageUpload}
+                                className="hidden"
+                              />
+                            </label>
+                            <input
+                              type="text"
+                              value={editProdModal.imagen || ''}
+                              onChange={(e) => setEditProdModal({ ...editProdModal, imagen: e.target.value })}
+                              placeholder="/1791513590376.jpg o URL"
+                              className="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-[11px] font-semibold"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditProdModal({ ...editProdModal, imagen: '/1791513590376.jpg' })}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🟣 Balón Morado
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditProdModal({ ...editProdModal, imagen: '/medidas-de-balon-de-gas-de-10-Kg (1).png' })}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🔵 Balón Gas 10kg
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditProdModal({ ...editProdModal, imagen: '/CHUSPITA-circulo.png' })}
+                            className="text-[10px] font-bold px-2 py-0.5 bg-white border border-slate-200 rounded-md hover:bg-purple-100 cursor-pointer"
+                          >
+                            🟡 Chuspita Tech
+                          </button>
+                        </div>
+                      </div>
+
                       <div>
                         <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">Descripción:</label>
                         <textarea
-                          rows={3}
+                          rows={2}
                           value={editProdModal.descripcion}
                           onChange={(e) => setEditProdModal({ ...editProdModal, descripcion: e.target.value })}
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-semibold"
