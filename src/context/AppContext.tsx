@@ -193,16 +193,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
   const [productos, setProductos] = useState<Producto[]>(() => getStored('leogas_productos', INITIAL_PRODUCTOS));
   const [accesorios, setAccesorios] = useState<Accesorio[]>(() => getStored('leogas_accesorios', INITIAL_ACCESORIOS));
-  const [telefonos, setTelefonos] = useState<TelefonosConfig>(() => {
-    const stored = getStored<TelefonosConfig>('leogas_telefonos', INITIAL_TELEFONOS);
-    if (!stored || stored.tel1 === '950 727 212' || stored.whatsapp === '51969773064') {
-      return INITIAL_TELEFONOS;
-    }
-    return stored;
-  });
+  const [telefonos, setTelefonos] = useState<TelefonosConfig>(() => getStored<TelefonosConfig>('leogas_telefonos', INITIAL_TELEFONOS));
   const [negocio, setNegocio] = useState<NegocioIdentidad>(() => {
     const stored = getStored<NegocioIdentidad>('leogas_negocio', INITIAL_NEGOCIO);
-    if (!stored || stored.nombre === 'LeoGas Cusco' || !stored.nombre) {
+    if (!stored || !stored.nombre) {
       return INITIAL_NEGOCIO;
     }
     return { ...INITIAL_NEGOCIO, ...stored, igvPorcentaje: stored.igvPorcentaje || 18 };
@@ -212,7 +206,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [clientesVIP, setClientesVIP] = useState<ClienteVIP[]>(() => getStored('leogas_clientes_vip', INITIAL_CLIENTES_VIP));
   const [pedidos, setPedidos] = useState<Pedido[]>(() => {
     const stored = getStored<Pedido[]>('leogas_pedidos', INITIAL_PEDIDOS);
-    return (stored || []).filter(
+    const cleaned = (stored || []).filter(
       (p) =>
         p &&
         p.id &&
@@ -221,10 +215,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         p.cliente !== 'Milla' &&
         p.cliente !== 'Mimi'
     );
+    if (stored && stored.length !== cleaned.length) {
+      try {
+        localStorage.setItem('leogas_pedidos', JSON.stringify(cleaned));
+      } catch {}
+    }
+    return cleaned;
   });
   const [ventas, setVentas] = useState<VentaRegistro[]>(() => {
     const stored = getStored<VentaRegistro[]>('leogas_ventas', INITIAL_VENTAS);
-    return (stored || []).filter(
+    const cleaned = (stored || []).filter(
       (v) =>
         v &&
         v.cliente !== 'Milla' &&
@@ -232,6 +232,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         v.cliente !== 'Rosa Quispe Huamán' &&
         v.cliente !== 'Carmen Luz Delgado'
     );
+    if (stored && stored.length !== cleaned.length) {
+      try {
+        localStorage.setItem('leogas_ventas', JSON.stringify(cleaned));
+      } catch {}
+    }
+    return cleaned;
   });
   const [crmPlantillas, setCrmPlantillas] = useState<CRMPlantilla[]>(() => getStored('leogas_crm_plantillas', INITIAL_CRM_PLANTILLAS));
   const [cotizaciones, setCotizaciones] = useState<CotizacionCRM[]>(() => getStored('leogas_cotizaciones', INITIAL_COTIZACIONES));
@@ -258,19 +264,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
             if (data.pedidos) {
               setPedidos(data.pedidos);
             }
-            // Only trigger voice/alert popup on the customer portal
+            // Only trigger alert popup on the customer portal (AlertPopups handles the voice)
             if (activePortal === 'cliente') {
               const myOrderId = localStorage.getItem('leogas_mi_pedido_id');
               if (myOrderId && myOrderId === data.pedidoId) {
                 if (data.nextEtapa === 1) {
                   setAlertModal('en_camino');
-                  playAndSpeak("¡Atención! Su balón de gas está en camino. Su repartidor va hacia su domicilio.");
                 } else if (data.nextEtapa === 2) {
                   setAlertModal('en_puerta');
-                  playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
                 } else if (data.nextEtapa >= 3) {
                   setAlertModal('completado');
-                  playAndSpeak(`¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`, true);
                 }
               }
             }
@@ -416,7 +419,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       } catch (err) {
         // ignore
       }
-    }, 250);
+    }, 1500);
 
     return () => {
       if (bc) bc.close();
@@ -444,7 +447,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     ? pedidos.find((p) => p.id === activeCustomerOrderId) || null
     : null;
 
-  // Watch for active customer order stage changes to trigger sound, voice agent & central alert modals
+  // Watch for active customer order stage changes to trigger central alert modals (voice played by AlertPopups)
   useEffect(() => {
     if (activePortal !== 'cliente') return;
     if (!activeCustomerOrder) return;
@@ -455,20 +458,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     if ((activeCustomerOrder.estado === 'completado' || currentEtapa >= 3) && lastSeen !== '3') {
       localStorage.setItem(stageKey, '3');
       setAlertModal('completado');
-      playAndSpeak(
-        `¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`,
-        true
-      );
     } else if (currentEtapa === 1 && lastSeen !== '1') {
       localStorage.setItem(stageKey, '1');
       setAlertModal('en_camino');
-      playAndSpeak("¡Atención! Su balón de gas está en camino. Su repartidor va hacia su domicilio.");
     } else if (currentEtapa === 2 && lastSeen !== '2') {
       localStorage.setItem(stageKey, '2');
       setAlertModal('en_puerta');
-      playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
     }
-  }, [activeCustomerOrder, negocio.nombre]);
+  }, [activeCustomerOrder]);
 
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [cloudSyncStatus, setCloudSyncStatus] = useState<{ ok: boolean; msg: string; time?: string } | null>(null);
@@ -484,7 +481,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         const cloudTime = cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : 0;
 
         // If not forced and local device has newer edits that haven't been pushed or were just saved, don't overwrite!
-        if (!force && localModified > 0 && cloudTime > 0 && cloudTime <= localModified) {
+        if (!force && localModified > 0 && cloudTime > 0 && cloudTime < localModified) {
           return false;
         }
 

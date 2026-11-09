@@ -73,7 +73,7 @@ export const FlyerSection: React.FC = () => {
           </div>
           <a
             href={`https://wa.me/${telefonos.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
-              `¡Hola ${negocio.nombre || 'La Chuspa Tech'}! Deseo consultar sobre balones de gas a domicilio.`
+              `¡Hola ${negocio.nombre || 'Leo Gas Cusco'}! Deseo consultar sobre balones de gas a domicilio.`
             )}`}
             target="_blank"
             rel="noopener noreferrer"

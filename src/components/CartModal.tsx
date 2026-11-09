@@ -202,7 +202,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     msg += `*⏰ Horario:* ${horarioEntrega}\n`;
     msg += `*🧾 Comprobante:* ${comprobanteDetalle}\n`;
     msg += `*📍 Dirección / GPS:* ${gpsUrl}\n\n`;
-    msg += `_Pedido registrado en el sistema ${negocio.nombre || 'La Chuspa Tech'}._`;
+    msg += `_Pedido registrado en el sistema ${negocio.nombre || 'Leo Gas Cusco'}._`;
 
     const targetUrl = `https://wa.me/${telefonos.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
     window.open(targetUrl, '_blank');
@@ -287,7 +287,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
               className="w-8 h-8 rounded-full object-cover bg-white p-0.5"
             />
             <div>
-              <h3 className="font-black text-base leading-tight">Mi Pedido {negocio.nombre || 'La Chuspa Tech'}</h3>
+              <h3 className="font-black text-base leading-tight">Mi Pedido {negocio.nombre || 'Leo Gas Cusco'}</h3>
               <p className="text-[11px] text-yellow-300 font-bold">
                 {negocio.slogan || 'Entrega rápida a domicilio en Cusco'}
               </p>

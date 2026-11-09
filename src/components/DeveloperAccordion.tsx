@@ -176,7 +176,7 @@ export const DeveloperAccordion: React.FC = () => {
   const handleExportFullBackup = () => {
     const backupData = {
       timestamp: new Date().toISOString(),
-      app: negocio.nombre || 'La Chuspa Tech',
+      app: negocio.nombre || 'Leo Gas Cusco',
       version: '2.0.0',
       githubRepo,
       negocio,

@@ -37,12 +37,12 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
   };
 
   const handleShareWhatsApp = () => {
-    let msg = `*${(negocio.nombre || 'LA CHUSPA TECH').toUpperCase()} - COMPROBANTE ELECTRÓNICO*\n`;
+    let msg = `*${(negocio.nombre || 'LEO GAS CUSCO').toUpperCase()} - COMPROBANTE ELECTRÓNICO*\n`;
     msg += `Serie: ${serie}\n`;
     msg += `Cliente: ${clienteNombre}\n`;
     msg += `Total Pagado: S/ ${total.toFixed(2)}\n`;
     msg += `Forma de Pago: ${metodoPago}\n`;
-    msg += `¡Gracias por su preferencia con ${negocio.nombre || 'La Chuspa Tech'}!`;
+    msg += `¡Gracias por su preferencia con ${negocio.nombre || 'Leo Gas Cusco'}!`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -139,7 +139,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
         <div className="text-center text-[9px] text-slate-400 leading-tight mb-4">
           Autorizado mediante Resolución de Superintendencia SUNAT<br />
           Representación impresa del Comprobante Electrónico<br />
-          <strong>¡Gracias por su preferencia con {negocio.nombre || 'La Chuspa Tech'}!</strong>
+          <strong>¡Gracias por su preferencia con {negocio.nombre || 'Leo Gas Cusco'}!</strong>
         </div>
 
         {/* Non-print Buttons */}

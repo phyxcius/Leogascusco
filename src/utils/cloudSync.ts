@@ -200,23 +200,37 @@ export async function fetchStoreFromCloud(
     .replace(/\/+$/, '') || 'phyxcius/Leogascusco';
   const cleanBranch = branch.trim() || 'main';
 
+  const basePath = typeof window !== 'undefined'
+    ? `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}`
+    : '';
+
   // URLs to attempt in order of priority (live raw content first to bypass static CDN cache):
   const candidateUrls = [
+    ...(basePath ? [`${basePath}/data/store.json?_t=${timestamp}`] : []),
+    `https://phyxcius.github.io/Leogascusco/data/store.json?_t=${timestamp}`,
+    `./data/store.json?_t=${timestamp}`,
+    `data/store.json?_t=${timestamp}`,
+    `/Leogascusco/data/store.json?_t=${timestamp}`,
     `https://raw.githubusercontent.com/${cleanRepo}/${cleanBranch}/public/data/store.json?_t=${timestamp}`,
     `https://raw.githubusercontent.com/${cleanRepo}/${cleanBranch}/data/store.json?_t=${timestamp}`,
     `https://raw.githubusercontent.com/phyxcius/Leogascusco/main/public/data/store.json?_t=${timestamp}`,
     `https://raw.githubusercontent.com/phyxcius/Leogascusco/main/data/store.json?_t=${timestamp}`,
     `https://raw.githubusercontent.com/phyxcius/Leogas/main/public/data/store.json?_t=${timestamp}`,
-    `./data/store.json?_t=${timestamp}`,
-    `/data/store.json?_t=${timestamp}`,
-    `/Leogascusco/data/store.json?_t=${timestamp}`
+    `/data/store.json?_t=${timestamp}`
   ];
 
+  const token = typeof window !== 'undefined' ? (localStorage.getItem('leogas_github_token') || '').trim() : '';
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) {
+    headers['Authorization'] = token.startsWith('ghp_') ? `token ${token}` : `Bearer ${token}`;
+  }
+
   for (const url of candidateUrls) {
+    if (!url) continue;
     try {
       const res = await fetch(url, {
         cache: 'no-store',
-        headers: { Accept: 'application/json' }
+        headers
       });
       if (res.ok) {
         const data = await res.json();

@@ -53,7 +53,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
   useEffect(() => {
     if (alertModal === 'completado') {
       playAndSpeak(
-        `¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`,
+        `¡Muchas gracias por su compra en ${negocio.nombre || 'Leo Gas Cusco'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`,
         true
       );
     } else if (alertModal === 'en_puerta') {
@@ -81,8 +81,8 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
   if (!alertModal) return null;
 
   const repartidorNombre =
-    activeCustomerOrder?.repartidorNombre || `Repartidor asignado de ${negocio.nombre || 'La Chuspa Tech'}`;
-  const nombreNegocio = negocio.nombre || 'La Chuspa Tech';
+    activeCustomerOrder?.repartidorNombre || `Repartidor asignado de ${negocio.nombre || 'Leo Gas Cusco'}`;
+  const nombreNegocio = negocio.nombre || 'Leo Gas Cusco';
 
   const handleSalirARecibir = () => {
     if (clienteAvisoEnviado) {
@@ -171,7 +171,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
     if (result.premioDesbloqueado) {
       setJustStampedAlert(`🎉 ¡Felicidades! Has completado 10 sellos. ¡Tu regalito sorpresa está listo para reclamar!`);
       playAndSpeak(
-        `¡Felicitaciones! Has completado tus diez sellos en el Club de Fidelidad de ${negocio.nombre || 'La Chuspa Tech'}. Ya puedes reclamar tu regalito.`,
+        `¡Felicitaciones! Has completado tus diez sellos en el Club de Fidelidad de ${negocio.nombre || 'Leo Gas Cusco'}. Ya puedes reclamar tu regalito.`,
         true
       );
     } else {
@@ -199,7 +199,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
         {/* Voice Agent Badge Indicator */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-purple-900 text-[10px] sm:text-xs font-black mb-2 shadow-2xs">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-          <span>🎙️ {negocio.nombre || 'La Chuspa Tech'} Agente de Voz Sincronizado</span>
+          <span>🎙️ {negocio.nombre || 'Leo Gas Cusco'} Agente de Voz Sincronizado</span>
         </div>
 
         {/* ================= ETAPA 0: ASIGNANDO REPARTIDOR ================= */}
