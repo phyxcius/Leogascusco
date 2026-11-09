@@ -49,19 +49,9 @@ export const DeveloperAccordion: React.FC = () => {
     cargarDatosDeLaNube
   } = useApp();
 
-  // Accordion & Authentication State
-  const [isOpen, setIsOpen] = useState(false);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  // Stored Developer Password (default: leogas2026)
-  const [devPassword, setDevPassword] = useState<string>(() => {
-    return localStorage.getItem('leogas_dev_password') || 'leogas2026';
-  });
-  const [newPasswordInput, setNewPasswordInput] = useState('');
-  const [showChangePass, setShowChangePass] = useState(false);
+  // Accordion & Direct Developer State (No password barrier as requested)
+  const [isOpen, setIsOpen] = useState(true);
+  const [isUnlocked, setIsUnlocked] = useState(true);
 
   // GitHub Token State
   const [githubToken, setGithubToken] = useState<string>(() => {
@@ -83,54 +73,8 @@ export const DeveloperAccordion: React.FC = () => {
     repoInfo?: { name: string; stars: number; visibility: string; defaultBranch: string };
   } | null>(null);
 
-  // Sync devPassword to localStorage
-  const handleUpdatePassword = () => {
-    if (!newPasswordInput.trim() || newPasswordInput.length < 4) {
-      alert('La clave debe tener al menos 4 caracteres.');
-      return;
-    }
-    localStorage.setItem('leogas_dev_password', newPasswordInput.trim());
-    setDevPassword(newPasswordInput.trim());
-    setNewPasswordInput('');
-    setShowChangePass(false);
-    playSuccessChime();
-    alert('✔ Clave del Desarrollador actualizada con éxito.');
-  };
-
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (
-      passwordInput === devPassword ||
-      passwordInput === 'lachuspatech2026' ||
-      passwordInput === 'leogas2026' ||
-      passwordInput === 'admin123'
-    ) {
-      setIsUnlocked(true);
-      setPasswordError(false);
-      setPasswordInput('');
-      setIsOpen(true);
-      playSuccessChime();
-      playAndSpeak('Acceso de desarrollador concedido.');
-    } else {
-      setPasswordError(true);
-      playChimeSound();
-    }
-  };
-
   const handleToggleAccordion = () => {
-    if (!isUnlocked) {
-      setIsOpen((prev) => !prev);
-    } else {
-      setIsOpen((prev) => !prev);
-    }
-  };
-
-  const handleLock = () => {
-    setIsUnlocked(false);
-    setIsOpen(false);
-    setPasswordInput('');
-    setPasswordError(false);
-    playChimeSound();
+    setIsOpen((prev) => !prev);
   };
 
   // Save GitHub Token & Test Connection
@@ -289,19 +233,11 @@ export const DeveloperAccordion: React.FC = () => {
       {/* Accordion Header */}
       <div
         onClick={handleToggleAccordion}
-        className={`p-4 sm:p-5 flex items-center justify-between cursor-pointer transition select-none ${
-          isUnlocked
-            ? 'bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white'
-            : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-        }`}
+        className="p-4 sm:p-5 flex items-center justify-between cursor-pointer transition select-none bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white"
       >
         <div className="flex items-center gap-3">
-          <div
-            className={`w-10 h-10 rounded-2xl flex items-center justify-center text-lg flex-shrink-0 shadow-xs ${
-              isUnlocked ? 'bg-amber-400 text-slate-950' : 'bg-slate-300 text-slate-700'
-            }`}
-          >
-            {isUnlocked ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg flex-shrink-0 shadow-xs bg-amber-400 text-slate-950">
+            <Unlock className="w-5 h-5" />
           </div>
 
           <div>
@@ -309,36 +245,18 @@ export const DeveloperAccordion: React.FC = () => {
               <h3 className="text-sm sm:text-base font-black tracking-tight leading-tight">
                 🛠️ Zona del Desarrollador (Token de GitHub & Reseteo del Sistema)
               </h3>
-              <span
-                className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
-                  isUnlocked ? 'bg-emerald-500 text-white animate-pulse' : 'bg-slate-200 text-slate-700'
-                }`}
-              >
-                {isUnlocked ? 'Desbloqueado ✔' : 'Protegido con Clave'}
+              <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500 text-white">
+                Acceso Directo ✔
               </span>
             </div>
-            <p className={`text-[11px] mt-0.5 ${isUnlocked ? 'text-slate-300' : 'text-slate-500'}`}>
+            <p className="text-[11px] mt-0.5 text-slate-300">
               Configuración de Token PAT de GitHub Pages, sincronización de repositorio y restablecimiento de fábrica.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {isUnlocked && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleLock();
-              }}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Bloquear</span>
-            </button>
-          )}
-
-          <div className="p-1 rounded-xl text-slate-400">
+          <div className="p-1 rounded-xl text-slate-300">
             {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
           </div>
         </div>
@@ -347,98 +265,19 @@ export const DeveloperAccordion: React.FC = () => {
       {/* Accordion Body */}
       {isOpen && (
         <div className="p-4 sm:p-6 bg-slate-50/50 border-t border-slate-200 animate-in fade-in duration-200">
-          {!isUnlocked ? (
-            /* ================= FORMULARIO DE DESBLOQUEO ================= */
-            <div className="max-w-md mx-auto bg-white p-5 sm:p-6 rounded-2xl border-2 border-purple-300 shadow-lg text-center space-y-4">
-              <div className="w-14 h-14 bg-purple-100 text-purple-800 rounded-full flex items-center justify-center text-2xl mx-auto shadow-inner">
-                <KeyRound className="w-7 h-7 text-purple-700 animate-bounce" />
+          <div className="space-y-6">
+            {/* TOP STATUS BAR */}
+            <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-emerald-950">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                <div>
+                  <strong className="text-xs font-black block">Modo Desarrollador Habilitado</strong>
+                  <span className="text-[11px] text-emerald-800">
+                    Tienes control total sobre el token de GitHub, respaldos y reseteo general del sistema.
+                  </span>
+                </div>
               </div>
-
-              <div>
-                <h4 className="text-base font-black text-slate-900 leading-tight">
-                  Ingresa la Clave del Desarrollador
-                </h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Esta zona contiene opciones críticas de tokens y reseteo general del sistema.
-                </p>
-              </div>
-
-              <form onSubmit={handleUnlock} className="space-y-3">
-                <div className="relative text-left">
-                  <label className="text-[10px] font-black uppercase text-slate-600 block mb-1">
-                    Clave de Acceso del Desarrollador:
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={passwordInput}
-                      onChange={(e) => {
-                        setPasswordInput(e.target.value);
-                        setPasswordError(false);
-                      }}
-                      placeholder="••••••••"
-                      className={`w-full bg-slate-50 border rounded-xl p-3 pr-10 text-xs font-bold text-slate-800 focus:outline-purple-800 transition ${
-                        passwordError ? 'border-red-500 bg-red-50' : 'border-slate-300'
-                      }`}
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-
-                  {passwordError && (
-                    <p className="text-[11px] text-red-600 font-bold mt-1.5 flex items-center gap-1">
-                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span>Clave incorrecta. Acceso restringido exclusivamente al desarrollador.</span>
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex gap-2 pt-1">
-                  <button
-                    type="submit"
-                    className="w-full bg-purple-800 hover:bg-purple-900 text-white font-black py-3 rounded-xl text-xs sm:text-sm shadow-md transition cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <Unlock className="w-4 h-4 text-amber-300" />
-                    <span>Desbloquear Opciones de Desarrollador 🔑</span>
-                  </button>
-                </div>
-
-                <div className="bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-                  <ShieldAlert className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Acceso seguro protegido. Credenciales privadas del desarrollador.</span>
-                </div>
-              </form>
             </div>
-          ) : (
-            /* ================= PANEL DE DESARROLLADOR DESBLOQUEADO ================= */
-            <div className="space-y-6">
-              {/* TOP STATUS BAR */}
-              <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-emerald-950">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                  <div>
-                    <strong className="text-xs font-black block">Modo Desarrollador Habilitado</strong>
-                    <span className="text-[11px] text-emerald-800">
-                      Tienes control total sobre el token de GitHub, respaldos y reseteo general.
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleLock}
-                  className="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
-                >
-                  <Lock className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Volver a Bloquear</span>
-                </button>
-              </div>
 
               {/* GLOBAL CLOUD SYNC CARD (CROSS-DEVICE SYNC FOR ALL CELLPHONES) */}
               <div className="bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-purple-800/80 space-y-4">
@@ -466,6 +305,21 @@ export const DeveloperAccordion: React.FC = () => {
                     <button
                       type="button"
                       onClick={async () => {
+                        let token = localStorage.getItem('leogas_github_token') || githubToken;
+                        if (!token.trim()) {
+                          const promptToken = prompt(
+                            '🔑 Token de GitHub requerido:\n\nIngresa tu Personal Access Token (PAT) de GitHub para publicar el catálogo en la nube:'
+                          );
+                          if (promptToken && promptToken.trim()) {
+                            token = promptToken.trim();
+                            setGithubToken(token);
+                            localStorage.setItem('leogas_github_token', token);
+                          } else {
+                            alert('⚠️ Se requiere el Token de GitHub para sincronizar con la nube.');
+                            return;
+                          }
+                        }
+
                         const res = await publicarCambiosEnLaNube();
                         if (res.ok) {
                           alert('✅ ¡Publicado en la nube con éxito! Todos los celulares verán los cambios actualizados.');
@@ -483,12 +337,12 @@ export const DeveloperAccordion: React.FC = () => {
                     <button
                       type="button"
                       onClick={async () => {
-                        const ok = await cargarDatosDeLaNube();
+                        const ok = await cargarDatosDeLaNube(true);
                         if (ok) {
                           playSuccessChime();
-                          alert('✔ Datos descargados y sincronizados desde la nube de GitHub.');
+                          alert('✔ Datos descargados y sincronizados desde la nube de GitHub con éxito.');
                         } else {
-                          alert('No se encontraron cambios pendientes en la nube o no hay conexión.');
+                          alert('No se encontraron cambios pendientes en la nube o no se pudo conectar con GitHub.');
                         }
                       }}
                       className="bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-700/60 font-bold px-3 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer"
@@ -735,56 +589,12 @@ export const DeveloperAccordion: React.FC = () => {
                         <span>🧹 Vaciar Historial de Pedidos y Ventas</span>
                       </button>
                     </div>
-
-                    {/* Botón 3: Cambiar Clave del Desarrollador */}
-                    <div className="pt-2 border-t border-slate-100">
-                      {!showChangePass ? (
-                        <button
-                          type="button"
-                          onClick={() => setShowChangePass(true)}
-                          className="text-xs text-purple-700 hover:text-purple-900 font-bold flex items-center gap-1 hover:underline cursor-pointer"
-                        >
-                          <KeyRound className="w-3.5 h-3.5" />
-                          <span>Cambiar Clave de Acceso del Desarrollador</span>
-                        </button>
-                      ) : (
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
-                          <label className="text-[10px] font-black uppercase text-slate-600 block">
-                            Nueva Clave del Desarrollador:
-                          </label>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={newPasswordInput}
-                              onChange={(e) => setNewPasswordInput(e.target.value)}
-                              placeholder="Nueva clave..."
-                              className="flex-1 bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold"
-                            />
-                            <button
-                              type="button"
-                              onClick={handleUpdatePassword}
-                              className="bg-purple-800 hover:bg-purple-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"
-                            >
-                              Guardar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setShowChangePass(false)}
-                              className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1.5 rounded-xl text-xs font-bold"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
+          </div>
+        )}
+      </div>
+    );
+  };

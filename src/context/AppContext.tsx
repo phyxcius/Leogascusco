@@ -117,6 +117,7 @@ interface AppContextType {
   openAlertModal: (type?: 'en_camino' | 'en_puerta' | 'completado' | 'asignando') => void;
   closeAlertModal: () => void;
   notificarClienteSaliendo: (pedidoId: string) => void;
+  acknowledgeClienteSaliendo: (pedidoId: string) => void;
 
   // CRM & Cotizaciones
   crmPlantillas: CRMPlantilla[];
@@ -154,7 +155,7 @@ interface AppContextType {
   isSyncingCloud: boolean;
   cloudSyncStatus: { ok: boolean; msg: string; time?: string } | null;
   publicarCambiosEnLaNube: () => Promise<{ ok: boolean; msg: string }>;
-  cargarDatosDeLaNube: () => Promise<boolean>;
+  cargarDatosDeLaNube: (force?: boolean) => Promise<boolean>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -209,8 +210,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [repartidores, setRepartidores] = useState<Repartidor[]>(() => getStored('leogas_repartidores', INITIAL_REPARTIDORES));
   const [empresasB2B, setEmpresasB2B] = useState<EmpresaB2B[]>(() => getStored('leogas_empresas_b2b', INITIAL_EMPRESAS_B2B));
   const [clientesVIP, setClientesVIP] = useState<ClienteVIP[]>(() => getStored('leogas_clientes_vip', INITIAL_CLIENTES_VIP));
-  const [pedidos, setPedidos] = useState<Pedido[]>(() => getStored('leogas_pedidos', INITIAL_PEDIDOS));
-  const [ventas, setVentas] = useState<VentaRegistro[]>(() => getStored('leogas_ventas', INITIAL_VENTAS));
+  const [pedidos, setPedidos] = useState<Pedido[]>(() => {
+    const stored = getStored<Pedido[]>('leogas_pedidos', INITIAL_PEDIDOS);
+    return (stored || []).filter(
+      (p) =>
+        p &&
+        p.id &&
+        !p.id.startsWith('cmd-179259') &&
+        !p.id.startsWith('cmd-179260') &&
+        p.cliente !== 'Milla' &&
+        p.cliente !== 'Mimi'
+    );
+  });
+  const [ventas, setVentas] = useState<VentaRegistro[]>(() => {
+    const stored = getStored<VentaRegistro[]>('leogas_ventas', INITIAL_VENTAS);
+    return (stored || []).filter(
+      (v) =>
+        v &&
+        v.cliente !== 'Milla' &&
+        v.cliente !== 'Mimi' &&
+        v.cliente !== 'Rosa Quispe Huamán' &&
+        v.cliente !== 'Carmen Luz Delgado'
+    );
+  });
   const [crmPlantillas, setCrmPlantillas] = useState<CRMPlantilla[]>(() => getStored('leogas_crm_plantillas', INITIAL_CRM_PLANTILLAS));
   const [cotizaciones, setCotizaciones] = useState<CotizacionCRM[]>(() => getStored('leogas_cotizaciones', INITIAL_COTIZACIONES));
   const [clubFidelidad, setClubFidelidad] = useState<ClienteFidelidad[]>(() => getStored('leogas_club_fidelidad', INITIAL_CLUB_FIDELIDAD));
@@ -236,22 +258,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
             if (data.pedidos) {
               setPedidos(data.pedidos);
             }
-            const myOrderId = localStorage.getItem('leogas_mi_pedido_id');
-            if (myOrderId && myOrderId === data.pedidoId) {
-              if (data.nextEtapa === 1) {
-                setAlertModal('en_camino');
-                playAndSpeak("¡Atención! Su balón de gas está en camino. Su repartidor va hacia su domicilio.");
-              } else if (data.nextEtapa === 2) {
-                setAlertModal('en_puerta');
-                playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
-              } else if (data.nextEtapa >= 3) {
-                setAlertModal('completado');
-                playAndSpeak(`¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`, true);
+            // Only trigger voice/alert popup on the customer portal
+            if (activePortal === 'cliente') {
+              const myOrderId = localStorage.getItem('leogas_mi_pedido_id');
+              if (myOrderId && myOrderId === data.pedidoId) {
+                if (data.nextEtapa === 1) {
+                  setAlertModal('en_camino');
+                  playAndSpeak("¡Atención! Su balón de gas está en camino. Su repartidor va hacia su domicilio.");
+                } else if (data.nextEtapa === 2) {
+                  setAlertModal('en_puerta');
+                  playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
+                } else if (data.nextEtapa >= 3) {
+                  setAlertModal('completado');
+                  playAndSpeak(`¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`, true);
+                }
               }
             }
           } else if (data.type === 'CLIENTE_SALIENDO') {
             setPedidos((prev) =>
               prev.map((p) => (p.id === data.pedidoId ? { ...p, clienteSaliendo: true } : p))
+            );
+          } else if (data.type === 'CLIENTE_SALIENDO_ACKNOWLEDGED') {
+            setPedidos((prev) =>
+              prev.map((p) => (p.id === data.pedidoId ? { ...p, clienteSaliendo: false, clienteSaliendoVisto: true } : p))
             );
           } else if (data.type === 'NEW_PEDIDO' && data.pedido) {
             setPedidos((prev) => [data.pedido, ...prev.filter((p) => p.id !== data.pedido.id)]);
@@ -417,6 +446,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
   // Watch for active customer order stage changes to trigger sound, voice agent & central alert modals
   useEffect(() => {
+    if (activePortal !== 'cliente') return;
     if (!activeCustomerOrder) return;
     const stageKey = `leogas_last_seen_stage_${activeCustomerOrder.id}`;
     const lastSeen = localStorage.getItem(stageKey);
@@ -443,13 +473,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [cloudSyncStatus, setCloudSyncStatus] = useState<{ ok: boolean; msg: string; time?: string } | null>(null);
 
-  // Cloud Auto-Fetch: on startup, check if cloud has updated store.json (for Android, iPhone, PC)
-  const cargarDatosDeLaNube = async (): Promise<boolean> => {
+  // Cloud Auto-Fetch: check if cloud has updated store.json (for Android, iPhone, PC)
+  const cargarDatosDeLaNube = async (force: boolean = false): Promise<boolean> => {
     try {
       const repo = localStorage.getItem('leogas_github_repo') || 'phyxcius/Leogascusco';
       const branch = localStorage.getItem('leogas_github_branch') || 'main';
       const cloudData = await fetchStoreFromCloud(repo, branch);
       if (cloudData && cloudData.negocio && Array.isArray(cloudData.productos)) {
+        const localModified = Number(localStorage.getItem('leogas_last_modified') || 0);
+        const cloudTime = cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : 0;
+
+        // If not forced and local device has newer edits that haven't been pushed or were just saved, don't overwrite!
+        if (!force && localModified > 0 && cloudTime > 0 && cloudTime <= localModified) {
+          return false;
+        }
+
         if (cloudData.negocio) {
           setNegocio(cloudData.negocio);
           localStorage.setItem('leogas_negocio', JSON.stringify(cloudData.negocio));
@@ -470,6 +508,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
           setClubFidelidad(cloudData.clubFidelidad);
           localStorage.setItem('leogas_club_fidelidad', JSON.stringify(cloudData.clubFidelidad));
         }
+        localStorage.setItem('leogas_last_modified', (cloudTime || Date.now()).toString());
         return true;
       }
     } catch {
@@ -479,7 +518,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   };
 
   useEffect(() => {
-    cargarDatosDeLaNube();
+    cargarDatosDeLaNube(false);
+    // Periodically sync every 25 seconds for viewers on mobile/desktop
+    const cloudInterval = setInterval(() => {
+      cargarDatosDeLaNube(false);
+    }, 25000);
+    return () => clearInterval(cloudInterval);
   }, []);
 
   // Publish to GitHub Cloud (Cross-Device Global Sync)
@@ -491,9 +535,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       const repo = localStorage.getItem('leogas_github_repo') || 'phyxcius/Leogascusco';
       const branch = localStorage.getItem('leogas_github_branch') || 'main';
 
+      const nowIso = new Date().toISOString();
       const payload: CloudStorePayload = {
         version: '2.1.0',
-        updatedAt: new Date().toISOString(),
+        updatedAt: nowIso,
         negocio,
         telefonos,
         productos,
@@ -508,6 +553,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         time: new Date().toLocaleTimeString('es-PE')
       });
       if (res.ok) {
+        localStorage.setItem('leogas_last_modified', new Date(nowIso).getTime().toString());
         playSuccessChime();
         playAndSpeak('Catálogo e identidad publicados globalmente en la nube de GitHub con éxito.');
       } else {
@@ -528,15 +574,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     }
   };
 
-  // Helper to broadcast changes across all open tabs
+  // Helper to broadcast changes across all open tabs and windows
   const broadcastSync = (type: string, payload: Record<string, any>) => {
-    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-      try {
-        const bc = new BroadcastChannel('leogas_realtime_sync');
-        bc.postMessage({ type, ...payload });
-        bc.close();
-      } catch {}
-    }
+    broadcastLiveEvent({ type, ...payload });
   };
 
   // Product CRUD
@@ -544,6 +584,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setProductos(prev => {
       const updated = prev.map(item => item.id === p.id ? p : item);
       localStorage.setItem('leogas_productos', JSON.stringify(updated));
+      localStorage.setItem('leogas_last_modified', Date.now().toString());
       broadcastSync('PRODUCTOS_SYNC', { productos: updated });
       return updated;
     });
@@ -552,6 +593,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setProductos(prev => {
       const updated = [...prev, p];
       localStorage.setItem('leogas_productos', JSON.stringify(updated));
+      localStorage.setItem('leogas_last_modified', Date.now().toString());
       broadcastSync('PRODUCTOS_SYNC', { productos: updated });
       return updated;
     });
@@ -560,6 +602,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setProductos(prev => {
       const updated = prev.filter(p => p.id !== id);
       localStorage.setItem('leogas_productos', JSON.stringify(updated));
+      localStorage.setItem('leogas_last_modified', Date.now().toString());
       broadcastSync('PRODUCTOS_SYNC', { productos: updated });
       return updated;
     });
@@ -570,6 +613,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setAccesorios(prev => {
       const updated = prev.map(item => item.id === a.id ? a : item);
       localStorage.setItem('leogas_accesorios', JSON.stringify(updated));
+      localStorage.setItem('leogas_last_modified', Date.now().toString());
       broadcastSync('ACCESORIOS_SYNC', { accesorios: updated });
       return updated;
     });
@@ -578,6 +622,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setAccesorios(prev => {
       const updated = [...prev, a];
       localStorage.setItem('leogas_accesorios', JSON.stringify(updated));
+      localStorage.setItem('leogas_last_modified', Date.now().toString());
       broadcastSync('ACCESORIOS_SYNC', { accesorios: updated });
       return updated;
     });
@@ -586,6 +631,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setAccesorios(prev => {
       const updated = prev.filter(a => a.id !== id);
       localStorage.setItem('leogas_accesorios', JSON.stringify(updated));
+      localStorage.setItem('leogas_last_modified', Date.now().toString());
       broadcastSync('ACCESORIOS_SYNC', { accesorios: updated });
       return updated;
     });
@@ -595,6 +641,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const updateTelefonos = (t: TelefonosConfig) => {
     setTelefonos(t);
     localStorage.setItem('leogas_telefonos', JSON.stringify(t));
+    localStorage.setItem('leogas_last_modified', Date.now().toString());
     broadcastSync('TELEFONOS_SYNC', { telefonos: t });
   };
 
@@ -613,6 +660,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
       localStorage.setItem('leogas_negocio', JSON.stringify(updated));
       localStorage.setItem('leogas_telefonos', JSON.stringify(updatedTels));
+      localStorage.setItem('leogas_last_modified', Date.now().toString());
 
       broadcastSync('NEGOCIO_SYNC', { negocio: updated });
       broadcastSync('TELEFONOS_SYNC', { telefonos: updatedTels });
@@ -625,6 +673,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setTelefonos(INITIAL_TELEFONOS);
     localStorage.setItem('leogas_negocio', JSON.stringify(INITIAL_NEGOCIO));
     localStorage.setItem('leogas_telefonos', JSON.stringify(INITIAL_TELEFONOS));
+    localStorage.setItem('leogas_last_modified', Date.now().toString());
     broadcastSync('NEGOCIO_SYNC', { negocio: INITIAL_NEGOCIO });
     broadcastSync('TELEFONOS_SYNC', { telefonos: INITIAL_TELEFONOS });
   };
@@ -658,6 +707,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     localStorage.setItem('leogas_crm_plantillas', JSON.stringify(INITIAL_CRM_PLANTILLAS));
     localStorage.setItem('leogas_cotizaciones', JSON.stringify(INITIAL_COTIZACIONES));
     localStorage.setItem('leogas_club_fidelidad', JSON.stringify(INITIAL_CLUB_FIDELIDAD));
+    localStorage.setItem('leogas_last_modified', Date.now().toString());
     localStorage.removeItem('leogas_mi_pedido_id');
 
     broadcastSync('FULL_RESET_SYNC', {
@@ -679,21 +729,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const resetPedidosYVentas = () => {
     setPedidos([]);
     setVentas([]);
+    setCotizaciones([]);
     setCarrito({});
     setActiveCustomerOrderId(null);
     setAlertModal(null);
 
     localStorage.setItem('leogas_pedidos', JSON.stringify([]));
     localStorage.setItem('leogas_ventas', JSON.stringify([]));
+    localStorage.setItem('leogas_cotizaciones', JSON.stringify([]));
     localStorage.removeItem('leogas_mi_pedido_id');
+    localStorage.removeItem('leogas_cliente_saliendo_notif');
 
-    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-      try {
-        const bc = new BroadcastChannel('leogas_realtime_sync');
-        bc.postMessage({ type: 'PEDIDOS_SYNC', pedidos: [] });
-        bc.close();
-      } catch {}
-    }
+    try {
+      Object.keys(localStorage).forEach((k) => {
+        if (k.startsWith('leogas_last_seen_stage_')) {
+          localStorage.removeItem(k);
+        }
+      });
+    } catch {}
+
+    broadcastLiveEvent({
+      type: 'PEDIDOS_SYNC',
+      pedidos: [],
+      ventas: [],
+      cotizaciones: []
+    });
   };
 
   // Fleet
@@ -866,6 +926,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
     playAndSpeak('Aviso enviado. Su repartidor lo está esperando en la puerta con su balón de gas.');
     closeAlertModal();
+  };
+
+  const acknowledgeClienteSaliendo = (pedidoId: string) => {
+    setPedidos((prev) => {
+      const updated = prev.map((p) =>
+        p.id === pedidoId ? { ...p, clienteSaliendo: false, clienteSaliendoVisto: true } : p
+      );
+
+      try {
+        localStorage.setItem('leogas_pedidos', JSON.stringify(updated));
+      } catch {}
+
+      broadcastLiveEvent({
+        type: 'CLIENTE_SALIENDO_ACKNOWLEDGED',
+        pedidoId,
+        pedidos: updated
+      });
+
+      return updated;
+    });
   };
 
   const advancePedidoEtapa = (pedidoId: string) => {
@@ -1279,6 +1359,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         openAlertModal,
         closeAlertModal,
         notificarClienteSaliendo,
+        acknowledgeClienteSaliendo,
         crmPlantillas,
         updateCRMPlantilla,
         cotizaciones,

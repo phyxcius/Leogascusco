@@ -42,7 +42,8 @@ export const RepartidorPanel: React.FC = () => {
     repartidores,
     ventas,
     negocio,
-    telefonos
+    telefonos,
+    acknowledgeClienteSaliendo
   } = useApp();
 
   const [selectedRepId, setSelectedRepId] = useState('');
@@ -53,8 +54,8 @@ export const RepartidorPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'solicitudes' | 'ruta' | 'movimientos'>('solicitudes');
   const [selectedPedidoId, setSelectedPedidoId] = useState<string | null>(null);
 
-  // Driver notification tracking: client coming out
-  const [dismissedClienteSaliendo, setDismissedClienteSaliendo] = useState<string | null>(null);
+  // Driver notification tracking: client coming out (Set of dismissed order IDs to prevent bouncing between orders)
+  const [dismissedClienteSaliendoIds, setDismissedClienteSaliendoIds] = useState<Set<string>>(new Set());
 
   // Movements calendar filter state
   const [movFechaFiltro, setMovFechaFiltro] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -121,13 +122,24 @@ export const RepartidorPanel: React.FC = () => {
     };
   }, [currentRepartidor?.id, setRepartidorCoords]);
 
-  // Realtime check if any of the driver's orders has clienteSaliendo active
+  // Realtime check if any of the driver's orders has clienteSaliendo active (Strictly active stage 2 orders not yet dismissed)
   const orderConClienteSaliendo = useMemo(() => {
     return (
-      myAssignedOrders.find((p) => p.clienteSaliendo && dismissedClienteSaliendo !== p.id) ||
-      (activeOrder?.clienteSaliendo && dismissedClienteSaliendo !== activeOrder.id ? activeOrder : null)
+      myAssignedOrders.find(
+        (p) =>
+          p.clienteSaliendo &&
+          p.estado !== 'completado' &&
+          p.etapa === 2 &&
+          !dismissedClienteSaliendoIds.has(p.id)
+      ) ||
+      (activeOrder?.clienteSaliendo &&
+      activeOrder.estado !== 'completado' &&
+      activeOrder.etapa === 2 &&
+      !dismissedClienteSaliendoIds.has(activeOrder.id)
+        ? activeOrder
+        : null)
     );
-  }, [myAssignedOrders, activeOrder, dismissedClienteSaliendo]);
+  }, [myAssignedOrders, activeOrder, dismissedClienteSaliendoIds]);
 
   // Audio & Voice trigger when client clicks "Salir a Recibir"
   useEffect(() => {
@@ -135,7 +147,7 @@ export const RepartidorPanel: React.FC = () => {
     playAndSpeak(
       `¡Atención! ${orderConClienteSaliendo.cliente || 'El cliente'} ya está saliendo a la puerta a recibir su pedido de gas.`
     );
-  }, [orderConClienteSaliendo?.id, orderConClienteSaliendo?.clienteSaliendo]);
+  }, [orderConClienteSaliendo?.id]);
 
   // Generate realistic Cusco street network waypoints (fallback if offline/OSRM slow)
   const generateCuscoStreetRoute = (startLat: number, startLng: number, destLat: number, destLng: number): [number, number][] => {
@@ -625,7 +637,9 @@ export const RepartidorPanel: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                setDismissedClienteSaliendo(orderConClienteSaliendo.id);
+                const orderId = orderConClienteSaliendo.id;
+                setDismissedClienteSaliendoIds((prev) => new Set(prev).add(orderId));
+                acknowledgeClienteSaliendo(orderId);
                 playSuccessChime();
               }}
               className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 sm:p-2.5 rounded-full transition cursor-pointer z-10 shadow-xs"
@@ -688,7 +702,9 @@ export const RepartidorPanel: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                setDismissedClienteSaliendo(orderConClienteSaliendo.id);
+                const orderId = orderConClienteSaliendo.id;
+                setDismissedClienteSaliendoIds((prev) => new Set(prev).add(orderId));
+                acknowledgeClienteSaliendo(orderId);
                 playSuccessChime();
               }}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 sm:py-4 px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base shadow-lg transition cursor-pointer min-h-[46px] flex items-center justify-center gap-2"

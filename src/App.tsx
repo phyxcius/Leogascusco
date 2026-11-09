@@ -14,6 +14,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { RepartidorPanel } from './components/RepartidorPanel';
 import { ShoppingCart, Bell } from 'lucide-react';
 import { playChimeSound } from './utils/audio';
+import { getPageUrl } from './utils/assets';
 
 const MainApp: React.FC = () => {
   const { activePortal, cartCount, negocio } = useApp();
@@ -135,10 +136,18 @@ const MainApp: React.FC = () => {
                   rel="noopener noreferrer"
                   className="text-yellow-400 hover:underline font-bold"
                 >
-                  La Chuspa Tech • www.lachusoaanuncios.com
+                  La Chuspa Tech • www.lachuspaanuncios.com
                 </a>
                 <span>•</span>
                 <span>Atención 24/7</span>
+                <span>•</span>
+                <a
+                  href={getPageUrl('admin.html')}
+                  className="text-slate-500 hover:text-slate-300 transition"
+                  title="Acceso al Panel de Control del Negocio"
+                >
+                  ⚙️ Admin
+                </a>
               </div>
             </div>
           </footer>

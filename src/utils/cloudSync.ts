@@ -127,6 +127,41 @@ export async function pushStoreToGitHub(
 
     if (putRes.ok) {
       const result = await putRes.json();
+      
+      // Also sync data/store.json for deployments where dist root is published to GitHub Pages
+      try {
+        const altFilePath = 'data/store.json';
+        const altApiUrl = `https://api.github.com/repos/${cleanRepo}/contents/${altFilePath}`;
+        let altSha: string | undefined = undefined;
+        const altGet = await fetch(`${altApiUrl}?ref=${cleanBranch}`, {
+          headers: {
+            Authorization: cleanToken.startsWith('ghp_') ? `token ${cleanToken}` : `Bearer ${cleanToken}`,
+            Accept: 'application/vnd.github+json'
+          }
+        });
+        if (altGet.ok) {
+          const altData = await altGet.json();
+          altSha = altData.sha;
+        }
+        const altPutBody: Record<string, any> = {
+          message: `Sincronización de catálogo en data/store.json [skip ci]`,
+          content: contentBase64,
+          branch: cleanBranch
+        };
+        if (altSha) altPutBody.sha = altSha;
+        await fetch(altApiUrl, {
+          method: 'PUT',
+          headers: {
+            Authorization: cleanToken.startsWith('ghp_') ? `token ${cleanToken}` : `Bearer ${cleanToken}`,
+            Accept: 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(altPutBody)
+        });
+      } catch {
+        // secondary path optional
+      }
+
       return {
         ok: true,
         msg: `¡Datos sincronizados y publicados exitosamente en GitHub (${cleanRepo})! Todos los celulares y clientes verán los cambios.`,
@@ -165,13 +200,16 @@ export async function fetchStoreFromCloud(
     .replace(/\/+$/, '') || 'phyxcius/Leogascusco';
   const cleanBranch = branch.trim() || 'main';
 
-  // URLs to attempt in order of priority:
+  // URLs to attempt in order of priority (live raw content first to bypass static CDN cache):
   const candidateUrls = [
+    `https://raw.githubusercontent.com/${cleanRepo}/${cleanBranch}/public/data/store.json?_t=${timestamp}`,
+    `https://raw.githubusercontent.com/${cleanRepo}/${cleanBranch}/data/store.json?_t=${timestamp}`,
+    `https://raw.githubusercontent.com/phyxcius/Leogascusco/main/public/data/store.json?_t=${timestamp}`,
+    `https://raw.githubusercontent.com/phyxcius/Leogascusco/main/data/store.json?_t=${timestamp}`,
+    `https://raw.githubusercontent.com/phyxcius/Leogas/main/public/data/store.json?_t=${timestamp}`,
     `./data/store.json?_t=${timestamp}`,
     `/data/store.json?_t=${timestamp}`,
-    `https://raw.githubusercontent.com/${cleanRepo}/${cleanBranch}/public/data/store.json?_t=${timestamp}`,
-    `https://raw.githubusercontent.com/phyxcius/Leogascusco/main/public/data/store.json?_t=${timestamp}`,
-    `https://raw.githubusercontent.com/phyxcius/Leogas/main/public/data/store.json?_t=${timestamp}`
+    `/Leogascusco/data/store.json?_t=${timestamp}`
   ];
 
   for (const url of candidateUrls) {

@@ -386,6 +386,12 @@ export const AdminPanel: React.FC = () => {
     });
     setSaveSuccessMsg(true);
     playAndSpeak('Configuración e identidad del negocio guardadas exitosamente.', true);
+    
+    // Auto-sincronizar con GitHub si el token está presente
+    const token = localStorage.getItem('leogas_github_token');
+    if (token && token.trim()) {
+      publicarCambiosEnLaNube();
+    }
     setTimeout(() => setSaveSuccessMsg(false), 4500);
   };
 
@@ -763,11 +769,25 @@ export const AdminPanel: React.FC = () => {
           <button
             type="button"
             onClick={async () => {
+              let token = localStorage.getItem('leogas_github_token') || '';
+              if (!token.trim()) {
+                const promptToken = prompt(
+                  '🔑 Sincronización Global con GitHub Pages:\n\nPara que tus cambios se vean en todos los celulares (iPhone, Android, PC, tablets), ingresa tu Token Personal de GitHub (PAT):'
+                );
+                if (promptToken && promptToken.trim()) {
+                  token = promptToken.trim();
+                  localStorage.setItem('leogas_github_token', token);
+                } else {
+                  alert('⚠️ Se requiere el Token de GitHub para publicar en la nube. También puedes configurarlo con opciones avanzadas en "Identidad del Negocio" -> "Zona del Desarrollador".');
+                  return;
+                }
+              }
+
               const res = await publicarCambiosEnLaNube();
               if (res.ok) {
                 alert('✅ ¡Sincronizado con éxito!\n\nLos cambios de catálogo, precios, fotos e identidad han sido subidos a GitHub. Ahora cualquier celular (Android, iPhone, tablet o PC) verá la información actualizada.');
               } else {
-                alert(`⚠️ Atención al publicar en la nube:\n\n${res.msg}\n\nSi aún no has configurado tu Token de GitHub, abre la pestaña "Identidad del Negocio" -> "Zona del Desarrollador" e ingresa tu Personal Access Token (PAT).`);
+                alert(`⚠️ Atención al publicar en la nube:\n\n${res.msg}\n\nPuedes revisar o cambiar tu Token en "Identidad del Negocio" -> "Zona del Desarrollador".`);
               }
             }}
             disabled={isSyncingCloud}
@@ -776,6 +796,19 @@ export const AdminPanel: React.FC = () => {
           >
             <Cloud className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-bounce' : ''}`} />
             <span>{isSyncingCloud ? 'Publicando en Nube...' : '☁️ Publicar en la Nube (Todos los Celulares)'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('desarrollador');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="bg-slate-800 hover:bg-slate-900 text-yellow-300 border border-slate-700 shadow-md px-3.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer"
+            title="Ir directo a la Zona del Desarrollador (Tokens de GitHub y Reseteo)"
+          >
+            <Code className="w-3.5 h-3.5 text-yellow-400" />
+            <span>🛠️ Zona Desarrollador</span>
           </button>
 
           <a
@@ -3440,7 +3473,11 @@ export const AdminPanel: React.FC = () => {
                         e.preventDefault();
                         updateAccesorio(editAccModal);
                         setEditAccModal(null);
-                        alert('✔ Accesorio modificado exitosamente.');
+                        const token = localStorage.getItem('leogas_github_token');
+                        if (token && token.trim()) {
+                          publicarCambiosEnLaNube();
+                        }
+                        alert('✔ Accesorio modificado y sincronizado exitosamente.');
                       }}
                       className="space-y-3.5 text-xs"
                     >
@@ -3844,7 +3881,11 @@ export const AdminPanel: React.FC = () => {
                         e.preventDefault();
                         updateProducto(editProdModal);
                         setEditProdModal(null);
-                        alert('✔ Producto actualizado correctamente.');
+                        const token = localStorage.getItem('leogas_github_token');
+                        if (token && token.trim()) {
+                          publicarCambiosEnLaNube();
+                        }
+                        alert('✔ Producto actualizado y sincronizado correctamente.');
                       }}
                       className="space-y-3.5 text-xs"
                     >

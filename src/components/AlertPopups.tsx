@@ -85,10 +85,17 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
   const nombreNegocio = negocio.nombre || 'La Chuspa Tech';
 
   const handleSalirARecibir = () => {
+    if (clienteAvisoEnviado) {
+      closeAlertModal();
+      return;
+    }
     if (activeCustomerOrder?.id) {
       notificarClienteSaliendo(activeCustomerOrder.id);
       setClienteAvisoEnviado(true);
       playSuccessChime();
+      setTimeout(() => {
+        closeAlertModal();
+      }, 1800);
     } else {
       closeAlertModal();
     }
@@ -365,16 +372,17 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
               }`}
             >
               <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white flex-shrink-0" />
-              <span>{clienteAvisoEnviado ? '¡Aviso Enviado! (Salir a Recibir)' : 'Salir a Recibir ✔️'}</span>
+              <span>{clienteAvisoEnviado ? '✔ ¡Aviso Enviado! (Cerrar Notificación)' : 'Salir a Recibir ✔️'}</span>
             </button>
 
-            <div>
+            <div className="pt-1">
               <button
                 type="button"
                 onClick={closeAlertModal}
-                className="text-xs sm:text-sm text-slate-400 hover:text-slate-600 underline font-semibold transition py-1"
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
               >
-                Minimizar ventana
+                <X className="w-3.5 h-3.5 text-slate-500" />
+                <span>Cerrar Notificación</span>
               </button>
             </div>
           </div>
