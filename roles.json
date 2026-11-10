@@ -1,0 +1,19 @@
+{
+  "roles": {
+    "l4zJsucsLFXCoTNar460hBK8zCy2": {
+      "role": "admin"
+    },
+    "RM4sjZf1IaeoZZ72SGKdknza3vK2": {
+      "role": "repartidor",
+      "repartidorId": "rep-1"
+    },
+    "RmUBc7bHNHT0eBZmksXErhWtAwb2": {
+      "role": "repartidor",
+      "repartidorId": "rep-2"
+    },
+    "KpQMz3COmPVNDP0MYtSUbTRwC9J3": {
+      "role": "repartidor",
+      "repartidorId": "rep-3"
+    }
+  }
+}
