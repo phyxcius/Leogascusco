@@ -4,6 +4,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  base: './',
   // Configuración de rutas absolutas con '@/' (opcional pero muy útil)
   resolve: {
     alias: {
