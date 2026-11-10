@@ -1,0 +1,78 @@
+{
+  "rules": {
+    "roles": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "meta": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "productos": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "accesorios": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "telefonos": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "negocio": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "empresasB2B": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "clientesVIP": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "crmPlantillas": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "cotizaciones": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "clubFidelidad": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'"
+    },
+    "repartidores": {
+      ".read": "auth != null",
+      "$rid": {
+        ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin' || (auth != null && root.child('roles').child(auth.uid).child('role').val() === 'repartidor' && root.child('roles').child(auth.uid).child('repartidorId').val() === $rid)"
+      }
+    },
+    "ventas": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin'",
+      "$vid": {
+        ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin' || (auth != null && root.child('roles').child(auth.uid).child('role').val() === 'repartidor' && !data.exists())"
+      }
+    },
+    "pedidos": {
+      ".indexOn": [
+        "repartidorId"
+      ],
+      ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin' || (auth != null && root.child('roles').child(auth.uid).child('role').val() === 'repartidor' && query.orderByChild === 'repartidorId' && query.equalTo === root.child('roles').child(auth.uid).child('repartidorId').val())",
+      "$pid": {
+        ".read": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin' || (auth != null && data.child('ownerUid').val() === auth.uid) || (auth != null && root.child('roles').child(auth.uid).child('role').val() === 'repartidor' && data.child('repartidorId').val() === root.child('roles').child(auth.uid).child('repartidorId').val())",
+        ".write": "auth != null && root.child('roles').child(auth.uid).child('role').val() === 'admin' || (auth != null && !data.exists() && newData.child('ownerUid').val() === auth.uid) || (auth != null && root.child('roles').child(auth.uid).child('role').val() === 'repartidor' && data.child('repartidorId').val() === root.child('roles').child(auth.uid).child('repartidorId').val())",
+        "clienteSaliendo": {
+          ".write": "auth != null && data.parent().child('ownerUid').val() === auth.uid"
+        },
+        "clienteSaliendoHora": {
+          ".write": "auth != null && data.parent().child('ownerUid').val() === auth.uid"
+        }
+      }
+    }
+  }
+}
