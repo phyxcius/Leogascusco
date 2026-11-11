@@ -84,6 +84,8 @@ export interface Pedido {
   etapa: number; // 0: asignado, 1: en camino, 2: en puerta, 3: entregado, 4: finalizado en base
   clienteSaliendo?: boolean;
   clienteSaliendoHora?: string;
+  clienteSaliendoVisto?: boolean;
+  ownerUid?: string; // uid anónimo de Firebase del cliente que creó el pedido
   timestamp: number;
   hora: string;
   fecha?: string;
