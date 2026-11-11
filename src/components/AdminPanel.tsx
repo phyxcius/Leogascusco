@@ -57,6 +57,7 @@ export const AdminPanel: React.FC = () => {
     isAdminLogged,
     adminLogin,
     adminLogout,
+    authError,
     pedidos,
     assignPedido,
     repartidores,
@@ -368,7 +369,7 @@ export const AdminPanel: React.FC = () => {
     e.preventDefault();
     const parsedIgv = parseFloat(identidadIgv.toString()) || 18;
     updateNegocio({
-      nombre: identidadNombre.trim() || 'Leo Gas Cusco',
+      nombre: identidadNombre.trim() || 'La Chuspa Tech',
       slogan: identidadSlogan.trim() || 'Publicidad, Tecnología & Balones de Gas en Cusco',
       logoUrl: identidadLogoUrl.trim() || '/CHUSPITA-circulo.png',
       imagenPresentacion: identidadPresentacionUrl.trim() || '/1791513590376.jpg',
@@ -544,7 +545,7 @@ export const AdminPanel: React.FC = () => {
       productos: emitirItems.map((it) => `${it.cantidad}x ${it.descripcion}`).join(', '),
       total: currentTotal,
       pago: emitirFormaPago,
-      repartidorNombre: emitirRepartidor || `Administración ${negocio.nombre || 'Leo Gas Cusco'}`,
+      repartidorNombre: emitirRepartidor || `Administración ${negocio.nombre || 'La Chuspa Tech'}`,
       comprobante: serieCorrelativo,
       documento: emitirNumDoc,
       tipoDoc: emitirTipo === 'FACTURA' ? ('RUC' as const) : ('DNI' as const),
@@ -565,7 +566,7 @@ export const AdminPanel: React.FC = () => {
       documento: emitirNumDoc,
       tipoDoc: emitirTipo === 'FACTURA' ? 'RUC' : 'DNI',
       direccion: emitirDireccionFiscal,
-      repartidor: emitirRepartidor || `Administración ${negocio.nombre || 'Leo Gas Cusco'}`,
+      repartidor: emitirRepartidor || `Administración ${negocio.nombre || 'La Chuspa Tech'}`,
       items: emitirItems.map((it) => ({
         cantidad: it.cantidad,
         descripcion: it.descripcion,
@@ -583,9 +584,10 @@ export const AdminPanel: React.FC = () => {
   };
 
   // Handle Login
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = adminLogin(loginUser, loginPass);
+    setLoginError(false);
+    const success = await adminLogin(loginUser, loginPass);
     if (!success) setLoginError(true);
   };
 
@@ -673,7 +675,7 @@ export const AdminPanel: React.FC = () => {
 
             {loginError && (
               <p className="text-xs text-red-600 font-bold">
-                Usuario o contraseña incorrectos. Verifica tus credenciales.
+                {authError || 'Usuario o contraseña incorrectos. Verifica tus credenciales.'}
               </p>
             )}
 
@@ -1609,6 +1611,9 @@ export const AdminPanel: React.FC = () => {
                   </button>
                 </div>
               </form>
+
+              {/* DEVELOPER ACCORDION (GITHUB TOKEN & SYSTEM FACTORY RESET) */}
+              <DeveloperAccordion />
             </div>
           )}
 
@@ -2577,8 +2582,8 @@ export const AdminPanel: React.FC = () => {
                             <a
                               href={`https://wa.me/${(client.telefono || telefonos.whatsapp || '969773064').replace(/\D/g, '')}?text=${encodeURIComponent(
                                 isComplete
-                                  ? `¡Hola ${client.nombre}! 🎉 En ${negocio.nombre || 'Leo Gas Cusco'} te felicitamos: ¡has completado tus 10 sellos del Club de Fidelidad con tu DNI ${client.dni}! Ya puedes coordinar la entrega de tu regalito sorpresa 🎁 ¡Gracias por tu preferencia!`
-                                  : `¡Hola ${client.nombre}! 🦁 En ${negocio.nombre || 'Leo Gas Cusco'} te recordamos que tienes ${client.sellos} de 10 sellos en tu Club de Fidelidad con tu DNI ${client.dni}. ¡Te faltan solo ${10 - client.sellos} consumos para tu regalito especial! Pídelo al ${telefonos.whatsapp || '969773064'}.`
+                                  ? `¡Hola ${client.nombre}! 🎉 En ${negocio.nombre || 'La Chuspa Tech'} te felicitamos: ¡has completado tus 10 sellos del Club de Fidelidad con tu DNI ${client.dni}! Ya puedes coordinar la entrega de tu regalito sorpresa 🎁 ¡Gracias por tu preferencia!`
+                                  : `¡Hola ${client.nombre}! 🦁 En ${negocio.nombre || 'La Chuspa Tech'} te recordamos que tienes ${client.sellos} de 10 sellos en tu Club de Fidelidad con tu DNI ${client.dni}. ¡Te faltan solo ${10 - client.sellos} consumos para tu regalito especial! Pídelo al ${telefonos.whatsapp || '969773064'}.`
                               )}`}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -4458,7 +4463,7 @@ export const AdminPanel: React.FC = () => {
             {/* Voice Agent Badge Indicator */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-900 text-[10px] sm:text-xs font-black shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-              <span>🎙️ {negocio.nombre || 'Leo Gas Cusco'} Agente de Voz Sincronizado</span>
+              <span>🎙️ {negocio.nombre || 'La Chuspa Tech'} Agente de Voz Sincronizado</span>
             </div>
 
             <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-yellow-100 text-amber-600 flex items-center justify-center text-3xl sm:text-4xl mx-auto shadow-inner animate-bounce">
@@ -4885,7 +4890,7 @@ export const AdminPanel: React.FC = () => {
                     onChange={(e) => setEmitirRepartidor(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 font-bold text-slate-700"
                   >
-                    <option value="">🛵 Administración {negocio.nombre || 'Leo Gas Cusco'} (Directo)</option>
+                    <option value="">🛵 Administración {negocio.nombre || 'La Chuspa Tech'} (Directo)</option>
                     {repartidores.map((r) => (
                       <option key={r.id} value={r.nombre}>
                         🛵 {r.nombre} ({r.vehiculo || 'Moto'})

@@ -36,6 +36,7 @@ export const RepartidorPanel: React.FC = () => {
     currentRepartidor,
     repartidorLogin,
     repartidorLogout,
+    authError,
     pedidos,
     advancePedidoEtapa,
     setRepartidorCoords,
@@ -275,7 +276,7 @@ export const RepartidorPanel: React.FC = () => {
     });
     L.marker([-13.525, -71.975], { icon: depotIcon })
       .addTo(map)
-      .bindPopup(`<b>🏢 Depósito ${negocio.nombre || 'Leo Gas Cusco'}</b><br>${negocio.direccion || 'Cusco - Perú'} (Punto A)`);
+      .bindPopup(`<b>🏢 Depósito ${negocio.nombre || 'La Chuspa Tech'}</b><br>${negocio.direccion || 'Cusco - Perú'} (Punto A)`);
 
     // Add Driver Marker
     const driverIcon = L.divIcon({
@@ -436,7 +437,7 @@ export const RepartidorPanel: React.FC = () => {
     speakVoice(`Iniciando navegación guiada hacia el cliente ${activeOrder.cliente}. Siga por la ruta trazada en las calles de Cusco.`);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRepId) {
       setLoginError(true);
@@ -447,7 +448,7 @@ export const RepartidorPanel: React.FC = () => {
       setLoginError(true);
       return;
     }
-    const ok = repartidorLogin(chofer.usuario || chofer.nombre, loginPass);
+    const ok = await repartidorLogin(chofer.usuario || chofer.nombre, loginPass, chofer.id);
     if (!ok) {
       setLoginError(true);
     } else {
@@ -482,7 +483,7 @@ export const RepartidorPanel: React.FC = () => {
       playAndSpeak(`Balón entregado con éxito a ${activeOrder.cliente}. Agradecimiento y solicitud de reseña enviados al cliente.`);
     } else if (currentEtapa >= 3) {
       // Finalizado en base
-      playAndSpeak(`Ruta finalizada. Registrado en caja de ${negocio.nombre || 'Leo Gas Cusco'}.`);
+      playAndSpeak(`Ruta finalizada. Registrado en caja de ${negocio.nombre || 'La Chuspa Tech'}.`);
       alert('✔ Pedido finalizado y registrado en caja. Has vuelto a estar libre en base.');
     }
   };
@@ -572,7 +573,7 @@ export const RepartidorPanel: React.FC = () => {
 
             {loginError && (
               <p className="text-xs text-red-600 font-bold bg-red-50 p-2.5 rounded-xl border border-red-200">
-                ❌ Clave incorrecta para el repartidor seleccionado.
+                ❌ {authError || 'Clave incorrecta para el repartidor seleccionado.'}
               </p>
             )}
 
@@ -652,7 +653,7 @@ export const RepartidorPanel: React.FC = () => {
             {/* Voice Agent Badge Indicator */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 text-[10px] sm:text-xs font-black shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-              <span>🎙️ {negocio.nombre || 'Leo Gas Cusco'} Agente de Voz Sincronizado</span>
+              <span>🎙️ {negocio.nombre || 'La Chuspa Tech'} Agente de Voz Sincronizado</span>
             </div>
 
             <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl sm:text-4xl mx-auto shadow-inner animate-bounce">
@@ -737,7 +738,7 @@ export const RepartidorPanel: React.FC = () => {
                 </div>
                 <h4 className="font-black text-slate-800 text-sm">No tienes pedidos pendientes</h4>
                 <p className="text-xs text-slate-400">
-                  Espera que la administración de {negocio.nombre || 'Leo Gas Cusco'} te asigne un pedido o revisa las solicitudes en espera.
+                  Espera que la administración de {negocio.nombre || 'La Chuspa Tech'} te asigne un pedido o revisa las solicitudes en espera.
                 </p>
               </div>
             ) : (
@@ -979,7 +980,7 @@ export const RepartidorPanel: React.FC = () => {
                       </span>
                       <div className="truncate">
                         <span className="text-[9px] font-bold text-slate-400 uppercase block">Partida</span>
-                        <strong className="text-slate-800 truncate block">Depósito {negocio.nombre || 'Leo Gas Cusco'} ({negocio.direccion || 'Cusco'})</strong>
+                        <strong className="text-slate-800 truncate block">Depósito {negocio.nombre || 'La Chuspa Tech'} ({negocio.direccion || 'Cusco'})</strong>
                       </div>
                     </div>
 
@@ -1006,7 +1007,7 @@ export const RepartidorPanel: React.FC = () => {
 
                     <a
                       href={`https://wa.me/${telefonos.whatsapp ? telefonos.whatsapp.replace(/\D/g, '') : '969773064'}?text=${encodeURIComponent(
-                        `Hola ${activeOrder.cliente}, soy ${currentRepartidor.nombre} de ${negocio.nombre || 'Leo Gas Cusco'}. Voy en camino con tu balón de gas.`
+                        `Hola ${activeOrder.cliente}, soy ${currentRepartidor.nombre} de ${negocio.nombre || 'La Chuspa Tech'}. Voy en camino con tu balón de gas.`
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -1363,7 +1364,7 @@ export const RepartidorPanel: React.FC = () => {
               </div>
               <div className="border-t border-slate-400 pt-1">
                 <strong>Firma de Caja / Administración</strong>
-                <p className="text-slate-400">{negocio.nombre || 'Leo Gas Cusco'}</p>
+                <p className="text-slate-400">{negocio.nombre || 'La Chuspa Tech'}</p>
               </div>
             </div>
 

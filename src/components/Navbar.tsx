@@ -17,7 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart, onOpenB2B }) => {
     if ('Notification' in window) {
       Notification.requestPermission().then((perm) => {
         if (perm === 'granted') {
-          new Notification(`🦁 ${negocio.nombre || 'Leo Gas Cusco'}`, {
+          new Notification(`🦁 ${negocio.nombre || 'La Chuspa Tech'}`, {
             body: '¡Alertas sonoras y notificaciones activadas con éxito!'
           });
         }
