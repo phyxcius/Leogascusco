@@ -56,7 +56,27 @@ export const RepartidorPanel: React.FC = () => {
   const [selectedPedidoId, setSelectedPedidoId] = useState<string | null>(null);
 
   // Driver notification tracking: client coming out (Set of dismissed order IDs to prevent bouncing between orders)
-  const [dismissedClienteSaliendoIds, setDismissedClienteSaliendoIds] = useState<Set<string>>(new Set());
+  const [dismissedClienteSaliendoIds, setDismissedClienteSaliendoIds] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem('leogas_dismissed_saliendo');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  const handleDismissClienteSaliendo = (orderId: string) => {
+    setDismissedClienteSaliendoIds((prev) => {
+      const next = new Set(prev);
+      next.add(orderId);
+      try {
+        localStorage.setItem('leogas_dismissed_saliendo', JSON.stringify([...next]));
+      } catch {}
+      return next;
+    });
+    acknowledgeClienteSaliendo(orderId);
+    playSuccessChime();
+  };
 
   // Movements calendar filter state
   const [movFechaFiltro, setMovFechaFiltro] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -123,24 +143,20 @@ export const RepartidorPanel: React.FC = () => {
     };
   }, [currentRepartidor?.id, setRepartidorCoords]);
 
-  // Realtime check if any of the driver's orders has clienteSaliendo active (Strictly active stage 2 orders not yet dismissed)
+  // Realtime check if any of the driver's orders has clienteSaliendo active (Strictly active stage 2 orders of THIS driver not yet dismissed)
   const orderConClienteSaliendo = useMemo(() => {
+    if (!currentRepartidor) return null;
     return (
       myAssignedOrders.find(
         (p) =>
+          p.repartidorId === currentRepartidor.id &&
           p.clienteSaliendo &&
           p.estado !== 'completado' &&
           p.etapa === 2 &&
           !dismissedClienteSaliendoIds.has(p.id)
-      ) ||
-      (activeOrder?.clienteSaliendo &&
-      activeOrder.estado !== 'completado' &&
-      activeOrder.etapa === 2 &&
-      !dismissedClienteSaliendoIds.has(activeOrder.id)
-        ? activeOrder
-        : null)
+      ) || null
     );
-  }, [myAssignedOrders, activeOrder, dismissedClienteSaliendoIds]);
+  }, [myAssignedOrders, currentRepartidor, dismissedClienteSaliendoIds]);
 
   // Audio & Voice trigger when client clicks "Salir a Recibir"
   useEffect(() => {
@@ -637,12 +653,7 @@ export const RepartidorPanel: React.FC = () => {
             {/* Close button */}
             <button
               type="button"
-              onClick={() => {
-                const orderId = orderConClienteSaliendo.id;
-                setDismissedClienteSaliendoIds((prev) => new Set(prev).add(orderId));
-                acknowledgeClienteSaliendo(orderId);
-                playSuccessChime();
-              }}
+              onClick={() => handleDismissClienteSaliendo(orderConClienteSaliendo.id)}
               className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 sm:p-2.5 rounded-full transition cursor-pointer z-10 shadow-xs"
               title="Cerrar notificación"
               aria-label="Cerrar"
@@ -702,12 +713,7 @@ export const RepartidorPanel: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => {
-                const orderId = orderConClienteSaliendo.id;
-                setDismissedClienteSaliendoIds((prev) => new Set(prev).add(orderId));
-                acknowledgeClienteSaliendo(orderId);
-                playSuccessChime();
-              }}
+              onClick={() => handleDismissClienteSaliendo(orderConClienteSaliendo.id)}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 sm:py-4 px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base shadow-lg transition cursor-pointer min-h-[46px] flex items-center justify-center gap-2"
             >
               👍 ¡Entendido, esperando en la puerta!

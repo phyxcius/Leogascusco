@@ -60,6 +60,7 @@ export const AdminPanel: React.FC = () => {
     authError,
     pedidos,
     assignPedido,
+    deletePedido,
     repartidores,
     addRepartidor,
     updateRepartidor,
@@ -974,13 +975,27 @@ export const AdminPanel: React.FC = () => {
 
                           <div className="flex items-center gap-2">
                             {ord.repartidorId ? (
-                              <div className="text-right">
-                                <span className="text-[10px] text-slate-400 block font-bold">
-                                  ASIGNADO A:
-                                </span>
-                                <span className="font-extrabold text-xs text-emerald-700">
-                                  🛵 {ord.repartidorNombre} (Etapa {ord.etapa}/3)
-                                </span>
+                              <div className="flex items-center gap-2">
+                                <div className="text-right">
+                                  <span className="text-[10px] text-slate-400 block font-bold">
+                                    ASIGNADO A:
+                                  </span>
+                                  <span className="font-extrabold text-xs text-emerald-700">
+                                    🛵 {ord.repartidorNombre} (Etapa {ord.etapa}/3)
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (confirm(`¿Deseas eliminar el pedido de ${ord.cliente} de Firebase y del sistema?`)) {
+                                      deletePedido(ord.id);
+                                    }
+                                  }}
+                                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                                  title="Eliminar pedido"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </div>
                             ) : (
                               <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -1000,6 +1015,18 @@ export const AdminPanel: React.FC = () => {
                                     </option>
                                   ))}
                                 </select>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (confirm(`¿Deseas eliminar el pedido de ${ord.cliente} de Firebase y del sistema?`)) {
+                                      deletePedido(ord.id);
+                                    }
+                                  }}
+                                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                                  title="Eliminar pedido"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </div>
                             )}
                           </div>
