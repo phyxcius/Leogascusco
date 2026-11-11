@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { X, Building2, Search, Send, Plus, Minus } from 'lucide-react';
+import { formatWhatsAppNumber } from '../utils/assets';
 
 interface B2BModalProps {
   isOpen: boolean;
@@ -109,7 +110,8 @@ export const B2BModal: React.FC<B2BModalProps> = ({ isOpen, onClose }) => {
     if (telefono) msg += `*📞 Contacto:* ${telefono}\n`;
     msg += `\n_Despacho prioritario comercial ${negocio.nombre || 'La Chuspa Tech'}._`;
 
-    const targetUrl = `https://wa.me/${telefonos.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+    const targetNumber = formatWhatsAppNumber(telefonos.whatsapp || negocio.whatsapp);
+    const targetUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
     window.open(targetUrl, '_blank');
 
     onClose();

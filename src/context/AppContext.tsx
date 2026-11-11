@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   Producto,
   Accesorio,
@@ -104,6 +104,7 @@ interface AppContextType {
   assignPedido: (pedidoId: string, repartidorId: string) => void;
   advancePedidoEtapa: (pedidoId: string) => void;
   completePedido: (pedidoId: string) => void;
+  deletePedido: (pedidoId: string) => void;
 
   ventas: VentaRegistro[];
   addVenta: (v: VentaRegistro) => void;
@@ -169,6 +170,10 @@ interface AppContextType {
 
   // Estado de la conexión con Firebase
   cloudStatus: { ready: boolean; connected: boolean; role: string; error?: string };
+
+  // Notificación de actualización en tiempo real para clientes (5 segundos)
+  dbUpdateToast: string | null;
+  dismissDbUpdateToast: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -277,6 +282,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   });
   const isAdminLogged = auth.role === 'admin';
   const currentRepartidorId: string | null = auth.role === 'repartidor' ? auth.repartidorId || null : null;
+
+  // Notificación de actualización en tiempo real para clientes (5 segundos)
+  const [dbUpdateToast, setDbUpdateToast] = useState<string | null>(null);
+  const dbToastTimeoutRef = useRef<any>(null);
+  const isInitialSyncDone = useRef(false);
+
+  const showDatabaseUpdateToast = (customMsg?: string) => {
+    if (activePortal !== 'cliente') return;
+    if (dbToastTimeoutRef.current) clearTimeout(dbToastTimeoutRef.current);
+    setDbUpdateToast(
+      customMsg || '🛡️ Por su seguridad, se está actualizando nuestra base de datos con los últimos precios y disponibilidad.'
+    );
+    dbToastTimeoutRef.current = setTimeout(() => {
+      setDbUpdateToast(null);
+    }, 5000);
+  };
+
+  const dismissDbUpdateToast = () => {
+    if (dbToastTimeoutRef.current) clearTimeout(dbToastTimeoutRef.current);
+    setDbUpdateToast(null);
+  };
+
+  // Esperar 2.5s después de cargar para no mostrar alerta en la carga inicial de la página
+  useEffect(() => {
+    const t = setTimeout(() => {
+      isInitialSyncDone.current = true;
+    }, 2500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Escuchar evento de actualización de base de datos desde Firebase o cambios remotos
+  useEffect(() => {
+    const handleDbUpdated = () => {
+      if (isInitialSyncDone.current && activePortal === 'cliente') {
+        showDatabaseUpdateToast();
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('leogas_db_updated', handleDbUpdated);
+      return () => window.removeEventListener('leogas_db_updated', handleDbUpdated);
+    }
+  }, [activePortal]);
 
   // Realtime BroadcastChannel & Storage Sync between Index, Repartidor and Admin
   useEffect(() => {
@@ -1075,6 +1122,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     advancePedidoEtapa(pedidoId);
   };
 
+  const deletePedido = (pedidoId: string) => {
+    setPedidos((prev) => {
+      const updated = prev.filter((p) => p.id !== pedidoId);
+      try {
+        localStorage.setItem('leogas_pedidos', JSON.stringify(updated));
+      } catch {}
+      broadcastSync('PEDIDOS_SYNC', { pedidos: updated });
+      return updated;
+    });
+    if (activeCustomerOrderId === pedidoId) {
+      setActiveCustomerOrderId(null);
+      localStorage.removeItem('leogas_mi_pedido_id');
+    }
+  };
+
   const addVenta = (v: VentaRegistro) => {
     const venta: VentaRegistro = v.id ? v : { ...v, id: `vta-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` };
     newVentaIds.add(venta.id as string);
@@ -1387,6 +1449,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         assignPedido,
         advancePedidoEtapa,
         completePedido,
+        deletePedido,
         ventas,
         addVenta,
         carrito,
@@ -1420,6 +1483,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         publicarCambiosEnLaNube,
         cargarDatosDeLaNube,
         authError,
+        dbUpdateToast,
+        dismissDbUpdateToast,
         cloudStatus: { ready: auth.ready, connected, role: auth.role, error: auth.error || syncError || undefined }
       }}
     >

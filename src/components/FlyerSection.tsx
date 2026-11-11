@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Phone, MessageCircle } from 'lucide-react';
-import { getAssetUrl } from '../utils/assets';
+import { getAssetUrl, formatWhatsAppNumber } from '../utils/assets';
 
 export const FlyerSection: React.FC = () => {
   const { telefonos, negocio } = useApp();
@@ -72,7 +72,7 @@ export const FlyerSection: React.FC = () => {
             )}
           </div>
           <a
-            href={`https://wa.me/${telefonos.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
+            href={`https://wa.me/${formatWhatsAppNumber(telefonos.whatsapp || negocio.whatsapp)}?text=${encodeURIComponent(
               `¡Hola ${negocio.nombre || 'La Chuspa Tech'}! Deseo consultar sobre balones de gas a domicilio.`
             )}`}
             target="_blank"

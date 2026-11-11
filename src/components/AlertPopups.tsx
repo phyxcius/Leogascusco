@@ -21,6 +21,7 @@ import {
   Flame,
   Check
 } from 'lucide-react';
+import { formatWhatsAppNumber } from '../utils/assets';
 import { ClienteFidelidad } from '../types/index';
 
 interface AlertPopupsProps {
@@ -586,7 +587,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
                     Has acumulado 10 sellos oficiales. Tienes un <strong>REGALITO</strong> listo para entrega.
                   </p>
                   <a
-                    href={`https://wa.me/${telefonos.whatsapp ? telefonos.whatsapp.replace(/\D/g, '') : '969773064'}?text=${encodeURIComponent(
+                    href={`https://wa.me/${formatWhatsAppNumber(telefonos.whatsapp || negocio.whatsapp)}?text=${encodeURIComponent(
                       `¡Hola ${nombreNegocio}! 🎉 He completado mis 10 sellos en el Club de Fidelidad con mi DNI ${fidelidadCliente.dni} (${fidelidadCliente.nombre}). Deseo coordinar la entrega de mi regalito del club 🎁`
                     )}`}
                     target="_blank"
@@ -685,7 +686,7 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
 
                 {/* WhatsApp */}
                 <a
-                  href={`https://wa.me/${negocio.whatsapp || '51969773064'}?text=${encodeURIComponent(
+                  href={`https://wa.me/${formatWhatsAppNumber(negocio.whatsapp || telefonos.whatsapp)}?text=${encodeURIComponent(
                     `Hola ${nombreNegocio}, acabo de recibir mi pedido de gas con éxito. ¡Muchas gracias!`
                   )}`}
                   target="_blank"

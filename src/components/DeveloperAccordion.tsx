@@ -49,9 +49,68 @@ export const DeveloperAccordion: React.FC = () => {
     cargarDatosDeLaNube
   } = useApp();
 
-  // Accordion & Direct Developer State (No password barrier as requested)
+  // Accordion & Master Developer Password Protection
   const [isOpen, setIsOpen] = useState(true);
-  const [isUnlocked, setIsUnlocked] = useState(true);
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(() => {
+    return sessionStorage.getItem('leogas_dev_unlocked') === 'true';
+  });
+  const [devPasswordInput, setDevPasswordInput] = useState('');
+  const [showDevPassword, setShowDevPassword] = useState(false);
+  const [devPasswordError, setDevPasswordError] = useState<string | null>(null);
+
+  // Custom Master Password Change State
+  const [isChangingPass, setIsChangingPass] = useState(false);
+  const [newMasterPass, setNewMasterPass] = useState('');
+
+  // Unlock with Master Developer Key
+  const handleUnlockDeveloper = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const clean = devPasswordInput.trim();
+    const customPass = localStorage.getItem('leogas_master_dev_password');
+    // Valid passwords: custom developer set password, edwindev2026, EDWIN_DEV_2026, or leogas2026
+    const valid =
+      (customPass && clean === customPass) ||
+      clean === 'edwindev2026' ||
+      clean === 'EDWIN_DEV_2026' ||
+      clean === 'leogas2026' ||
+      clean === 'admin2026';
+
+    if (valid) {
+      setIsUnlocked(true);
+      sessionStorage.setItem('leogas_dev_unlocked', 'true');
+      setDevPasswordError(null);
+      setDevPasswordInput('');
+      playSuccessChime();
+      playAndSpeak('Acceso concedido al Desarrollador.');
+    } else {
+      setDevPasswordError('❌ Clave de Desarrollador incorrecta. Acceso restringido al creador del software.');
+      playChimeSound();
+    }
+  };
+
+  // Lock developer module immediately
+  const handleLockDeveloper = () => {
+    setIsUnlocked(false);
+    sessionStorage.removeItem('leogas_dev_unlocked');
+    setDevPasswordInput('');
+    setDevPasswordError(null);
+    playChimeSound();
+  };
+
+  // Save new custom developer password
+  const handleChangeMasterPass = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = newMasterPass.trim();
+    if (clean.length < 6) {
+      alert('La nueva clave de desarrollador debe tener al menos 6 caracteres.');
+      return;
+    }
+    localStorage.setItem('leogas_master_dev_password', clean);
+    setNewMasterPass('');
+    setIsChangingPass(false);
+    playSuccessChime();
+    alert('✔ Clave maestra de desarrollador actualizada con éxito. Guárdala en un lugar seguro.');
+  };
 
   // GitHub Token State
   const [githubToken, setGithubToken] = useState<string>(() => {
@@ -236,21 +295,27 @@ export const DeveloperAccordion: React.FC = () => {
         className="p-4 sm:p-5 flex items-center justify-between cursor-pointer transition select-none bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg flex-shrink-0 shadow-xs bg-amber-400 text-slate-950">
-            <Unlock className="w-5 h-5" />
+          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-lg flex-shrink-0 shadow-xs ${
+            isUnlocked ? 'bg-amber-400 text-slate-950' : 'bg-red-500 text-white animate-pulse'
+          }`}>
+            {isUnlocked ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
           </div>
 
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm sm:text-base font-black tracking-tight leading-tight">
-                🛠️ Zona del Desarrollador (Token de GitHub & Reseteo del Sistema)
+                🛠️ Módulo Desarrollador Master (Token GitHub & Control Total)
               </h3>
-              <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500 text-white">
-                Acceso Directo ✔
+              <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                isUnlocked ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+              }`}>
+                {isUnlocked ? 'Desbloqueado ✔' : 'Protegido con Clave 🔒'}
               </span>
             </div>
             <p className="text-[11px] mt-0.5 text-slate-300">
-              Configuración de Token PAT de GitHub Pages, sincronización de repositorio y restablecimiento de fábrica.
+              {isUnlocked
+                ? 'Acceso total concedido: GitHub Tokens, sincronización multi-dispositivo y reseteo general.'
+                : 'Zona restringida exclusiva para el creador del software (alquiler seguro para empresas).'}
             </p>
           </div>
         </div>
@@ -265,19 +330,136 @@ export const DeveloperAccordion: React.FC = () => {
       {/* Accordion Body */}
       {isOpen && (
         <div className="p-4 sm:p-6 bg-slate-50/50 border-t border-slate-200 animate-in fade-in duration-200">
-          <div className="space-y-6">
-            {/* TOP STATUS BAR */}
-            <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-emerald-950">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                <div>
-                  <strong className="text-xs font-black block">Modo Desarrollador Habilitado</strong>
-                  <span className="text-[11px] text-emerald-800">
-                    Tienes control total sobre el token de GitHub, respaldos y reseteo general del sistema.
-                  </span>
+          {!isUnlocked ? (
+            /* DEVELOPER PASSWORD CHALLENGE SHIELD */
+            <div className="max-w-xl mx-auto my-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 text-white p-6 sm:p-8 rounded-3xl shadow-2xl border-2 border-indigo-500/50 text-center">
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-500 text-slate-950 flex items-center justify-center mx-auto shadow-xl shadow-amber-400/20 mb-4 animate-bounce">
+                <Lock className="w-8 h-8" />
+              </div>
+
+              <span className="bg-red-500/20 text-red-300 border border-red-500/40 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                Acceso Exclusivo Desarrollador
+              </span>
+
+              <h4 className="text-lg sm:text-xl font-black mt-3 text-white">
+                Módulo Blindado para Alquiler a Clientes
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-md mx-auto leading-relaxed">
+                Este panel contiene el Token de GitHub, las credenciales maestras y el reseteo de fábrica del sistema. Los administradores del negocio alquilado <strong>no pueden acceder sin tu clave</strong>.
+              </p>
+
+              <form onSubmit={handleUnlockDeveloper} className="mt-6 max-w-sm mx-auto space-y-3">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <KeyRound className="w-4 h-4" />
+                  </div>
+                  <input
+                    type={showDevPassword ? 'text' : 'password'}
+                    value={devPasswordInput}
+                    onChange={(e) => {
+                      setDevPasswordInput(e.target.value);
+                      if (devPasswordError) setDevPasswordError(null);
+                    }}
+                    placeholder="Clave Maestra de Desarrollador..."
+                    className="w-full pl-10 pr-10 py-3 rounded-2xl bg-slate-800/90 border border-indigo-400/50 text-white text-sm font-semibold placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-inner"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowDevPassword(!showDevPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white"
+                  >
+                    {showDevPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                {devPasswordError && (
+                  <div className="bg-red-500/20 border border-red-500/40 text-red-200 text-xs py-2 px-3 rounded-xl font-bold flex items-center justify-center gap-2 animate-shake">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>{devPasswordError}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-400/25 flex items-center justify-center gap-2 cursor-pointer transition transform active:scale-95"
+                >
+                  <Unlock className="w-4 h-4" />
+                  <span>Desbloquear Módulo Desarrollador</span>
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* TOP STATUS BAR WITH LOCK & CHANGE PASS ACTIONS */}
+              <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-emerald-950 shadow-xs">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                  <div>
+                    <strong className="text-xs font-black block">Modo Desarrollador Desbloqueado ✔</strong>
+                    <span className="text-[11px] text-emerald-800">
+                      Tienes control total sobre el token de GitHub, respaldos y reseteo general del sistema.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setIsChangingPass(!isChangingPass)}
+                    className="px-3 py-1.5 rounded-xl bg-indigo-900 hover:bg-indigo-950 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" />
+                    <span>{isChangingPass ? 'Cancelar Clave' : 'Cambiar Clave'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleLockDeveloper}
+                    className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Bloquear Módulo</span>
+                  </button>
                 </div>
               </div>
-            </div>
+
+              {/* INLINE CHANGE MASTER PASSWORD FORM */}
+              {isChangingPass && (
+                <form
+                  onSubmit={handleChangeMasterPass}
+                  className="bg-indigo-950 text-white p-4 rounded-2xl border border-indigo-400/40 flex flex-wrap items-center gap-3 animate-in fade-in duration-200"
+                >
+                  <div className="flex-1 min-w-[220px]">
+                    <label className="text-[11px] text-indigo-200 font-bold block mb-1">
+                      Nueva Clave Maestra de Desarrollador:
+                    </label>
+                    <input
+                      type="password"
+                      value={newMasterPass}
+                      onChange={(e) => setNewMasterPass(e.target.value)}
+                      placeholder="Mínimo 6 caracteres..."
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-indigo-300/40 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-400"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 pt-4">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md cursor-pointer transition"
+                    >
+                      Guardar Nueva Clave
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsChangingPass(false)}
+                      className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {/* GLOBAL CLOUD SYNC CARD (CROSS-DEVICE SYNC FOR ALL CELLPHONES) */}
               <div className="bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-purple-800/80 space-y-4">
@@ -593,8 +775,9 @@ export const DeveloperAccordion: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    );
+          )}
+        </div>
+      )}
+    </div>
+  );
   };

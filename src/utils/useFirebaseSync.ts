@@ -109,10 +109,14 @@ function useWholeNode(
       ref(fbDb, key),
       (snap) => {
         const v = snap.val();
+        const wasLoaded = loaded.current;
         loaded.current = true;
         if (v !== null && v !== undefined) {
           last.current = stable(v);
           setRef.current(v);
+          if (wasLoaded && typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('leogas_db_updated', { detail: { key } }));
+          }
         }
         setTick((t) => t + 1);
       },

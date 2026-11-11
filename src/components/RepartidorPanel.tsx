@@ -28,7 +28,7 @@ import {
 import L from 'leaflet';
 import { BrandBadge } from './BrandBadge';
 import { playChimeSound, playSuccessChime, speakVoice, playAndSpeak } from '../utils/audio';
-import { getAssetUrl } from '../utils/assets';
+import { getAssetUrl, formatWhatsAppNumber } from '../utils/assets';
 import { Pedido, VentaRegistro } from '../types/index';
 
 export const RepartidorPanel: React.FC = () => {
@@ -1012,7 +1012,7 @@ export const RepartidorPanel: React.FC = () => {
                     </a>
 
                     <a
-                      href={`https://wa.me/${telefonos.whatsapp ? telefonos.whatsapp.replace(/\D/g, '') : '969773064'}?text=${encodeURIComponent(
+                      href={`https://wa.me/${formatWhatsAppNumber(activeOrder.telefono || telefonos.whatsapp || negocio.whatsapp)}?text=${encodeURIComponent(
                         `Hola ${activeOrder.cliente}, soy ${currentRepartidor.nombre} de ${negocio.nombre || 'La Chuspa Tech'}. Voy en camino con tu balón de gas.`
                       )}`}
                       target="_blank"

@@ -38,7 +38,7 @@ const CloudBanner: React.FC = () => {
 };
 
 const MainApp: React.FC = () => {
-  const { activePortal, cartCount, negocio } = useApp();
+  const { activePortal, cartCount, negocio, dbUpdateToast, dismissDbUpdateToast } = useApp();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isB2BOpen, setIsB2BOpen] = useState(false);
   const [isTicketOpen, setIsTicketOpen] = useState(false);
@@ -62,6 +62,44 @@ const MainApp: React.FC = () => {
     <div className="min-h-screen bg-[#fafaf9] flex flex-col justify-between selection:bg-purple-200">
       <div>
         <CloudBanner />
+
+        {/* Floating 5-Second Security Database Update Toast (Portal Cliente) */}
+        {dbUpdateToast && activePortal === 'cliente' && (
+          <aside
+            role="status"
+            aria-live="polite"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-lg bg-gradient-to-r from-slate-950 via-purple-950 to-indigo-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-2xl border-2 border-yellow-400 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-purple-950 flex items-center justify-center font-black text-lg flex-shrink-0 shadow-md animate-pulse">
+                🛡️
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black text-yellow-300 uppercase tracking-wider">
+                    Sincronización en Vivo
+                  </span>
+                  <span className="text-[10px] bg-emerald-500/30 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
+                    5s
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm font-bold text-slate-100 leading-tight mt-0.5">
+                  {dbUpdateToast}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={dismissDbUpdateToast}
+              className="w-7 h-7 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center font-bold text-xs cursor-pointer flex-shrink-0 transition"
+              aria-label="Cerrar notificación"
+            >
+              ✕
+            </button>
+          </aside>
+        )}
+
         {/* Navigation Bar (Solo en portal Cliente) */}
         {activePortal === 'cliente' && (
           <Navbar onOpenCart={() => setIsCartOpen(true)} onOpenB2B={() => setIsB2BOpen(true)} />

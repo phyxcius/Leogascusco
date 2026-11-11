@@ -47,7 +47,7 @@ import {
 } from 'lucide-react';
 import L from 'leaflet';
 import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido, CotizacionCRM, ClienteFidelidad } from '../types/index';
-import { getPageUrl, getAssetUrl } from '../utils/assets';
+import { getPageUrl, getAssetUrl, formatWhatsAppNumber } from '../utils/assets';
 import { BrandBadge } from './BrandBadge';
 import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
 import { DeveloperAccordion } from './DeveloperAccordion';
@@ -2094,7 +2094,7 @@ export const AdminPanel: React.FC = () => {
                               📋 Copiar Texto
                             </button>
                             <a
-                              href={`https://wa.me/${selectedCrmClientPhone.trim() || negocio.whatsapp}?text=${encodeURIComponent(renderedText)}`}
+                              href={`https://wa.me/${formatWhatsAppNumber(selectedCrmClientPhone.trim() || negocio.whatsapp)}?text=${encodeURIComponent(renderedText)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm text-center"
@@ -2464,7 +2464,7 @@ export const AdminPanel: React.FC = () => {
                                   </span>
                                   {client.telefono && (
                                     <a
-                                      href={`https://wa.me/${client.telefono.replace(/\D/g, '')}`}
+                                      href={`https://wa.me/${formatWhatsAppNumber(client.telefono)}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-emerald-700 font-bold text-[10px] hover:underline flex items-center gap-1"
@@ -2607,7 +2607,7 @@ export const AdminPanel: React.FC = () => {
 
                             {/* WhatsApp Notification */}
                             <a
-                              href={`https://wa.me/${(client.telefono || telefonos.whatsapp || '969773064').replace(/\D/g, '')}?text=${encodeURIComponent(
+                              href={`https://wa.me/${formatWhatsAppNumber(client.telefono || telefonos.whatsapp || negocio.whatsapp)}?text=${encodeURIComponent(
                                 isComplete
                                   ? `¡Hola ${client.nombre}! 🎉 En ${negocio.nombre || 'La Chuspa Tech'} te felicitamos: ¡has completado tus 10 sellos del Club de Fidelidad con tu DNI ${client.dni}! Ya puedes coordinar la entrega de tu regalito sorpresa 🎁 ¡Gracias por tu preferencia!`
                                   : `¡Hola ${client.nombre}! 🦁 En ${negocio.nombre || 'La Chuspa Tech'} te recordamos que tienes ${client.sellos} de 10 sellos en tu Club de Fidelidad con tu DNI ${client.dni}. ¡Te faltan solo ${10 - client.sellos} consumos para tu regalito especial! Pídelo al ${telefonos.whatsapp || '969773064'}.`

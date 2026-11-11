@@ -13,6 +13,8 @@ import {
   CreditCard,
   Search
 } from 'lucide-react';
+import { formatWhatsAppNumber } from '../utils/assets';
+import { playSuccessChime } from '../utils/audio';
 
 interface CartModalProps {
   isOpen: boolean;
@@ -71,11 +73,12 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGpsCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        alert('✔ Ubicación GPS capturada exitosamente.');
+        playSuccessChime();
       },
       () => {
-        alert('No se pudo acceder al GPS.');
-      }
+        alert('No se pudo acceder al GPS. Verifica los permisos de ubicación en tu navegador.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
@@ -204,7 +207,8 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     msg += `*📍 Dirección / GPS:* ${gpsUrl}\n\n`;
     msg += `_Pedido registrado en el sistema ${negocio.nombre || 'La Chuspa Tech'}._`;
 
-    const targetUrl = `https://wa.me/${telefonos.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+    const targetNumber = formatWhatsAppNumber(telefonos.whatsapp || negocio.whatsapp);
+    const targetUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
     window.open(targetUrl, '_blank');
 
     // RESET CART TO ZERO
@@ -591,12 +595,16 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
             <button
               type="button"
               onClick={handleCaptureGPS}
-              className="w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer"
+              className={`w-full font-black py-2.5 px-3.5 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer ${
+                gpsCoords
+                  ? 'bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white border-2 border-emerald-300 shadow-xl shadow-emerald-500/40 ring-4 ring-emerald-400/40 animate-pulse'
+                  : 'bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 shadow-2xs'
+              }`}
             >
-              <MapPin className="w-3.5 h-3.5 text-purple-700" />
-              <span>
+              <MapPin className={`w-4 h-4 ${gpsCoords ? 'text-yellow-200 animate-bounce' : 'text-purple-700'}`} />
+              <span className="text-xs sm:text-sm font-black tracking-wide">
                 {gpsCoords
-                  ? `✔ GPS Registrado (${gpsCoords.lat.toFixed(4)}, ${gpsCoords.lng.toFixed(4)})`
+                  ? `✔ 📍 UBICACIÓN GPS ACTIVA (${gpsCoords.lat.toFixed(4)}, ${gpsCoords.lng.toFixed(4)})`
                   : '📍 Adjuntar mi Ubicación GPS en Vivo'}
               </span>
             </button>
