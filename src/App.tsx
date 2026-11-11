@@ -1,3 +1,4 @@
+import { ErrorBoundary } from './components/ErrorBoundary';
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
@@ -15,6 +16,26 @@ import { RepartidorPanel } from './components/RepartidorPanel';
 import { ShoppingCart, Bell } from 'lucide-react';
 import { playChimeSound } from './utils/audio';
 import { getPageUrl } from './utils/assets';
+
+const CloudBanner: React.FC = () => {
+  const { cloudStatus } = useApp();
+  if (!cloudStatus.ready) return null;
+  if (cloudStatus.error) {
+    return (
+      <div className="bg-red-600 text-white text-xs font-bold text-center px-3 py-2">
+        ⚠️ Sin conexión con la nube: {cloudStatus.error} Los pedidos NO se compartirán entre dispositivos.
+      </div>
+    );
+  }
+  if (!cloudStatus.connected) {
+    return (
+      <div className="bg-amber-500 text-black text-xs font-bold text-center px-3 py-2">
+        📡 Sin internet. Los cambios se enviarán automáticamente cuando vuelva la conexión.
+      </div>
+    );
+  }
+  return null;
+};
 
 const MainApp: React.FC = () => {
   const { activePortal, cartCount, negocio } = useApp();
@@ -40,6 +61,7 @@ const MainApp: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#fafaf9] flex flex-col justify-between selection:bg-purple-200">
       <div>
+        <CloudBanner />
         {/* Navigation Bar (Solo en portal Cliente) */}
         {activePortal === 'cliente' && (
           <Navbar onOpenCart={() => setIsCartOpen(true)} onOpenB2B={() => setIsB2BOpen(true)} />
@@ -161,9 +183,11 @@ export { MainApp };
 
 export default function App({ initialPortal }: { initialPortal?: 'cliente' | 'admin' | 'repartidor' }) {
   return (
-    <AppProvider initialPortal={initialPortal}>
-      <MainApp />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider initialPortal={initialPortal}>
+        <MainApp />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
 
