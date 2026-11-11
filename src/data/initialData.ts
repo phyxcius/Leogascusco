@@ -16,7 +16,7 @@ import {
 export const INITIAL_PRODUCTOS: Producto[] = [
   {
     id: "gas-1",
-    nombre: "Balón Leo Gas Cusco 10kg Normal o Regular",
+    nombre: "Balón La Chuspa Tech 10kg Normal o Regular",
     tag: "El Moradito Rendidor",
     descripcion: "Balón sellado de 10kg con precinto de seguridad garantizado y peso exacto.",
     precio: 50,
@@ -25,7 +25,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
   },
   {
     id: "gas-2",
-    nombre: "Balón Gas Premium 10kg Leo Gas Cusco",
+    nombre: "Balón Gas Premium 10kg La Chuspa Tech",
     tag: "Máximo Rendimiento",
     descripcion: "GLP de alta pureza con válvula premium anti-fugas y máxima durabilidad.",
     precio: 55,
@@ -34,7 +34,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
   },
   {
     id: "gas-3",
-    nombre: "Balón Leo Gas Cusco 45kg Industrial",
+    nombre: "Balón La Chuspa Tech 45kg Industrial",
     tag: "Comercial / B2B",
     descripcion: "Balón industrial de 45kg ideal para pollerías, chifas, restaurantes, panaderías y hoteles.",
     precio: 175,
@@ -82,9 +82,9 @@ export const INITIAL_TELEFONOS: TelefonosConfig = {
 };
 
 export const INITIAL_NEGOCIO: NegocioIdentidad = {
-  nombre: "Leo Gas Cusco",
+  nombre: "La Chuspa Tech",
   slogan: "Publicidad, Tecnología & Balones de Gas en Cusco",
-  logoUrl: "/1791513590376.jpg",
+  logoUrl: "/CHUSPITA-circulo.png",
   imagenPresentacion: "/1791513590376.jpg",
   whatsapp: "969773064",
   telPrincipal: "969773064",
@@ -136,9 +136,62 @@ export const INITIAL_REPARTIDORES: Repartidor[] = [
   }
 ];
 
-export const INITIAL_EMPRESAS_B2B: EmpresaB2B[] = [];
+export const INITIAL_EMPRESAS_B2B: EmpresaB2B[] = [
+  {
+    ruc: "20601234567",
+    razonSocial: "Pollería El Tablón Cusco",
+    precioBalon45: 175.00,
+    condicionPago: "Crédito (A cuenta 15 días)",
+    direccion: "Av. El Sol 450, Wanchaq, Cusco",
+    telefono: "984 112 233"
+  },
+  {
+    ruc: "20509876543",
+    razonSocial: "Chifa Hong Kong Imperial",
+    precioBalon45: 170.00,
+    condicionPago: "Crédito (A cuenta 30 días)",
+    direccion: "Calle Maruri 220, Centro Histórico",
+    telefono: "984 334 455"
+  },
+  {
+    ruc: "20401122334",
+    razonSocial: "Hotel & Restaurante Los Portales",
+    precioBalon45: 175.00,
+    condicionPago: "Factura al Contado",
+    direccion: "Plazoleta Santo Domingo 112",
+    telefono: "984 556 677"
+  }
+];
 
-export const INITIAL_CLIENTES_VIP: ClienteVIP[] = [];
+export const INITIAL_CLIENTES_VIP: ClienteVIP[] = [
+  {
+    id: "vip-1",
+    nombre: "Rosa Quispe Huamán",
+    documento: "23984512",
+    telefono: "984 765 432",
+    direccion: "Urb. Magisterio 1ra Etapa, Calle Los Pinos 140",
+    pedidosTotales: 14,
+    notas: "Balón Moradito Llamagas. Paga con Yape."
+  },
+  {
+    id: "vip-2",
+    nombre: "Carmen Luz Delgado",
+    documento: "45127890",
+    telefono: "950 123 987",
+    direccion: "Av. De la Cultura 720, San Sebastián",
+    pedidosTotales: 9,
+    notas: "Prefiere entrega por las mañanas."
+  },
+  {
+    id: "vip-3",
+    nombre: "Edwin Oblitas Ubalde",
+    documento: "23891045",
+    telefono: "984 285 500",
+    direccion: "Calle Garcilaso 210, Cusco",
+    pedidosTotales: 22,
+    notas: "Cliente preferencial La Chuspa Tech."
+  }
+];
 
 export const INITIAL_PEDIDOS: Pedido[] = [];
 
@@ -246,5 +299,59 @@ export const INITIAL_CRM_PLANTILLAS: CRMPlantilla[] = [
 
 export const INITIAL_COTIZACIONES: CotizacionCRM[] = [];
 
-export const INITIAL_CLUB_FIDELIDAD: ClienteFidelidad[] = [];
+export const INITIAL_CLUB_FIDELIDAD: ClienteFidelidad[] = [
+  {
+    id: "fid-1",
+    dni: "23891045",
+    nombre: "Edwin Oblitas Ubalde",
+    telefono: "969773064",
+    sellos: 9, // 9 de 10 sellos, ¡a 1 del regalito!
+    totalConsumos: 19,
+    premiosCanjeados: 1,
+    ultimoConsumo: "Hoy, 11:45 a.m.",
+    historial: [
+      { fecha: "Hoy, 11:45 a.m.", detalle: "Balón Gas Premium 10kg", sellosSumados: 1 },
+      { fecha: "Ayer, 04:30 p.m.", detalle: "Balón La Chuspa Tech 10kg", sellosSumados: 1 }
+    ]
+  },
+  {
+    id: "fid-2",
+    dni: "45127890",
+    nombre: "Carmen Luz Delgado",
+    telefono: "950 123 987",
+    sellos: 7, // 7 de 10
+    totalConsumos: 7,
+    premiosCanjeados: 0,
+    ultimoConsumo: "Hoy, 11:15 a.m.",
+    historial: [
+      { fecha: "Hoy, 11:15 a.m.", detalle: "Balón La Chuspa Tech 10kg Normal", sellosSumados: 1 }
+    ]
+  },
+  {
+    id: "fid-3",
+    dni: "23984512",
+    nombre: "Rosa Quispe Huamán",
+    telefono: "984 765 432",
+    sellos: 10, // ¡Completó 10 sellos! Listo para canjear regalito
+    totalConsumos: 20,
+    premiosCanjeados: 1,
+    ultimoConsumo: "Hoy, 09:30 a.m.",
+    historial: [
+      { fecha: "Hoy, 09:30 a.m.", detalle: "Balón Gas Premium 10kg", sellosSumados: 1 }
+    ]
+  },
+  {
+    id: "fid-4",
+    dni: "41982345",
+    nombre: "Juan Carlos Mendoza",
+    telefono: "984 112 233",
+    sellos: 3,
+    totalConsumos: 3,
+    premiosCanjeados: 0,
+    ultimoConsumo: "Ayer, 02:15 p.m.",
+    historial: [
+      { fecha: "Ayer, 02:15 p.m.", detalle: "Balón La Chuspa Tech 10kg", sellosSumados: 1 }
+    ]
+  }
+];
 
