@@ -78,8 +78,6 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
     }
   }, [activeCustomerOrder?.etapa]);
 
-  if (!alertModal) return null;
-
   const repartidorNombre =
     activeCustomerOrder?.repartidorNombre || `Repartidor asignado de ${negocio.nombre || 'La Chuspa Tech'}`;
   const nombreNegocio = negocio.nombre || 'La Chuspa Tech';
@@ -130,6 +128,9 @@ export const AlertPopups: React.FC<AlertPopupsProps> = ({ onOpenTicket }) => {
       if (found) setFidelidadCliente(found);
     }
   }, [clubFidelidad]);
+
+  // IMPORTANTE: este return va DESPUÉS de todos los hooks (useState/useEffect)
+  if (!alertModal) return null;
 
   const handleConsultarFidelidad = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
