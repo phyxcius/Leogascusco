@@ -30,6 +30,15 @@ import {
 } from '../data/initialData';
 import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
 import { fetchStoreFromCloud, pushStoreToGitHub, CloudStorePayload } from '../utils/cloudSync';
+import { ref as fbRef, update as fbUpdate } from 'firebase/database';
+import { FIREBASE_ENABLED, fbDb } from '../utils/firebase';
+import { useFirebaseSync, loginStaff, logoutStaff, newVentaIds } from '../utils/useFirebaseSync';
+
+function hashStr(str: string): string {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+  return Math.abs(h).toString(36);
+}
 
 export function broadcastLiveEvent(payload: Record<string, any>) {
   try {
@@ -144,11 +153,12 @@ interface AppContextType {
 
   // Authentication
   isAdminLogged: boolean;
-  adminLogin: (u: string, p: string) => boolean;
+  adminLogin: (u: string, p: string) => Promise<boolean>;
+  authError: string;
   adminLogout: () => void;
 
   currentRepartidor: Repartidor | null;
-  repartidorLogin: (u: string, p: string) => boolean;
+  repartidorLogin: (u: string, p: string, repId?: string) => Promise<boolean>;
   repartidorLogout: () => void;
 
   // Cloud Sync (Cross-Device Global Sync)
@@ -156,6 +166,9 @@ interface AppContextType {
   cloudSyncStatus: { ok: boolean; msg: string; time?: string } | null;
   publicarCambiosEnLaNube: () => Promise<{ ok: boolean; msg: string }>;
   cargarDatosDeLaNube: (force?: boolean) => Promise<boolean>;
+
+  // Estado de la conexión con Firebase
+  cloudStatus: { ready: boolean; connected: boolean; role: string; error?: string };
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -193,10 +206,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
   const [productos, setProductos] = useState<Producto[]>(() => getStored('leogas_productos', INITIAL_PRODUCTOS));
   const [accesorios, setAccesorios] = useState<Accesorio[]>(() => getStored('leogas_accesorios', INITIAL_ACCESORIOS));
-  const [telefonos, setTelefonos] = useState<TelefonosConfig>(() => getStored<TelefonosConfig>('leogas_telefonos', INITIAL_TELEFONOS));
+  const [telefonos, setTelefonos] = useState<TelefonosConfig>(() => {
+    const stored = getStored<TelefonosConfig>('leogas_telefonos', INITIAL_TELEFONOS);
+    if (!stored || stored.tel1 === '950 727 212' || stored.whatsapp === '51969773064') {
+      return INITIAL_TELEFONOS;
+    }
+    return stored;
+  });
   const [negocio, setNegocio] = useState<NegocioIdentidad>(() => {
     const stored = getStored<NegocioIdentidad>('leogas_negocio', INITIAL_NEGOCIO);
-    if (!stored || !stored.nombre) {
+    if (!stored || stored.nombre === 'LeoGas Cusco' || !stored.nombre) {
       return INITIAL_NEGOCIO;
     }
     return { ...INITIAL_NEGOCIO, ...stored, igvPorcentaje: stored.igvPorcentaje || 18 };
@@ -206,7 +225,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [clientesVIP, setClientesVIP] = useState<ClienteVIP[]>(() => getStored('leogas_clientes_vip', INITIAL_CLIENTES_VIP));
   const [pedidos, setPedidos] = useState<Pedido[]>(() => {
     const stored = getStored<Pedido[]>('leogas_pedidos', INITIAL_PEDIDOS);
-    const cleaned = (stored || []).filter(
+    return (stored || []).filter(
       (p) =>
         p &&
         p.id &&
@@ -215,29 +234,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         p.cliente !== 'Milla' &&
         p.cliente !== 'Mimi'
     );
-    if (stored && stored.length !== cleaned.length) {
-      try {
-        localStorage.setItem('leogas_pedidos', JSON.stringify(cleaned));
-      } catch {}
-    }
-    return cleaned;
   });
   const [ventas, setVentas] = useState<VentaRegistro[]>(() => {
     const stored = getStored<VentaRegistro[]>('leogas_ventas', INITIAL_VENTAS);
-    const cleaned = (stored || []).filter(
-      (v) =>
-        v &&
-        v.cliente !== 'Milla' &&
-        v.cliente !== 'Mimi' &&
-        v.cliente !== 'Rosa Quispe Huamán' &&
-        v.cliente !== 'Carmen Luz Delgado'
-    );
-    if (stored && stored.length !== cleaned.length) {
-      try {
-        localStorage.setItem('leogas_ventas', JSON.stringify(cleaned));
-      } catch {}
-    }
-    return cleaned;
+    return (stored || [])
+      .filter(
+        (v) =>
+          v &&
+          v.cliente !== 'Milla' &&
+          v.cliente !== 'Mimi' &&
+          v.cliente !== 'Rosa Quispe Huamán' &&
+          v.cliente !== 'Carmen Luz Delgado'
+      )
+      .map((v) => (v.id ? v : { ...v, id: `vta-old-${hashStr(JSON.stringify(v))}` }));
   });
   const [crmPlantillas, setCrmPlantillas] = useState<CRMPlantilla[]>(() => getStored('leogas_crm_plantillas', INITIAL_CRM_PLANTILLAS));
   const [cotizaciones, setCotizaciones] = useState<CotizacionCRM[]>(() => getStored('leogas_cotizaciones', INITIAL_COTIZACIONES));
@@ -247,11 +256,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const [activeCustomerOrderId, setActiveCustomerOrderId] = useState<string | null>(() => localStorage.getItem('leogas_mi_pedido_id'));
   const [alertModal, setAlertModal] = useState<'en_camino' | 'en_puerta' | 'completado' | 'asignando' | null>(null);
 
-  const [isAdminLogged, setIsAdminLogged] = useState<boolean>(() => localStorage.getItem('leogas_admin_logged') === 'true');
-  const [currentRepartidorId, setCurrentRepartidorId] = useState<string | null>(() => localStorage.getItem('leogas_rep_id'));
+  const [authError, setAuthError] = useState('');
+
+  // Sincronización en la nube (Firebase Realtime Database + Authentication)
+  const { auth, connected, syncError } = useFirebaseSync({
+    productos, setProductos,
+    accesorios, setAccesorios,
+    telefonos, setTelefonos,
+    negocio,
+    setNegocio: (v: any) => setNegocio({ ...INITIAL_NEGOCIO, ...v, igvPorcentaje: (v && v.igvPorcentaje) || 18 }),
+    empresasB2B, setEmpresasB2B,
+    clientesVIP, setClientesVIP,
+    crmPlantillas, setCrmPlantillas,
+    cotizaciones, setCotizaciones,
+    clubFidelidad, setClubFidelidad,
+    repartidores, setRepartidores,
+    pedidos, setPedidos,
+    ventas, setVentas,
+    activeCustomerOrderId
+  });
+  const isAdminLogged = auth.role === 'admin';
+  const currentRepartidorId: string | null = auth.role === 'repartidor' ? auth.repartidorId || null : null;
 
   // Realtime BroadcastChannel & Storage Sync between Index, Repartidor and Admin
   useEffect(() => {
+    // Con Firebase activo, la sincronización entre dispositivos la hace la nube (no localStorage).
+    if (FIREBASE_ENABLED) return;
     let bc: BroadcastChannel | null = null;
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
       try {
@@ -264,16 +294,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
             if (data.pedidos) {
               setPedidos(data.pedidos);
             }
-            // Only trigger alert popup on the customer portal (AlertPopups handles the voice)
+            // Only trigger voice/alert popup on the customer portal
             if (activePortal === 'cliente') {
               const myOrderId = localStorage.getItem('leogas_mi_pedido_id');
               if (myOrderId && myOrderId === data.pedidoId) {
                 if (data.nextEtapa === 1) {
                   setAlertModal('en_camino');
+                  playAndSpeak("¡Atención! Su balón de gas está en camino. Su repartidor va hacia su domicilio.");
                 } else if (data.nextEtapa === 2) {
                   setAlertModal('en_puerta');
+                  playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
                 } else if (data.nextEtapa >= 3) {
                   setAlertModal('completado');
+                  playAndSpeak(`¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`, true);
                 }
               }
             }
@@ -345,8 +378,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         if (e.key === 'leogas_cotizaciones') setCotizaciones(JSON.parse(e.newValue));
         if (e.key === 'leogas_club_fidelidad') setClubFidelidad(JSON.parse(e.newValue));
         if (e.key === 'leogas_mi_pedido_id') setActiveCustomerOrderId(e.newValue);
-        if (e.key === 'leogas_admin_logged') setIsAdminLogged(e.newValue === 'true');
-        if (e.key === 'leogas_rep_id') setCurrentRepartidorId(e.newValue);
       } catch (err) {
         console.error('Storage sync error:', err);
       }
@@ -419,7 +450,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       } catch (err) {
         // ignore
       }
-    }, 1500);
+    }, 250);
 
     return () => {
       if (bc) bc.close();
@@ -447,7 +478,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     ? pedidos.find((p) => p.id === activeCustomerOrderId) || null
     : null;
 
-  // Watch for active customer order stage changes to trigger central alert modals (voice played by AlertPopups)
+  // Watch for active customer order stage changes to trigger sound, voice agent & central alert modals
   useEffect(() => {
     if (activePortal !== 'cliente') return;
     if (!activeCustomerOrder) return;
@@ -458,14 +489,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     if ((activeCustomerOrder.estado === 'completado' || currentEtapa >= 3) && lastSeen !== '3') {
       localStorage.setItem(stageKey, '3');
       setAlertModal('completado');
+      playAndSpeak(
+        `¡Muchas gracias por su compra en ${negocio.nombre || 'La Chuspa Tech'}! Su pedido ha sido entregado exitosamente. Por favor califíquenos con 5 estrellas en Google.`,
+        true
+      );
     } else if (currentEtapa === 1 && lastSeen !== '1') {
       localStorage.setItem(stageKey, '1');
       setAlertModal('en_camino');
+      playAndSpeak("¡Atención! Su balón de gas está en camino. Su repartidor va hacia su domicilio.");
     } else if (currentEtapa === 2 && lastSeen !== '2') {
       localStorage.setItem(stageKey, '2');
       setAlertModal('en_puerta');
+      playAndSpeak("¡Atención! Su repartidor ya está en su puerta. Por favor presione salir a recibir.");
     }
-  }, [activeCustomerOrder]);
+  }, [activeCustomerOrder, negocio.nombre]);
 
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [cloudSyncStatus, setCloudSyncStatus] = useState<{ ok: boolean; msg: string; time?: string } | null>(null);
@@ -481,7 +518,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         const cloudTime = cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : 0;
 
         // If not forced and local device has newer edits that haven't been pushed or were just saved, don't overwrite!
-        if (!force && localModified > 0 && cloudTime > 0 && cloudTime < localModified) {
+        if (!force && localModified > 0 && cloudTime > 0 && cloudTime <= localModified) {
           return false;
         }
 
@@ -515,6 +552,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   };
 
   useEffect(() => {
+    if (FIREBASE_ENABLED) return; // el catálogo ahora viaja por Firebase
     cargarDatosDeLaNube(false);
     // Periodically sync every 25 seconds for viewers on mobile/desktop
     const cloudInterval = setInterval(() => {
@@ -821,8 +859,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       fecha: now.toLocaleDateString('es-PE'),
       estado: newP.repartidorId ? 'en_proceso' : 'pendiente_asignacion',
       etapa: 0,
-      horaAsignacion: newP.repartidorId ? hora : undefined
+      horaAsignacion: newP.repartidorId ? hora : undefined,
+      ownerUid: auth.uid || undefined
     };
+    if (!auth.uid) {
+      console.warn('[Firebase] Sin sesión en la nube: el pedido se guardó solo en este dispositivo.');
+    }
 
     setPedidos((prev) => {
       const updated = [fullPedido, ...prev];
@@ -921,6 +963,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
       return updated;
     });
 
+    if (auth.uid) {
+      fbUpdate(fbRef(fbDb, `pedidos/${pedidoId}`), { clienteSaliendo: true, clienteSaliendoHora: hora }).catch((e) =>
+        console.error('[Firebase] No se pudo avisar al repartidor:', e?.message || e)
+      );
+    }
     playAndSpeak('Aviso enviado. Su repartidor lo está esperando en la puerta con su balón de gas.');
     closeAlertModal();
   };
@@ -977,6 +1024,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
           } else {
             const totalNum = typeof p.montoCobro === 'number' ? p.montoCobro : parseFloat(p.montoCobro) || 0;
             addVenta({
+              id: `vta-${p.id}`,
               fecha: new Date().toISOString().split('T')[0],
               cliente: p.cliente,
               productos: p.tipoBalon,
@@ -1028,7 +1076,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   };
 
   const addVenta = (v: VentaRegistro) => {
-    setVentas(prev => [v, ...prev]);
+    const venta: VentaRegistro = v.id ? v : { ...v, id: `vta-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` };
+    newVentaIds.add(venta.id as string);
+    setVentas(prev => (prev.some(x => x.id === venta.id) ? prev : [venta, ...prev]));
   };
 
   // Cart operations
@@ -1070,47 +1120,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const cartTotal = Object.values(carrito).reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
   const cartCount = Object.values(carrito).reduce((acc, item) => acc + item.cantidad, 0);
 
-  // Authentication
-  const adminLogin = (u: string, p: string) => {
-    if ((u.toLowerCase() === 'admin' && p === 'admin123') || (u.toLowerCase() === 'admin' && p === 'admin') || p === '1234') {
-      setIsAdminLogged(true);
-      localStorage.setItem('leogas_admin_logged', 'true');
-      return true;
-    }
-    return false;
+  // Authentication (Firebase Auth: correo/contraseña; los roles viven en /roles/{uid})
+  const adminLogin = async (u: string, p: string): Promise<boolean> => {
+    setAuthError('');
+    const res = await loginStaff(u, p, 'admin');
+    if (!res.ok) setAuthError(res.msg || 'No se pudo iniciar sesión.');
+    return res.ok;
   };
 
   const adminLogout = () => {
-    setIsAdminLogged(false);
-    localStorage.removeItem('leogas_admin_logged');
+    logoutStaff();
   };
 
   const currentRepartidor = currentRepartidorId
     ? repartidores.find(r => r.id === currentRepartidorId) || null
     : null;
 
-  const repartidorLogin = (u: string, p: string) => {
-    const chofer = repartidores.find(
-      r => (r.usuario && r.usuario.toLowerCase() === u.trim().toLowerCase()) ||
-           (r.nombre.toLowerCase() === u.trim().toLowerCase())
-    );
-    if (chofer) {
-      if (!chofer.password || chofer.password === p || p === '123' || p === '1234') {
-        setCurrentRepartidorId(chofer.id);
-        localStorage.setItem('leogas_rep_id', chofer.id);
-        setRepartidores(prev => prev.map(r => r.id === chofer.id ? { ...r, online: true } : r));
-        return true;
-      }
+  const repartidorLogin = async (u: string, p: string, repId?: string): Promise<boolean> => {
+    setAuthError('');
+    const res = await loginStaff(u, p, 'repartidor', repId);
+    if (!res.ok) {
+      setAuthError(res.msg || 'No se pudo iniciar sesión.');
+      return false;
     }
-    return false;
+    if (res.repartidorId) {
+      setRepartidores(prev => prev.map(r => r.id === res.repartidorId ? { ...r, online: true } : r));
+    }
+    return true;
   };
 
-  const repartidorLogout = () => {
+  const repartidorLogout = async () => {
     if (currentRepartidorId) {
       setRepartidores(prev => prev.map(r => r.id === currentRepartidorId ? { ...r, online: false } : r));
+      try {
+        await fbUpdate(fbRef(fbDb, `repartidores/${currentRepartidorId}`), { online: false });
+      } catch {}
     }
-    setCurrentRepartidorId(null);
-    localStorage.removeItem('leogas_rep_id');
+    await logoutStaff();
   };
 
   // Club de Fidelidad (Sellos)
@@ -1372,7 +1418,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         isSyncingCloud,
         cloudSyncStatus,
         publicarCambiosEnLaNube,
-        cargarDatosDeLaNube
+        cargarDatosDeLaNube,
+        authError,
+        cloudStatus: { ready: auth.ready, connected, role: auth.role, error: auth.error || syncError || undefined }
       }}
     >
       {children}
