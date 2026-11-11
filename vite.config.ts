@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-   import tailwindcss from '@tailwindcss/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-     plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss()],
+  // Rutas relativas: funciona en phyxcius.github.io/Leogascusco/ y en cualquier subcarpeta
   base: './',
   // Configuración de rutas absolutas con '@/' (opcional pero muy útil)
   resolve: {
