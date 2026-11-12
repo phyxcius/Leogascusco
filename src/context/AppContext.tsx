@@ -865,10 +865,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     setRepartidores(prev => prev.filter(r => r.id !== id));
   };
   const toggleRepartidorOnline = (id: string) => {
-    setRepartidores(prev => prev.map(r => r.id === id ? { ...r, online: !r.online } : r));
+    setRepartidores((prev) => {
+      const updated = prev.map((r) => (r.id === id ? { ...r, online: !r.online } : r));
+      const target = updated.find((r) => r.id === id);
+      if (target) {
+        try {
+          fbUpdate(fbRef(fbDb, `repartidores/${id}`), { online: target.online });
+        } catch {}
+      }
+      return updated;
+    });
   };
+
   const setRepartidorCoords = (id: string, lat: number, lng: number) => {
-    setRepartidores(prev => prev.map(r => r.id === id ? { ...r, lat, lng } : r));
+    const nowTime = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setRepartidores((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, lat, lng, online: true, ultimaActualizacionSecuencia: nowTime } : r))
+    );
+    try {
+      fbUpdate(fbRef(fbDb, `repartidores/${id}`), {
+        lat,
+        lng,
+        online: true,
+        ultimaActualizacionSecuencia: nowTime
+      });
+    } catch {}
+    broadcastLiveEvent({
+      type: 'REPARTIDOR_LOCATION_UPDATE',
+      repartidorId: id,
+      lat,
+      lng,
+      time: nowTime
+    });
   };
 
   // B2B & VIP

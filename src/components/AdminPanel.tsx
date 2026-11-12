@@ -282,6 +282,7 @@ export const AdminPanel: React.FC = () => {
   // Leaflet map reference for Pedidos tab
   const adminMapContainerRef = useRef<HTMLDivElement>(null);
   const adminMapInstanceRef = useRef<L.Map | null>(null);
+  const adminMarkersRef = useRef<Record<string, L.Marker>>({});
 
   // Logo file upload handler (converts to base64)
   const handleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -606,21 +607,6 @@ export const AdminPanel: React.FC = () => {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    repartidores.forEach((rep) => {
-      const customIcon = L.divIcon({
-        html: `
-          <div style="background:#7e22ce; color:white; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; font-size:18px; border:2.5px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.3);">
-            🛵
-          </div>
-        `,
-        iconSize: [38, 38],
-        iconAnchor: [19, 19]
-      });
-      L.marker([rep.lat, rep.lng], { icon: customIcon })
-        .addTo(map)
-        .bindPopup(`<b>${rep.nombre}</b><br>Estado: ${rep.online ? 'En línea' : 'Desconectado'}`);
-    });
-
     adminMapInstanceRef.current = map;
 
     return () => {
@@ -628,8 +614,55 @@ export const AdminPanel: React.FC = () => {
         adminMapInstanceRef.current.remove();
         adminMapInstanceRef.current = null;
       }
+      adminMarkersRef.current = {};
     };
-  }, [isAdminLogged, activeTab, repartidores]);
+  }, [isAdminLogged, activeTab]);
+
+  // Real-time Fleet GPS Markers update on Admin Satellite Map
+  useEffect(() => {
+    const map = adminMapInstanceRef.current;
+    if (!map) return;
+
+    repartidores.forEach((rep) => {
+      const customIcon = L.divIcon({
+        className: 'admin-driver-marker',
+        html: `
+          <div class="relative">
+            ${rep.online ? '<div class="absolute -inset-1.5 bg-purple-500 rounded-full animate-ping opacity-60"></div>' : ''}
+            <div style="background:${rep.online ? '#7e22ce' : '#64748b'}; color:white; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; font-size:18px; border:2.5px solid white; box-shadow:0 3px 8px rgba(0,0,0,0.35);">
+              🛵
+            </div>
+          </div>
+        `,
+        iconSize: [38, 38],
+        iconAnchor: [19, 19]
+      });
+
+      const popupHtml = `
+        <div style="font-family:system-ui; font-size:12px; line-height:1.4;">
+          <strong style="color:#6b21a8; font-size:13px;">🛵 Repartidor: ${rep.nombre}</strong><br>
+          <span style="color:${rep.online ? '#15803d' : '#dc2626'}; font-weight:bold;">
+            ● ${rep.online ? 'En Ruta (GPS Activo)' : 'Desconectado'}
+          </span><br>
+          <span style="color:#64748b; font-size:10px;">Coords: ${rep.lat.toFixed(4)}, ${rep.lng.toFixed(4)}</span><br>
+          <span>Etapa: ${rep.etapaSecuencia === 1 ? '1. En Camino' : rep.etapaSecuencia === 2 ? '2. En Puerta' : '3. Completado'}</span><br>
+          <span style="color:#94a3b8; font-size:9px;">Últ. sync: ${rep.ultimaActualizacionSecuencia || 'Reciente'}</span>
+        </div>
+      `;
+
+      if (!adminMarkersRef.current[rep.id]) {
+        const marker = L.marker([rep.lat, rep.lng], { icon: customIcon })
+          .addTo(map)
+          .bindPopup(popupHtml);
+        adminMarkersRef.current[rep.id] = marker;
+      } else {
+        const marker = adminMarkersRef.current[rep.id];
+        marker.setLatLng([rep.lat, rep.lng]);
+        marker.setIcon(customIcon);
+        marker.setPopupContent(popupHtml);
+      }
+    });
+  }, [repartidores]);
 
   // If not logged in, render Admin Login screen
   if (!isAdminLogged) {

@@ -33,6 +33,20 @@ import { playChimeSound, playSuccessChime, speakVoice, playAndSpeak } from '../u
 import { getAssetUrl, formatWhatsAppNumber } from '../utils/assets';
 import { Pedido, VentaRegistro } from '../types/index';
 
+function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export const RepartidorPanel: React.FC = () => {
   const {
     currentRepartidor,
@@ -97,11 +111,18 @@ export const RepartidorPanel: React.FC = () => {
   // Street Cartography & Turn-by-Turn Navigation State
   const [streetWaypoints, setStreetWaypoints] = useState<[number, number][]>([]);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [navStepIndex, setNavStepIndex] = useState(0);
-  const [navDistanceKm, setNavDistanceKm] = useState(2.4);
-  const [navEtaMin, setNavEtaMin] = useState(12);
-  const [navInstruction, setNavInstruction] = useState('⬆️ Iniciar ruta por calles de Cusco');
+  const [navDistanceKm, setNavDistanceKm] = useState(0);
+  const [navEtaMin, setNavEtaMin] = useState(0);
+  const [navInstruction, setNavInstruction] = useState('Esperando activación de GPS satelital...');
   const [hasArrived, setHasArrived] = useState(false);
+  const [hasAnnouncedArrival, setHasAnnouncedArrival] = useState(false);
+
+  // Real GPS Telemetry State (Hardware GPS directly from driver mobile device)
+  const [gpsActive, setGpsActive] = useState(false);
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
+  const [gpsLastUpdate, setGpsLastUpdate] = useState<string | null>(null);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+  const [userSpeed, setUserSpeed] = useState<number | null>(null);
 
   // Filter assigned orders
   const myAssignedOrders = useMemo(() => {
@@ -128,23 +149,146 @@ export const RepartidorPanel: React.FC = () => {
     }
   }, [myAssignedOrders, selectedPedidoId]);
 
-  // Driver GPS watch
+  // Request & Calibrate GPS on demand
+  const handleRequestGps = () => {
+    if (!navigator.geolocation) {
+      alert('Tu navegador no cuenta con servicio de geolocalización GPS.');
+      return;
+    }
+    setGpsError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        setGpsActive(true);
+        setGpsAccuracy(Math.round(accuracy));
+        const nowTimeStr = new Date().toLocaleTimeString('es-PE', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        setGpsLastUpdate(nowTimeStr);
+
+        if (currentRepartidor) {
+          setRepartidorCoords(currentRepartidor.id, latitude, longitude);
+        }
+        if (driverMarkerRef.current) {
+          driverMarkerRef.current.setLatLng([latitude, longitude]);
+        }
+        if (repMapInstanceRef.current) {
+          repMapInstanceRef.current.flyTo([latitude, longitude], 16, { animate: true });
+        }
+        playSuccessChime();
+      },
+      (err) => {
+        setGpsActive(false);
+        if (err.code === 1) {
+          setGpsError('Permiso de GPS denegado. Habilita el acceso en tu navegador móvil.');
+        } else {
+          setGpsError('No se pudo calibrar el GPS. Intenta en un área despejada.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  // Continuous Hardware GPS Tracking (Streams directly to Firebase RTDB)
+  // CRITICAL: Runs continuously while driver is logged in, even after completing deliveries,
+  // keeping the driver visible on the Admin satellite monitoring map at all times!
   useEffect(() => {
     if (!currentRepartidor) return;
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setGpsError('Geolocalización no soportada en este dispositivo.');
+      return;
+    }
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
-        setRepartidorCoords(currentRepartidor.id, pos.coords.latitude, pos.coords.longitude);
+        const { latitude, longitude, accuracy, speed } = pos.coords;
+        setGpsActive(true);
+        setGpsError(null);
+        setGpsAccuracy(Math.round(accuracy));
+        if (speed !== null && speed !== undefined) {
+          setUserSpeed(Math.round(speed * 3.6)); // m/s to km/h
+        }
+        const nowTimeStr = new Date().toLocaleTimeString('es-PE', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        setGpsLastUpdate(nowTimeStr);
+
+        // 1. Broadcast real GPS coordinates to Firebase RTDB & AppContext
+        setRepartidorCoords(currentRepartidor.id, latitude, longitude);
+
+        // 2. Update motorcycle marker on driver map
+        if (driverMarkerRef.current) {
+          driverMarkerRef.current.setLatLng([latitude, longitude]);
+        }
+
+        // 3. Pan map smoothly if turn-by-turn navigation is toggled
+        if (isNavigating && repMapInstanceRef.current) {
+          repMapInstanceRef.current.panTo([latitude, longitude], { animate: true });
+        }
+
+        // 4. If there is an active order with customer destination coordinates, compute real distance & ETA
+        if (activeOrder && activeOrder.lat && activeOrder.lng) {
+          const distKm = calculateDistanceKm(latitude, longitude, activeOrder.lat, activeOrder.lng);
+          const roundedKm = parseFloat(distKm.toFixed(2));
+          setNavDistanceKm(roundedKm);
+
+          // Cusco urban delivery speed ~22 km/h
+          const estMin = Math.max(1, Math.round((distKm / 22) * 60));
+          setNavEtaMin(estMin);
+
+          // Real distance guidance and doorstep arrival check
+          if (distKm <= 0.045) {
+            setNavInstruction(`🏁 ¡En la puerta del cliente! (${Math.round(distKm * 1000)} m)`);
+            if (!hasAnnouncedArrival) {
+              setHasAnnouncedArrival(true);
+              setHasArrived(true);
+              playSuccessChime();
+              speakVoice(`Ha llegado a la puerta del cliente ${activeOrder.cliente}. Proceda a avisar.`);
+            }
+          } else if (distKm <= 0.25) {
+            setNavInstruction(`📍 Acercándose a ${activeOrder.direccion || 'domicilio'} (${Math.round(distKm * 1000)} m)`);
+          } else if (distKm <= 0.8) {
+            setNavInstruction(`🛵 En camino hacia ${activeOrder.direccion || 'domicilio'} (${Math.round(distKm * 1000)} m)`);
+          } else {
+            setNavInstruction(`🛵 En ruta por calles de Cusco hacia ${activeOrder.cliente} (${distKm.toFixed(1)} km)`);
+          }
+        }
       },
-      () => {},
-      { enableHighAccuracy: true }
+      (err) => {
+        setGpsActive(false);
+        if (err.code === 1) {
+          setGpsError('Permiso de GPS denegado. Activa la ubicación en tu celular.');
+        } else if (err.code === 2) {
+          setGpsError('Buscando satélites GPS en Cusco...');
+        } else {
+          setGpsError('Tiempo de espera de señal GPS.');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+        timeout: 15000
+      }
     );
 
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
-  }, [currentRepartidor?.id, setRepartidorCoords]);
+  }, [
+    currentRepartidor?.id,
+    setRepartidorCoords,
+    activeOrder?.id,
+    activeOrder?.lat,
+    activeOrder?.lng,
+    activeOrder?.cliente,
+    activeOrder?.direccion,
+    isNavigating,
+    hasAnnouncedArrival
+  ]);
 
   // Realtime check if any of the driver's orders has clienteSaliendo active (Strictly active stage 2 orders of THIS driver not yet dismissed)
   const orderConClienteSaliendo = useMemo(() => {
@@ -207,7 +351,6 @@ export const RepartidorPanel: React.FC = () => {
 
     const fallback = generateCuscoStreetRoute(startLat, startLng, destLat, destLng);
     setStreetWaypoints(fallback);
-    setNavStepIndex(0);
     setHasArrived(false);
 
     let active = true;
@@ -385,64 +528,7 @@ export const RepartidorPanel: React.FC = () => {
     };
   }, [currentRepartidor?.id, activeTab, activeOrder?.id, streetWaypoints]);
 
-  // Turn-by-Turn Navigation Interval & Audio Announcement on Arrival
-  useEffect(() => {
-    if (!isNavigating) {
-      if (navIntervalRef.current) clearInterval(navIntervalRef.current);
-      return;
-    }
-
-    if (streetWaypoints.length < 2) return;
-
-    navIntervalRef.current = setInterval(() => {
-      setNavStepIndex((prev) => {
-        const nextIdx = prev + 1;
-        if (nextIdx >= streetWaypoints.length) {
-          // Reached destination!
-          clearInterval(navIntervalRef.current);
-          setIsNavigating(false);
-          setHasArrived(true);
-          playSuccessChime();
-          speakVoice("Ha llegado a su destino. Proceda a avisar al cliente.");
-          return streetWaypoints.length - 1;
-        }
-
-        const currentCoord = streetWaypoints[nextIdx];
-        if (driverMarkerRef.current) {
-          driverMarkerRef.current.setLatLng(currentCoord);
-        }
-        if (repMapInstanceRef.current && nextIdx % 2 === 0) {
-          repMapInstanceRef.current.panTo(currentCoord, { animate: true });
-        }
-
-        // Calculate progress & ETA
-        const pctRemaining = 1 - nextIdx / streetWaypoints.length;
-        const km = (2.4 * pctRemaining).toFixed(1);
-        const mins = Math.max(1, Math.round(12 * pctRemaining));
-        setNavDistanceKm(parseFloat(km));
-        setNavEtaMin(mins);
-
-        // Turn instruction update
-        if (pctRemaining > 0.75) {
-          setNavInstruction('⬆️ Continúe recto por Av. El Sol (350 m)');
-        } else if (pctRemaining > 0.45) {
-          setNavInstruction('↗️ Gire a la derecha hacia Av. Tullumayo (500 m)');
-        } else if (pctRemaining > 0.15) {
-          setNavInstruction(`📍 Acercándose a ${activeOrder?.direccion || 'domicilio'} (150 m)`);
-        } else {
-          setNavInstruction(`🏁 Llegando a destino: ${activeOrder?.cliente}`);
-        }
-
-        return nextIdx;
-      });
-    }, 600);
-
-    return () => {
-      if (navIntervalRef.current) clearInterval(navIntervalRef.current);
-    };
-  }, [isNavigating, streetWaypoints, activeOrder?.cliente, activeOrder?.direccion]);
-
-  // Start / Stop Navigation Handler
+  // Start / Stop Real GPS Navigation
   const handleToggleNavigation = () => {
     if (isNavigating) {
       setIsNavigating(false);
@@ -451,9 +537,17 @@ export const RepartidorPanel: React.FC = () => {
     if (!activeOrder) return;
     setIsNavigating(true);
     setHasArrived(false);
-    setNavStepIndex(0);
+    setHasAnnouncedArrival(false);
     playChimeSound();
-    speakVoice(`Iniciando navegación guiada hacia el cliente ${activeOrder.cliente}. Siga por la ruta trazada en las calles de Cusco.`);
+    speakVoice(`Iniciando navegación guiada hacia ${activeOrder.cliente}. Sincronizado con GPS satelital en tiempo real.`);
+
+    // Center map on driver's current real GPS location
+    if (repMapInstanceRef.current && currentRepartidor) {
+      repMapInstanceRef.current.flyTo([currentRepartidor.lat, currentRepartidor.lng], 16, {
+        animate: true,
+        duration: 1.0
+      });
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -643,8 +737,8 @@ export const RepartidorPanel: React.FC = () => {
               {currentRepartidor.nombre}
             </h4>
             <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>En Servicio • GPS Cusco Activo</span>
+              <span className={`w-2 h-2 rounded-full ${gpsActive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+              <span>{gpsActive ? 'En Servicio • GPS Cusco Activo' : 'Esperando GPS Satelital'}</span>
             </span>
           </div>
         </div>
@@ -658,6 +752,41 @@ export const RepartidorPanel: React.FC = () => {
           <span>Salir</span>
         </button>
       </header>
+
+      {/* Realtime GPS Satelital Live Status & Calibration Bar */}
+      <div className={`px-4 py-2 text-xs font-bold flex items-center justify-between border-b shadow-xs transition z-30 ${
+        gpsActive
+          ? 'bg-emerald-950 text-emerald-200 border-emerald-800'
+          : 'bg-amber-950 text-amber-200 border-amber-800'
+      }`}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${gpsActive ? 'bg-emerald-400 animate-ping' : 'bg-amber-400 animate-pulse'}`} />
+          <div className="min-w-0">
+            <p className="font-black text-[11px] truncate flex items-center gap-1.5">
+              <span>{gpsActive ? '📡 GPS Satelital Conectado' : '⚠️ GPS Inactivo o Sin Permiso'}</span>
+              {gpsAccuracy && <span className="text-[10px] text-emerald-300 font-mono font-normal">±{gpsAccuracy}m</span>}
+              {userSpeed !== null && userSpeed > 0 && <span className="text-[10px] text-yellow-300 font-mono">⚡ {userSpeed} km/h</span>}
+            </p>
+            <p className="text-[9px] text-slate-300 truncate">
+              {gpsActive
+                ? `Transmitiendo a Firebase RTDB • Panel Admin & Clientes (${gpsLastUpdate || 'En vivo'})`
+                : (gpsError || 'Toca el botón para activar la señal GPS de tu celular')}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleRequestGps}
+          className={`flex-shrink-0 ml-2 px-3 py-1.5 rounded-xl text-[10px] font-black cursor-pointer shadow-sm transition ${
+            gpsActive
+              ? 'bg-emerald-800 hover:bg-emerald-700 text-white border border-emerald-600'
+              : 'bg-amber-400 hover:bg-amber-300 text-purple-950 font-black animate-bounce shadow-amber-900/50'
+          }`}
+        >
+          {gpsActive ? '🔄 Calibrar' : '📡 Activar GPS'}
+        </button>
+      </div>
 
       {/* DRIVER ALERT POPUP: CLIENT IS COMING OUT - RESPONSIVE FOR CELULAR, TABLET, PC */}
       {orderConClienteSaliendo && (
@@ -881,22 +1010,42 @@ export const RepartidorPanel: React.FC = () => {
 
                       <a
                         href={
-                          activeOrder.gpsUrl ||
-                          `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                            `${activeOrder.direccion || 'Cusco'}, Cusco, Peru`
-                          )}`
+                          activeOrder.lat && activeOrder.lng
+                            ? `https://www.google.com/maps/dir/?api=1&destination=${activeOrder.lat},${activeOrder.lng}&travelmode=driving`
+                            : activeOrder.gpsUrl ||
+                              `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                                `${activeOrder.direccion || 'Cusco'}, Cusco, Peru`
+                              )}`
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-full shadow-lg text-xs font-black flex items-center gap-1.5"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-full shadow-lg text-xs font-black flex items-center gap-1 cursor-pointer transition"
+                        title="Abrir en Google Maps de tu celular"
                       >
                         <Compass className="w-3.5 h-3.5" />
-                        <span>Google Maps</span>
+                        <span>Maps</span>
+                      </a>
+
+                      <a
+                        href={
+                          activeOrder.lat && activeOrder.lng
+                            ? `https://www.waze.com/ul?ll=${activeOrder.lat},${activeOrder.lng}&navigate=yes`
+                            : `https://www.waze.com/ul?q=${encodeURIComponent(
+                                `${activeOrder.direccion || 'Cusco'}, Cusco, Peru`
+                              )}&navigate=yes`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-sky-500 hover:bg-sky-600 text-white px-2.5 py-1.5 rounded-full shadow-lg text-xs font-black flex items-center gap-1 cursor-pointer transition"
+                        title="Abrir en Waze"
+                      >
+                        <Navigation className="w-3.5 h-3.5" />
+                        <span>Waze</span>
                       </a>
                     </div>
                   </div>
 
-                  {/* WAZE / GOOGLE MAPS TURN-BY-TURN TOP BANNER */}
+                  {/* REAL GPS TURN-BY-TURN TOP BANNER */}
                   {isNavigating && (
                     <div className="absolute top-14 left-3 right-3 z-[1000] bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-2xl border-2 border-emerald-500 shadow-2xl animate-in slide-in-from-top duration-200 pointer-events-auto">
                       <div className="flex items-center justify-between gap-2">
@@ -909,13 +1058,13 @@ export const RepartidorPanel: React.FC = () => {
                               {navInstruction}
                             </p>
                             <p className="text-[10px] text-emerald-300 font-bold">
-                              Restante: {navDistanceKm} km • {navEtaMin} min • Siguiendo calles en Cusco
+                              Restante: {navDistanceKm > 0 ? `${navDistanceKm} km` : 'Calculando...'} • ~{navEtaMin} min • GPS Satelital Cusco
                             </p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
                           <span className="text-[10px] font-black uppercase text-yellow-300 bg-purple-950 px-2 py-0.5 rounded-full border border-purple-700">
-                            En Ruta GPS
+                            GPS En Vivo
                           </span>
                         </div>
                       </div>
