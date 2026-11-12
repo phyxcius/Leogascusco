@@ -23,7 +23,9 @@ import {
   Volume2,
   Play,
   Square,
-  X
+  X,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import L from 'leaflet';
 import { BrandBadge } from './BrandBadge';
@@ -49,6 +51,7 @@ export const RepartidorPanel: React.FC = () => {
 
   const [selectedRepId, setSelectedRepId] = useState('');
   const [loginPass, setLoginPass] = useState('');
+  const [showLoginPass, setShowLoginPass] = useState(false);
   const [loginError, setLoginError] = useState(false);
 
   // Tabs: 'solicitudes' | 'ruta' | 'movimientos'
@@ -574,22 +577,32 @@ export const RepartidorPanel: React.FC = () => {
               <label className="text-[10px] font-black uppercase text-slate-500 block mb-1">
                 Contraseña Personal:
               </label>
-              <input
-                type="password"
-                required
-                value={loginPass}
-                onChange={(e) => {
-                  setLoginPass(e.target.value);
-                  setLoginError(false);
-                }}
-                placeholder="Ingresa tu contraseña"
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-purple-600"
-              />
+              <div className="relative">
+                <input
+                  type={showLoginPass ? 'text' : 'password'}
+                  required
+                  value={loginPass}
+                  onChange={(e) => {
+                    setLoginPass(e.target.value);
+                    setLoginError(false);
+                  }}
+                  placeholder="Ingresa tu contraseña de chofer"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 pr-10 text-xs font-bold text-slate-800 focus:outline-purple-600 shadow-inner"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPass(!showLoginPass)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-purple-700 cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showLoginPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             {loginError && (
               <p className="text-xs text-red-600 font-bold bg-red-50 p-2.5 rounded-xl border border-red-200">
-                ❌ {authError || 'Clave incorrecta para el repartidor seleccionado.'}
+                ❌ {authError || 'Contraseña incorrecta para el repartidor seleccionado.'}
               </p>
             )}
 

@@ -48,6 +48,7 @@ export interface Repartidor {
   nombre: string;
   usuario?: string;
   password?: string;
+  clave?: string;
   online: boolean;
   lat: number;
   lng: number;

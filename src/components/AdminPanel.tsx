@@ -4151,6 +4151,7 @@ export const AdminPanel: React.FC = () => {
                       nombre: newRepNombre.trim(),
                       usuario: newRepUser.trim() || newRepNombre.toLowerCase().split(' ')[0],
                       password: newRepPass.trim() || '123',
+                      clave: newRepPass.trim() || '123',
                       online: true,
                       lat: -13.525,
                       lng: -71.975,
@@ -4208,7 +4209,7 @@ export const AdminPanel: React.FC = () => {
                       <div className="text-[11px] text-slate-500 bg-white p-2 rounded-xl border border-slate-200 space-y-0.5">
                         <div className="flex justify-between">
                           <span>Clave de acceso:</span>
-                          <strong className="font-mono text-purple-900">{rep.password || '123'}</strong>
+                          <strong className="font-mono text-purple-900">{rep.clave || rep.password || '123'}</strong>
                         </div>
                         <div className="flex justify-between">
                           <span>GPS Cusco:</span>
@@ -4220,8 +4221,8 @@ export const AdminPanel: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            const newPass = prompt(`Nueva contraseña para ${rep.nombre}:`, rep.password || '123');
-                            if (newPass) updateRepartidor({ ...rep, password: newPass });
+                            const newPass = prompt(`Nueva contraseña para ${rep.nombre}:`, rep.clave || rep.password || '123');
+                            if (newPass) updateRepartidor({ ...rep, password: newPass.trim(), clave: newPass.trim() });
                           }}
                           className="flex-1 bg-white hover:bg-slate-100 border border-slate-300 py-1.5 rounded-xl text-center text-xs font-bold cursor-pointer transition shadow-xs"
                         >
@@ -4266,7 +4267,7 @@ export const AdminPanel: React.FC = () => {
                           <td className="p-2.5 font-mono text-slate-500">{rep.id}</td>
                           <td className="p-2.5 font-black text-purple-950">🛵 {rep.nombre}</td>
                           <td className="p-2.5 font-bold text-slate-700 font-mono">{rep.usuario || rep.nombre.toLowerCase()}</td>
-                          <td className="p-2.5 font-mono text-purple-900">{rep.password || '123'}</td>
+                          <td className="p-2.5 font-mono text-purple-900">{rep.clave || rep.password || '123'}</td>
                           <td className="p-2.5">
                             <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                               rep.online ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'

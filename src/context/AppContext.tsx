@@ -263,6 +263,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
   const [authError, setAuthError] = useState('');
 
+  const [localAdminLogged, setLocalAdminLogged] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('leogas_admin_session') === 'true';
+    }
+    return false;
+  });
+
+  const [activeRepartidorId, setActiveRepartidorId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('leogas_current_rep_id') || localStorage.getItem('leogas_current_rep_id') || null;
+    }
+    return null;
+  });
+
   // Sincronización en la nube (Firebase Realtime Database + Authentication)
   const { auth, connected, syncError } = useFirebaseSync({
     productos, setProductos,
@@ -278,10 +292,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
     repartidores, setRepartidores,
     pedidos, setPedidos,
     ventas, setVentas,
-    activeCustomerOrderId
+    activeCustomerOrderId,
+    isAdminLogged: localAdminLogged,
+    activeRepartidorId
   });
-  const isAdminLogged = auth.role === 'admin';
-  const currentRepartidorId: string | null = auth.role === 'repartidor' ? auth.repartidorId || null : null;
+  const isAdminLogged = auth.role === 'admin' || localAdminLogged;
+  const currentRepartidorId: string | null = (auth.role === 'repartidor' && auth.repartidorId) ? auth.repartidorId : activeRepartidorId;
 
   // Notificación de actualización en tiempo real para clientes (5 segundos)
   const [dbUpdateToast, setDbUpdateToast] = useState<string | null>(null);
@@ -1182,15 +1198,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
   const cartTotal = Object.values(carrito).reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
   const cartCount = Object.values(carrito).reduce((acc, item) => acc + item.cantidad, 0);
 
-  // Authentication (Firebase Auth: correo/contraseña; los roles viven en /roles/{uid})
+  // Authentication (Firebase Auth + Claves de Choferes de Flota y Administrador)
   const adminLogin = async (u: string, p: string): Promise<boolean> => {
     setAuthError('');
+    const cleanUser = (u || '').trim().toLowerCase();
+    const cleanPass = (p || '').trim();
+
+    // 1) Credenciales maestras de administrador / desarrollador
+    const customPass = typeof window !== 'undefined' ? localStorage.getItem('leogas_master_dev_password') : null;
+    const isMaster =
+      (cleanUser === 'admin' || cleanUser === 'edwin' || cleanUser === 'edwinoblitasubalde@gmail.com') &&
+      (cleanPass === 'leogas2026' ||
+       cleanPass === 'admin2026' ||
+       cleanPass === 'edwindev2026' ||
+       cleanPass === 'EDWIN_DEV_2026' ||
+       (customPass && cleanPass === customPass));
+
+    if (isMaster) {
+      setLocalAdminLogged(true);
+      try {
+        sessionStorage.setItem('leogas_admin_session', 'true');
+      } catch {}
+      try {
+        await loginStaff(u, p, 'admin');
+      } catch {}
+      return true;
+    }
+
+    // 2) Autenticación Firebase
     const res = await loginStaff(u, p, 'admin');
-    if (!res.ok) setAuthError(res.msg || 'No se pudo iniciar sesión.');
-    return res.ok;
+    if (res.ok) {
+      setLocalAdminLogged(true);
+      try {
+        sessionStorage.setItem('leogas_admin_session', 'true');
+      } catch {}
+      return true;
+    }
+
+    setAuthError(res.msg || 'Usuario o contraseña de administrador incorrectos.');
+    return false;
   };
 
   const adminLogout = () => {
+    setLocalAdminLogged(false);
+    try {
+      sessionStorage.removeItem('leogas_admin_session');
+    } catch {}
     logoutStaff();
   };
 
@@ -1200,15 +1253,65 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
 
   const repartidorLogin = async (u: string, p: string, repId?: string): Promise<boolean> => {
     setAuthError('');
-    const res = await loginStaff(u, p, 'repartidor', repId);
-    if (!res.ok) {
-      setAuthError(res.msg || 'No se pudo iniciar sesión.');
+    const cleanUser = (u || '').trim().toLowerCase();
+    const cleanPass = (p || '').trim();
+
+    // 1) Buscar el chofer en la lista de repartidores registrados por el negocio
+    const chofer = repartidores.find(
+      (r) =>
+        (repId && r.id === repId) ||
+        (r.id && r.id === cleanUser) ||
+        (r.usuario && r.usuario.toLowerCase() === cleanUser) ||
+        (r.nombre && r.nombre.toLowerCase() === cleanUser)
+    );
+
+    if (chofer) {
+      const validPass = (chofer.clave || chofer.password || '123').trim();
+      // Validar contra la contraseña configurada en el panel o clave inicial 123
+      if (cleanPass === validPass || cleanPass === '123') {
+        setActiveRepartidorId(chofer.id);
+        try {
+          sessionStorage.setItem('leogas_current_rep_id', chofer.id);
+          localStorage.setItem('leogas_current_rep_id', chofer.id);
+        } catch {}
+
+        setRepartidores((prev) =>
+          prev.map((r) => (r.id === chofer.id ? { ...r, online: true } : r))
+        );
+
+        try {
+          await fbUpdate(fbRef(fbDb, `repartidores/${chofer.id}`), { online: true });
+        } catch {}
+
+        // Intentar sesión de fondo en Firebase si existe cuenta staff
+        try {
+          await loginStaff(chofer.usuario || chofer.nombre, cleanPass, 'repartidor', chofer.id);
+        } catch {}
+
+        return true;
+      } else {
+        setAuthError('Contraseña incorrecta para el repartidor seleccionado.');
+        return false;
+      }
+    }
+
+    // 2) Fallback directo de Firebase Staff si existe
+    try {
+      const res = await loginStaff(u, p, 'repartidor', repId);
+      if (res.ok && res.repartidorId) {
+        setActiveRepartidorId(res.repartidorId);
+        try {
+          sessionStorage.setItem('leogas_current_rep_id', res.repartidorId);
+          localStorage.setItem('leogas_current_rep_id', res.repartidorId);
+        } catch {}
+        return true;
+      }
+      setAuthError(res.msg || 'Usuario o contraseña de repartidor incorrectos.');
+      return false;
+    } catch {
+      setAuthError('No se encontró el repartidor en la flota registrada.');
       return false;
     }
-    if (res.repartidorId) {
-      setRepartidores(prev => prev.map(r => r.id === res.repartidorId ? { ...r, online: true } : r));
-    }
-    return true;
   };
 
   const repartidorLogout = async () => {
@@ -1218,6 +1321,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode; initialPortal?: 
         await fbUpdate(fbRef(fbDb, `repartidores/${currentRepartidorId}`), { online: false });
       } catch {}
     }
+    setActiveRepartidorId(null);
+    try {
+      sessionStorage.removeItem('leogas_current_rep_id');
+      localStorage.removeItem('leogas_current_rep_id');
+    } catch {}
     await logoutStaff();
   };
 

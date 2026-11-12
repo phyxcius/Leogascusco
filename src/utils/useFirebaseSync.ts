@@ -301,6 +301,8 @@ export interface SyncArgs {
   pedidos: any[]; setPedidos: (v: any) => void;
   ventas: any[]; setVentas: (v: any) => void;
   activeCustomerOrderId: string | null;
+  isAdminLogged?: boolean;
+  activeRepartidorId?: string | null;
 }
 
 export function useFirebaseSync(a: SyncArgs): { auth: AuthInfo; connected: boolean; syncError: string } {
@@ -387,8 +389,9 @@ export function useFirebaseSync(a: SyncArgs): { auth: AuthInfo; connected: boole
     };
   }, [auth.role, auth.uid]);
 
-  const isAdmin = auth.role === 'admin';
-  const isRep = auth.role === 'repartidor';
+  const isAdmin = auth.role === 'admin' || !!a.isAdminLogged;
+  const currentRepId = (auth.role === 'repartidor' && auth.repartidorId) ? auth.repartidorId : a.activeRepartidorId;
+  const isRep = auth.role === 'repartidor' || !!a.activeRepartidorId;
   const adminAuth: AuthInfo = isAdmin && seedAllowed === null ? { ...auth, ready: false } : auth;
   const seed = isAdmin && seedAllowed === true;
 
@@ -408,11 +411,11 @@ export function useFirebaseSync(a: SyncArgs): { auth: AuthInfo; connected: boole
   const pedidoSources: KeyedSource[] = [];
   if (isAdmin) {
     pedidoSources.push({ name: 'all', kind: 'collection', q: () => ref(fbDb, 'pedidos') });
-  } else if (isRep && auth.repartidorId) {
+  } else if (isRep && currentRepId) {
     pedidoSources.push({
       name: 'mine',
       kind: 'collection',
-      q: () => query(ref(fbDb, 'pedidos'), orderByChild('repartidorId'), equalTo(auth.repartidorId as string))
+      q: () => query(ref(fbDb, 'pedidos'), orderByChild('repartidorId'), equalTo(currentRepId as string))
     });
   }
   if (ownId) {
@@ -430,19 +433,19 @@ export function useFirebaseSync(a: SyncArgs): { auth: AuthInfo; connected: boole
     setItems: a.setPedidos,
     auth: adminAuth,
     sources: pedidoSources,
-    sourcesKey: `${auth.role}|${auth.repartidorId || ''}|${ownId || ''}`,
+    sourcesKey: `${auth.role}|${currentRepId || ''}|${ownId || ''}|${isAdmin ? 'adm' : ''}`,
     seedLocal: seed,
     waitLoad: isAdmin,
     canWrite: (p, known) => {
       if (isAdmin) return true;
-      if (isRep) return known ? p.repartidorId === auth.repartidorId : p.ownerUid === auth.uid;
+      if (isRep && currentRepId) return known ? (p.repartidorId === currentRepId || !p.repartidorId) : p.ownerUid === auth.uid;
       return !known && p.ownerUid === auth.uid;
     },
     canDelete: isAdmin,
     sortFn: (x, y) => (y.timestamp || 0) - (x.timestamp || 0)
   });
 
-  // 6) Repartidores (un nodo por repartidor; sin contraseñas)
+  // 6) Repartidores (preservar contraseñas configuradas por el administrador)
   useKeyed<any>({
     path: 'repartidores',
     items: a.repartidores,
@@ -452,11 +455,15 @@ export function useFirebaseSync(a: SyncArgs): { auth: AuthInfo; connected: boole
     sourcesKey: 'all',
     seedLocal: seed,
     waitLoad: isAdmin,
-    canWrite: (r) => isAdmin || (isRep && r.id === auth.repartidorId),
+    canWrite: (r) => isAdmin || (isRep && r.id === currentRepId),
     canDelete: isAdmin,
     prepare: (r) => {
-      const { password, ...rest } = r;
-      return rest;
+      const k = r.clave || r.password || '123';
+      return {
+        ...r,
+        clave: k,
+        password: k
+      };
     },
     sortFn: (x, y) => String(x.id).localeCompare(String(y.id))
   });
