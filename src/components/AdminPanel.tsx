@@ -51,6 +51,7 @@ import { getPageUrl, getAssetUrl, formatWhatsAppNumber } from '../utils/assets';
 import { BrandBadge } from './BrandBadge';
 import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
 import { DeveloperAccordion } from './DeveloperAccordion';
+import { consultarDni, consultarRuc } from '../utils/apisPeru';
 
 export const AdminPanel: React.FC = () => {
   const {
@@ -421,9 +422,6 @@ export const AdminPanel: React.FC = () => {
     }
     setEmitirConsultando(true);
 
-    const apiToken =
-      'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVkd2lub2JsaXRhc3ViYWxkZUBnbWFpbC5jb20iLCJqdGkiOiIxNzExZGRjNTc5M2ZhYjQ0In0.h1PcqQHzHBK6abr7ZGVkMeSTOSN49BWOWHzB7wpIDw8';
-
     try {
       if (emitirTipo === 'FACTURA') {
         if (numDoc.length !== 11) {
@@ -442,28 +440,17 @@ export const AdminPanel: React.FC = () => {
           return;
         }
 
-        // 2. Real query to SUNAT API
-        const res = await fetch(`https://api.apis.net.pe/v2/sunat/ruc?numero=${numDoc}`, {
-          headers: {
-            Authorization: apiToken,
-            Accept: 'application/json'
-          }
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.razonSocial) {
-            setEmitirRazonSocial(data.razonSocial);
-            if (data.direccion) setEmitirDireccionFiscal(data.direccion);
-            const estado = data.estado ? `${data.estado} - ${data.condicion || 'HABIDO'}` : 'ACTIVO - HABIDO';
-            setEmitirEstadoSunat(estado);
-            playSuccessChime();
-            alert(`✔ RUC verificado en SUNAT en tiempo real:\n${data.razonSocial}\nEstado: ${estado}`);
-          } else {
-            throw new Error('RUC no encontrado en padrón SUNAT');
-          }
+        // 2. Real query to SUNAT via APIsPerú
+        const res = await consultarRuc(numDoc);
+        if (res.success && res.razonSocial) {
+          setEmitirRazonSocial(res.razonSocial);
+          if (res.direccion) setEmitirDireccionFiscal(res.direccion);
+          const estado = `${res.estado || 'ACTIVO'} - ${res.condicion || 'HABIDO'}`;
+          setEmitirEstadoSunat(estado);
+          playSuccessChime();
+          alert(`✔ RUC verificado en SUNAT en tiempo real:\n${res.razonSocial}\nEstado: ${estado}\nFuente: ${res.fuente}`);
         } else {
-          throw new Error('Error al consultar SUNAT');
+          alert(res.error || 'RUC no encontrado en SUNAT. Puedes ingresar la Razón Social manualmente.');
         }
       } else {
         // DNI - RENIEC
@@ -483,39 +470,20 @@ export const AdminPanel: React.FC = () => {
           return;
         }
 
-        // 2. Real query to RENIEC API
-        const res = await fetch(`https://api.apis.net.pe/v2/reniec/dni?numero=${numDoc}`, {
-          headers: {
-            Authorization: apiToken,
-            Accept: 'application/json'
-          }
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data && (data.nombres || data.nombre)) {
-            const nombreCompleto =
-              data.nombre || `${data.nombres} ${data.apellidoPaterno || ''} ${data.apellidoMaterno || ''}`.trim();
-            setEmitirRazonSocial(nombreCompleto);
-            setEmitirEstadoSunat('DNI VÁLIDO (RENIEC EN VIVO)');
-            playSuccessChime();
-            alert(`✔ DNI verificado en RENIEC en tiempo real:\n${nombreCompleto}`);
-          } else {
-            throw new Error('DNI no encontrado en RENIEC');
-          }
+        // 2. Real query to RENIEC via APIsPerú
+        const res = await consultarDni(numDoc);
+        if (res.success && res.nombreCompleto) {
+          setEmitirRazonSocial(res.nombreCompleto);
+          setEmitirEstadoSunat('DNI VÁLIDO (RENIEC EN VIVO)');
+          playSuccessChime();
+          alert(`✔ DNI verificado en RENIEC en tiempo real:\n${res.nombreCompleto}\nFuente: ${res.fuente}`);
         } else {
-          throw new Error('Error al consultar RENIEC');
+          alert(res.error || 'DNI no encontrado en RENIEC. Puedes ingresar el nombre manualmente.');
         }
       }
     } catch (err: any) {
       console.warn('Fallo consulta API:', err);
-      const manual = prompt(
-        'No se pudo conectar a la base de datos en línea. Ingresa el nombre o Razón Social manualmente:'
-      );
-      if (manual && manual.trim()) {
-        setEmitirRazonSocial(manual.trim());
-        setEmitirEstadoSunat('REGISTRADO MANUALMENTE');
-      }
+      alert('No se pudo conectar a la base de datos en línea. Puedes ingresar los datos en las casillas correspondientes.');
     } finally {
       setEmitirConsultando(false);
     }

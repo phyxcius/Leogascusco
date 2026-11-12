@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { X, Building2, Search, Send, Plus, Minus } from 'lucide-react';
 import { formatWhatsAppNumber } from '../utils/assets';
+import { consultarRuc } from '../utils/apisPeru';
 
 interface B2BModalProps {
   isOpen: boolean;
@@ -41,28 +42,19 @@ export const B2BModal: React.FC<B2BModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Otherwise lookup in SUNAT API
+    // Otherwise lookup in SUNAT API via APIsPerú
     setIsSearching(true);
     try {
-      const res = await fetch(`https://api.apis.net.pe/v2/sunat/ruc?numero=${cleanRuc}`, {
-        headers: {
-          Authorization:
-            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVkd2lub2JsaXRhc3ViYWxkZUBnbWFpbC5jb20iLCJqdGkiOiIxNzExZGRjNTc5M2ZhYjQ0In0.h1PcqQHzHBK6abr7ZGVkMeSTOSN49BWOWHzB7wpIDw8',
-          Accept: 'application/json'
-        }
-      });
-      if (!res.ok) throw new Error('Error en padrón SUNAT');
-      const data = await res.json();
-      if (data && data.razonSocial) {
-        setRazonSocial(data.razonSocial);
-        if (data.direccion) setDireccion(data.direccion);
-        alert(`✔ RUC verificado en SUNAT: ${data.razonSocial}`);
+      const res = await consultarRuc(cleanRuc);
+      if (res.success && res.razonSocial) {
+        setRazonSocial(res.razonSocial);
+        if (res.direccion) setDireccion(res.direccion);
+        alert(`✔ RUC verificado en SUNAT: ${res.razonSocial}`);
       } else {
-        throw new Error('No encontrado');
+        alert(res.error || 'RUC no encontrado en el padrón de SUNAT. Puedes ingresar la Razón Social manualmente.');
       }
     } catch {
-      const manual = prompt('RUC válido. Ingresa la Razón Social de la empresa:');
-      if (manual) setRazonSocial(manual.trim());
+      alert('No se pudo conectar a SUNAT en este momento. Ingresa la Razón Social en el formulario.');
     } finally {
       setIsSearching(false);
     }

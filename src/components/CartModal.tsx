@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { formatWhatsAppNumber } from '../utils/assets';
 import { playSuccessChime } from '../utils/audio';
+import { consultarDni, consultarRuc } from '../utils/apisPeru';
 
 interface CartModalProps {
   isOpen: boolean;
@@ -90,25 +91,15 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     }
     setIsSearchingDoc(true);
     try {
-      const res = await fetch(`https://api.apis.net.pe/v2/reniec/dni?numero=${dni}`, {
-        headers: {
-          Authorization:
-            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVkd2lub2JsaXRhc3ViYWxkZUBnbWFpbC5jb20iLCJqdGkiOiIxNzExZGRjNTc5M2ZhYjQ0In0.h1PcqQHzHBK6abr7ZGVkMeSTOSN49BWOWHzB7wpIDw8',
-          Accept: 'application/json'
-        }
-      });
-      if (!res.ok) throw new Error('Error en consulta');
-      const data = await res.json();
-      if (data && data.nombres) {
-        const full = `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`;
-        setNombreCliente(full);
-        alert(`✔ DNI Encontrado: ${full}`);
+      const res = await consultarDni(dni);
+      if (res.success && res.nombreCompleto) {
+        setNombreCliente(res.nombreCompleto);
+        playSuccessChime();
       } else {
-        throw new Error('No encontrado');
+        alert(res.error || 'DNI no encontrado en el padrón de RENIEC. Puedes ingresar el nombre manualmente.');
       }
     } catch {
-      const manual = prompt('No se pudo conectar al padrón en línea. Ingresa el nombre del cliente manualmente:');
-      if (manual) setNombreCliente(manual.trim());
+      alert('No se pudo verificar el DNI en este momento. Puedes ingresar el nombre del cliente directamente.');
     } finally {
       setIsSearchingDoc(false);
     }
@@ -122,29 +113,19 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     }
     setIsSearchingDoc(true);
     try {
-      const res = await fetch(`https://api.apis.net.pe/v2/sunat/ruc?numero=${ruc}`, {
-        headers: {
-          Authorization:
-            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVkd2lub2JsaXRhc3ViYWxkZUBnbWFpbC5jb20iLCJqdGkiOiIxNzExZGRjNTc5M2ZhYjQ0In0.h1PcqQHzHBK6abr7ZGVkMeSTOSN49BWOWHzB7wpIDw8',
-          Accept: 'application/json'
+      const res = await consultarRuc(ruc);
+      if (res.success && res.razonSocial) {
+        setRazonSocial(res.razonSocial);
+        setNombreCliente(res.razonSocial);
+        if (res.direccion && !direccion) {
+          setDireccion(res.direccion);
         }
-      });
-      if (!res.ok) throw new Error('Error en consulta');
-      const data = await res.json();
-      if (data && data.razonSocial) {
-        setRazonSocial(data.razonSocial);
-        setNombreCliente(data.razonSocial);
-        if (data.direccion) setDireccion(data.direccion);
-        alert(`✔ RUC Encontrado: ${data.razonSocial}`);
+        playSuccessChime();
       } else {
-        throw new Error('No encontrado');
+        alert(res.error || 'RUC no encontrado en el padrón de SUNAT. Puedes ingresar la Razón Social en el casillero.');
       }
     } catch {
-      const manual = prompt('No se pudo conectar a SUNAT. Ingresa la Razón Social manualmente:');
-      if (manual) {
-        setRazonSocial(manual.trim());
-        setNombreCliente(manual.trim());
-      }
+      alert('No se pudo verificar el RUC en este momento. Puedes ingresar la Razón Social de la empresa directamente.');
     } finally {
       setIsSearchingDoc(false);
     }

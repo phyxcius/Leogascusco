@@ -24,8 +24,15 @@ import {
   Cloud,
   Smartphone,
   UploadCloud,
-  Globe
+  Globe,
+  FileCheck2
 } from 'lucide-react';
+import {
+  consultarDni,
+  consultarRuc,
+  getStoredApisPeruToken,
+  setStoredApisPeruToken
+} from '../utils/apisPeru';
 
 export const DeveloperAccordion: React.FC = () => {
   const {
@@ -131,6 +138,60 @@ export const DeveloperAccordion: React.FC = () => {
     msg: string;
     repoInfo?: { name: string; stars: number; visibility: string; defaultBranch: string };
   } | null>(null);
+
+  // APIsPerú / APIS.net.pe (RENIEC & SUNAT) Configuration State
+  const [apisPeruToken, setApisPeruTokenState] = useState<string>(() => getStoredApisPeruToken());
+  const [showApisToken, setShowApisToken] = useState(false);
+  const [isTestingApis, setIsTestingApis] = useState(false);
+  const [apisTestResult, setApisTestResult] = useState<{
+    ok: boolean;
+    dniResult?: string;
+    rucResult?: string;
+    msg: string;
+  } | null>(null);
+
+  const handleSaveApisToken = () => {
+    setStoredApisPeruToken(apisPeruToken);
+    playSuccessChime();
+    alert('✔ Token de APIsPerú / APIS.net.pe guardado exitosamente.');
+  };
+
+  const handleTestApisPeru = async () => {
+    setIsTestingApis(true);
+    setApisTestResult(null);
+    try {
+      // Live test DNI (42423549) and RUC (20100070970)
+      const dniRes = await consultarDni('42423549', apisPeruToken);
+      const rucRes = await consultarRuc('20100070970', apisPeruToken);
+
+      const ok = dniRes.success && rucRes.success;
+      setApisTestResult({
+        ok,
+        dniResult: dniRes.success
+          ? `✔ DNI 42423549: ${dniRes.nombreCompleto} [${dniRes.fuente}]`
+          : `❌ DNI: ${dniRes.error}`,
+        rucResult: rucRes.success
+          ? `✔ RUC 20100070970: ${rucRes.razonSocial} (${rucRes.estado} - ${rucRes.condicion}) [${rucRes.fuente}]`
+          : `❌ RUC: ${rucRes.error}`,
+        msg: ok
+          ? '¡Sincronización Exitosa! Conexión en vivo con RENIEC y SUNAT activa.'
+          : 'Atención: Revisa el token o conexión.'
+      });
+      if (ok) {
+        playSuccessChime();
+      } else {
+        playChimeSound();
+      }
+    } catch (err: any) {
+      setApisTestResult({
+        ok: false,
+        msg: `Error al probar APIsPerú: ${err.message || 'Sin conexión'}`
+      });
+      playChimeSound();
+    } finally {
+      setIsTestingApis(false);
+    }
+  };
 
   const handleToggleAccordion = () => {
     setIsOpen((prev) => !prev);
@@ -573,6 +634,113 @@ export const DeveloperAccordion: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Smartphone className="w-4 h-4 text-cyan-400 flex-shrink-0" />
                     <span><strong>Alcance:</strong> Android, iPhone, PC y Tablets</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* APISPERU / APIS.NET.PE OFFICIAL INTEGRATION CARD */}
+              <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-blue-800/80 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-800/60 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 to-blue-600 text-slate-950 flex items-center justify-center font-black shadow-md">
+                      <FileCheck2 className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm sm:text-base font-black text-white">
+                          Integración APIsPerú (RENIEC para DNI & SUNAT para Factura/Boleta)
+                        </h4>
+                        <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                          En Vivo • 100% Operativo
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-blue-200/90 leading-tight">
+                        Consulta oficial automática en los padrones públicos de Perú. Valida DNI al instante para Boletas y RUC para Facturas con Razón Social y Estado Habido.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleTestApisPeru}
+                      disabled={isTestingApis}
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${isTestingApis ? 'animate-spin' : ''}`} />
+                      <span>{isTestingApis ? 'Consultando en RENIEC y SUNAT...' : '🧪 Probar Conexión en Vivo'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Token Configuration & Explanatory info */}
+                <div className="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-blue-900/50">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="text-[11px] font-black uppercase text-blue-200 block">
+                      Token Personal de APIsPerú / APIS.net.pe (Opcional):
+                    </label>
+                    <span className="text-[10px] text-emerald-400 font-bold">
+                      ● Respaldo dual activo: endpoint v1 directo sin expiración + token v2
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type={showApisToken ? 'text' : 'password'}
+                        value={apisPeruToken}
+                        onChange={(e) => setApisPeruTokenState(e.target.value)}
+                        placeholder="Pega aquí tu token de apisperu.com o apis.net.pe..."
+                        className="w-full bg-slate-950 border border-blue-700/60 rounded-xl p-2.5 pr-10 text-xs font-mono font-bold text-white focus:outline-blue-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApisToken(!showApisToken)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      >
+                        {showApisToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveApisToken}
+                      className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Guardar</span>
+                    </button>
+                  </div>
+
+                  {/* Test Feedback display */}
+                  {apisTestResult && (
+                    <div className={`p-3.5 rounded-xl border text-xs space-y-1 animate-in fade-in ${
+                      apisTestResult.ok ? 'bg-emerald-950/80 border-emerald-500/80 text-emerald-100' : 'bg-red-950/80 border-red-500/80 text-red-100'
+                    }`}>
+                      <div className="font-black flex items-center gap-1.5 text-sm">
+                        {apisTestResult.ok ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
+                        <span>{apisTestResult.msg}</span>
+                      </div>
+                      {apisTestResult.dniResult && (
+                        <div className="text-[11px] font-mono text-cyan-200">
+                          {apisTestResult.dniResult}
+                        </div>
+                      )}
+                      {apisTestResult.rucResult && (
+                        <div className="text-[11px] font-mono text-cyan-200">
+                          {apisTestResult.rucResult}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] text-blue-200/80 pt-1">
+                    <div>
+                      <strong>📌 RENIEC (Boletas):</strong> Valida DNI en el carrito de compra y autocompleta nombres y apellidos reales del cliente.
+                    </div>
+                    <div>
+                      <strong>🏢 SUNAT (Facturas):</strong> Valida RUC de 11 dígitos, obtiene la Razón Social exacta, dirección fiscal y estado Habido.
+                    </div>
                   </div>
                 </div>
               </div>
