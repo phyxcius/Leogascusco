@@ -1,5 +1,6 @@
 // Utility service for Peruvian Identity (RENIEC / DNI) and Tax Administration (SUNAT / RUC)
-// Supports apis.net.pe (v1 direct public + v2 authenticated) and apiperu.dev with automatic fallback.
+// Primary provider: APIsPerú Official CORS-enabled API (https://dniruc.apisperu.com/api/v1/)
+// Secondary fallback: apiperu.dev
 
 export interface ResDni {
   success: boolean;
@@ -9,8 +10,10 @@ export interface ResDni {
   apellidoPaterno?: string;
   apellidoMaterno?: string;
   direccion?: string;
+  codVerifica?: string | number;
   error?: string;
   fuente?: string;
+  tokenWarning?: string;
 }
 
 export interface ResRuc {
@@ -26,30 +29,137 @@ export interface ResRuc {
   ubigeo?: string;
   error?: string;
   fuente?: string;
+  tokenWarning?: string;
 }
+
+export interface FacturacionApisPeruConfig {
+  tokenEmpresa: string;
+  entorno: 'beta' | 'produccion';
+  rucEmisor: string;
+  razonSocialEmisor: string;
+}
+
+// Verified working APIsPerú Consultas DNI/RUC Token (CORS enabled via dniruc.apisperu.com)
+export const DEFAULT_DNIRUC_TOKEN =
+  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVkd2lub2JsaXRhc3ViYWxkZUBnbWFpbC5jb20iLCJqdGkiOiIxNzExZGRjNTc5M2ZhYjQ0In0.h1PcqQHzHBK6abr7ZGVkMeSTOSN49BWOWHzB7wpIDw8';
+
+const KEY_DNIRUC_TOKEN = 'leogas_apisperu_dniruc_token';
+const KEY_FACTURACION_CONFIG = 'leogas_apisperu_facturacion_config';
 
 export const getStoredApisPeruToken = (): string => {
   try {
-    return (
-      localStorage.getItem('leogas_apisperu_token') ||
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVkd2lub2JsaXRhc3ViYWxkZUBnbWFpbC5jb20iLCJqdGkiOiIxNzExZGRjNTc5M2ZhYjQ0In0.h1PcqQHzHBK6abr7ZGVkMeSTOSN49BWOWHzB7wpIDw8'
-    );
+    const stored = localStorage.getItem(KEY_DNIRUC_TOKEN);
+    if (stored && stored.trim().length > 20) return stored.trim();
+    return DEFAULT_DNIRUC_TOKEN;
   } catch {
-    return '';
+    return DEFAULT_DNIRUC_TOKEN;
   }
 };
 
 export const setStoredApisPeruToken = (token: string): void => {
   try {
-    localStorage.setItem('leogas_apisperu_token', token.trim());
+    const clean = token.trim();
+    if (!clean) {
+      localStorage.removeItem(KEY_DNIRUC_TOKEN);
+    } else {
+      localStorage.setItem(KEY_DNIRUC_TOKEN, clean);
+    }
   } catch {}
 };
 
+export const resetStoredApisPeruToken = (): string => {
+  try {
+    localStorage.setItem(KEY_DNIRUC_TOKEN, DEFAULT_DNIRUC_TOKEN);
+  } catch {}
+  return DEFAULT_DNIRUC_TOKEN;
+};
+
+export const getStoredFacturacionConfig = (): FacturacionApisPeruConfig => {
+  try {
+    const raw = localStorage.getItem(KEY_FACTURACION_CONFIG);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        tokenEmpresa: parsed.tokenEmpresa || '',
+        entorno: parsed.entorno === 'produccion' ? 'produccion' : 'beta',
+        rucEmisor: parsed.rucEmisor || '10424235496',
+        razonSocialEmisor: parsed.razonSocialEmisor || 'LA CHUSPA ANUNCIOS'
+      };
+    }
+    // Check if the user previously pasted a Token de empresa into the old key
+    const legacy = localStorage.getItem('leogas_apisperu_token');
+    if (legacy && legacy !== DEFAULT_DNIRUC_TOKEN && legacy.length > 20) {
+      return {
+        tokenEmpresa: legacy,
+        entorno: 'beta',
+        rucEmisor: '10424235496',
+        razonSocialEmisor: 'LA CHUSPA ANUNCIOS'
+      };
+    }
+  } catch {}
+  return {
+    tokenEmpresa: '',
+    entorno: 'beta',
+    rucEmisor: '10424235496',
+    razonSocialEmisor: 'LA CHUSPA ANUNCIOS'
+  };
+};
+
+export const setStoredFacturacionConfig = (cfg: FacturacionApisPeruConfig): void => {
+  try {
+    localStorage.setItem(KEY_FACTURACION_CONFIG, JSON.stringify(cfg));
+  } catch {}
+};
+
+async function fetchDniFromApisPeru(dni: string, token: string): Promise<{ ok: boolean; status: number; data?: any; msg?: string }> {
+  const res = await fetch(
+    `https://dniruc.apisperu.com/api/v1/dni/${dni}?token=${encodeURIComponent(token)}`,
+    {
+      method: 'GET',
+      headers: { Accept: 'application/json' }
+    }
+  );
+  const data = await res.json().catch(() => null);
+  if (res.ok && data && data.success !== false && (data.nombres || data.nombreCompleto)) {
+    return { ok: true, status: res.status, data };
+  }
+  return {
+    ok: false,
+    status: res.status,
+    data,
+    msg: data?.message || `HTTP ${res.status}`
+  };
+}
+
+async function fetchRucFromApisPeru(ruc: string, token: string): Promise<{ ok: boolean; status: number; data?: any; msg?: string }> {
+  const res = await fetch(
+    `https://dniruc.apisperu.com/api/v1/ruc/${ruc}?token=${encodeURIComponent(token)}`,
+    {
+      method: 'GET',
+      headers: { Accept: 'application/json' }
+    }
+  );
+  const data = await res.json().catch(() => null);
+  if (res.ok && data && data.success !== false && (data.razonSocial || data.nombre)) {
+    return { ok: true, status: res.status, data };
+  }
+  return {
+    ok: false,
+    status: res.status,
+    data,
+    msg: data?.message || `HTTP ${res.status}`
+  };
+}
+
 /**
- * Consulta oficial de DNI ante RENIEC vía APIsPerú / APIS.net.pe
- * Utiliza estrategia resiliente multi-endpoint (v1 público -> v2 autenticado -> apiperu.dev)
+ * Consulta oficial de DNI ante RENIEC vía APIsPerú (dniruc.apisperu.com)
+ * Compatible 100% desde el navegador (CORS habilitado) y en GitHub Pages.
  */
-export async function consultarDni(rawDni: string, customToken?: string): Promise<ResDni> {
+export async function consultarDni(
+  rawDni: string,
+  customToken?: string,
+  strictCustomToken = false
+): Promise<ResDni> {
   const dni = rawDni.trim().replace(/\D/g, '');
   if (dni.length !== 8) {
     return {
@@ -60,56 +170,45 @@ export async function consultarDni(rawDni: string, customToken?: string): Promis
     };
   }
 
-  const token = customToken?.trim() || getStoredApisPeruToken();
+  const token = (customToken !== undefined ? customToken : getStoredApisPeruToken()).trim() || DEFAULT_DNIRUC_TOKEN;
+  let tokenWarning: string | undefined;
 
-  // 1. Try apis.net.pe v1 (Direct public endpoint, highly reliable, no 401 token blockage)
+  // 1. Primary: dniruc.apisperu.com (Official CORS-enabled APIsPerú endpoint)
   try {
-    const res = await fetch(`https://api.apis.net.pe/v1/dni?numero=${dni}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json'
-      }
-    });
+    const attempt = await fetchDniFromApisPeru(dni, token);
+    if (attempt.ok && attempt.data) {
+      const data = attempt.data;
+      const full = `${data.nombres || ''} ${data.apellidoPaterno || ''} ${data.apellidoMaterno || ''}`.trim();
+      return {
+        success: true,
+        dni,
+        nombreCompleto: full,
+        nombres: data.nombres || '',
+        apellidoPaterno: data.apellidoPaterno || '',
+        apellidoMaterno: data.apellidoMaterno || '',
+        codVerifica: data.codVerifica,
+        fuente: 'APIsPerú Oficial (RENIEC en Vivo)'
+      };
+    }
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data && (data.nombre || data.nombres)) {
-        const full =
-          data.nombre?.trim() ||
-          `${data.nombres || ''} ${data.apellidoPaterno || ''} ${data.apellidoMaterno || ''}`.trim();
+    // If token returned 401/invalid (e.g., user pasted a Facturación Token de empresa instead of Consultas DNI/RUC token)
+    if (attempt.status === 401 || attempt.msg?.toLowerCase().includes('token')) {
+      if (strictCustomToken) {
         return {
-          success: true,
+          success: false,
           dni,
-          nombreCompleto: full,
-          nombres: data.nombres || '',
-          apellidoPaterno: data.apellidoPaterno || '',
-          apellidoMaterno: data.apellidoMaterno || '',
-          direccion: data.direccion || '',
-          fuente: 'APIS.net.pe v1 (RENIEC Padrón Oficial)'
+          nombreCompleto: '',
+          error:
+            'El token ingresado no corresponde al servicio "API Consultas DNI/RUC" de APIsPerú (nota: el "Token de empresa" de Facturación Electrónica es un token diferente que solo sirve para emitir XML/CDR).'
         };
       }
-    }
-  } catch (err) {
-    // Continue to next fallback
-  }
-
-  // 2. Try apis.net.pe v2 (Bearer Token endpoint)
-  if (token) {
-    try {
-      const res = await fetch(`https://api.apis.net.pe/v2/reniec/dni?numero=${dni}`, {
-        method: 'GET',
-        headers: {
-          Authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data && (data.nombres || data.nombreCompleto)) {
-          const full =
-            data.nombreCompleto?.trim() ||
-            `${data.nombres || ''} ${data.apellidoPaterno || ''} ${data.apellidoMaterno || ''}`.trim();
+      // Try automatic fallback to verified DEFAULT_DNIRUC_TOKEN so clients aren't blocked
+      if (token !== DEFAULT_DNIRUC_TOKEN) {
+        tokenWarning = 'Token personalizado inválido para Consultas DNI/RUC; usando token base de respaldo.';
+        const fallbackAttempt = await fetchDniFromApisPeru(dni, DEFAULT_DNIRUC_TOKEN);
+        if (fallbackAttempt.ok && fallbackAttempt.data) {
+          const data = fallbackAttempt.data;
+          const full = `${data.nombres || ''} ${data.apellidoPaterno || ''} ${data.apellidoMaterno || ''}`.trim();
           return {
             success: true,
             dni,
@@ -117,17 +216,18 @@ export async function consultarDni(rawDni: string, customToken?: string): Promis
             nombres: data.nombres || '',
             apellidoPaterno: data.apellidoPaterno || '',
             apellidoMaterno: data.apellidoMaterno || '',
-            direccion: data.direccion || '',
-            fuente: 'APIS.net.pe v2 (RENIEC)'
+            codVerifica: data.codVerifica,
+            fuente: 'APIsPerú Oficial (RENIEC Respaldo)',
+            tokenWarning
           };
         }
       }
-    } catch (err) {
-      // Continue to next fallback
     }
+  } catch {
+    // Continue to apiperu.dev fallback
   }
 
-  // 3. Try apiperu.dev endpoint as fallback
+  // 2. Fallback: apiperu.dev (also CORS-enabled) if user configured an apiperu.dev token
   if (token) {
     try {
       const res = await fetch(`https://apiperu.dev/api/dni/${dni}`, {
@@ -153,11 +253,12 @@ export async function consultarDni(rawDni: string, customToken?: string): Promis
             apellidoPaterno: data.apellido_paterno || '',
             apellidoMaterno: data.apellido_materno || '',
             direccion: data.direccion || '',
-            fuente: 'APIsPerú Dev (RENIEC)'
+            fuente: 'ApiPeru.dev (RENIEC)',
+            tokenWarning
           };
         }
       }
-    } catch (err) {
+    } catch {
       // Fallback exhausted
     }
   }
@@ -166,15 +267,19 @@ export async function consultarDni(rawDni: string, customToken?: string): Promis
     success: false,
     dni,
     nombreCompleto: '',
-    error: 'No se pudo validar el DNI en los padrones en línea de RENIEC.'
+    error: 'No se encontró el DNI o no se pudo conectar con RENIEC en línea.'
   };
 }
 
 /**
- * Consulta oficial de RUC ante SUNAT vía APIsPerú / APIS.net.pe
- * Utiliza estrategia resiliente multi-endpoint (v1 público -> v2 autenticado -> apiperu.dev)
+ * Consulta oficial de RUC ante SUNAT vía APIsPerú (dniruc.apisperu.com)
+ * Compatible 100% desde el navegador (CORS habilitado) y en GitHub Pages.
  */
-export async function consultarRuc(rawRuc: string, customToken?: string): Promise<ResRuc> {
+export async function consultarRuc(
+  rawRuc: string,
+  customToken?: string,
+  strictCustomToken = false
+): Promise<ResRuc> {
   const ruc = rawRuc.trim().replace(/\D/g, '');
   if (ruc.length !== 11) {
     return {
@@ -185,54 +290,45 @@ export async function consultarRuc(rawRuc: string, customToken?: string): Promis
     };
   }
 
-  const token = customToken?.trim() || getStoredApisPeruToken();
+  const token = (customToken !== undefined ? customToken : getStoredApisPeruToken()).trim() || DEFAULT_DNIRUC_TOKEN;
+  let tokenWarning: string | undefined;
 
-  // 1. Try apis.net.pe v1 (Direct public endpoint, highly reliable, no 401 token blockage)
+  // 1. Primary: dniruc.apisperu.com (Official CORS-enabled APIsPerú endpoint)
   try {
-    const res = await fetch(`https://api.apis.net.pe/v1/ruc?numero=${ruc}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json'
-      }
-    });
+    const attempt = await fetchRucFromApisPeru(ruc, token);
+    if (attempt.ok && attempt.data) {
+      const data = attempt.data;
+      const razonSocial = (data.razonSocial || data.nombre || '').trim();
+      return {
+        success: true,
+        ruc,
+        razonSocial,
+        estado: data.estado || 'ACTIVO',
+        condicion: data.condicion || 'HABIDO',
+        direccion: data.direccion || '',
+        distrito: data.distrito || '',
+        provincia: data.provincia || '',
+        departamento: data.departamento || '',
+        ubigeo: data.ubigeo || '',
+        fuente: 'APIsPerú Oficial (SUNAT en Vivo)'
+      };
+    }
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data && (data.nombre || data.razonSocial)) {
-        const razonSocial = (data.nombre || data.razonSocial || '').trim();
+    if (attempt.status === 401 || attempt.msg?.toLowerCase().includes('token')) {
+      if (strictCustomToken) {
         return {
-          success: true,
+          success: false,
           ruc,
-          razonSocial,
-          estado: data.estado || 'ACTIVO',
-          condicion: data.condicion || 'HABIDO',
-          direccion: data.direccion || '',
-          distrito: data.distrito || '',
-          provincia: data.provincia || '',
-          departamento: data.departamento || '',
-          ubigeo: data.ubigeo || '',
-          fuente: 'APIS.net.pe v1 (SUNAT Padrón Oficial)'
+          razonSocial: '',
+          error:
+            'El token ingresado no corresponde al servicio "API Consultas DNI/RUC" de APIsPerú (el "Token de empresa" de Facturación Electrónica pertenece al entorno de emisión, no al padrón DNI/RUC).'
         };
       }
-    }
-  } catch (err) {
-    // Continue to next fallback
-  }
-
-  // 2. Try apis.net.pe v2 (Bearer Token endpoint)
-  if (token) {
-    try {
-      const res = await fetch(`https://api.apis.net.pe/v2/sunat/ruc?numero=${ruc}`, {
-        method: 'GET',
-        headers: {
-          Authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data && (data.razonSocial || data.nombre)) {
+      if (token !== DEFAULT_DNIRUC_TOKEN) {
+        tokenWarning = 'Token personalizado inválido para Consultas DNI/RUC; usando token base de respaldo.';
+        const fallbackAttempt = await fetchRucFromApisPeru(ruc, DEFAULT_DNIRUC_TOKEN);
+        if (fallbackAttempt.ok && fallbackAttempt.data) {
+          const data = fallbackAttempt.data;
           const razonSocial = (data.razonSocial || data.nombre || '').trim();
           return {
             success: true,
@@ -245,16 +341,17 @@ export async function consultarRuc(rawRuc: string, customToken?: string): Promis
             provincia: data.provincia || '',
             departamento: data.departamento || '',
             ubigeo: data.ubigeo || '',
-            fuente: 'APIS.net.pe v2 (SUNAT)'
+            fuente: 'APIsPerú Oficial (SUNAT Respaldo)',
+            tokenWarning
           };
         }
       }
-    } catch (err) {
-      // Continue to next fallback
     }
+  } catch {
+    // Continue to apiperu.dev fallback
   }
 
-  // 3. Try apiperu.dev endpoint as fallback
+  // 2. Fallback: apiperu.dev (CORS-enabled)
   if (token) {
     try {
       const res = await fetch(`https://apiperu.dev/api/ruc/${ruc}`, {
@@ -281,11 +378,12 @@ export async function consultarRuc(rawRuc: string, customToken?: string): Promis
             provincia: data.provincia || '',
             departamento: data.departamento || '',
             ubigeo: data.ubigeo || '',
-            fuente: 'APIsPerú Dev (SUNAT)'
+            fuente: 'ApiPeru.dev (SUNAT)',
+            tokenWarning
           };
         }
       }
-    } catch (err) {
+    } catch {
       // Fallback exhausted
     }
   }
@@ -294,6 +392,6 @@ export async function consultarRuc(rawRuc: string, customToken?: string): Promis
     success: false,
     ruc,
     razonSocial: '',
-    error: 'No se pudo validar el RUC en el padrón en línea de SUNAT.'
+    error: 'No se encontró el RUC o no se pudo conectar con SUNAT en línea.'
   };
 }

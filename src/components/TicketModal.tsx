@@ -1,34 +1,82 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Printer, MessageCircle, X } from 'lucide-react';
+import { Printer, MessageCircle, X, ShieldCheck } from 'lucide-react';
+
+export interface DraftReceiptData {
+  tipo: 'Boleta' | 'Factura' | 'Nota';
+  documento?: string;
+  tipoDoc?: 'DNI' | 'RUC';
+  cliente: string;
+  direccion?: string;
+  metodoPago?: string;
+  validado?: boolean;
+  estadoContribuyente?: string;
+}
 
 interface TicketModalProps {
   isOpen: boolean;
   onClose: () => void;
+  draftData?: DraftReceiptData | null;
 }
 
-export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => {
+export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, draftData }) => {
   const { activeCustomerOrder, carrito, cartTotal, negocio, telefonos } = useApp();
 
   if (!isOpen) return null;
 
-  // Use active order data if exists, otherwise current cart
-  const clienteNombre = activeCustomerOrder?.cliente || 'Particular';
-  const total = activeCustomerOrder
+  const allowBoleta = negocio.habilitarBoletaDni !== false;
+  const allowFactura = negocio.habilitarFacturaRuc !== false;
+  const comprobantesDeshabilitados = !allowBoleta && !allowFactura;
+
+  // Determine source of receipt data: draft from CartModal (validated) OR activeCustomerOrder
+  const clienteNombre =
+    draftData?.cliente ||
+    activeCustomerOrder?.cliente ||
+    'Cliente Particular';
+
+  const total = activeCustomerOrder && !draftData
     ? typeof activeCustomerOrder.montoCobro === 'number'
       ? activeCustomerOrder.montoCobro
       : parseFloat(activeCustomerOrder.montoCobro) || 0
     : cartTotal;
 
-  const subtotal = total / 1.18;
+  const igvRate = (negocio.igvPorcentaje || 18) / 100;
+  const subtotal = total / (1 + igvRate);
   const igv = total - subtotal;
-  const metodoPago = activeCustomerOrder?.metodoPago || 'Efectivo';
-  const serie = activeCustomerOrder?.tipoComprobante?.includes('Factura')
-    ? 'F001-000124'
-    : 'B001-000452';
-  const isFactura = activeCustomerOrder?.tipoComprobante?.includes('Factura');
+  const metodoPago = draftData?.metodoPago || activeCustomerOrder?.metodoPago || 'Efectivo';
 
-  const fechaHora = activeCustomerOrder?.hora
+  const isNotaInterna =
+    comprobantesDeshabilitados ||
+    draftData?.tipo === 'Nota' ||
+    activeCustomerOrder?.tipoComprobante?.includes('Nota');
+
+  const isFactura =
+    !isNotaInterna &&
+    (draftData?.tipo === 'Factura' ||
+      (!draftData && Boolean(activeCustomerOrder?.tipoComprobante?.includes('Factura'))));
+
+  const serie = isNotaInterna
+    ? 'NP01-000105'
+    : isFactura
+      ? 'F001-000124'
+      : 'B001-000452';
+
+  // Extract documento number if stored in activeCustomerOrder.tipoComprobante
+  let docNumber = draftData?.documento || '';
+  let docLabel = draftData?.tipoDoc || (isFactura ? 'RUC' : 'DNI');
+  if (!docNumber && activeCustomerOrder?.tipoComprobante) {
+    const matchRuc = activeCustomerOrder.tipoComprobante.match(/RUC:\s*(\d{11})/);
+    const matchDni = activeCustomerOrder.tipoComprobante.match(/DNI:\s*(\d{8})/);
+    if (matchRuc) {
+      docNumber = matchRuc[1];
+      docLabel = 'RUC';
+    } else if (matchDni) {
+      docNumber = matchDni[1];
+      docLabel = 'DNI';
+    }
+  }
+
+  const fechaHora = activeCustomerOrder?.hora && !draftData
     ? `${activeCustomerOrder.fecha || 'Hoy'} - ${activeCustomerOrder.hora}`
     : new Date().toLocaleString('es-PE');
 
@@ -37,9 +85,17 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
   };
 
   const handleShareWhatsApp = () => {
-    let msg = `*${(negocio.nombre || 'LA CHUSPA TECH').toUpperCase()} - COMPROBANTE ELECTRÓNICO*\n`;
+    const titulo = isNotaInterna
+      ? 'NOTA DE PEDIDO'
+      : isFactura
+        ? 'FACTURA ELECTRÓNICA'
+        : 'BOLETA DE VENTA ELECTRÓNICA';
+    let msg = `*${(negocio.nombre || 'LA CHUSPA TECH').toUpperCase()} - ${titulo}*\n`;
     msg += `Serie: ${serie}\n`;
     msg += `Cliente: ${clienteNombre}\n`;
+    if (docNumber && !isNotaInterna) {
+      msg += `${docLabel}: ${docNumber}\n`;
+    }
     msg += `Total Pagado: S/ ${total.toFixed(2)}\n`;
     msg += `Forma de Pago: ${metodoPago}\n`;
     msg += `¡Gracias por su preferencia con ${negocio.nombre || 'La Chuspa Tech'}!`;
@@ -67,16 +123,22 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
           <p className="text-[10px] text-slate-600 font-bold uppercase">
             {negocio.slogan || 'PUBLICIDAD, TECNOLOGÍA & GAS'}
           </p>
-          <p className="text-[10px] text-slate-500">R.U.C. N° 20601894521</p>
+          {!isNotaInterna && <p className="text-[10px] text-slate-500">R.U.C. N° 20601894521</p>}
           <p className="text-[10px] text-slate-500">
             {negocio.direccion || 'Cusco - Perú'}
           </p>
           <p className="text-[10px] text-slate-500">Central / WhatsApp: {telefonos.whatsapp || '969773064'}</p>
 
           <div className="mt-2 py-1 bg-slate-100 rounded text-[11px] font-black tracking-wider text-purple-900">
-            *** {isFactura ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA ELECTRÓNICA'} ***
+            *** {isNotaInterna ? 'NOTA DE PEDIDO / ENTREGA' : isFactura ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA ELECTRÓNICA'} ***
           </div>
           <div className="text-[11px] font-bold mt-0.5 text-slate-700">{serie}</div>
+          {draftData?.validado && !isNotaInterna && (
+            <div className="mt-1 inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded-full">
+              <ShieldCheck className="w-3 h-3" />
+              <span>{isFactura ? 'VERIFICADO SUNAT' : 'VERIFICADO RENIEC'}</span>
+            </div>
+          )}
         </div>
 
         {/* Customer & Date */}
@@ -85,10 +147,24 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
             <span className="text-slate-500">FECHA:</span>
             <span className="font-bold">{fechaHora}</span>
           </div>
+          {!isNotaInterna && docNumber && (
+            <div className="flex justify-between">
+              <span className="text-slate-500">{docLabel}:</span>
+              <span className="font-bold">{docNumber}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-slate-500">CLIENTE:</span>
-            <span className="font-bold truncate max-w-[190px]">{clienteNombre}</span>
+            <span className="font-bold truncate max-w-[190px] text-right">{clienteNombre}</span>
           </div>
+          {(draftData?.direccion || activeCustomerOrder?.direccion) && (
+            <div className="flex justify-between">
+              <span className="text-slate-500">DIRECCIÓN:</span>
+              <span className="font-bold truncate max-w-[190px] text-right">
+                {draftData?.direccion || activeCustomerOrder?.direccion}
+              </span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-slate-500">PAGO:</span>
             <span className="font-bold">{metodoPago}</span>
@@ -102,7 +178,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
             <span>TOTAL</span>
           </div>
 
-          {activeCustomerOrder ? (
+          {activeCustomerOrder && !draftData ? (
             <div className="flex justify-between text-[11px] py-0.5">
               <span className="truncate pr-2">{activeCustomerOrder.tipoBalon}</span>
               <span className="font-bold">S/ {total.toFixed(2)}</span>
@@ -121,14 +197,18 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
 
         {/* Totals */}
         <div className="space-y-1 text-right text-[11px] border-b border-dashed border-slate-300 pb-2 mb-3">
-          <div className="flex justify-between">
-            <span className="text-slate-500">OP. GRAVADA:</span>
-            <span>S/ {subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-500">I.G.V. (18%):</span>
-            <span>S/ {igv.toFixed(2)}</span>
-          </div>
+          {!isNotaInterna && (
+            <>
+              <div className="flex justify-between">
+                <span className="text-slate-500">OP. GRAVADA:</span>
+                <span>S/ {subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">I.G.V. ({negocio.igvPorcentaje || 18}%):</span>
+                <span>S/ {igv.toFixed(2)}</span>
+              </div>
+            </>
+          )}
           <div className="flex justify-between text-xs font-black text-purple-900 border-t border-slate-300 pt-1">
             <span>TOTAL A PAGAR:</span>
             <span>S/ {total.toFixed(2)}</span>
@@ -137,8 +217,16 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose }) => 
 
         {/* Footer OSE */}
         <div className="text-center text-[9px] text-slate-400 leading-tight mb-4">
-          Autorizado mediante Resolución de Superintendencia SUNAT<br />
-          Representación impresa del Comprobante Electrónico<br />
+          {!isNotaInterna ? (
+            <>
+              Autorizado mediante Resolución de Superintendencia SUNAT<br />
+              Representación impresa del Comprobante Electrónico<br />
+            </>
+          ) : (
+            <>
+              Comprobante interno de entrega a domicilio<br />
+            </>
+          )}
           <strong>¡Gracias por su preferencia con {negocio.nombre || 'La Chuspa Tech'}!</strong>
         </div>
 

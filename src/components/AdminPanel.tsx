@@ -43,15 +43,18 @@ import {
   Sparkles,
   Cloud,
   RefreshCw,
-  Smartphone
+  Smartphone,
+  Palette,
+  ShieldCheck
 } from 'lucide-react';
 import L from 'leaflet';
-import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido, CotizacionCRM, ClienteFidelidad } from '../types/index';
+import { Repartidor, Producto, Accesorio, EmpresaB2B, ClienteVIP, Pedido, CotizacionCRM, ClienteFidelidad, NegocioIdentidad } from '../types/index';
 import { getPageUrl, getAssetUrl, formatWhatsAppNumber } from '../utils/assets';
 import { BrandBadge } from './BrandBadge';
 import { playChimeSound, playSuccessChime, playAndSpeak, speakVoice } from '../utils/audio';
 import { DeveloperAccordion } from './DeveloperAccordion';
 import { consultarDni, consultarRuc } from '../utils/apisPeru';
+import { BRAND_THEME_PRESETS, applyBrandTheme } from '../utils/theme';
 
 export const AdminPanel: React.FC = () => {
   const {
@@ -145,6 +148,11 @@ export const AdminPanel: React.FC = () => {
   const [identidadInstagram, setIdentidadInstagram] = useState(negocio.instagramUrl || '');
   const [identidadTiktok, setIdentidadTiktok] = useState(negocio.tiktokUrl || '');
   const [identidadGoogleReview, setIdentidadGoogleReview] = useState(negocio.googleReviewUrl || '');
+  const [identidadHabilitarBoletaDni, setIdentidadHabilitarBoletaDni] = useState<boolean>(negocio.habilitarBoletaDni !== false);
+  const [identidadHabilitarFacturaRuc, setIdentidadHabilitarFacturaRuc] = useState<boolean>(negocio.habilitarFacturaRuc !== false);
+  const [identidadColorTema, setIdentidadColorTema] = useState<NonNullable<NegocioIdentidad['colorTema']>>(negocio.colorTema || 'morado');
+  const [identidadColorPrimario, setIdentidadColorPrimario] = useState<string>(negocio.colorPrimario || '#6b21a8');
+  const [identidadColorSecundario, setIdentidadColorSecundario] = useState<string>(negocio.colorSecundario || '#f59e0b');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
 
   // Map Fullscreen
@@ -187,6 +195,7 @@ export const AdminPanel: React.FC = () => {
   const [emitirDireccionFiscal, setEmitirDireccionFiscal] = useState('Av. El Sol 450, Wanchaq, Cusco');
   const [emitirEstadoSunat, setEmitirEstadoSunat] = useState('ACTIVO - HABIDO');
   const [emitirConsultando, setEmitirConsultando] = useState(false);
+  const [emitirDocVerificado, setEmitirDocVerificado] = useState<string | null>(null);
   const [emitirRepartidor, setEmitirRepartidor] = useState('');
   const [emitirFormaPago, setEmitirFormaPago] = useState('Contado / Efectivo');
   const [emitirItems, setEmitirItems] = useState<{ descripcion: string; cantidad: number; precioUnitario: number }[]>([
@@ -233,6 +242,11 @@ export const AdminPanel: React.FC = () => {
     setIdentidadInstagram(negocio.instagramUrl || '');
     setIdentidadTiktok(negocio.tiktokUrl || '');
     setIdentidadGoogleReview(negocio.googleReviewUrl || '');
+    setIdentidadHabilitarBoletaDni(negocio.habilitarBoletaDni !== false);
+    setIdentidadHabilitarFacturaRuc(negocio.habilitarFacturaRuc !== false);
+    setIdentidadColorTema(negocio.colorTema || 'morado');
+    setIdentidadColorPrimario(negocio.colorPrimario || '#6b21a8');
+    setIdentidadColorSecundario(negocio.colorSecundario || '#f59e0b');
   }, [negocio]);
 
   // Detect incoming orders in real time to show central alert modal
@@ -386,10 +400,15 @@ export const AdminPanel: React.FC = () => {
       facebookUrl: identidadFacebook.trim(),
       instagramUrl: identidadInstagram.trim(),
       tiktokUrl: identidadTiktok.trim(),
-      googleReviewUrl: identidadGoogleReview.trim()
+      googleReviewUrl: identidadGoogleReview.trim(),
+      habilitarBoletaDni: identidadHabilitarBoletaDni,
+      habilitarFacturaRuc: identidadHabilitarFacturaRuc,
+      colorTema: identidadColorTema,
+      colorPrimario: identidadColorPrimario,
+      colorSecundario: identidadColorSecundario
     });
     setSaveSuccessMsg(true);
-    playAndSpeak('Configuración e identidad del negocio guardadas exitosamente.', true);
+    playAndSpeak('Configuración, colores e identidad del negocio guardadas exitosamente.', true);
     
     // Auto-sincronizar con GitHub si el token está presente
     const token = localStorage.getItem('leogas_github_token');
@@ -436,6 +455,7 @@ export const AdminPanel: React.FC = () => {
           setEmitirRazonSocial(foundB2B.razonSocial);
           setEmitirDireccionFiscal(foundB2B.direccion || 'Av. El Sol 450, Cusco');
           setEmitirEstadoSunat('ACTIVO - HABIDO (Padrón Local)');
+          setEmitirDocVerificado(`RUC:${numDoc}`);
           setEmitirConsultando(false);
           return;
         }
@@ -447,10 +467,12 @@ export const AdminPanel: React.FC = () => {
           if (res.direccion) setEmitirDireccionFiscal(res.direccion);
           const estado = `${res.estado || 'ACTIVO'} - ${res.condicion || 'HABIDO'}`;
           setEmitirEstadoSunat(estado);
+          setEmitirDocVerificado(`RUC:${numDoc}`);
           playSuccessChime();
           alert(`✔ RUC verificado en SUNAT en tiempo real:\n${res.razonSocial}\nEstado: ${estado}\nFuente: ${res.fuente}`);
         } else {
-          alert(res.error || 'RUC no encontrado en SUNAT. Puedes ingresar la Razón Social manualmente.');
+          setEmitirDocVerificado(null);
+          alert(res.error || 'RUC no encontrado en SUNAT. No se puede emitir Factura sin un RUC válido.');
         }
       } else {
         // DNI - RENIEC
@@ -466,6 +488,7 @@ export const AdminPanel: React.FC = () => {
           setEmitirRazonSocial(foundVip.nombre);
           setEmitirDireccionFiscal(foundVip.direccion || 'Cusco, Perú');
           setEmitirEstadoSunat('DNI VÁLIDO (Padrón Local)');
+          setEmitirDocVerificado(`DNI:${numDoc}`);
           setEmitirConsultando(false);
           return;
         }
@@ -475,24 +498,100 @@ export const AdminPanel: React.FC = () => {
         if (res.success && res.nombreCompleto) {
           setEmitirRazonSocial(res.nombreCompleto);
           setEmitirEstadoSunat('DNI VÁLIDO (RENIEC EN VIVO)');
+          setEmitirDocVerificado(`DNI:${numDoc}`);
           playSuccessChime();
           alert(`✔ DNI verificado en RENIEC en tiempo real:\n${res.nombreCompleto}\nFuente: ${res.fuente}`);
         } else {
-          alert(res.error || 'DNI no encontrado en RENIEC. Puedes ingresar el nombre manualmente.');
+          setEmitirDocVerificado(null);
+          alert(res.error || 'DNI no encontrado en RENIEC. No se puede emitir Boleta sin un DNI válido.');
         }
       }
     } catch (err: any) {
       console.warn('Fallo consulta API:', err);
-      alert('No se pudo conectar a la base de datos en línea. Puedes ingresar los datos en las casillas correspondientes.');
+      setEmitirDocVerificado(null);
+      alert('No se pudo conectar a RENIEC/SUNAT en línea. Verifica tu conexión antes de emitir el comprobante.');
     } finally {
       setEmitirConsultando(false);
     }
   };
 
-  // Emit Electronic Voucher connecting to SUNAT
-  const handleEmitirComprobanteFinal = () => {
-    if (!emitirRazonSocial.trim()) {
-      alert('Primero ingresa o consulta el documento para obtener la Razón Social o Nombre del cliente.');
+  // Emit Electronic Voucher connecting to SUNAT (Strict RENIEC/SUNAT verification enforced)
+  const handleEmitirComprobanteFinal = async () => {
+    const cleanDoc = emitirNumDoc.trim().replace(/\D/g, '');
+    const expectedKey = `${emitirTipo === 'FACTURA' ? 'RUC' : 'DNI'}:${cleanDoc}`;
+    let finalNombre = emitirRazonSocial.trim();
+    let finalDireccion = emitirDireccionFiscal.trim();
+    let finalEstado = emitirEstadoSunat;
+
+    if (emitirTipo === 'FACTURA' && cleanDoc.length !== 11) {
+      alert('⚠️ Para emitir una Factura Electrónica debes ingresar un RUC válido de 11 dígitos.');
+      return;
+    }
+    if (emitirTipo === 'BOLETA' && cleanDoc.length !== 8) {
+      alert('⚠️ Para emitir una Boleta de Venta debes ingresar un DNI válido de 8 dígitos.');
+      return;
+    }
+
+    // Strict check: verify document with RENIEC / SUNAT before issuing receipt so arbitrary invented names cannot be printed
+    if (emitirDocVerificado !== expectedKey) {
+      setEmitirConsultando(true);
+      try {
+        if (emitirTipo === 'FACTURA') {
+          const foundB2B = empresasB2B.find((e) => e.ruc === cleanDoc);
+          if (foundB2B) {
+            finalNombre = foundB2B.razonSocial;
+            finalDireccion = foundB2B.direccion || finalDireccion;
+            finalEstado = 'ACTIVO - HABIDO (Padrón Local)';
+            setEmitirRazonSocial(finalNombre);
+            setEmitirDireccionFiscal(finalDireccion);
+            setEmitirEstadoSunat(finalEstado);
+            setEmitirDocVerificado(expectedKey);
+          } else {
+            const res = await consultarRuc(cleanDoc);
+            if (!res.success || !res.razonSocial) {
+              alert(`❌ Validación SUNAT requerida:\n${res.error || 'No se pudo validar el RUC en SUNAT. No se permite emitir Factura con datos sin verificar.'}`);
+              setEmitirConsultando(false);
+              return;
+            }
+            finalNombre = res.razonSocial;
+            if (res.direccion) finalDireccion = res.direccion;
+            finalEstado = `${res.estado || 'ACTIVO'} - ${res.condicion || 'HABIDO'}`;
+            setEmitirRazonSocial(finalNombre);
+            setEmitirDireccionFiscal(finalDireccion);
+            setEmitirEstadoSunat(finalEstado);
+            setEmitirDocVerificado(expectedKey);
+          }
+        } else {
+          const foundVip = clientesVIP.find((c) => c.documento === cleanDoc);
+          if (foundVip) {
+            finalNombre = foundVip.nombre;
+            finalDireccion = foundVip.direccion || finalDireccion;
+            finalEstado = 'DNI VÁLIDO (Padrón Local)';
+            setEmitirRazonSocial(finalNombre);
+            setEmitirDireccionFiscal(finalDireccion);
+            setEmitirEstadoSunat(finalEstado);
+            setEmitirDocVerificado(expectedKey);
+          } else {
+            const res = await consultarDni(cleanDoc);
+            if (!res.success || !res.nombreCompleto) {
+              alert(`❌ Validación RENIEC requerida:\n${res.error || 'No se pudo validar el DNI en RENIEC. No se permite emitir Boleta con nombres sin verificar.'}`);
+              setEmitirConsultando(false);
+              return;
+            }
+            finalNombre = res.nombreCompleto;
+            finalEstado = 'DNI VÁLIDO (RENIEC EN VIVO)';
+            setEmitirRazonSocial(finalNombre);
+            setEmitirEstadoSunat(finalEstado);
+            setEmitirDocVerificado(expectedKey);
+          }
+        }
+      } finally {
+        setEmitirConsultando(false);
+      }
+    }
+
+    if (!finalNombre) {
+      alert('No se obtuvo la Razón Social o Nombre oficial del documento consultado.');
       return;
     }
 
@@ -511,15 +610,15 @@ export const AdminPanel: React.FC = () => {
 
     const nuevoVenta = {
       fecha: `Hoy, ${hora}`,
-      cliente: emitirRazonSocial,
+      cliente: finalNombre,
       productos: emitirItems.map((it) => `${it.cantidad}x ${it.descripcion}`).join(', '),
       total: currentTotal,
       pago: emitirFormaPago,
       repartidorNombre: emitirRepartidor || `Administración ${negocio.nombre || 'La Chuspa Tech'}`,
       comprobante: serieCorrelativo,
-      documento: emitirNumDoc,
+      documento: cleanDoc,
       tipoDoc: emitirTipo === 'FACTURA' ? ('RUC' as const) : ('DNI' as const),
-      direccion: emitirDireccionFiscal,
+      direccion: finalDireccion,
       subtotal: parseFloat(subtotalCalc.toFixed(2)),
       igv: parseFloat(igvCalc.toFixed(2)),
       sunatEstado: 'ACEPTADO' as const
@@ -532,10 +631,10 @@ export const AdminPanel: React.FC = () => {
       tipo: emitirTipo === 'FACTURA' ? 'Factura Electrónica' : 'Boleta de Venta Electrónica',
       fecha,
       hora,
-      cliente: emitirRazonSocial,
-      documento: emitirNumDoc,
+      cliente: finalNombre,
+      documento: cleanDoc,
       tipoDoc: emitirTipo === 'FACTURA' ? 'RUC' : 'DNI',
-      direccion: emitirDireccionFiscal,
+      direccion: finalDireccion,
       repartidor: emitirRepartidor || `Administración ${negocio.nombre || 'La Chuspa Tech'}`,
       items: emitirItems.map((it) => ({
         cantidad: it.cantidad,
@@ -545,12 +644,13 @@ export const AdminPanel: React.FC = () => {
       total: currentTotal,
       metodoPago: emitirFormaPago,
       sunatEstado: 'ACEPTADO',
-      estadoContribuyente: emitirEstadoSunat,
+      estadoContribuyente: finalEstado,
       hashCdr: `SHA256:${Math.random().toString(36).substring(2, 15).toUpperCase()}`
     });
 
     setShowEmitirSunatModal(false);
-    alert(`✔ Comprobante ${serieCorrelativo} emitido y validado exitosamente ante SUNAT.`);
+    playSuccessChime();
+    alert(`✔ Comprobante ${serieCorrelativo} emitido y validado ante RENIEC/SUNAT para ${finalNombre}.`);
   };
 
   // Handle Login
@@ -1614,6 +1714,196 @@ export const AdminPanel: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Fourth Section: Comprobantes en Index del Cliente (Boleta DNI / Factura RUC) */}
+                <div className="pt-4 border-t border-slate-100">
+                  <h4 className="text-sm font-black text-slate-900 flex items-center gap-2 mb-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Comprobantes Tributarios en el Index del Cliente (Pedidos Domésticos)</span>
+                  </h4>
+                  <p className="text-xs text-slate-500 mb-4">
+                    Si alquilas el sistema a un negocio que entrega balones domésticos sin emitir boletas ni facturas electrónicas, puedes desactivar Boleta (DNI) o Factura (RUC) en el carrito del cliente.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${identidadHabilitarBoletaDni ? 'bg-emerald-50/70 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
+                      <div>
+                        <strong className="text-xs font-black text-slate-900 block">📄 Boleta con DNI (RENIEC)</strong>
+                        <span className="text-[11px] text-slate-600">
+                          {identidadHabilitarBoletaDni
+                            ? 'Habilitado: pide y valida DNI real en RENIEC.'
+                            : 'Deshabilitado: oculto en el carrito del cliente.'}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIdentidadHabilitarBoletaDni((v) => !v)}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-black cursor-pointer transition shrink-0 ${
+                          identidadHabilitarBoletaDni
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            : 'bg-slate-300 hover:bg-slate-400 text-slate-800'
+                        }`}
+                      >
+                        {identidadHabilitarBoletaDni ? '✔ Activo' : '✕ Inactivo'}
+                      </button>
+                    </div>
+
+                    <div className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${identidadHabilitarFacturaRuc ? 'bg-emerald-50/70 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
+                      <div>
+                        <strong className="text-xs font-black text-slate-900 block">🏢 Factura con RUC (SUNAT)</strong>
+                        <span className="text-[11px] text-slate-600">
+                          {identidadHabilitarFacturaRuc
+                            ? 'Habilitado: pide y valida RUC real en SUNAT.'
+                            : 'Deshabilitado: oculto en el carrito del cliente.'}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIdentidadHabilitarFacturaRuc((v) => !v)}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-black cursor-pointer transition shrink-0 ${
+                          identidadHabilitarFacturaRuc
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            : 'bg-slate-300 hover:bg-slate-400 text-slate-800'
+                        }`}
+                      >
+                        {identidadHabilitarFacturaRuc ? '✔ Activo' : '✕ Inactivo'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fifth Section: Paleta de Colores del Negocio (Multi-marca para alquiler) */}
+                <div className="pt-4 border-t border-slate-100 space-y-4">
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 flex items-center gap-2 mb-1">
+                      <Palette className="w-4 h-4 text-purple-700" />
+                      <span>Paleta de Colores Corporativos del Negocio (Alquiler Multi-Empresa)</span>
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Elige una paleta predefinida o escoge los colores exactos del volante/logo de tu cliente. Al guardar se sincroniza automáticamente en todos los celulares.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                    {BRAND_THEME_PRESETS.map((preset) => {
+                      const active = identidadColorTema === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => {
+                            setIdentidadColorTema(preset.id);
+                            setIdentidadColorPrimario(preset.primary);
+                            setIdentidadColorSecundario(preset.secondary);
+                            applyBrandTheme({
+                              colorTema: preset.id,
+                              colorPrimario: preset.primary,
+                              colorSecundario: preset.secondary
+                            });
+                          }}
+                          className={`p-2.5 rounded-2xl border-2 text-left transition cursor-pointer flex items-center gap-2.5 ${
+                            active
+                              ? 'border-purple-700 bg-purple-50 shadow-xs'
+                              : 'border-slate-200 bg-white hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex flex-col gap-0.5 shrink-0">
+                            <span
+                              className="w-6 h-4 rounded-t-md border border-black/10 block"
+                              style={{ backgroundColor: preset.primary }}
+                            />
+                            <span
+                              className="w-6 h-2.5 rounded-b-md border border-black/10 block"
+                              style={{ backgroundColor: preset.secondary }}
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[11px] font-black text-slate-900 truncate">{preset.nombre}</div>
+                            <div className="text-[10px] text-slate-500 truncate">{preset.descripcion}</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIdentidadColorTema('personalizado');
+                        applyBrandTheme({
+                          colorTema: 'personalizado',
+                          colorPrimario: identidadColorPrimario,
+                          colorSecundario: identidadColorSecundario
+                        });
+                      }}
+                      className={`p-2.5 rounded-2xl border-2 text-left transition cursor-pointer flex items-center gap-2.5 ${
+                        identidadColorTema === 'personalizado'
+                          ? 'border-purple-700 bg-purple-50 shadow-xs'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex flex-col gap-0.5 shrink-0">
+                        <span
+                          className="w-6 h-4 rounded-t-md border border-black/10 block"
+                          style={{ backgroundColor: identidadColorPrimario }}
+                        />
+                        <span
+                          className="w-6 h-2.5 rounded-b-md border border-black/10 block"
+                          style={{ backgroundColor: identidadColorSecundario }}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-black text-slate-900">🎨 Personalizado</div>
+                        <div className="text-[10px] text-slate-500">Elige color exacto</div>
+                      </div>
+                    </button>
+                  </div>
+
+                  {identidadColorTema === 'personalizado' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <label className="text-[11px] font-black text-slate-800 block">Color Principal (Cabeceras y Botones):</label>
+                          <span className="text-[10px] font-mono text-slate-500">{identidadColorPrimario}</span>
+                        </div>
+                        <input
+                          type="color"
+                          value={identidadColorPrimario}
+                          onChange={(e) => {
+                            const hex = e.target.value;
+                            setIdentidadColorPrimario(hex);
+                            applyBrandTheme({
+                              colorTema: 'personalizado',
+                              colorPrimario: hex,
+                              colorSecundario: identidadColorSecundario
+                            });
+                          }}
+                          className="w-12 h-10 rounded-xl border border-slate-300 cursor-pointer bg-white p-0.5"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <label className="text-[11px] font-black text-slate-800 block">Color Acento / Secundario (Badges):</label>
+                          <span className="text-[10px] font-mono text-slate-500">{identidadColorSecundario}</span>
+                        </div>
+                        <input
+                          type="color"
+                          value={identidadColorSecundario}
+                          onChange={(e) => {
+                            const hex = e.target.value;
+                            setIdentidadColorSecundario(hex);
+                            applyBrandTheme({
+                              colorTema: 'personalizado',
+                              colorPrimario: identidadColorPrimario,
+                              colorSecundario: hex
+                            });
+                          }}
+                          className="w-12 h-10 rounded-xl border border-slate-300 cursor-pointer bg-white p-0.5"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Action Buttons */}
                 <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                   <button
@@ -1663,6 +1953,7 @@ export const AdminPanel: React.FC = () => {
                   type="button"
                   onClick={() => {
                     const pending = pedidos.find(p => p.estado !== 'completado');
+                    setEmitirDocVerificado(null);
                     if (pending) {
                       setEmitirItems([{
                         descripcion: pending.tipoBalon,
@@ -1686,6 +1977,51 @@ export const AdminPanel: React.FC = () => {
                   <Plus className="w-4 h-4" />
                   <span>Emitir Factura / Boleta SUNAT</span>
                 </button>
+              </div>
+
+              {/* Instant Customer Storefront Receipt Switches */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-purple-700" />
+                    <span>Visibilidad de Boleta (DNI) y Factura (RUC) en Portal Cliente</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Controla al instante si tus clientes domésticos ven o no la opción de Boleta/Factura al hacer su pedido por WhatsApp o web.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !(negocio.habilitarBoletaDni !== false);
+                      updateNegocio({ habilitarBoletaDni: next });
+                      playSuccessChime();
+                    }}
+                    className={`px-3 py-2 rounded-xl text-xs font-black border cursor-pointer transition flex items-center gap-1.5 ${
+                      negocio.habilitarBoletaDni !== false
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
+                        : 'bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    <span>{negocio.habilitarBoletaDni !== false ? '✅ Boleta DNI: HABILITADA' : '⛔ Boleta DNI: DESACTIVADA'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !(negocio.habilitarFacturaRuc !== false);
+                      updateNegocio({ habilitarFacturaRuc: next });
+                      playSuccessChime();
+                    }}
+                    className={`px-3 py-2 rounded-xl text-xs font-black border cursor-pointer transition flex items-center gap-1.5 ${
+                      negocio.habilitarFacturaRuc !== false
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
+                        : 'bg-slate-100 border-slate-300 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    <span>{negocio.habilitarFacturaRuc !== false ? '✅ Factura RUC: HABILITADA' : '⛔ Factura RUC: DESACTIVADA'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Filters Bar: Calendar, Driver, Type, Search */}
@@ -4722,7 +5058,8 @@ export const AdminPanel: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setEmitirTipo('FACTURA');
-                    if (emitirNumDoc.length === 8) setEmitirNumDoc('20601234567');
+                    setEmitirDocVerificado(null);
+                    if (emitirNumDoc.length === 8) setEmitirNumDoc('');
                   }}
                   className={`py-2 px-3 rounded-xl font-black text-xs transition ${
                     emitirTipo === 'FACTURA'
@@ -4736,7 +5073,8 @@ export const AdminPanel: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setEmitirTipo('BOLETA');
-                    if (emitirNumDoc.length === 11) setEmitirNumDoc('45892147');
+                    setEmitirDocVerificado(null);
+                    if (emitirNumDoc.length === 11) setEmitirNumDoc('');
                   }}
                   className={`py-2 px-3 rounded-xl font-black text-xs transition ${
                     emitirTipo === 'BOLETA'
@@ -4750,12 +5088,18 @@ export const AdminPanel: React.FC = () => {
 
               {/* RUC / DNI lookup row */}
               <div className="bg-purple-50/70 border border-purple-200 rounded-2xl p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
                   <label className="text-[10px] font-black uppercase text-purple-900 flex items-center gap-1.5">
                     <span>{emitirTipo === 'FACTURA' ? 'Número de RUC (11 dígitos):' : 'Número de DNI (8 dígitos):'}</span>
                   </label>
-                  <span className="text-[10px] font-mono text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full font-bold">
-                    {emitirTipo === 'FACTURA' ? 'SUNAT Padrón' : 'RENIEC Identidad'}
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                    emitirDocVerificado === `${emitirTipo === 'FACTURA' ? 'RUC' : 'DNI'}:${emitirNumDoc.trim()}`
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}>
+                    {emitirDocVerificado === `${emitirTipo === 'FACTURA' ? 'RUC' : 'DNI'}:${emitirNumDoc.trim()}`
+                      ? `✔ Validado ${emitirTipo === 'FACTURA' ? 'SUNAT' : 'RENIEC'}`
+                      : `Obligatorio validar en ${emitirTipo === 'FACTURA' ? 'SUNAT' : 'RENIEC'}`}
                   </span>
                 </div>
 
@@ -4764,7 +5108,10 @@ export const AdminPanel: React.FC = () => {
                     type="text"
                     maxLength={emitirTipo === 'FACTURA' ? 11 : 8}
                     value={emitirNumDoc}
-                    onChange={(e) => setEmitirNumDoc(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => {
+                      setEmitirNumDoc(e.target.value.replace(/\D/g, ''));
+                      setEmitirDocVerificado(null);
+                    }}
                     placeholder={emitirTipo === 'FACTURA' ? 'Ej: 20608933211' : 'Ej: 45892147'}
                     className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono font-black text-slate-800 focus:outline-purple-600"
                   />
@@ -4786,12 +5133,15 @@ export const AdminPanel: React.FC = () => {
                 {/* Taxpayer info */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
                   <div>
-                    <label className="text-[9px] font-bold text-slate-500 uppercase block">Razón Social / Nombre:</label>
+                    <label className="text-[9px] font-bold text-slate-500 uppercase block">
+                      {emitirTipo === 'FACTURA' ? 'Razón Social Oficial (SUNAT):' : 'Nombre Completo Oficial (RENIEC):'}
+                    </label>
                     <input
                       type="text"
                       value={emitirRazonSocial}
-                      onChange={(e) => setEmitirRazonSocial(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg p-1.5 font-bold text-slate-800"
+                      readOnly
+                      placeholder={emitirTipo === 'FACTURA' ? 'Pulsa Consultar RUC...' : 'Pulsa Consultar DNI...'}
+                      className="w-full bg-slate-100 border border-slate-200 rounded-lg p-1.5 font-bold text-slate-800 cursor-not-allowed"
                     />
                   </div>
                   <div>

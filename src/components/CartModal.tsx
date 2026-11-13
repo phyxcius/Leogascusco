@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X,
@@ -11,16 +11,19 @@ import {
   Banknote,
   Smartphone,
   CreditCard,
-  Search
+  Search,
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 import { formatWhatsAppNumber } from '../utils/assets';
-import { playSuccessChime } from '../utils/audio';
+import { playSuccessChime, playChimeSound } from '../utils/audio';
 import { consultarDni, consultarRuc } from '../utils/apisPeru';
+import { DraftReceiptData } from './TicketModal';
 
 interface CartModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onOpenTicket: () => void;
+  onOpenTicket: (draft?: DraftReceiptData) => void;
 }
 
 export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTicket }) => {
@@ -34,10 +37,16 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     negocio
   } = useApp();
 
+  const allowBoleta = negocio.habilitarBoletaDni !== false;
+  const allowFactura = negocio.habilitarFacturaRuc !== false;
+  const comprobantesHabilitados = allowBoleta || allowFactura;
+
   const [metodoPago, setMetodoPago] = useState<string>('Efectivo');
   const [montoEfectivo, setMontoEfectivo] = useState<string>('');
   const [horarioEntrega, setHorarioEntrega] = useState<'Inmediata' | 'Programada'>('Inmediata');
-  const [tipoComprobante, setTipoComprobante] = useState<'Boleta' | 'Factura'>('Boleta');
+  const [tipoComprobante, setTipoComprobante] = useState<'Boleta' | 'Factura'>(
+    allowBoleta ? 'Boleta' : 'Factura'
+  );
 
   const [nombreCliente, setNombreCliente] = useState<string>('');
   const [direccion, setDireccion] = useState<string>('');
@@ -45,10 +54,29 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
   const [rucFactura, setRucFactura] = useState<string>('');
   const [razonSocial, setRazonSocial] = useState<string>('');
 
+  // Official RENIEC / SUNAT verified states
+  const [dniVerified, setDniVerified] = useState<{ dni: string; nombre: string } | null>(null);
+  const [rucVerified, setRucVerified] = useState<{
+    ruc: string;
+    razonSocial: string;
+    estado?: string;
+    condicion?: string;
+  } | null>(null);
+  const [docFeedback, setDocFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
+
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isSearchingDoc, setIsSearchingDoc] = useState<boolean>(false);
   const [showResendPrompt, setShowResendPrompt] = useState<boolean>(false);
   const [lastSentMinutes, setLastSentMinutes] = useState<number>(0);
+
+  // Sync tipoComprobante if admin toggles Boleta/Factura availability
+  useEffect(() => {
+    if (allowBoleta && !allowFactura) {
+      setTipoComprobante('Boleta');
+    } else if (!allowBoleta && allowFactura) {
+      setTipoComprobante('Factura');
+    }
+  }, [allowBoleta, allowFactura]);
 
   if (!isOpen) return null;
 
@@ -83,60 +111,195 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
     );
   };
 
-  const handleSearchDNI = async () => {
-    const dni = dniBoleta.trim();
+  const handleSearchDNI = async (): Promise<{ dni: string; nombre: string } | null> => {
+    const dni = dniBoleta.trim().replace(/\D/g, '');
     if (dni.length !== 8) {
-      alert('Ingresa un DNI válido de 8 dígitos.');
-      return;
+      setDocFeedback({ ok: false, msg: 'Ingresa un DNI válido de 8 dígitos numéricos.' });
+      playChimeSound();
+      return null;
     }
     setIsSearchingDoc(true);
+    setDocFeedback(null);
     try {
       const res = await consultarDni(dni);
       if (res.success && res.nombreCompleto) {
+        const verifiedObj = { dni, nombre: res.nombreCompleto };
+        setDniVerified(verifiedObj);
         setNombreCliente(res.nombreCompleto);
+        setDocFeedback({
+          ok: true,
+          msg: `✔ Verificado en RENIEC: ${res.nombreCompleto}`
+        });
         playSuccessChime();
+        return verifiedObj;
       } else {
-        alert(res.error || 'DNI no encontrado en el padrón de RENIEC. Puedes ingresar el nombre manualmente.');
+        setDniVerified(null);
+        setDocFeedback({
+          ok: false,
+          msg: res.error || 'DNI no encontrado en el padrón de RENIEC.'
+        });
+        playChimeSound();
+        return null;
       }
     } catch {
-      alert('No se pudo verificar el DNI en este momento. Puedes ingresar el nombre del cliente directamente.');
+      setDniVerified(null);
+      setDocFeedback({
+        ok: false,
+        msg: 'No se pudo conectar con RENIEC para validar el DNI.'
+      });
+      return null;
     } finally {
       setIsSearchingDoc(false);
     }
   };
 
-  const handleSearchRUC = async () => {
-    const ruc = rucFactura.trim();
+  const handleSearchRUC = async (): Promise<{ ruc: string; razonSocial: string; estado?: string; condicion?: string } | null> => {
+    const ruc = rucFactura.trim().replace(/\D/g, '');
     if (ruc.length !== 11) {
-      alert('Ingresa un RUC válido de 11 dígitos.');
-      return;
+      setDocFeedback({ ok: false, msg: 'Ingresa un RUC válido de 11 dígitos numéricos.' });
+      playChimeSound();
+      return null;
     }
     setIsSearchingDoc(true);
+    setDocFeedback(null);
     try {
       const res = await consultarRuc(ruc);
       if (res.success && res.razonSocial) {
+        const verifiedObj = {
+          ruc,
+          razonSocial: res.razonSocial,
+          estado: res.estado,
+          condicion: res.condicion
+        };
+        setRucVerified(verifiedObj);
         setRazonSocial(res.razonSocial);
         setNombreCliente(res.razonSocial);
         if (res.direccion && !direccion) {
           setDireccion(res.direccion);
         }
+        setDocFeedback({
+          ok: true,
+          msg: `✔ RUC Verificado SUNAT (${res.estado || 'ACTIVO'} • ${res.condicion || 'HABIDO'})`
+        });
         playSuccessChime();
+        return verifiedObj;
       } else {
-        alert(res.error || 'RUC no encontrado en el padrón de SUNAT. Puedes ingresar la Razón Social en el casillero.');
+        setRucVerified(null);
+        setDocFeedback({
+          ok: false,
+          msg: res.error || 'RUC no encontrado en el padrón de SUNAT.'
+        });
+        playChimeSound();
+        return null;
       }
     } catch {
-      alert('No se pudo verificar el RUC en este momento. Puedes ingresar la Razón Social de la empresa directamente.');
+      setRucVerified(null);
+      setDocFeedback({
+        ok: false,
+        msg: 'No se pudo conectar con SUNAT para validar el RUC.'
+      });
+      return null;
     } finally {
       setIsSearchingDoc(false);
     }
   };
 
+  // Validate RENIEC / SUNAT strictly before opening or printing Boleta / Factura
+  const handleOpenVerifiedTicket = async () => {
+    if (items.length === 0) {
+      alert('Tu carrito está vacío. Agrega al menos un balón de gas para ver el comprobante.');
+      return;
+    }
+
+    if (!comprobantesHabilitados) {
+      onOpenTicket({
+        tipo: 'Nota',
+        cliente: nombreCliente.trim() || 'Cliente Doméstico',
+        direccion: direccion.trim() || 'Cusco',
+        metodoPago,
+        validado: false
+      });
+      return;
+    }
+
+    if (tipoComprobante === 'Factura') {
+      const cleanRuc = rucFactura.trim().replace(/\D/g, '');
+      if (cleanRuc.length !== 11) {
+        setDocFeedback({
+          ok: false,
+          msg: 'Para imprimir Factura Electrónica debes ingresar un RUC de 11 dígitos y validarlo en SUNAT.'
+        });
+        alert('⚠️ Para emitir o imprimir Factura Electrónica, ingresa un RUC válido de 11 dígitos y valídalo con SUNAT.');
+        return;
+      }
+
+      let verified = rucVerified && rucVerified.ruc === cleanRuc ? rucVerified : null;
+      if (!verified) {
+        verified = await handleSearchRUC();
+      }
+      if (!verified) {
+        alert('⚠️ No se puede imprimir Factura sin validar el RUC en el padrón oficial de SUNAT.');
+        return;
+      }
+
+      onOpenTicket({
+        tipo: 'Factura',
+        documento: verified.ruc,
+        tipoDoc: 'RUC',
+        cliente: verified.razonSocial,
+        direccion: direccion.trim() || 'Cusco',
+        metodoPago,
+        validado: true,
+        estadoContribuyente: `${verified.estado || 'ACTIVO'} - ${verified.condicion || 'HABIDO'}`
+      });
+      return;
+    }
+
+    // Boleta Electrónica requires DNI verified in RENIEC
+    const cleanDni = dniBoleta.trim().replace(/\D/g, '');
+    if (cleanDni.length !== 8) {
+      setDocFeedback({
+        ok: false,
+        msg: 'Para imprimir Boleta Electrónica debes ingresar un DNI de 8 dígitos y validarlo en RENIEC.'
+      });
+      alert('⚠️ Para emitir o imprimir Boleta Electrónica, ingresa un DNI válido de 8 dígitos y valídalo con RENIEC.');
+      return;
+    }
+
+    let verified = dniVerified && dniVerified.dni === cleanDni ? dniVerified : null;
+    if (!verified) {
+      verified = await handleSearchDNI();
+    }
+    if (!verified) {
+      alert('⚠️ No se puede imprimir Boleta sin verificar el DNI en RENIEC (no se permiten nombres ficticios).');
+      return;
+    }
+
+    onOpenTicket({
+      tipo: 'Boleta',
+      documento: verified.dni,
+      tipoDoc: 'DNI',
+      cliente: verified.nombre,
+      direccion: direccion.trim() || 'Cusco',
+      metodoPago,
+      validado: true,
+      estadoContribuyente: 'DNI VÁLIDO RENIEC'
+    });
+  };
+
   const executeOrderSubmission = () => {
-    const clienteName = nombreCliente.trim() || 'Particular';
+    const clienteName =
+      comprobantesHabilitados && tipoComprobante === 'Factura' && rucVerified
+        ? rucVerified.razonSocial
+        : comprobantesHabilitados && tipoComprobante === 'Boleta' && dniVerified
+          ? dniVerified.nombre
+          : nombreCliente.trim() || 'Particular';
+
     const detalleProductos = items.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
-    const comprobanteDetalle =
-      tipoComprobante === 'Factura'
-        ? `Factura (RUC: ${rucFactura} - ${razonSocial})`
+    const comprobanteDetalle = !comprobantesHabilitados
+      ? `Nota de Pedido (${clienteName})`
+      : tipoComprobante === 'Factura'
+        ? `Factura (RUC: ${rucFactura} - ${razonSocial || clienteName})`
         : `Boleta (DNI: ${dniBoleta || 'Sin DNI'} - ${clienteName})`;
 
     const gpsUrl = gpsCoords
@@ -184,7 +347,9 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
       msg += `*💵 Paga con:* S/ ${pagaConNum.toFixed(2)} (Vuelto: S/ ${vueltoCalculado.toFixed(2)})\n`;
     }
     msg += `*⏰ Horario:* ${horarioEntrega}\n`;
-    msg += `*🧾 Comprobante:* ${comprobanteDetalle}\n`;
+    if (comprobantesHabilitados) {
+      msg += `*🧾 Comprobante:* ${comprobanteDetalle}\n`;
+    }
     msg += `*📍 Dirección / GPS:* ${gpsUrl}\n\n`;
     msg += `_Pedido registrado en el sistema ${negocio.nombre || 'La Chuspa Tech'}._`;
 
@@ -470,95 +635,165 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
             </div>
           </div>
 
-          {/* Invoice / Comprobante */}
-          <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2.5">
-            <div className="flex justify-between items-center">
-              <span className="font-extrabold uppercase text-slate-500 text-[10px]">
-                Comprobante de Pago
-              </span>
-              <div className="inline-flex bg-slate-200 p-0.5 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setTipoComprobante('Boleta')}
-                  className={`px-3 py-1 text-[11px] font-bold rounded-md transition cursor-pointer ${
-                    tipoComprobante === 'Boleta' ? 'bg-purple-800 text-white' : 'text-slate-600'
+          {/* Invoice / Comprobante OR Simple Domestic Client Box */}
+          {comprobantesHabilitados ? (
+            <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2.5">
+              <div className="flex justify-between items-center">
+                <span className="font-extrabold uppercase text-slate-500 text-[10px]">
+                  Comprobante de Pago (Validación Oficial)
+                </span>
+                <div className="inline-flex bg-slate-200 p-0.5 rounded-lg">
+                  {allowBoleta && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTipoComprobante('Boleta');
+                        setDocFeedback(null);
+                      }}
+                      className={`px-3 py-1 text-[11px] font-bold rounded-md transition cursor-pointer ${
+                        tipoComprobante === 'Boleta' ? 'bg-purple-800 text-white' : 'text-slate-600'
+                      }`}
+                    >
+                      Boleta
+                    </button>
+                  )}
+                  {allowFactura && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTipoComprobante('Factura');
+                        setDocFeedback(null);
+                      }}
+                      className={`px-3 py-1 text-[11px] font-bold rounded-md transition cursor-pointer ${
+                        tipoComprobante === 'Factura' ? 'bg-purple-800 text-white' : 'text-slate-600'
+                      }`}
+                    >
+                      Factura
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {tipoComprobante === 'Boleta' && allowBoleta ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      maxLength={8}
+                      value={dniBoleta}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setDniBoleta(val);
+                        if (dniVerified && dniVerified.dni !== val) {
+                          setDniVerified(null);
+                          setDocFeedback(null);
+                        }
+                      }}
+                      placeholder="DNI del cliente (8 dígitos RENIEC)"
+                      className="flex-1 bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSearchDNI}
+                      disabled={isSearchingDoc}
+                      className="bg-purple-800 hover:bg-purple-900 disabled:opacity-60 text-white px-3 py-2 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>{isSearchingDoc ? '...' : 'Validar'}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      maxLength={11}
+                      value={rucFactura}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setRucFactura(val);
+                        if (rucVerified && rucVerified.ruc !== val) {
+                          setRucVerified(null);
+                          setDocFeedback(null);
+                        }
+                      }}
+                      placeholder="RUC de empresa (11 dígitos SUNAT)"
+                      className="flex-1 bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSearchRUC}
+                      disabled={isSearchingDoc}
+                      className="bg-purple-800 hover:bg-purple-900 disabled:opacity-60 text-white px-3 py-2 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>{isSearchingDoc ? '...' : 'SUNAT'}</span>
+                    </button>
+                  </div>
+                  {razonSocial && (
+                    <div className="p-2 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg font-bold text-xs">
+                      Razón Social: {razonSocial}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {docFeedback && (
+                <div
+                  className={`p-2 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border ${
+                    docFeedback.ok
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                      : 'bg-red-50 border-red-300 text-red-700'
                   }`}
                 >
-                  Boleta
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTipoComprobante('Factura')}
-                  className={`px-3 py-1 text-[11px] font-bold rounded-md transition cursor-pointer ${
-                    tipoComprobante === 'Factura' ? 'bg-purple-800 text-white' : 'text-slate-600'
-                  }`}
-                >
-                  Factura
-                </button>
+                  {docFeedback.ok ? (
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                  )}
+                  <span>{docFeedback.msg}</span>
+                </div>
+              )}
+
+              <div>
+                <input
+                  type="text"
+                  value={nombreCliente}
+                  onChange={(e) => {
+                    setNombreCliente(e.target.value);
+                    // Clear official verification if name is manually overwritten for Boleta/Factura
+                    if (dniVerified && e.target.value !== dniVerified.nombre) setDniVerified(null);
+                    if (rucVerified && e.target.value !== rucVerified.razonSocial) setRucVerified(null);
+                  }}
+                  placeholder={
+                    tipoComprobante === 'Factura'
+                      ? 'Razón social validada ante SUNAT'
+                      : 'Nombre completo (validado con DNI o para entrega)'
+                  }
+                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  {tipoComprobante === 'Factura'
+                    ? 'Para imprimir Factura Electrónica es obligatorio validar RUC en SUNAT.'
+                    : 'Para imprimir Boleta Electrónica es obligatorio validar DNI de 8 dígitos en RENIEC.'}
+                </p>
               </div>
             </div>
-
-            {tipoComprobante === 'Boleta' ? (
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    maxLength={8}
-                    value={dniBoleta}
-                    onChange={(e) => setDniBoleta(e.target.value)}
-                    placeholder="DNI del cliente (8 dígitos)"
-                    className="flex-1 bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSearchDNI}
-                    disabled={isSearchingDoc}
-                    className="bg-purple-800 hover:bg-purple-900 text-white px-3 py-2 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
-                  >
-                    <Search className="w-3.5 h-3.5" />
-                    <span>Validar</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    maxLength={11}
-                    value={rucFactura}
-                    onChange={(e) => setRucFactura(e.target.value)}
-                    placeholder="RUC de empresa (11 dígitos)"
-                    className="flex-1 bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSearchRUC}
-                    disabled={isSearchingDoc}
-                    className="bg-purple-800 hover:bg-purple-900 text-white px-3 py-2 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
-                  >
-                    <Search className="w-3.5 h-3.5" />
-                    <span>SUNAT</span>
-                  </button>
-                </div>
-                {razonSocial && (
-                  <div className="p-2 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg font-bold text-xs">
-                    Razón Social: {razonSocial}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div>
+          ) : (
+            <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2">
+              <span className="font-extrabold uppercase text-slate-500 text-[10px] block">
+                Datos del Cliente (Pedido Doméstico)
+              </span>
               <input
                 type="text"
                 value={nombreCliente}
                 onChange={(e) => setNombreCliente(e.target.value)}
-                placeholder="Nombre completo / Razón social"
+                placeholder="Tu nombre o referencia (Ej: Sra. María)"
                 className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold"
               />
             </div>
-          </div>
+          )}
 
           {/* Address & GPS */}
           <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2">
@@ -604,12 +839,19 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, onOpenTic
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={onOpenTicket}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-              title="Ver Boleta / Factura Térmica"
+              onClick={handleOpenVerifiedTicket}
+              disabled={isSearchingDoc}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3 px-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+              title={
+                comprobantesHabilitados
+                  ? 'Validar con RENIEC/SUNAT y ver Boleta o Factura'
+                  : 'Ver Nota de Pedido'
+              }
             >
               <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">Comprobante</span>
+              <span className="hidden sm:inline">
+                {comprobantesHabilitados ? 'Comprobante' : 'Nota'}
+              </span>
             </button>
 
             <button

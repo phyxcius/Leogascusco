@@ -40,6 +40,11 @@ export interface NegocioIdentidad {
   instagramUrl?: string;
   tiktokUrl?: string;
   googleReviewUrl?: string;
+  habilitarBoletaDni?: boolean; // Habilita Boleta + consulta RENIEC DNI en el index del cliente
+  habilitarFacturaRuc?: boolean; // Habilita Factura + consulta SUNAT RUC en el index del cliente
+  colorTema?: 'morado' | 'azul' | 'rojo' | 'verde' | 'naranja' | 'oscuro' | 'personalizado';
+  colorPrimario?: string;
+  colorSecundario?: string;
 }
 
 

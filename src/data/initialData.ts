@@ -96,7 +96,12 @@ export const INITIAL_NEGOCIO: NegocioIdentidad = {
   facebookUrl: "https://facebook.com/lachuspaanuncios",
   instagramUrl: "https://instagram.com/lachuspaanuncios",
   tiktokUrl: "https://tiktok.com/@lachuspaanuncios",
-  googleReviewUrl: "https://www.lachuspaanuncios.com"
+  googleReviewUrl: "https://www.lachuspaanuncios.com",
+  habilitarBoletaDni: true,
+  habilitarFacturaRuc: true,
+  colorTema: "morado",
+  colorPrimario: "#6b21a8",
+  colorSecundario: "#f59e0b"
 };
 
 

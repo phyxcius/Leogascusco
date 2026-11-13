@@ -31,7 +31,11 @@ import {
   consultarDni,
   consultarRuc,
   getStoredApisPeruToken,
-  setStoredApisPeruToken
+  setStoredApisPeruToken,
+  resetStoredApisPeruToken,
+  getStoredFacturacionConfig,
+  setStoredFacturacionConfig,
+  FacturacionApisPeruConfig
 } from '../utils/apisPeru';
 
 export const DeveloperAccordion: React.FC = () => {
@@ -139,7 +143,7 @@ export const DeveloperAccordion: React.FC = () => {
     repoInfo?: { name: string; stars: number; visibility: string; defaultBranch: string };
   } | null>(null);
 
-  // APIsPerú / APIS.net.pe (RENIEC & SUNAT) Configuration State
+  // APIsPerú (RENIEC & SUNAT Consultas DNI/RUC) Configuration State
   const [apisPeruToken, setApisPeruTokenState] = useState<string>(() => getStoredApisPeruToken());
   const [showApisToken, setShowApisToken] = useState(false);
   const [isTestingApis, setIsTestingApis] = useState(false);
@@ -148,22 +152,30 @@ export const DeveloperAccordion: React.FC = () => {
     dniResult?: string;
     rucResult?: string;
     msg: string;
+    isWrongServiceToken?: boolean;
   } | null>(null);
+
+  // APIsPerú Facturación Electrónica (Beta / Producción - Token de Empresa)
+  const [factConfig, setFactConfig] = useState<FacturacionApisPeruConfig>(() => getStoredFacturacionConfig());
+  const [showFactToken, setShowFactToken] = useState(false);
+  const [factSavedNotice, setFactSavedNotice] = useState(false);
 
   const handleSaveApisToken = () => {
     setStoredApisPeruToken(apisPeruToken);
     playSuccessChime();
-    alert('✔ Token de APIsPerú / APIS.net.pe guardado exitosamente.');
+    alert('✔ Token de API Consultas DNI/RUC guardado exitosamente.');
   };
 
-  const handleTestApisPeru = async () => {
-    setIsTestingApis(true);
+  const handleRestoreDefaultApisToken = async () => {
+    const restored = resetStoredApisPeruToken();
+    setApisPeruTokenState(restored);
     setApisTestResult(null);
+    playSuccessChime();
+    // Auto-verify restored token
+    setIsTestingApis(true);
     try {
-      // Live test DNI (42423549) and RUC (20100070970)
-      const dniRes = await consultarDni('42423549', apisPeruToken);
-      const rucRes = await consultarRuc('20100070970', apisPeruToken);
-
+      const dniRes = await consultarDni('42423549', restored, true);
+      const rucRes = await consultarRuc('20100070970', restored, true);
       const ok = dniRes.success && rucRes.success;
       setApisTestResult({
         ok,
@@ -174,8 +186,54 @@ export const DeveloperAccordion: React.FC = () => {
           ? `✔ RUC 20100070970: ${rucRes.razonSocial} (${rucRes.estado} - ${rucRes.condicion}) [${rucRes.fuente}]`
           : `❌ RUC: ${rucRes.error}`,
         msg: ok
-          ? '¡Sincronización Exitosa! Conexión en vivo con RENIEC y SUNAT activa.'
-          : 'Atención: Revisa el token o conexión.'
+          ? '¡Token base restaurado y verificado en vivo con RENIEC y SUNAT!'
+          : 'Token restaurado, pero hubo un error al consultar.'
+      });
+    } finally {
+      setIsTestingApis(false);
+    }
+  };
+
+  const handleSaveFacturacionConfig = () => {
+    setStoredFacturacionConfig({
+      ...factConfig,
+      tokenEmpresa: factConfig.tokenEmpresa.trim(),
+      rucEmisor: factConfig.rucEmisor.trim(),
+      razonSocialEmisor: factConfig.razonSocialEmisor.trim()
+    });
+    setFactSavedNotice(true);
+    playSuccessChime();
+    setTimeout(() => setFactSavedNotice(false), 3500);
+  };
+
+  const handleTestApisPeru = async () => {
+    setIsTestingApis(true);
+    setApisTestResult(null);
+    try {
+      // Test strictly with the token entered so admin knows right away if it's a Consultas token vs Facturación token
+      const dniRes = await consultarDni('42423549', apisPeruToken, true);
+      const rucRes = await consultarRuc('20100070970', apisPeruToken, true);
+
+      const ok = dniRes.success && rucRes.success;
+      const wrongService =
+        !ok &&
+        ((dniRes.error || '').includes('Facturación Electrónica') ||
+          (rucRes.error || '').includes('Facturación Electrónica'));
+
+      setApisTestResult({
+        ok,
+        isWrongServiceToken: wrongService,
+        dniResult: dniRes.success
+          ? `✔ DNI 42423549: ${dniRes.nombreCompleto} [${dniRes.fuente}]`
+          : `❌ DNI: ${dniRes.error}`,
+        rucResult: rucRes.success
+          ? `✔ RUC 20100070970: ${rucRes.razonSocial} (${rucRes.estado} - ${rucRes.condicion}) [${rucRes.fuente}]`
+          : `❌ RUC: ${rucRes.error}`,
+        msg: ok
+          ? '¡Sincronización Exitosa! Conexión en vivo con RENIEC y SUNAT activa (dniruc.apisperu.com).'
+          : wrongService
+          ? 'Ese token pertenece a "Facturación Electrónica (Beta/Prod)", no a "Consultas DNI/RUC". Usa el botón Restaurar Token Consultas o pega el Token de Facturación abajo.'
+          : 'Atención: Revisa el token de Consultas DNI/RUC o tu conexión.'
       });
       if (ok) {
         playSuccessChime();
@@ -638,7 +696,7 @@ export const DeveloperAccordion: React.FC = () => {
                 </div>
               </div>
 
-              {/* APISPERU / APIS.NET.PE OFFICIAL INTEGRATION CARD */}
+              {/* APISPERU OFFICIAL INTEGRATION CARD (DUAL TOKEN: CONSULTAS DNI/RUC + FACTURACION BETA/PROD) */}
               <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-blue-800/80 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-800/60 pb-4">
                   <div className="flex items-center gap-3">
@@ -648,19 +706,19 @@ export const DeveloperAccordion: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="text-sm sm:text-base font-black text-white">
-                          Integración APIsPerú (RENIEC para DNI & SUNAT para Factura/Boleta)
+                          Integración APIsPerú (Consultas RENIEC/SUNAT & Facturación Beta/Prod)
                         </h4>
                         <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
-                          En Vivo • 100% Operativo
+                          dniruc.apisperu.com • CORS Libre
                         </span>
                       </div>
-                      <p className="text-[11px] text-blue-200/90 leading-tight">
-                        Consulta oficial automática en los padrones públicos de Perú. Valida DNI al instante para Boletas y RUC para Facturas con Razón Social y Estado Habido.
+                      <p className="text-[11px] text-blue-200/90 leading-tight mt-0.5">
+                        APIsPerú maneja 2 servicios separados: (1) <strong>API Consultas DNI/RUC</strong> para validar nombres reales en RENIEC y SUNAT, y (2) <strong>Token de Empresa</strong> para Facturación Electrónica (Beta/Producción).
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={handleTestApisPeru}
@@ -668,29 +726,33 @@ export const DeveloperAccordion: React.FC = () => {
                       className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md disabled:opacity-50"
                     >
                       <RefreshCw className={`w-4 h-4 ${isTestingApis ? 'animate-spin' : ''}`} />
-                      <span>{isTestingApis ? 'Consultando en RENIEC y SUNAT...' : '🧪 Probar Conexión en Vivo'}</span>
+                      <span>{isTestingApis ? 'Consultando RENIEC/SUNAT...' : '🧪 Probar Consultas en Vivo'}</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Token Configuration & Explanatory info */}
+                {/* BOX 1: Token API Consultas DNI/RUC */}
                 <div className="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-blue-900/50">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="text-[11px] font-black uppercase text-blue-200 block">
-                      Token Personal de APIsPerú / APIS.net.pe (Opcional):
+                    <label className="text-[11px] font-black uppercase text-cyan-300 block">
+                      1. Token "API Consultas DNI/RUC" (dniruc.apisperu.com):
                     </label>
-                    <span className="text-[10px] text-emerald-400 font-bold">
-                      ● Respaldo dual activo: endpoint v1 directo sin expiración + token v2
-                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRestoreDefaultApisToken}
+                      className="text-[10px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-black px-2.5 py-1 rounded-lg cursor-pointer transition w-fit"
+                    >
+                      ↺ Restaurar Token Funcional Base
+                    </button>
                   </div>
 
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
+                  <div className="flex flex-wrap gap-2">
+                    <div className="relative flex-1 min-w-[200px]">
                       <input
                         type={showApisToken ? 'text' : 'password'}
                         value={apisPeruToken}
                         onChange={(e) => setApisPeruTokenState(e.target.value)}
-                        placeholder="Pega aquí tu token de apisperu.com o apis.net.pe..."
+                        placeholder="Pega aquí el token de API Consultas DNI/RUC de apisperu.com..."
                         className="w-full bg-slate-950 border border-blue-700/60 rounded-xl p-2.5 pr-10 text-xs font-mono font-bold text-white focus:outline-blue-400"
                       />
                       <button
@@ -708,17 +770,17 @@ export const DeveloperAccordion: React.FC = () => {
                       className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs"
                     >
                       <Save className="w-3.5 h-3.5" />
-                      <span>Guardar</span>
+                      <span>Guardar Token</span>
                     </button>
                   </div>
 
                   {/* Test Feedback display */}
                   {apisTestResult && (
-                    <div className={`p-3.5 rounded-xl border text-xs space-y-1 animate-in fade-in ${
+                    <div className={`p-3.5 rounded-xl border text-xs space-y-1.5 animate-in fade-in ${
                       apisTestResult.ok ? 'bg-emerald-950/80 border-emerald-500/80 text-emerald-100' : 'bg-red-950/80 border-red-500/80 text-red-100'
                     }`}>
-                      <div className="font-black flex items-center gap-1.5 text-sm">
-                        {apisTestResult.ok ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
+                      <div className="font-black flex items-center gap-1.5 text-xs sm:text-sm">
+                        {apisTestResult.ok ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> : <XCircle className="w-4 h-4 text-red-400 shrink-0" />}
                         <span>{apisTestResult.msg}</span>
                       </div>
                       {apisTestResult.dniResult && (
@@ -731,17 +793,120 @@ export const DeveloperAccordion: React.FC = () => {
                           {apisTestResult.rucResult}
                         </div>
                       )}
+                      {apisTestResult.isWrongServiceToken && (
+                        <div className="pt-1">
+                          <button
+                            type="button"
+                            onClick={handleRestoreDefaultApisToken}
+                            className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-1.5 rounded-lg text-[11px] cursor-pointer"
+                          >
+                            ⚡ Restaurar y Probar Token Consultas DNI/RUC Ahora
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] text-blue-200/80 pt-1">
                     <div>
-                      <strong>📌 RENIEC (Boletas):</strong> Valida DNI en el carrito de compra y autocompleta nombres y apellidos reales del cliente.
+                      <strong>📌 RENIEC (Boletas):</strong> Valida DNI real antes de imprimir boleta en carrito y administración.
                     </div>
                     <div>
-                      <strong>🏢 SUNAT (Facturas):</strong> Valida RUC de 11 dígitos, obtiene la Razón Social exacta, dirección fiscal y estado Habido.
+                      <strong>🏢 SUNAT (Facturas):</strong> Valida RUC de 11 dígitos, Razón Social y condición Habido en vivo.
                     </div>
                   </div>
+                </div>
+
+                {/* BOX 2: API Facturación Electrónica (Token de Empresa - Beta / Producción) */}
+                <div className="space-y-3 bg-indigo-950/70 p-4 rounded-2xl border border-indigo-700/50">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <label className="text-[11px] font-black uppercase text-amber-300 block">
+                        2. API Facturación Electrónica — Token de Empresa ({factConfig.entorno.toUpperCase()}):
+                      </label>
+                      <span className="text-[10px] text-indigo-200/80">
+                        Aquí va el <strong>Token de empresa</strong> de tu panel APIsPerú (modo Beta para pruebas o Producción al alquilar).
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-indigo-700/60 w-fit">
+                      <button
+                        type="button"
+                        onClick={() => setFactConfig((prev) => ({ ...prev, entorno: 'beta' }))}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-black cursor-pointer transition ${
+                          factConfig.entorno === 'beta' ? 'bg-amber-400 text-slate-950' : 'text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        🧪 Entorno BETA (Pruebas)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFactConfig((prev) => ({ ...prev, entorno: 'produccion' }))}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-black cursor-pointer transition ${
+                          factConfig.entorno === 'produccion' ? 'bg-emerald-500 text-slate-950' : 'text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        🚀 PRODUCCIÓN
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                    <div>
+                      <label className="text-[10px] text-indigo-200 font-bold block mb-1">RUC Emisor (Empresa):</label>
+                      <input
+                        type="text"
+                        maxLength={11}
+                        value={factConfig.rucEmisor}
+                        onChange={(e) => setFactConfig((prev) => ({ ...prev, rucEmisor: e.target.value.replace(/\D/g, '') }))}
+                        placeholder="Ej: 10424235496"
+                        className="w-full bg-slate-950 border border-indigo-700/60 rounded-xl p-2 text-xs font-mono font-bold text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-indigo-200 font-bold block mb-1">Razón Social Emisor:</label>
+                      <input
+                        type="text"
+                        value={factConfig.razonSocialEmisor}
+                        onChange={(e) => setFactConfig((prev) => ({ ...prev, razonSocialEmisor: e.target.value }))}
+                        placeholder="Ej: LA CHUSPA ANUNCIOS"
+                        className="w-full bg-slate-950 border border-indigo-700/60 rounded-xl p-2 text-xs font-bold text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <div className="relative flex-1 min-w-[200px]">
+                      <input
+                        type={showFactToken ? 'text' : 'password'}
+                        value={factConfig.tokenEmpresa}
+                        onChange={(e) => setFactConfig((prev) => ({ ...prev, tokenEmpresa: e.target.value }))}
+                        placeholder="Pega aquí el Token de empresa (Facturación Electrónica Beta/Prod)..."
+                        className="w-full bg-slate-950 border border-indigo-700/60 rounded-xl p-2.5 pr-10 text-xs font-mono font-bold text-white focus:outline-amber-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowFactToken(!showFactToken)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      >
+                        {showFactToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSaveFacturacionConfig}
+                      className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Guardar Config SUNAT</span>
+                    </button>
+                  </div>
+
+                  {factSavedNotice && (
+                    <div className="text-[11px] font-bold text-emerald-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Configuración de Facturación Electrónica ({factConfig.entorno.toUpperCase()}) guardada correctamente.</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

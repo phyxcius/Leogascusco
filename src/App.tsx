@@ -9,13 +9,14 @@ import { CuscoMap } from './components/CuscoMap';
 import { CatalogSection } from './components/CatalogSection';
 import { CartModal } from './components/CartModal';
 import { B2BModal } from './components/B2BModal';
-import { TicketModal } from './components/TicketModal';
+import { TicketModal, DraftReceiptData } from './components/TicketModal';
 import { AlertPopups } from './components/AlertPopups';
 import { AdminPanel } from './components/AdminPanel';
 import { RepartidorPanel } from './components/RepartidorPanel';
 import { ShoppingCart, Bell } from 'lucide-react';
 import { playChimeSound } from './utils/audio';
 import { getPageUrl } from './utils/assets';
+import { applyBrandTheme } from './utils/theme';
 
 const CloudBanner: React.FC = () => {
   const { cloudStatus } = useApp();
@@ -42,7 +43,13 @@ const MainApp: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isB2BOpen, setIsB2BOpen] = useState(false);
   const [isTicketOpen, setIsTicketOpen] = useState(false);
+  const [draftReceipt, setDraftReceipt] = useState<DraftReceiptData | null>(null);
   const [notifActive, setNotifActive] = useState(false);
+
+  // Apply brand color theme dynamically across the app
+  React.useEffect(() => {
+    applyBrandTheme(negocio);
+  }, [negocio.colorTema, negocio.colorPrimario, negocio.colorSecundario]);
 
   const handleFloatingNotif = () => {
     playChimeSound();
@@ -107,7 +114,12 @@ const MainApp: React.FC = () => {
 
         {/* Live Order Tracking Banner (Customer) */}
         {activePortal === 'cliente' && (
-          <TrackingBar onOpenTicket={() => setIsTicketOpen(true)} />
+          <TrackingBar
+            onOpenTicket={() => {
+              setDraftReceipt(null);
+              setIsTicketOpen(true);
+            }}
+          />
         )}
 
         {/* Dynamic Portal View */}
@@ -164,7 +176,8 @@ const MainApp: React.FC = () => {
           <CartModal
             isOpen={isCartOpen}
             onClose={() => setIsCartOpen(false)}
-            onOpenTicket={() => {
+            onOpenTicket={(draft) => {
+              setDraftReceipt(draft || null);
               setIsCartOpen(false);
               setIsTicketOpen(true);
             }}
@@ -172,9 +185,18 @@ const MainApp: React.FC = () => {
 
           <B2BModal isOpen={isB2BOpen} onClose={() => setIsB2BOpen(false)} />
 
-          <TicketModal isOpen={isTicketOpen} onClose={() => setIsTicketOpen(false)} />
+          <TicketModal
+            isOpen={isTicketOpen}
+            onClose={() => setIsTicketOpen(false)}
+            draftData={draftReceipt}
+          />
 
-          <AlertPopups onOpenTicket={() => setIsTicketOpen(true)} />
+          <AlertPopups
+            onOpenTicket={() => {
+              setDraftReceipt(null);
+              setIsTicketOpen(true);
+            }}
+          />
 
           {/* Footer */}
           <footer className="bg-slate-900 text-slate-400 text-xs py-8 px-4 border-t border-slate-800 no-print">
